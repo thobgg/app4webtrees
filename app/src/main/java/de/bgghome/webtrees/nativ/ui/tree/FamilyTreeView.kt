@@ -84,8 +84,6 @@ fun FamilyTreeView(
     compact: Boolean,
     onToggleFullscreen: () -> Unit,
     onPerson: (Person) -> Unit,
-    /** Tipp neben alle Karten */
-    onBackground: () -> Unit,
     onPlus: (Person) -> Unit,
     onPlaceholder: (Placeholder) -> Unit,
     onExpand: (n: Int, xref: String) -> Unit,
@@ -168,7 +166,6 @@ fun FamilyTreeView(
                                     centerOn(box)
                                     onPerson(box.person)
                                 }
-                                box == null -> onBackground()
                             }
                         },
                     )

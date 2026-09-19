@@ -1,29 +1,23 @@
 package de.bgghome.webtrees.nativ.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -32,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.R
 import de.bgghome.webtrees.nativ.ui.tree.FamilyTreeView
@@ -56,14 +48,14 @@ import de.bgghome.webtrees.nativ.ui.tree.TreeLayout
 
 /**
  * Bereich "Baum", der Hauptbildschirm: Kopfzeile, Suchfeld, der Baum selbst - und je nach Breite das Profil
- * daneben (Tablet) oder eine Kurzkarte am unteren Rand (Handy).
+ * daneben (Tablet) oder, nach einem Tipp auf eine Karte, als eigene Seite (Handy).
  */
 @Composable
 fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb: (String) -> Unit, onPlaceholder: (Placeholder) -> Unit) {
     val detail = state.detail
 
-    // Handy: das Profil ist eine eigene Seite.
-    if (!wide && state.profileOpen && detail != null) {
+    // Handy: das Profil ist eine eigene Seite; bis die Daten der angetippten Person da sind, ein Ladekreis.
+    if (!wide && state.profileOpen) {
         Column(Modifier.fillMaxSize()) {
             Surface(color = MaterialTheme.colorScheme.surface) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -73,7 +65,11 @@ fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb:
                     Text(stringResource(R.string.action_profile), style = MaterialTheme.typography.titleMedium)
                 }
             }
-            ProfilePanel(state, detail, viewModel, openWeb, onClose = null)
+            if (detail != null && detail.person.xref == state.selected) {
+                ProfilePanel(state, detail, viewModel, openWeb, onClose = null)
+            } else {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            }
         }
         return
     }
@@ -106,11 +102,6 @@ fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb:
 
             Box(Modifier.weight(1f).fillMaxHeight()) {
                 TreeCanvas(state, viewModel, wide, onPlaceholder)
-
-                // Handy: kompakte Kurzkarte am unteren Rand statt eines Panels
-                if (!wide && !state.treeFullscreen && state.selected != null && state.quickCard) {
-                    QuickCard(state, viewModel, Modifier.align(Alignment.BottomCenter))
-                }
             }
         }
     }
@@ -156,8 +147,7 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean, o
         initialScale = if (wide) 1f else 0.8f,
         compact = !wide,
         onToggleFullscreen = { viewModel.setTreeFullscreen(!state.treeFullscreen) },
-        onPerson = { viewModel.select(it.xref) },
-        onBackground = viewModel::hideQuickCard,
+        onPerson = { viewModel.openPerson(it.xref, wide) },
         onPlus = { viewModel.requestAddRelative(it.xref) },
         onPlaceholder = onPlaceholder,
         onExpand = viewModel::expandAncestors,
@@ -205,48 +195,6 @@ private fun TreeSettings(state: UiState, viewModel: AppViewModel) {
                 enabled = state.showSiblings,
                 onClick = { open = false; viewModel.setShowCousins(!state.showCousins) },
             )
-        }
-    }
-}
-
-/** Handy: wer ist angetippt - mit den zwei wichtigsten Wegen (Profil, als Mittelperson). */
-@Composable
-private fun QuickCard(state: UiState, viewModel: AppViewModel, modifier: Modifier) {
-    val person = state.detail?.person?.takeIf { it.xref == state.selected }
-
-    Surface(
-        modifier = modifier.padding(start = 12.dp, end = 72.dp, bottom = 12.dp).widthIn(max = 520.dp).fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 6.dp,
-    ) {
-        Column(Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (person == null) {
-                    CircularProgressIndicator(Modifier.padding(8.dp).size(24.dp), strokeWidth = 2.dp)
-                    Spacer(Modifier.weight(1f))
-                } else {
-                    Avatar(person, 44.dp)
-                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                        Text(person.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        val relation = state.detail?.relationship.orEmpty().replaceFirstChar { it.uppercase() }
-                        Text(
-                            listOf(relation, person.lifespan).filter { it.isNotBlank() }.joinToString(" | "),
-                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
-                        )
-                    }
-                }
-                IconButton(onClick = viewModel::hideQuickCard) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close))
-                }
-            }
-            if (person != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
-                    Button(onClick = viewModel::openProfile) { Text(stringResource(R.string.action_profile)) }
-                    if (state.root != person.xref) {
-                        OutlinedButton(onClick = { viewModel.setRoot(person.xref) }) { Text(stringResource(R.string.action_make_root)) }
-                    }
-                }
-            }
         }
     }
 }

@@ -66,7 +66,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /** Alles neu laden, was gerade sichtbar sein kann - nach dem Rueckfall ins Web und aus dem Menue. */
     fun refresh() {
         uiState.update { it.copy(pedigree = null, descendants = null) }
-        uiState.value.selected?.let { select(it, byTap = uiState.value.quickCard) }
+        uiState.value.selected?.let { select(it) }
         loadPeople(reset = true)
         if (uiState.value.mediaLoaded) loadMedia(reset = true)
         loadAnniversaries()

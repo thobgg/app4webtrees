@@ -80,15 +80,15 @@ fun AppViewModel.setRoot(xref: String, remember: Boolean = true) {
         val history = if (remember && it.root != null && it.root != xref) it.rootHistory + it.root else it.rootHistory
         it.copy(root = xref, rootHistory = history, pedigree = null, descendants = null, section = Section.Tree, profileOpen = false)
     }
-    select(xref, byTap = false)
+    select(xref)
 }
 
-/** Person ins Profil-Panel holen (Tipp auf eine Karte). Die Mittelperson des Baums bleibt. */
-fun AppViewModel.select(xref: String, byTap: Boolean = true) {
+/** Person ins Profil-Panel holen. Die Mittelperson des Baums bleibt. */
+fun AppViewModel.select(xref: String) {
     val tree = uiState.value.tree ?: return
     val home = uiState.value.home
 
-    uiState.update { it.copy(selected = xref, loadingDetail = true, quickCard = byTap) }
+    uiState.update { it.copy(selected = xref, loadingDetail = true) }
 
     viewModelScope.launch {
         try {
@@ -107,13 +107,17 @@ fun AppViewModel.select(xref: String, byTap: Boolean = true) {
 }
 
 fun AppViewModel.closePanel() = uiState.update {
-    it.copy(selected = null, detail = null, profileOpen = false, addRelativeFor = null, quickCard = false)
+    it.copy(selected = null, detail = null, profileOpen = false, addRelativeFor = null)
 }
 
-/** Tipp ins Leere: die Kurzkarte verschwindet, die Auswahl (und am Tablet das Profil) bleibt. */
-fun AppViewModel.hideQuickCard() = uiState.update { it.copy(quickCard = false) }
-
-fun AppViewModel.openProfile() = uiState.update { it.copy(profileOpen = true) }
+/**
+ * Tipp auf eine Karte. Tablet: das Profil daneben zeigt die Person. Handy: ihr Profil oeffnet sich als eigene
+ * Seite - wie in der MyHeritage-App; "Zurueck" fuehrt in den Baum, der unveraendert stehen bleibt.
+ */
+fun AppViewModel.openPerson(xref: String, wide: Boolean) {
+    select(xref)
+    if (!wide) uiState.update { it.copy(profileOpen = true) }
+}
 
 fun AppViewModel.setAncestorGenerations(generations: Int) {
     uiState.update { it.copy(ancestorGenerations = generations, pedigree = null, descendants = null) }
@@ -245,7 +249,7 @@ fun AppViewModel.setTreeFullscreen(on: Boolean) = uiState.update { it.copy(treeF
 /** "+" an einer Karte: Details der Person holen; der Dialog oeffnet sich, sobald sie da sind. */
 fun AppViewModel.requestAddRelative(xref: String) {
     uiState.update { it.copy(addRelativeFor = xref) }
-    if (uiState.value.detail?.person?.xref != xref) select(xref, byTap = uiState.value.quickCard)
+    if (uiState.value.detail?.person?.xref != xref) select(xref)
 }
 
 fun AppViewModel.addRelativeHandled() = uiState.update { it.copy(addRelativeFor = null) }

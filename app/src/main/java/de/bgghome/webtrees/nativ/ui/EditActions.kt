@@ -102,7 +102,7 @@ internal fun AppViewModel.write(@StringRes done: Int, action: suspend (tree: Str
 
             // Panel und Baum zeigen den neuen Stand; die Mittelperson bleibt, wo sie ist.
             uiState.update { it.copy(pedigree = null, descendants = null, mediaLoaded = false) }
-            select(xref, byTap = uiState.value.quickCard)
+            select(xref)
             loadPeople(reset = true)
             loadAnniversaries()
             loadPending()
@@ -140,7 +140,7 @@ fun AppViewModel.moderate(xref: String?, accept: Boolean) {
 
             // Eine verworfene neue Person gibt es nicht mehr - dann nicht im Profil stehen lassen.
             val selected = uiState.value.selected
-            if (selected != null) select(selected, byTap = uiState.value.quickCard)
+            if (selected != null) select(selected)
         } catch (e: Exception) {
             uiState.update { it.copy(busy = false) }
             fail(e)

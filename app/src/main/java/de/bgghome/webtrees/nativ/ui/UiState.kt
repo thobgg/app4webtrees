@@ -66,8 +66,6 @@ data class UiState(
     val loadingDetail: Boolean = false,
     /** Handy: das Profil als eigene Seite (am Tablet steht es immer neben dem Baum). */
     val profileOpen: Boolean = false,
-    /** Handy: die Kurzkarte unten - nur nach einem Tipp auf eine Karte, nie von selbst beim Start. */
-    val quickCard: Boolean = false,
     /** Gewaehlter Reiter im Profil; liegt hier, damit er beim Personenwechsel erhalten bleibt. */
     val detailTab: Int = 0,
     /** "+" an einer Karte getippt: sobald die Details dieser Person da sind, oeffnet sich der Hinzufuegen-Dialog. */
