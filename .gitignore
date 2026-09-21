@@ -25,5 +25,4 @@ __pycache__/
 # Eigene Notizen und Werkzeuge - bleiben auf der Platte, gehoeren nicht ins oeffentliche Repo
 docs/offline-konzept.md
 docs/icon/icon_webtreesand.*
-tools/prod_check.py
-tools/ui.py
+tools/

@@ -6,7 +6,7 @@ Ein kleiner, **frei erfundener** Stammbaum zum Ausprobieren und Testen von webtr
 
 **Alle Personen, Lebensdaten und Dokumente sind ausgedacht.** Übereinstimmungen mit lebenden oder
 verstorbenen Personen sind Zufall. Die Orte gibt es wirklich – sie tragen Koordinaten, damit Karten etwas
-zu zeigen haben. Die Bilder sind gezeichnet (`tools/make_demo_tree.py`), nichts stammt aus fremden Quellen.
+zu zeigen haben. Die Bilder sind mit einem Skript gezeichnet, nichts stammt aus fremden Quellen.
 
 Lizenz: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.de) – frei verwendbar, auch für
 Screenshots und Vorführungen.
