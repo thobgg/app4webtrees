@@ -14,7 +14,7 @@ keystore.properties
 *.jks
 
 # Lokale Testumgebung und Zugangsdaten.
-# testdata/ komplett: Beispielbaum und Bilder stammen aus Ahnenblatt (fremdes Urheberrecht) - nie veroeffentlichen.
+# testdata/ komplett: fremdes Material, nie veroeffentlichen.
 testsite/
 testdata/
 

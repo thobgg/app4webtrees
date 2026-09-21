@@ -86,7 +86,7 @@ data class FactJson(
     val id: String,
     val tag: String = "",
     val label: String = "",
-    /** false: Hersteller-Tag, das webtrees nicht kennt (z. B. Ahnenblatts _INET) - die App blendet es aus. */
+    /** false: Hersteller-Tag, das webtrees nicht kennt (z. B. _INET) - die App blendet es aus. */
     val known: Boolean = true,
     val value: String = "",
     val type: String = "",
