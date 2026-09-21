@@ -53,6 +53,10 @@ class WriteInterruptedException(cause: IOException) : IOException(cause.message,
  *     bekommt vom BadBotBlocker einen "Cookie check" (406). Accept-Language immer mitsenden.
  *  3. Fachliche Fehler kommen als HTTP 200 mit {"ok":false,...}, weil Webserver wie der der
  *     Synology bei 4xx/5xx den Antwortinhalt durch ihre eigene Fehlerseite ersetzen.
+ *
+ * Dazu seit 21.09.2026: webtrees benennt ein Modul nach seinem Ordner. Seit Modul 1.3.0 heisst es
+ * _api4webtrees_, bis 1.2 hiess es _webtreesand-api_. Welcher Name gilt, stellt info() fest (404 unter dem
+ * neuen -> der alte); die Antwort merkt sich die App, damit auch der Hintergrunddienst sie kennt.
  */
 class WtClient(private val context: Context) {
 
@@ -98,9 +102,35 @@ class WtClient(private val context: Context) {
 
     private var csrf: String = ""
 
+    private val prefs = context.getSharedPreferences("wtclient", Context.MODE_PRIVATE)
+
+    /** Name des Moduls in der Route - siehe Klassenkommentar. */
+    var module: String
+        get() = prefs.getString("module", MODULE) ?: MODULE
+        private set(value) = prefs.edit().putString("module", value).apply()
+
     // ── Lesen ────────────────────────────────────────────────────────
 
-    suspend fun info(): Info = get("Info", null, emptyMap(), Info.serializer()).also { csrf = it.csrf }
+    /** Erster Aufruf jeder Sitzung: liefert CSRF-Token und Serverstand - und findet den Modulnamen, falls der bisherige 404 gibt. */
+    suspend fun info(): Info {
+        val info = try {
+            get("Info", null, emptyMap(), Info.serializer())
+        } catch (e: NotJsonException) {
+            if (e.httpStatus != 404) throw e
+            val other = if (module == MODULE) LEGACY_MODULE else MODULE
+            val previous = module
+            module = other
+            try {
+                get("Info", null, emptyMap(), Info.serializer())
+            } catch (retry: NotJsonException) {
+                module = previous
+                throw if (retry.httpStatus == 404) e else retry
+            }
+        }
+        csrf = info.csrf
+
+        return info
+    }
 
     suspend fun individuals(tree: String, query: String, page: Int): PersonPage =
         get("Individuals", tree, mapOf("q" to query, "page" to page.toString()), PersonPage.serializer())
@@ -237,7 +267,7 @@ class WtClient(private val context: Context) {
     }
 
     private fun apiRoute(action: String, tree: String?): String =
-        "/module/$MODULE/$action" + if (tree != null) "/$tree" else ""
+        "/module/$module/$action" + if (tree != null) "/$tree" else ""
 
     /**
      * Fuer POSTs: KEINE stille Wiederholung. OkHttp wiederholt sonst eine Anfrage, deren Verbindung nach dem Senden
@@ -312,7 +342,11 @@ class WtClient(private val context: Context) {
         json.encodeToString(serializer, value).toRequestBody("application/json".toMediaType())
 
     companion object {
-        const val MODULE = "_webtreesand-api_"
+        /** Modul ab 1.3.0 (Ordner api4webtrees) */
+        const val MODULE = "_api4webtrees_"
+
+        /** Modul bis 1.2 (Ordner webtreesand-api) */
+        const val LEGACY_MODULE = "_webtreesand-api_"
         val USER_AGENT = "wtAnd/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
 
         /**
