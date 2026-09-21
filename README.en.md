@@ -22,8 +22,8 @@ the app arrives as a pending change in the same webtrees installation, under its
 
 ## Features
 
-- **The tree is the centre:** hourglass view with ancestors, partners, children and grandchildren – plus, as in
-  MyHeritage's family view, the siblings of the focus person and of their ancestors with partners, and the cousins
+- **The tree is the centre:** hourglass view with ancestors, partners, children and grandchildren – plus, as a
+  family view usually does, the siblings of the focus person and of their ancestors with partners, and the cousins
   (both can be switched off);
   pan and zoom freely, expand branches upwards, make any person the focus
 - **Profile:** life as a timeline (including marriage and births of children), relationship to yourself

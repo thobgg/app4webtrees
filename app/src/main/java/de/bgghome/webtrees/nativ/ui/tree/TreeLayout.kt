@@ -6,7 +6,7 @@ import de.bgghome.webtrees.nativ.api.Person
 
 /**
  * Ein Geschwister einer Person im Baum, mit seinen Partnern (rechts daneben) und Kindern. Die Kinder werden nur fuer
- * die Geschwister der Eltern gezeichnet - das sind die Cousins der Mittelperson, wie beim Vorbild MyHeritage.
+ * die Geschwister der Eltern gezeichnet - das sind die Cousins der Mittelperson.
  */
 data class Sibling(val person: Person, val spouses: List<Person> = emptyList(), val children: List<Person> = emptyList())
 
@@ -32,12 +32,12 @@ data class TreeBox(
     fun contains(px: Float, py: Float) = px >= x && px <= x + TreeLayout.BOX_W && py >= y && py <= y + TreeLayout.BOX_H
 }
 
-/** Ein Linienzug (Eckpunkte in dp). Gezeichnet wird er mit runden Ecken - wie beim Vorbild MyHeritage. */
+/** Ein Linienzug (Eckpunkte in dp). Gezeichnet wird er mit runden Ecken. */
 data class Connector(val points: List<Pair<Float, Float>>)
 
 /**
  * Sanduhr-Baum: Mittelperson, Ahnen nach oben (binaer, Kekule-Nummern), Partner daneben,
- * Nachkommen nach unten. Dazu - wie in der Familienansicht von MyHeritage - die Geschwister der Mittelperson und
+ * Nachkommen nach unten. Dazu - wie in einer Familienansicht ueblich - die Geschwister der Mittelperson und
  * ihrer Ahnen samt Partnern, vaeterlicherseits links, muetterlicherseits rechts der jeweiligen Person.
  * Reine Rechnung ohne Android/Compose - siehe TreeLayoutTest.
  */
@@ -67,7 +67,7 @@ class TreeLayout private constructor(
     }
 
     companion object {
-        // Kompakte Querkarten wie in der MyHeritage-App auf Android: rundes Foto links, Name, Jahre.
+        // Kompakte Querkarten wie in gaengigen Stammbaum-Apps auf Android: rundes Foto links, Name, Jahre.
         const val BOX_W = 172f
         const val BOX_H = 60f
         const val H_GAP = 18f

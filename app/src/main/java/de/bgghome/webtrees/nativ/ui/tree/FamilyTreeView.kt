@@ -66,7 +66,7 @@ private const val MIN_SCALE = 0.2f
 private const val MAX_SCALE = 2.5f
 
 /**
- * Der Baum als frei verschieb- und zoombare Flaeche, Karten nach dem Vorbild MyHeritage.
+ * Der Baum als frei verschieb- und zoombare Flaeche, Karten im Stil gaengiger Stammbaum-Apps.
  *
  * Tipps werden hier selbst ausgewertet (Bildschirmpunkt -> Baumkoordinate -> Karte) statt ueber
  * clickable() an den Karten: Compose liefert Beruehrungen nicht an Kinder, die ausserhalb der

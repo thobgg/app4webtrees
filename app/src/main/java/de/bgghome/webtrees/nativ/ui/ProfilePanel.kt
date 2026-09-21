@@ -67,7 +67,7 @@ private sealed interface ProfileDialog {
 }
 
 /**
- * Profil einer Person nach dem Vorbild MyHeritage: rundes Foto, Name, "Verwandtschaft | Jahre",
+ * Profil einer Person im Stil gaengiger Stammbaum-Apps: rundes Foto, Name, "Verwandtschaft | Jahre",
  * Reiter, runder Aktionsknopf. Am Tablet steht es dauerhaft links neben dem Baum, am Handy ist es eine eigene Seite.
  *
  * @param onClose null, wenn das Profil nicht geschlossen werden kann (Handy: dort fuehrt die Zurueck-Taste heraus)

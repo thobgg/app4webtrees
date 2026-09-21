@@ -143,7 +143,7 @@
     <string name="err_unreachable">Server nicht erreichbar</string>
     <string name="err_http_only">Die App verbindet sich nur verschlüsselt (https). Bitte die Adresse mit https:// eingeben – ohne Verschlüsselung würden dein Passwort und die Daten deiner Familie im Klartext übertragen.</string>
     <string name="err_module_too_old">Das Modul „api4webtrees“ auf dem Server ist zu alt für diese App (Version %1$s). Bitte aktualisiere es in webtrees unter modules_v4.</string>
-    <!-- Neue Struktur nach dem Vorbild MyHeritage -->
+    <!-- Neue Struktur der Profilseite -->
     <string name="nav_home">Start</string>
     <string name="nav_tree">Baum</string>
     <string name="nav_search">Suche</string>

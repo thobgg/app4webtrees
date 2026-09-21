@@ -112,7 +112,7 @@ fun AppViewModel.closePanel() = uiState.update {
 
 /**
  * Tipp auf eine Karte. Tablet: das Profil daneben zeigt die Person. Handy: ihr Profil oeffnet sich als eigene
- * Seite - wie in der MyHeritage-App; "Zurueck" fuehrt in den Baum, der unveraendert stehen bleibt.
+ * Seite - wie in gaengigen Stammbaum-Apps; "Zurueck" fuehrt in den Baum, der unveraendert stehen bleibt.
  */
 fun AppViewModel.openPerson(xref: String, wide: Boolean) {
     select(xref)
@@ -159,8 +159,8 @@ fun AppViewModel.loadChart() {
 }
 
 /**
- * Geschwister (mit Partnern und Kindern) der Mittelperson, ihrer Eltern und Grosseltern - wie in der Familienansicht
- * von MyHeritage. Das Modul hat dafuer keinen eigenen Aufruf; die Nachkommen eines Elternteils liefern sie mit.
+ * Geschwister (mit Partnern und Kindern) der Mittelperson, ihrer Eltern und Grosseltern - wie in einer
+ * Familienansicht ueblich. Das Modul hat dafuer keinen eigenen Aufruf; die Nachkommen eines Elternteils liefern sie mit.
  * Die oberste Reihe bleibt ohne: ihre Eltern sind nicht geladen. Kommen sie spaeter dazu ("nach oben aufklappen"),
  * holt ein weiterer Aufruf nur die noch fehlenden Gruppen nach.
  */

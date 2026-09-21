@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Festes Farbschema (Petrol) statt der Geraetefarben: Die App soll auf jedem Geraet gleich aussehen.
- * Formensprache nach dem Vorbild MyHeritage (siehe docs/design-vorbild-myheritage.md): weisse Flaechen
+ * Formensprache wie in gaengigen Stammbaum-Apps: weisse Flaechen
  * auf hellgrauem Grund, Haarlinien, kaum Schatten - aber eigene Farben, kein fremdes Branding.
  */
 private val Light = lightColorScheme(

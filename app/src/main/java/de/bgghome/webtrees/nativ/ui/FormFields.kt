@@ -163,7 +163,7 @@ class DateInputState(gedcom: String, displayText: String) {
 internal fun rememberDateInput(gedcom: String = "", displayText: String = ""): DateInputState =
     remember { DateInputState(gedcom, displayText) }
 
-/** Datumsfeld wie bei MyHeritage: Genauigkeit oben rechts, darunter Tag · Monat · Jahr, bei "zwischen" zweimal. */
+/** Datumsfeld wie in gaengigen Stammbaum-Apps: Genauigkeit oben rechts, darunter Tag · Monat · Jahr, bei "zwischen" zweimal. */
 @Composable
 internal fun DateInput(state: DateInputState, @StringRes label: Int) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
