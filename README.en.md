@@ -36,7 +36,7 @@ the app arrives as a pending change in the same webtrees installation, under its
 - **Anniversaries:** upcoming birthdays, wedding days and days of death, with an optional daily reminder
 - **Moderation:** moderators accept or reject pending changes in the app
 - **Compact on phones, comprehensive on tablets**
-- German and English; labels from the server arrive in the language of the app
+- German and English; devices set to any other language get English. Labels from the server arrive in the language of the app
 
 Whatever is not native (yet) opens as the webtrees page in the same session.
 

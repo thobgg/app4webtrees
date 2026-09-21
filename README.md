@@ -36,7 +36,7 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
 - **Jahrestage:** die nächsten Geburts-, Heirats- und Todestage, auf Wunsch mit täglicher Erinnerung
 - **Freigabe:** Moderatoren nehmen ausstehende Änderungen direkt in der App an oder verwerfen sie
 - **Handy kompakt, Tablet umfassend:** am Tablet stehen Profil und Baum nebeneinander
-- Deutsch und Englisch; die Beschriftungen des Servers kommen in der Sprache der App
+- Deutsch und Englisch; Geräte in anderen Sprachen sehen Englisch. Die Beschriftungen des Servers kommen in der Sprache der App
 
 Alles, was (noch) nicht nativ geht, öffnet die App als webtrees-Seite in derselben Sitzung.
 
