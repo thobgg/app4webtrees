@@ -1,11 +1,11 @@
-# webtreesAnd
+# wtAnd
 
 [Deutsch](README.md) · **English**
 
-### [⬇ Download the APK](https://github.com/thobgg/WebtreesAnd/releases/latest)
+### [⬇ Download the APK](https://github.com/thobgg/wtAnd/releases/latest)
 
 Signed. To install outside the Play Store, Android asks once to allow your browser to install apps.
-Your webtrees server needs the [WebtreesAnd API](https://github.com/thobgg/webtreesand-api) module.
+Your webtrees server needs the [api4webtrees](https://github.com/thobgg/api4webtrees) module.
 
 A native Android app for [webtrees](https://webtrees.net/) – view **and edit** your family tree on phone and tablet,
 with your own data on your own server.
@@ -43,7 +43,7 @@ Whatever is not native (yet) opens as the webtrees page in the same session.
 ## Requirement: the webtrees module
 
 webtrees has no interface for apps. The app therefore talks to the module
-**[WebtreesAnd API](https://github.com/thobgg/webtreesand-api)**, which you copy into `modules_v4/` of your own
+**[api4webtrees](https://github.com/thobgg/api4webtrees)**, which you copy into `modules_v4/` of your own
 webtrees server (2.2.x). The webtrees core stays untouched.
 
 ## Privacy

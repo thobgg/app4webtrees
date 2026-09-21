@@ -60,10 +60,10 @@ fun AppViewModel.uploadPhoto(uri: Uri, title: String) = write(R.string.msg_photo
     val limit = (uiState.value.info?.maxUpload?.takeIf { it > 0 } ?: AppViewModel.DEFAULT_MAX_UPLOAD) * 9 / 10
     val prepared = withContext(Dispatchers.IO) {
         runCatching { ImagePrep.toUploadJpeg(resolver, uri, limit) }
-            .onFailure { Log.w("webtreesAnd", "Bild liess sich nicht verkleinern", it) }
+            .onFailure { Log.w("wtAnd", "Bild liess sich nicht verkleinern", it) }
             .getOrNull()
     }
-    Log.i("webtreesAnd", "Upload $name: ${prepared?.size} Bytes vorbereitet, Limit $limit (Server: ${uiState.value.info?.maxUpload})")
+    Log.i("wtAnd", "Upload $name: ${prepared?.size} Bytes vorbereitet, Limit $limit (Server: ${uiState.value.info?.maxUpload})")
 
     val mime = resolver.getType(uri).orEmpty()
 

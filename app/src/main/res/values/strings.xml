@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Deutsch ist die Standardsprache (die meisten Nutzer); Uebersetzungen liegen in values-xx/strings.xml. -->
-    <string name="app_name" translatable="false">webtreesAnd</string>
+    <string name="app_name" translatable="false">wtAnd</string>
     <string name="tab_with_count" translatable="false">%1$s (%2$d)</string>
     <string name="tree_add" translatable="false">+ %1$s</string>
     <string name="action_back">Zurück</string>
@@ -15,7 +15,7 @@
     <string name="action_close">Schließen</string>
     <string name="action_sign_in">Anmelden</string>
     <string name="action_sign_out">Abmelden</string>
-    <string name="setup_subtitle">Adresse deiner webtrees-Seite. Auf dem Server muss das Modul „WebtreesAnd API“ installiert sein.</string>
+    <string name="setup_subtitle">Adresse deiner webtrees-Seite. Auf dem Server muss das Modul „api4webtrees“ installiert sein.</string>
     <string name="setup_address">Adresse</string>
     <string name="setup_connect">Verbinden</string>
     <string name="setup_connecting">Verbinde …</string>
@@ -141,12 +141,12 @@
     <string name="err_upload_not_allowed">In diesem Stammbaum darfst du keine Dateien hochladen.</string>
     <string name="err_upload_failed">Die Datei konnte nicht hochgeladen werden (Dateityp oder Größe).</string>
     <string name="err_rejected">Der Server hat die Anfrage abgelehnt (%1$s).</string>
-    <string name="err_module_missing">Unter dieser Adresse antwortet das Modul „WebtreesAnd API“ nicht. Ist es in webtrees unter modules_v4 installiert?</string>
+    <string name="err_module_missing">Unter dieser Adresse antwortet das Modul „api4webtrees“ nicht. Ist es in webtrees unter modules_v4 installiert?</string>
     <string name="err_unexpected">Unerwartete Antwort vom Server (HTTP %1$d). Stimmt die Adresse der webtrees-Startseite?</string>
     <string name="err_no_connection">Keine Verbindung: %1$s</string>
     <string name="err_unreachable">Server nicht erreichbar</string>
     <string name="err_http_only">Die App verbindet sich nur verschlüsselt (https). Bitte die Adresse mit https:// eingeben – ohne Verschlüsselung würden dein Passwort und die Daten deiner Familie im Klartext übertragen.</string>
-    <string name="err_module_too_old">Das Modul „WebtreesAnd API“ auf dem Server ist zu alt für diese App (Version %1$s). Bitte aktualisiere es in webtrees unter modules_v4.</string>
+    <string name="err_module_too_old">Das Modul „api4webtrees“ auf dem Server ist zu alt für diese App (Version %1$s). Bitte aktualisiere es in webtrees unter modules_v4.</string>
     <!-- Neue Struktur nach dem Vorbild MyHeritage -->
     <string name="nav_home">Start</string>
     <string name="nav_tree">Baum</string>
@@ -181,7 +181,7 @@
     <string name="home_recent_empty">Noch niemand angesehen.</string>
     <string name="home_role">Deine Rolle: %1$s</string>
     <string name="photos_none">Keine Fotos in diesem Stammbaum.</string>
-    <string name="photos_needs_update">Für die Fotoübersicht braucht der Server das Modul „WebtreesAnd API“ ab Version 0.4.</string>
+    <string name="photos_needs_update">Für die Fotoübersicht braucht der Server das Modul „api4webtrees“ ab Version 0.4.</string>
     <string name="person_private">Privat</string>
     <!-- Sprache dieser Datei; die App nennt sie dem Server, damit dessen Beschriftungen dazu passen. -->
     <string name="api_language">de</string>

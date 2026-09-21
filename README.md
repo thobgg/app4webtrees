@@ -1,11 +1,11 @@
-# webtreesAnd
+# wtAnd
 
 **Deutsch** · [English](README.en.md)
 
-### [⬇ APK herunterladen](https://github.com/thobgg/WebtreesAnd/releases/latest)
+### [⬇ APK herunterladen](https://github.com/thobgg/wtAnd/releases/latest)
 
 Signiert. Für die Installation außerhalb des Play Store muss Android einmalig erlaubt werden, dass der Browser Apps installiert.
-Auf dem webtrees-Server muss das Modul [WebtreesAnd API](https://github.com/thobgg/webtreesand-api) installiert sein.
+Auf dem webtrees-Server muss das Modul [api4webtrees](https://github.com/thobgg/api4webtrees) installiert sein.
 
 Eine native Android-App für [webtrees](https://webtrees.net/) – den eigenen Stammbaum auf Handy und Tablet
 ansehen **und bearbeiten**, mit den eigenen Daten auf dem eigenen Server.
@@ -43,7 +43,7 @@ Alles, was (noch) nicht nativ geht, öffnet die App als webtrees-Seite in dersel
 ## Voraussetzung: das webtrees-Modul
 
 webtrees hat keine Schnittstelle für Apps. Die App spricht deshalb mit dem Modul
-**[WebtreesAnd API](https://github.com/thobgg/webtreesand-api)**, das auf dem eigenen webtrees-Server (2.2.x)
+**[api4webtrees](https://github.com/thobgg/api4webtrees)**, das auf dem eigenen webtrees-Server (2.2.x)
 nach `modules_v4/` kopiert wird. Der webtrees-Kern bleibt unverändert.
 
 ## Datenschutz
@@ -92,5 +92,5 @@ Einstieg in den Code: `MainActivity` zeigt `ui/MainScreen.kt` (Bildschirmwahl, N
 
 [GPL-3.0](LICENSE), wie webtrees. Der Demo-Stammbaum in `demo-tree/` steht unter CC0.
 
-Verwandt: [WebtreesAnd (Wrapper)](https://github.com/thobgg/WebtreesAnd-wrapper) – die schlanke WebView-Hülle für alle,
+Verwandt: [wtAnd (Wrapper)](https://github.com/thobgg/wtAnd-wrapper) – die schlanke WebView-Hülle für alle,
 die kein Modul installieren möchten.

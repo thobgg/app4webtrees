@@ -12,7 +12,7 @@
     <string name="action_close">Close</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_out">Sign out</string>
-    <string name="setup_subtitle">Address of your webtrees site. The “WebtreesAnd API” module must be installed on the server.</string>
+    <string name="setup_subtitle">Address of your webtrees site. The “api4webtrees” module must be installed on the server.</string>
     <string name="setup_address">Address</string>
     <string name="setup_connect">Connect</string>
     <string name="setup_connecting">Connecting …</string>
@@ -137,12 +137,12 @@
     <string name="err_upload_not_allowed">You are not allowed to upload files to this family tree.</string>
     <string name="err_upload_failed">The file could not be uploaded (file type or size).</string>
     <string name="err_rejected">The server rejected the request (%1$s).</string>
-    <string name="err_module_missing">The “WebtreesAnd API” module does not answer at this address. Is it installed in webtrees under modules_v4?</string>
+    <string name="err_module_missing">The “api4webtrees” module does not answer at this address. Is it installed in webtrees under modules_v4?</string>
     <string name="err_unexpected">Unexpected answer from the server (HTTP %1$d). Is this the address of the webtrees home page?</string>
     <string name="err_no_connection">No connection: %1$s</string>
     <string name="err_unreachable">server not reachable</string>
     <string name="err_http_only">The app only connects over an encrypted connection (https). Please enter the address with https:// – without encryption, your password and your family\'s data would be sent in plain text.</string>
-    <string name="err_module_too_old">The “WebtreesAnd API” module on the server is too old for this app (version %1$s). Please update it in webtrees under modules_v4.</string>
+    <string name="err_module_too_old">The “api4webtrees” module on the server is too old for this app (version %1$s). Please update it in webtrees under modules_v4.</string>
     <!-- Neue Struktur nach dem Vorbild MyHeritage -->
     <string name="nav_home">Home</string>
     <string name="nav_tree">Tree</string>
@@ -176,7 +176,7 @@
     <string name="home_recent_empty">Nobody viewed yet.</string>
     <string name="home_role">Your role: %1$s</string>
     <string name="photos_none">No photos in this family tree.</string>
-    <string name="photos_needs_update">The photo overview needs version 0.4 or newer of the “WebtreesAnd API” module on the server.</string>
+    <string name="photos_needs_update">The photo overview needs version 0.4 or newer of the “api4webtrees” module on the server.</string>
     <string name="person_private">Private</string>
     <!-- Sprache dieser Datei; die App nennt sie dem Server, damit dessen Beschriftungen dazu passen. -->
     <string name="api_language">en</string>

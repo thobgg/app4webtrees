@@ -33,7 +33,7 @@ wenn die App offline *suchen* soll (Namen über alle Seiten) – das ist eine sp
 
 ## Wie Veralten erkannt wird
 
-Das Modul liefert bisher weder ETag noch Änderungszeitpunkt (das steht im API-Vertrag von webtreesand-api, der hier
+Das Modul liefert bisher weder ETag noch Änderungszeitpunkt (das steht im API-Vertrag von api4webtrees, der hier
 nicht angefasst wird). Also:
 
 1. **Zeigen, dann prüfen:** Ist ein Eintrag vorhanden, wird er sofort angezeigt und im Hintergrund neu geladen;

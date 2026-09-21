@@ -44,7 +44,7 @@ class NotJsonException(val httpStatus: Int) : Exception("Keine JSON-Antwort (HTT
 class WriteInterruptedException(cause: IOException) : IOException(cause.message, cause)
 
 /**
- * Client fuer das webtrees-Modul "webtreesand-api".
+ * Client fuer das webtrees-Modul "api4webtrees".
  *
  * Drei Dinge, die am echten Server gemessen wurden (17.09.2026):
  *  1. Liegt webtrees in einem Unterordner, gehoert dieser in den route-Parameter:
@@ -313,7 +313,7 @@ class WtClient(private val context: Context) {
 
     companion object {
         const val MODULE = "_webtreesand-api_"
-        val USER_AGENT = "webtreesAnd/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
+        val USER_AGENT = "wtAnd/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
 
         /**
          * Unverschluesselte Adresse (http://)? Android blockiert Klartext ohnehin - die App lehnt sie

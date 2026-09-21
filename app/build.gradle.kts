@@ -10,7 +10,7 @@ plugins {
 
 // Release-Signierung: liest Keystore-Angaben aus keystore.properties (nicht
 // einchecken). Fehlt die Datei, wird mit dem Debug-Key signiert statt den Build
-// zu brechen — gleiches Muster wie MyPhotoDiary/WebtreesAnd.
+// zu brechen — gleiches Muster wie MyPhotoDiary/wtAnd.
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) FileInputStream(keystorePropsFile).use { load(it) }

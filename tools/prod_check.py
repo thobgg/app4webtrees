@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Prueft das Modul webtreesand-api gegen eine echte webtrees-Installation.
+Prueft das Modul api4webtrees gegen eine echte webtrees-Installation.
 
 Regeln (siehe Projektnotizen):
 - Zugangsdaten kommen aus testdata/prod-test.env und werden NIE ausgegeben.
@@ -29,7 +29,7 @@ MODULE = '_webtreesand-api_'
 HEADERS = {
     # Ehrlicher User-Agent: wer sich als Chrome/Firefox/Safari ausgibt und noch kein Cookie hat,
     # bekommt vom BadBotBlocker erst einen "Cookie check" (406). Die App macht es genauso.
-    'User-Agent': 'webtreesAnd/0.1 (Android; pruefskript)',
+    'User-Agent': 'wtAnd/0.1 (Android; pruefskript)',
     # Der echte Server beantwortet Anfragen ohne Accept-Language mit 404.
     'Accept-Language': 'de-DE,de;q=0.9',
     'Accept': 'application/json, text/html;q=0.9, */*;q=0.8',
@@ -162,7 +162,7 @@ def main() -> None:
     # ── Testbaum: schreiben ──────────────────────────────────────────
     if do_write:
         print(f"\n── Testbaum: schreiben (als {test_tree['role']})")
-        status, _, raw = client.api('Fact', name, {'xref': root}, {'tag': 'NOTE', 'value': 'API-Test webtreesand-api (kann geloescht werden)'})
+        status, _, raw = client.api('Fact', name, {'xref': root}, {'tag': 'NOTE', 'value': 'API-Test api4webtrees (kann geloescht werden)'})
         print(f"  Fact neu: HTTP {status} {raw.decode()}")
         status, _, raw = client.api('Individual', name, {'xref': root})
         notes = [f for f in json.loads(raw)['facts'] if f['tag'] == 'NOTE' and 'API-Test' in f['value']]

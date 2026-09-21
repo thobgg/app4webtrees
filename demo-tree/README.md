@@ -1,7 +1,7 @@
 # Demo-Stammbaum „Familie Falkenrath“
 
 Ein kleiner, **frei erfundener** Stammbaum zum Ausprobieren und Testen von webtrees, dem Modul
-*WebtreesAnd API* und der App *webtreesAnd*: 103 Personen, 38 Familien, acht Generationen
+*api4webtrees* und der App *wtAnd*: 103 Personen, 38 Familien, acht Generationen
 (um 1770 bis heute), 34 Bilder.
 
 **Alle Personen, Lebensdaten und Dokumente sind ausgedacht.** Übereinstimmungen mit lebenden oder

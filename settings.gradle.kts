@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "webtreesAnd"
+rootProject.name = "wtAnd"
 include(":app")
