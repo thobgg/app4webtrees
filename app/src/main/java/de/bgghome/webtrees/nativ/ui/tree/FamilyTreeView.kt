@@ -26,6 +26,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -64,6 +66,23 @@ import kotlinx.coroutines.launch
 
 private const val MIN_SCALE = 0.2f
 private const val MAX_SCALE = 2.5f
+
+/**
+ * Zoom nach Bedeutung: beim Herauszoomen wird nicht alles kleiner, sondern die Karte zeigt weniger - erst fallen
+ * Portraet und Jahre weg, dann der Nachname, zuletzt bleibt ein Kasten in der Geschlechtsfarbe. Die Schrift bleibt
+ * dabei auf dem Schirm lesbar, weil sie je Stufe im Baum groesser gesetzt wird.
+ */
+enum class DetailLevel(
+    /** Schriftfaktor gegenueber der Vollkarte - hebt auf, was der Zoom wegnimmt */
+    val textScale: Float,
+) { Full(1f), Compact(1.5f), Mini(2.4f), Box(1f) }
+
+fun levelFor(scale: Float): DetailLevel = when {
+    scale >= 0.75f -> DetailLevel.Full
+    scale >= 0.45f -> DetailLevel.Compact
+    scale >= 0.28f -> DetailLevel.Mini
+    else -> DetailLevel.Box
+}
 
 /**
  * Der Baum als frei verschieb- und zoombare Flaeche, Karten im Stil gaengiger Stammbaum-Apps.
@@ -105,6 +124,8 @@ fun FamilyTreeView(
         // Neue Mittelperson -> in die Mitte ruecken, Zoom behalten.
         val focusKey = layout.focus.person?.xref
         var scale by remember { mutableFloatStateOf(initialScale) }
+        // Nur ein Stufenwechsel setzt die Karten neu zusammen, nicht jeder Zoom-Schritt.
+        val level by remember { derivedStateOf { levelFor(scale) } }
         var offset by remember(focusKey) {
             mutableStateOf(Offset(viewW / 2 - layout.focus.centerX * density * scale, viewH / 2 - layout.focus.centerY * density * scale))
         }
@@ -183,22 +204,43 @@ fun FamilyTreeView(
                     .wrapContentSize(align = Alignment.TopStart, unbounded = true)
                     .requiredSize(layout.width.dp, layout.height.dp),
             ) {
+                val bandColor = MaterialTheme.colorScheme.outlineVariant
+                val ringColor = MaterialTheme.colorScheme.onSurfaceVariant
+                val ringFill = MaterialTheme.colorScheme.background
+
                 Canvas(Modifier.fillMaxSize()) {
-                    val stroke = Stroke(
-                        width = 1.3f * density, cap = StrokeCap.Round,
-                        pathEffect = PathEffect.cornerPathEffect(10f * density),
-                    )
+                    // Linien werden beim Herauszoomen nicht duenner als ein Pixel - sonst verschwindet der Baum vor den Karten.
+                    val lineWidth = (1.3f * density / scale).coerceIn(1.3f * density, 4f * density)
+                    val stroke = Stroke(width = lineWidth, cap = StrokeCap.Round, pathEffect = PathEffect.cornerPathEffect(10f * density))
+
+                    // Generationsbaender: eine feine Linie zwischen je zwei Reihen, ueber die ganze Breite
+                    layout.rows.zipWithNext { above, below ->
+                        val y = (above + TreeLayout.BOX_H + (below - above - TreeLayout.BOX_H) / 2) * density
+                        drawLine(bandColor, Offset(0f, y), Offset(size.width, y), strokeWidth = lineWidth * 0.8f)
+                    }
+
                     layout.connectors.forEach { line ->
                         val path = Path()
                         line.points.forEachIndexed { index, (x, y) ->
                             if (index == 0) path.moveTo(x * density, y * density) else path.lineTo(x * density, y * density)
                         }
                         drawPath(path, lineColor, style = stroke)
+
+                        // Ehe-Symbol: zwei Ringe auf der Linie zwischen Partnern - nicht mehr, wenn die Karten nur noch Kaesten sind
+                        if (line.spouse && level != DetailLevel.Box) {
+                            val (ax, ay) = line.points.first(); val (bx, by) = line.points.last()
+                            val cx = (ax + bx) / 2 * density; val cy = (ay + by) / 2 * density
+                            val r = 4.5f * density * level.textScale.coerceAtMost(1.5f)
+                            val ring = Stroke(width = 1.2f * density)
+                            drawCircle(ringFill, r * 1.9f, Offset(cx, cy))
+                            drawCircle(ringColor, r, Offset(cx - r * 0.6f, cy), style = ring)
+                            drawCircle(ringColor, r, Offset(cx + r * 0.6f, cy), style = ring)
+                        }
                     }
                 }
 
                 layout.boxes.forEach { box ->
-                    TreeCard(box, isSelected = box.person != null && box.person.xref == selected, showPlus = layout.hasPlus(box))
+                    TreeCard(box, level, isSelected = box.person != null && box.person.xref == selected, showPlus = layout.hasPlus(box))
                 }
             }
         }
@@ -223,80 +265,105 @@ private fun ToolButton(glyph: String, description: String, onClick: () -> Unit) 
 }
 
 @Composable
-private fun TreeCard(box: TreeBox, isSelected: Boolean, showPlus: Boolean) {
+private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, showPlus: Boolean) {
     val shape = RoundedCornerShape(8.dp)
-    val base = Modifier.offset(box.x.dp, box.y.dp).size(TreeLayout.BOX_W.dp, TreeLayout.BOX_H.dp)
+    val base = Modifier.offset(box.x.dp, box.y.dp).size(box.w.dp, TreeLayout.BOX_H.dp)
 
-    // Geisterkarte: "Vater hinzufuegen" ...
+    // Platzhalter: gestrichelter Kasten mit "+", nur nah dran - weiter weg ist er Rauschen
     val placeholder = box.placeholder
     if (placeholder != null) {
-        Row(
-            base.background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f), shape)
-                .border(1.dp, MaterialTheme.colorScheme.outline, shape)
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            PlusBadge(28)
-            Text(
-                relationLabel(placeholder.relation),
-                color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge,
-            )
+        if (level == DetailLevel.Full) {
+            val label = relationLabel(placeholder.relation)
+            Box(
+                base.dashedBorder(MaterialTheme.colorScheme.outline, shape).semantics { contentDescription = label },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("+", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.headlineSmall)
+            }
         }
         return
     }
 
     val person = box.person ?: return
     val gender = treeColors.forSex(person.sex)
+    // Rahmen und Schrift wachsen mit der Stufe, damit sie auf dem Schirm gleich bleiben
+    val borderWidth = (if (isSelected) 2.5f else 1.5f) * level.textScale
+    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else gender
 
     Box(base) {
-        Row(
+        Box(
             Modifier
                 .fillMaxSize()
                 // Mittelperson: hebt sich mit Schatten ab. Gewaehlte Karte (Profil-Panel): kraeftiger Rahmen.
-                .then(if (box.isFocus) Modifier.shadow(10.dp, shape) else Modifier)
+                .then(if (box.isFocus && level != DetailLevel.Box) Modifier.shadow(10.dp, shape) else Modifier)
                 .background(MaterialTheme.colorScheme.surface, shape)
-                .border(if (isSelected) 2.5.dp else 1.5.dp, if (isSelected) MaterialTheme.colorScheme.primary else gender, shape)
-                .clip(shape)
-                .padding(start = 8.dp, end = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .border(borderWidth.dp, borderColor, shape)
+                .clip(shape),
         ) {
-            Avatar(person, 42.dp)
-            Column {
-                Text(
-                    if (person.isPrivate) stringResource(R.string.person_private) else person.name,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
-                    lineHeight = MaterialTheme.typography.labelSmall.lineHeight,
-                )
-                if (person.lifespan.isNotBlank() && !person.isPrivate) {
-                    Text(person.lifespan, maxLines = 1, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            when (level) {
+                DetailLevel.Full -> Row(
+                    Modifier.fillMaxSize().padding(start = 8.dp, end = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Avatar(person, 42.dp)
+                    Column {
+                        Text(
+                            if (person.isPrivate) stringResource(R.string.person_private) else person.name,
+                            maxLines = 2, overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
+                            lineHeight = MaterialTheme.typography.labelSmall.lineHeight,
+                        )
+                        if (person.lifespan.isNotBlank() && !person.isPrivate) {
+                            Text(person.lifespan, maxLines = 1, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
                 }
-            }
-        }
-
-        // Schwarze Eck-Schleife fuer Verstorbene
-        if (person.isDead && !person.isPrivate) {
-            Canvas(Modifier.size(20.dp).clip(RoundedCornerShape(topStart = 8.dp))) {
-                val ribbon = Path().apply {
-                    moveTo(size.width * 0.45f, 0f); lineTo(size.width, 0f); lineTo(0f, size.height); lineTo(0f, size.height * 0.45f); close()
+                // Ohne Portraet und Jahre: der Name in grosser Schrift, zwei Zeilen
+                DetailLevel.Compact -> Box(Modifier.fillMaxSize().padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        if (person.isPrivate) stringResource(R.string.person_private) else person.name,
+                        maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize * level.textScale,
+                        lineHeight = MaterialTheme.typography.labelMedium.fontSize * level.textScale * 1.15f,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
-                drawPath(ribbon, Color(0xFF1B1B1B))
+                // Nur der Rufname, eine Zeile
+                DetailLevel.Mini -> Box(Modifier.fillMaxSize().padding(horizontal = 6.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        if (person.isPrivate) "" else givenName(person.name),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize * level.textScale,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                DetailLevel.Box -> Unit
             }
         }
 
         // Zweig-Symbol: diese Person hat Eltern, die noch nicht geladen sind - Tipp klappt den Baum nach oben auf
-        if (box.canExpand) {
+        val readable = level == DetailLevel.Full || level == DetailLevel.Compact
+        if (box.canExpand && readable) {
             Box(Modifier.align(Alignment.TopCenter).offset(y = (-TreeLayout.EXPAND_OFFSET - 11f).dp)) { ExpandBadge() }
         }
 
-        // "+"-Lasche: haengt mittig an der Unterkante (halb ueber die Karte hinaus)
-        if (showPlus) {
-            Box(Modifier.align(Alignment.BottomCenter).offset(y = TreeLayout.PLUS_RADIUS.dp)) { PlusBadge((TreeLayout.PLUS_RADIUS * 2).toInt()) }
+        // "+"-Lasche: haengt mittig unter der Karte, wie ein Reiter - nur, solange die Karte lesbar ist (nicht bei Rufname und Kasten)
+        if (showPlus && readable) {
+            Box(Modifier.align(Alignment.BottomCenter).offset(y = (TreeLayout.PLUS_RADIUS + 4f).dp)) { PlusTab() }
         }
     }
 }
+
+/** Der Rufname vor dem Familiennamen - "Lorenzo" aus "Lorenzo de' Medici"; bei einem einzigen Wort das Wort selbst. */
+fun givenName(name: String): String = name.trim().split(' ').firstOrNull().orEmpty()
+
+private fun Modifier.dashedBorder(color: Color, shape: RoundedCornerShape) = this.then(
+    Modifier.drawWithContent {
+        drawContent()
+        val stroke = Stroke(width = 1.5f * density, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f * density, 5f * density)))
+        drawRoundRect(color, style = stroke, cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f * density))
+    }
+)
 
 /** Zwei kleine Kaestchen (Vater blau, Mutter rosa) - das Zeichen fuer "hier geht es weiter nach oben". */
 @Composable
@@ -312,9 +379,11 @@ private fun ExpandBadge() {
 }
 
 @Composable
-private fun PlusBadge(sizeDp: Int) {
+private fun PlusTab() {
     Box(
-        Modifier.size(sizeDp.dp).background(MaterialTheme.colorScheme.surface, CircleShape).border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
+        Modifier.size(width = 30.dp, height = 20.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp, topStart = 2.dp, topEnd = 2.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp, topStart = 2.dp, topEnd = 2.dp)),
         contentAlignment = Alignment.Center,
     ) {
         Text("+", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)

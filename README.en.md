@@ -25,7 +25,9 @@ the app arrives as a pending change in the same webtrees installation, under its
 - **The tree is the centre:** hourglass view with ancestors, partners, children and grandchildren – plus, as a
   family view usually does, the siblings of the focus person and of their ancestors with partners, and the cousins
   (both can be switched off);
-  pan and zoom freely, expand branches upwards, make any person the focus
+  pan and zoom freely, expand branches upwards, make any person the focus. Zooming out, a card shows less rather
+  than smaller: first without portrait and years, then just the given name, finally a box in the sex colour, with
+  the text staying readable
 - **Profile:** life as a timeline (including marriage and births of children), relationship to yourself
   (“paternal grandfather”), photos, family, map of the stations of a life (OpenStreetMap)
 - **Editing:** add, change and delete events – also marriages and other family events; add relatives right in the tree

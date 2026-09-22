@@ -25,7 +25,9 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
 - **Baum als Mittelpunkt:** Sanduhr-Ansicht mit Ahnen, Partnern, Kindern und Enkeln – dazu, wie in einer
   Familienansicht üblich, die Geschwister der Mittelperson und ihrer Ahnen samt Partnern sowie die Cousins
   (beides abschaltbar);
-  frei verschieben und zoomen, Zweige nach oben aufklappen, jede Person zur Mittelperson machen
+  frei verschieben und zoomen, Zweige nach oben aufklappen, jede Person zur Mittelperson machen. Beim Herauszoomen
+  zeigt eine Karte weniger statt kleiner: erst ohne Porträt und Jahre, dann nur der Rufname, zuletzt ein Kasten in der
+  Geschlechtsfarbe, die Schrift bleibt lesbar
 - **Profil:** Lebenslauf als Zeitleiste (mit Heirat und Geburten der Kinder), Verwandtschaft zur eigenen Person
   („Großvater väterlicherseits"), Fotos, Familie, Karte der Lebensstationen (OpenStreetMap)
 - **Bearbeiten:** Ereignisse anlegen, ändern, löschen – auch Heirat und andere Familienereignisse; Verwandte direkt im

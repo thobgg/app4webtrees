@@ -45,7 +45,7 @@ class TreeLayoutTest {
         val boxes = layout.boxes
         for (i in boxes.indices) for (j in i + 1 until boxes.size) {
             val a = boxes[i]; val b = boxes[j]
-            val apart = a.x + TreeLayout.BOX_W <= b.x || b.x + TreeLayout.BOX_W <= a.x ||
+            val apart = a.right <= b.x || b.right <= a.x ||
                 a.y + TreeLayout.BOX_H <= b.y || b.y + TreeLayout.BOX_H <= a.y
             assertTrue("Ueberlappung: ${a.person?.xref ?: a.placeholder} / ${b.person?.xref ?: b.placeholder}", apart)
         }
@@ -72,9 +72,9 @@ class TreeLayoutTest {
         val placeholders = layout.boxes.mapNotNull { it.placeholder }
         // Mutter der Mittelperson fehlt
         assertNotNull(placeholders.firstOrNull { it.relation == "mother" && it.relativeTo.xref == "I1" })
-        // I5 (Generation 2) hat nur die Mutter I11 -> Vater wird angeboten
-        assertNotNull(placeholders.firstOrNull { it.relation == "father" && it.relativeTo.xref == "I5" })
-        // Generation 3 (I8, I9, I11): deren Eltern laegen in Generation 4 - dort keine Platzhalter mehr
+        // Fehlende Eltern werden nur fuer die Mittelperson angeboten - I5 (Generation 2) hat zwar nur die Mutter,
+        // bekommt aber keinen Platzhalter: jede Karte hat ihre "+"-Lasche, und die oberen Reihen bleiben schlank.
+        assertNull(placeholders.firstOrNull { it.relation == "father" && it.relativeTo.xref == "I5" })
         assertNull(placeholders.firstOrNull { it.relativeTo.xref == "I8" })
         // Partner und Kind nur fuer die Mittelperson, das Kind mit beiden Verbindungen zur Wahl
         assertEquals(1, placeholders.count { it.relation == "spouse" })
@@ -118,7 +118,7 @@ class TreeLayoutTest {
         // Der Ahnenbaum steht weiter mittig ueber der Mittelperson: Vater links, Mutter-Platzhalter rechts
         val mother = layout.boxes.first { it.placeholder?.relation == "mother" && it.placeholder.relativeTo.xref == "I1" }
         assertTrue(box.getValue("I2").centerX < box.getValue("I1").centerX && mother.centerX > box.getValue("I1").centerX)
-        assertTrue(layout.boxes.all { it.x >= 0 && it.x + TreeLayout.BOX_W <= layout.width })
+        assertTrue(layout.boxes.all { it.x >= 0 && it.right <= layout.width })
     }
 
     @Test
@@ -142,7 +142,7 @@ class TreeLayoutTest {
         assertTrue(box.getValue("K3").x + TreeLayout.BOX_W <= box.getValue("B1").x)
         assertTrue(box.getValue("K1").x < box.getValue("K2").x && box.getValue("K2").x < box.getValue("K3").x)
         assertTrue(box.getValue("K1").y > box.getValue("U1").y)
-        assertTrue(with.boxes.all { it.x >= 0 && it.x + TreeLayout.BOX_W <= with.width })
+        assertTrue(with.boxes.all { it.x >= 0 && it.right <= with.width })
     }
 
     @Test
@@ -191,9 +191,9 @@ class TreeLayoutTest {
         val mother = layout.boxes.first { it.person?.xref == "I3" }
         assertTrue(father.canExpand)
         assertEquals(2, father.ahnen)
-        // Die Mutter hat keine Eltern: kein Symbol, aber als Bearbeiter zwei "+" fuer Vater und Mutter
+        // Die Mutter hat keine Eltern: kein Symbol - und auch keine "+"-Kaesten, die gibt es nur fuer die Mittelperson
         assertTrue(!mother.canExpand)
-        assertEquals(2, layout.boxes.count { it.placeholder?.relativeTo?.xref == "I3" })
+        assertEquals(0, layout.boxes.count { it.placeholder?.relativeTo?.xref == "I3" })
         // Dem Vater wird nichts angeboten: seine Eltern gibt es schon, sie sind nur nicht geladen
         assertEquals(0, layout.boxes.count { it.placeholder?.relativeTo?.xref == "I2" })
         // Das Symbol sitzt mittig ueber der Karte und ist dort treffbar - daneben nicht
@@ -259,6 +259,6 @@ class TreeLayoutTest {
         assertEquals("C3", layout.boxAt(box.centerX, box.centerY)?.person?.xref)
         assertNull(layout.boxAt(-5f, -5f))
         assertTrue(layout.width > 0 && layout.height > 0)
-        assertTrue(layout.boxes.all { it.x >= 0 && it.y >= 0 && it.x + TreeLayout.BOX_W <= layout.width })
+        assertTrue(layout.boxes.all { it.x >= 0 && it.y >= 0 && it.right <= layout.width })
     }
 }
