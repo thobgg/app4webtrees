@@ -14,11 +14,21 @@ Die App bringt zwei Welten zusammen: die Person, die den Stammbaum am PC akribis
 Handy oder Tablet hineinschauen und mit Fotos und Hinweisen beitragen will. Die Detailarbeit bleibt am PC. Was aus der
 App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, unter deren Rechten, Moderation und Regeln.
 
-| Tablet | Handy |
-| - | - |
-| ![Baum und Profil nebeneinander](docs/screenshots/tablet-baum.png) | ![Baum am Handy](docs/screenshots/handy-baum.png) |
+| Baum | Lebenslauf | Archiv |
+| - | - | - |
+| <img src="docs/screenshots/handy-baum.png" alt="Baum am Handy" width="250"> | <img src="docs/screenshots/handy-zeitleiste.png" alt="Profil mit Zeitleiste" width="250"> | <img src="docs/screenshots/handy-archiv.png" alt="Archiv des Sammlungen-Moduls" width="250"> |
 
 <sub>Alle Bilder zeigen den frei erfundenen Demo-Stammbaum „Familie Falkenrath" (siehe [demo-tree/](demo-tree/)).</sub>
+
+## Deine Daten bleiben deine
+
+- Der Stammbaum liegt auf **deinem** webtrees-Server, die App ist nur ein Fenster dazu. Kein Konto bei einem Anbieter,
+  kein Abo, keine Werbung, kein Weg, der die Daten festhält.
+- Beschriftungen von Fotos, Beschreibung, Datum, Personen, schreibt die App **in die Bilddatei** (EXIF/XMP), nicht in
+  eine Datenbank, die nur eine Firma lesen kann. Die Angaben wandern mit dem Foto, wohin es auch geht.
+- Dateien im Archiv müssen an niemandem hängen. Dreißig Aufnahmen eines Vorfahren, von denen drei an seinem Datensatz
+  gehören, die anderen siebenundzwanzig sind das Archiv.
+- Quelloffen unter GPL, wie webtrees selbst.
 
 ## Was die App kann
 
@@ -73,11 +83,34 @@ zusätzlich das Archiv. Fehlt es, fehlt nur der Reiter.
   Wachbleiben, Vordergrunddienst). Für „Foto aufnehmen" ist keine Kamera-Berechtigung nötig – die Kamera-App des Geräts
   macht das Bild. Kein Zugriff auf Kontakte, Standort oder Dateien.
 
-## Weitere Bilder
+## Bilder
 
-| Start mit Jahrestagen | Fotoübersicht | Profil am Handy |
-| - | - | - |
-| ![Start](docs/screenshots/tablet-start.png) | ![Fotos](docs/screenshots/tablet-fotos.png) | ![Profil](docs/screenshots/handy-profil.png) |
+**Baum.** Sanduhr um die Mittelperson, Geschwister und Cousins dazu. Beim Herauszoomen zeigt eine Karte weniger statt
+kleiner, die Schrift bleibt lesbar.
+
+| nah | Namen | Rufnamen | Übersicht |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-baum.png" alt="Baum nah" width="190"> | <img src="docs/screenshots/handy-baum-namen.png" alt="Baum mit Namen" width="190"> | <img src="docs/screenshots/handy-baum-rufnamen.png" alt="Baum mit Rufnamen" width="190"> | <img src="docs/screenshots/handy-baum-uebersicht.png" alt="Baum als Übersicht" width="190"> |
+
+**Person.** Lebenslauf als Zeitleiste mit Heirat, Geburten und Heiraten der Kinder und dem Sterbealter; Familie mit
+Eltern, Geschwistern, Partnern und Kindern; Karte der Lebensstationen.
+
+| Profil | Zeitleiste | Familie | Karte |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-profil.png" alt="Profil" width="190"> | <img src="docs/screenshots/handy-zeitleiste.png" alt="Zeitleiste" width="190"> | <img src="docs/screenshots/handy-familie.png" alt="Familie" width="190"> | <img src="docs/screenshots/handy-karte.png" alt="Karte der Lebensstationen" width="190"> |
+
+**Fotos und Archiv.** Die Fotos des Baums, wahlweise dicht; das Archiv des Sammlungen-Moduls mit Ordner-Sammlungen,
+thematischen Sammlungen und dem freien Bestand; der Betrachter mit Kneifzoom und Beschriftung; PDFs Seite für Seite.
+
+| Fotos | dicht | Sammlung | Betrachter |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-fotos.png" alt="Fotos des Baums" width="190"> | <img src="docs/screenshots/handy-fotos-dicht.png" alt="dichtes Raster" width="190"> | <img src="docs/screenshots/handy-sammlung.png" alt="Sammlung mit Kennzeichen" width="190"> | <img src="docs/screenshots/handy-betrachter.png" alt="Betrachter" width="190"> |
+
+**Start, Suche, Dokumente, Tablet.**
+
+| Start | Suche | PDF | Tablet |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-start.png" alt="Start mit Jahrestagen" width="190"> | <img src="docs/screenshots/handy-suche.png" alt="Suche" width="190"> | <img src="docs/screenshots/handy-pdf.png" alt="PDF-Betrachter" width="190"> | <img src="docs/screenshots/tablet-baum.png" alt="Baum und Profil nebeneinander" width="190"> |
 
 ## Selbst bauen
 

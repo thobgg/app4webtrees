@@ -14,11 +14,21 @@ The app brings two worlds together: the person who maintains the tree meticulous
 to look into it on a phone or tablet and contribute photos and hints. The detailed work stays at the PC. What comes from
 the app arrives as a pending change in the same webtrees installation, under its rights, moderation and rules.
 
-| Tablet | Phone |
-| - | - |
-| ![Tree and profile side by side](docs/screenshots/tablet-baum.png) | ![Tree on a phone](docs/screenshots/handy-baum.png) |
+| Tree | Timeline | Archive |
+| - | - | - |
+| <img src="docs/screenshots/handy-baum.png" alt="Tree on a phone" width="250"> | <img src="docs/screenshots/handy-zeitleiste.png" alt="Profile with timeline" width="250"> | <img src="docs/screenshots/handy-archiv.png" alt="Archive of the Sammlungen module" width="250"> |
 
 <sub>All pictures show the entirely fictional demo tree “Familie Falkenrath” (see [demo-tree/](demo-tree/)). The screenshots are in German; the app also speaks English.</sub>
+
+## Your data stays yours
+
+- The tree lives on **your** webtrees server; the app is just a window onto it. No account with a provider, no
+  subscription, no ads, nothing that holds your data hostage.
+- Photo details – description, date, people – are written **into the image file** (EXIF/XMP), not into a database
+  only one company can read. The details travel with the photo wherever it goes.
+- Files in the archive don't have to hang on anyone. Thirty pictures of an ancestor, three of which belong on their
+  record – the other twenty-seven are the archive.
+- Open source under the GPL, like webtrees itself.
 
 ## Features
 
@@ -73,6 +83,35 @@ app also shows the archive. Without it, only that tab is missing.
   on) plus the usual rights of Android's job scheduler (network state, start after reboot, wake lock, foreground
   service). “Take photo” needs no camera permission – the device's camera app takes the picture. No access to contacts,
   location or files.
+
+## Pictures
+
+**Tree.** Hourglass around the focus person, siblings and cousins included. Zooming out, a card shows less rather than
+smaller, and the text stays readable.
+
+| close | names | given names | overview |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-baum.png" alt="Tree close up" width="190"> | <img src="docs/screenshots/handy-baum-namen.png" alt="Tree with names" width="190"> | <img src="docs/screenshots/handy-baum-rufnamen.png" alt="Tree with given names" width="190"> | <img src="docs/screenshots/handy-baum-uebersicht.png" alt="Tree overview" width="190"> |
+
+**Person.** Life as a timeline with marriage, the births and marriages of the children and the age at death; family
+with parents, siblings, partners and children; map of the stations of a life.
+
+| Profile | Timeline | Family | Map |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-profil.png" alt="Profile" width="190"> | <img src="docs/screenshots/handy-zeitleiste.png" alt="Timeline" width="190"> | <img src="docs/screenshots/handy-familie.png" alt="Family" width="190"> | <img src="docs/screenshots/handy-karte.png" alt="Map" width="190"> |
+
+**Photos and archive.** The tree's photos, dense on request; the archive of the Sammlungen module with folder
+collections, thematic collections and the free holdings; the viewer with pinch zoom and caption editing; PDFs page by page.
+
+| Photos | dense | Collection | Viewer |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-fotos.png" alt="Photos of the tree" width="190"> | <img src="docs/screenshots/handy-fotos-dicht.png" alt="dense grid" width="190"> | <img src="docs/screenshots/handy-sammlung.png" alt="Collection with badges" width="190"> | <img src="docs/screenshots/handy-betrachter.png" alt="Viewer" width="190"> |
+
+**Start, search, documents, tablet.**
+
+| Start | Search | PDF | Tablet |
+| - | - | - | - |
+| <img src="docs/screenshots/handy-start.png" alt="Start with anniversaries" width="190"> | <img src="docs/screenshots/handy-suche.png" alt="Search" width="190"> | <img src="docs/screenshots/handy-pdf.png" alt="PDF viewer" width="190"> | <img src="docs/screenshots/tablet-baum.png" alt="Tree and profile side by side" width="190"> |
 
 ## Build
 
