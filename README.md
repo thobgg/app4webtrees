@@ -36,7 +36,10 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
 - **Archiv:** Läuft auf dem Server das Modul [Sammlungen](https://github.com/thobgg/webtrees-sammlungen) (ab 1.6),
   zeigt der Bereich „Fotos“ auch dessen Archiv – Ordner-Sammlungen, thematische Sammlungen, Sammlungen nach
   Medientyp, und vor allem die Bilder, die an keiner Person hängen. Jede Kachel sagt, wie das Bild am Stammbaum
-  hängt: an Personen, als Medienobjekt ohne Person oder als freie Datei. Nur zum Anschauen; bearbeitet wird im Modul
+  hängt: an Personen, als Medienobjekt ohne Person oder als freie Datei. Bearbeitet wird im Modul
+- **Festhalten:** unterwegs ein Foto aus der Schublade abfotografieren, Ordner wählen, Beschreibung, Datum und Personen
+  dazu (Namen schlägt die App aus dem Baum vor), fertig – es landet als Datei im Archiv, mit den Angaben als EXIF in
+  der Datei, ohne an einer Person zu hängen (Modul Sammlungen ab 1.7)
 - **Jahrestage:** die nächsten Geburts-, Heirats- und Todestage, auf Wunsch mit täglicher Erinnerung
 - **Freigabe:** Moderatoren nehmen ausstehende Änderungen direkt in der App an oder verwerfen sie
 - **Handy kompakt, Tablet umfassend:** am Tablet stehen Profil und Baum nebeneinander

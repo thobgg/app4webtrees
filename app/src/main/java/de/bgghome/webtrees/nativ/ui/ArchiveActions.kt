@@ -1,12 +1,20 @@
 package de.bgghome.webtrees.nativ.ui
 
+import android.app.Application
+import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.lifecycle.viewModelScope
+import de.bgghome.webtrees.nativ.R
 import de.bgghome.webtrees.nativ.api.ApiException
 import de.bgghome.webtrees.nativ.api.ArchiveEntry
+import de.bgghome.webtrees.nativ.api.ArchiveUploadRequest
 import de.bgghome.webtrees.nativ.api.MediaJson
 import de.bgghome.webtrees.nativ.api.NotJsonException
+import de.bgghome.webtrees.nativ.data.ImagePrep
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // Archiv (Modul "Sammlungen" auf dem Server): Uebersicht, eine Sammlung seitenweise, und der Betrachter fuer Bilder -
 // auch fuer die Fotos des Baums und einer Person. Erweiterungen von AppViewModel.
@@ -84,6 +92,60 @@ internal fun AppViewModel.loadCollection(slug: String, typ: String, page: Int) {
         } catch (e: Exception) {
             fail(e)
             uiState.update { it.copy(loadingCollection = false) }
+        }
+    }
+}
+
+// ── Festhalten: ein Foto ins Archiv legen ────────────────────────
+
+/** Ob der Server das Hochladen ins Archiv anbietet und diesem Nutzer erlaubt (Modul ab Stufe 2). */
+val AppViewModel.canCaptureToArchive: Boolean
+    get() = uiState.value.archive?.let { it.api >= 2 && it.darfHochladen } == true
+
+/** Namen aus dem Stammbaum zum angefangenen Text - damit im EXIF die Schreibweise von webtrees steht. */
+fun AppViewModel.personSuggestions(): PlaceSuggest? {
+    val tree = uiState.value.tree ?: return null
+
+    return { query ->
+        try {
+            client.individuals(tree.name, query, 1).data.filter { !it.isPrivate && it.name.isNotBlank() }.map { it.name }.take(8)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+}
+
+/**
+ * Foto verkleinern wie beim Personenfoto und mit der Beschriftung ins Archiv legen. Danach Uebersicht und offene
+ * Sammlung neu laden, damit Zaehler und Raster den neuen Eintrag zeigen.
+ */
+fun AppViewModel.uploadArchivePhoto(uri: Uri, request: ArchiveUploadRequest) {
+    val tree = uiState.value.tree ?: return
+    uiState.update { it.copy(busy = true) }
+
+    viewModelScope.launch {
+        try {
+            val resolver = getApplication<Application>().contentResolver
+            var name = "foto.jpg"
+            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0)?.let { name = it }
+            }
+            val limit = (uiState.value.info?.maxUpload?.takeIf { it > 0 } ?: AppViewModel.DEFAULT_MAX_UPLOAD) * 9 / 10
+            val prepared = withContext(Dispatchers.IO) { runCatching { ImagePrep.toUploadJpeg(resolver, uri, limit) }.getOrNull() }
+                ?: throw UserMessageException(text(R.string.err_image_prepare))
+
+            val result = client.uploadArchive(tree.name, request, prepared, name.substringBeforeLast('.') + ".jpg", "image/jpeg")
+            val message = when (result.hinweis) {
+                "exif-failed", "not-image" -> text(R.string.msg_archive_saved_no_exif, result.datei)
+                else -> text(R.string.msg_archive_saved, result.datei)
+            }
+            uiState.update { it.copy(busy = false, message = message) }
+
+            probeArchive()
+            uiState.value.collection?.let { loadCollection(it.slug, it.typ.orEmpty(), 1) }
+        } catch (e: Exception) {
+            uiState.update { it.copy(busy = false) }
+            fail(e)
         }
     }
 }

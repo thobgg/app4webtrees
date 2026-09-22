@@ -156,6 +156,22 @@ class WtClient(private val context: Context) {
             CollectionPage.serializer(),
         )
 
+    /** Ein Foto ins Archiv legen: Datei plus Beschriftung, Modul Sammlungen ab Stufe 2. Braucht wie jeder POST das CSRF-Token. */
+    suspend fun uploadArchive(tree: String, request: ArchiveUploadRequest, bytes: ByteArray, fileName: String, mime: String): ArchiveUploadResult {
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("ordner", request.ordner)
+            .addFormDataPart("beschreibung", request.beschreibung)
+            .addFormDataPart("datum", request.datum)
+            .addFormDataPart("personen", request.personen.joinToString(", "))
+            .addFormDataPart("keywords", request.keywords.joinToString(", "))
+            .addFormDataPart("sammlung", request.sammlung)
+            .addFormDataPart("file", fileName, bytes.toRequestBody(mime.toMediaType()))
+            .build()
+
+        return postRoute("/tree/$tree/archiv/api/hochladen", body, ArchiveUploadResult.serializer())
+    }
+
     suspend fun pedigree(tree: String, xref: String, generations: Int): Pedigree =
         get("Pedigree", tree, mapOf("xref" to xref, "generations" to generations.toString()), Pedigree.serializer())
 
@@ -305,10 +321,17 @@ class WtClient(private val context: Context) {
     private suspend fun post(action: String, tree: String, params: Map<String, String>, body: RequestBody): WriteResult =
         post(action, tree, params, body, WriteResult.serializer())
 
-    private suspend fun <T> post(action: String, tree: String?, params: Map<String, String>, body: RequestBody, deserializer: DeserializationStrategy<T>): T {
+    private suspend fun <T> post(action: String, tree: String?, params: Map<String, String>, body: RequestBody, deserializer: DeserializationStrategy<T>): T =
+        postUrl(url(apiRoute(action, tree), params), body, deserializer)
+
+    /** POST an eine beliebige webtrees-Route (Modul Sammlungen) - dieselbe CSRF-Behandlung wie bei api4webtrees. */
+    private suspend fun <T> postRoute(route: String, body: RequestBody, deserializer: DeserializationStrategy<T>): T =
+        postUrl(url(route, emptyMap()), body, deserializer)
+
+    private suspend fun <T> postUrl(target: HttpUrl, body: RequestBody, deserializer: DeserializationStrategy<T>): T {
         suspend fun attempt(): T {
             val request = Request.Builder()
-                .url(url(apiRoute(action, tree), params))
+                .url(target)
                 .header("X-CSRF-TOKEN", csrf)
                 .post(body)
                 .build()

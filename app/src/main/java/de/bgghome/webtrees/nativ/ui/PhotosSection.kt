@@ -58,10 +58,16 @@ fun PhotosSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
         }
 
         if (state.photosTab == PhotosTab.Archive && state.archiveStatus == ArchiveStatus.Ready) {
-            if (state.collection != null || state.loadingCollection) {
-                CollectionView(state, viewModel, openWeb)
-            } else {
-                ArchiveOverviewList(state, viewModel)
+            Box(Modifier.fillMaxSize()) {
+                if (state.collection != null || state.loadingCollection) {
+                    CollectionView(state, viewModel, openWeb)
+                } else {
+                    ArchiveOverviewList(state, viewModel)
+                }
+                // Festhalten: nur, wenn das Modul es anbietet (Stufe 2) und dieser Nutzer hochladen darf.
+                if (viewModel.canCaptureToArchive) {
+                    ArchiveCaptureButton(state, viewModel, Modifier.align(Alignment.BottomEnd).padding(16.dp))
+                }
             }
             return@Column
         }

@@ -231,10 +231,10 @@ private fun ProfileHeader(
 }
 
 /** Die zwei Wege zu einem Foto: aus der Galerie waehlen oder mit der Kamera aufnehmen. */
-private class PhotoSources(val pick: () -> Unit, val take: () -> Unit)
+internal class PhotoSources(val pick: () -> Unit, val take: () -> Unit)
 
 @Composable
-private fun rememberPhotoSources(onPhoto: (Uri) -> Unit): PhotoSources {
+internal fun rememberPhotoSources(onPhoto: (Uri) -> Unit): PhotoSources {
     val context = LocalContext.current
 
     // Galerie: der Photo Picker des Systems braucht keine Berechtigung.

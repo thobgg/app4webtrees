@@ -15,6 +15,10 @@ data class ArchiveOverview(
     val proSeite: Int = 50,
     /** Die Galerie des Moduls im Browser */
     val galerie: String = "",
+    /** Ab Stufe 2: ob dieser Nutzer ins Archiv hochladen bzw. EXIF schreiben darf, und die Zielordner */
+    val darfHochladen: Boolean = false,
+    val darfExif: Boolean = false,
+    val ordnerListe: List<String> = emptyList(),
     val sammlungen: List<ArchiveCollection> = emptyList(),
     /** Medienobjekte, an denen keine Person und keine Familie haengt - nach Medientyp */
     val unverknuepft: List<MediaTypeCount> = emptyList(),
@@ -61,6 +65,8 @@ data class CollectionPage(
     val farbe: String? = null,
     val icon: String = "",
     val ansicht: String = "foto",
+    /** Bei Ordner-Sammlungen der Ordner unter dem Medienordner - Vorgabe fuer "Festhalten" */
+    val ordner: String? = null,
     val anzahl: Int = 0,
     val dateien: Int = 0,
     val seite: Int = 1,
@@ -104,4 +110,29 @@ data class ArchiveEntry(
     val original: String = "",
     /** Die Medienseite in webtrees - nur bei Medienobjekten */
     val seite: String? = null,
+)
+
+/** Was die App zu einem Foto mitgibt, das sie ins Archiv legt (Stufe 2 der Schnittstelle). */
+data class ArchiveUploadRequest(
+    /** Unterordner des Medienordners, "" = Hauptordner */
+    val ordner: String = "",
+    val beschreibung: String = "",
+    /** YYYY, YYYY-MM oder YYYY-MM-DD */
+    val datum: String = "",
+    val personen: List<String> = emptyList(),
+    val keywords: List<String> = emptyList(),
+    /** Slug einer thematischen Sammlung, "" = keine */
+    val sammlung: String = "",
+)
+
+/** Antwort von /archiv/api/hochladen. exif: true geschrieben, false fehlgeschlagen, null nichts zu schreiben. */
+@Serializable
+data class ArchiveUploadResult(
+    val ok: Boolean = false,
+    val pfad: String = "",
+    val datei: String = "",
+    val exif: Boolean? = null,
+    /** "exif-failed", "not-image" oder "unknown-collection" - die Datei liegt trotzdem im Archiv */
+    val hinweis: String? = null,
+    val eintrag: ArchiveEntry? = null,
 )

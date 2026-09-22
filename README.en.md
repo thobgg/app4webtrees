@@ -36,7 +36,10 @@ the app arrives as a pending change in the same webtrees installation, under its
 - **Archive:** if the server runs the [Sammlungen](https://github.com/thobgg/webtrees-sammlungen) module (1.6 or
   newer), the “Photos” section also shows its archive – folder collections, thematic collections, collections by media
   type, and above all the pictures that hang on nobody. Every tile says how the picture relates to the tree: linked to
-  people, a media object without a person, or a free file. Viewing only; editing stays in the module
+  people, a media object without a person, or a free file. Editing stays in the module
+- **Capture:** on the road, photograph a picture from the drawer, pick a folder, add description, date and people (the
+  app suggests names from the tree), done – it lands as a file in the archive with the details as EXIF inside the
+  file, without hanging on a person (Sammlungen module 1.7 or newer)
 - **Anniversaries:** upcoming birthdays, wedding days and days of death, with an optional daily reminder
 - **Moderation:** moderators accept or reject pending changes in the app
 - **Compact on phones, comprehensive on tablets**
