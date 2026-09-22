@@ -241,8 +241,12 @@ fun MainMenu(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit)
                             style = MaterialTheme.typography.labelMedium,
                         )
                         Text(stringResource(R.string.app_author), style = MaterialTheme.typography.labelSmall)
+                        // Beide Server-Module, jedes mit Namen: api4webtrees immer, Sammlungen nur, wo das Archiv antwortet.
                         state.info?.module?.takeIf { it.isNotEmpty() }?.let { module ->
-                            Text(stringResource(R.string.menu_about_module, module), style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(R.string.menu_about_module, "api4webtrees $module"), style = MaterialTheme.typography.labelSmall)
+                        }
+                        state.archive?.modul?.takeIf { it.isNotEmpty() }?.let { module ->
+                            Text(stringResource(R.string.menu_about_module, "Sammlungen $module"), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 },

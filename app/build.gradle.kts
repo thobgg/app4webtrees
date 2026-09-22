@@ -24,8 +24,8 @@ android {
         applicationId = "de.bgghome.webtrees.nativ"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "1.9"
+        versionCode = 12
+        versionName = "1.10"
     }
 
     signingConfigs {
