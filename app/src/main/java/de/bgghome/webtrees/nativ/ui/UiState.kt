@@ -37,6 +37,8 @@ data class ViewerItem(
     val image: String, val thumb: String?, val caption: String, val subtitle: String, val webUrl: String?, val link: LinkState,
     /** Bei Bildern aus dem Archiv der Eintrag dazu - fuer das Bearbeiten der Beschriftung */
     val entry: ArchiveEntry? = null,
+    /** Pfad der Datei im Medienordner - bei Baum- und Profilfotos ab api4webtrees 1.4; null: nicht beschriftbar */
+    val path: String? = null,
 )
 
 /** Woher die Bilder im Betrachter kommen - entscheidet, wo beim Erreichen des Endes nachgeladen wird. */
@@ -130,4 +132,6 @@ data class UiState(
     val viewer: ViewerState? = null,
     /** Der PDF-Betrachter, wenn offen */
     val pdf: PdfTarget? = null,
+    /** Der Eintrag, dessen Beschriftung gerade im Betrachter bearbeitet wird */
+    val exifEditing: ArchiveEntry? = null,
 )

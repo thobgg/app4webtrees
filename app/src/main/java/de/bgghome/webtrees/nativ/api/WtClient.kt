@@ -172,6 +172,10 @@ class WtClient(private val context: Context) {
         return postRoute("/tree/$tree/archiv/api/hochladen", body, ArchiveUploadResult.serializer())
     }
 
+    /** Ein Eintrag zu einer Datei im Medienordner (Modul Sammlungen ab Stufe 3) - fuer Fotos, die die App aus dem Baum kennt. */
+    suspend fun archiveEntry(tree: String, pfad: String): EntryResult =
+        getRoute("/tree/$tree/archiv/api/eintrag", mapOf("pfad" to pfad), EntryResult.serializer())
+
     /** Beschriftung eines Archivbildes in die Datei schreiben - nur Verwalter (Modul Sammlungen ab Stufe 2). */
     suspend fun writeExif(tree: String, pfad: String, request: ExifRequest): ExifWriteResult {
         val form = FormBody.Builder()

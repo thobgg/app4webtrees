@@ -157,11 +157,41 @@ fun AppViewModel.uploadArchivePhoto(uri: Uri, request: ArchiveUploadRequest) {
 val AppViewModel.canEditExif: Boolean
     get() = uiState.value.archive?.let { it.api >= 2 && it.darfExif } == true
 
+/** Ob sich ein Bild im Betrachter beschriften laesst: aus dem Archiv immer, aus Baum oder Profil erst ab Modul-Stufe 3 (Eintrag nachladen). */
+fun AppViewModel.canEditExif(item: ViewerItem): Boolean {
+    val archive = uiState.value.archive ?: return false
+    if (!canEditExif || item.path == null || !item.image.isNotEmpty()) return false
+    return item.entry != null || archive.api >= 3
+}
+
+/**
+ * Bearbeiten beginnen: ein Archivbild bringt seinen Eintrag mit; ein Foto aus Baum oder Profil kennt nur seinen Pfad,
+ * dann holt die App erst den Eintrag - sonst ginge der Dialog leer auf und ueberschriebe, was in der Datei steht.
+ */
+fun AppViewModel.editExif(item: ViewerItem) {
+    item.entry?.let { uiState.update { s -> s.copy(exifEditing = it) }; return }
+    val tree = uiState.value.tree ?: return
+    val path = item.path ?: return
+    uiState.update { it.copy(busy = true) }
+
+    viewModelScope.launch {
+        try {
+            val entry = client.archiveEntry(tree.name, path).eintrag ?: throw UserMessageException(text(R.string.err_not_found))
+            uiState.update { it.copy(busy = false, exifEditing = entry) }
+        } catch (e: Exception) {
+            uiState.update { it.copy(busy = false) }
+            fail(e)
+        }
+    }
+}
+
+fun AppViewModel.cancelExif() = uiState.update { it.copy(exifEditing = null) }
+
 /** Schreibt die Beschriftung in die Datei und tauscht den Eintrag in Sammlung und Betrachter aus. */
 fun AppViewModel.writeExif(entry: ArchiveEntry, request: ExifRequest) {
     val tree = uiState.value.tree ?: return
     val pfad = entry.pfad ?: return
-    uiState.update { it.copy(busy = true) }
+    uiState.update { it.copy(busy = true, exifEditing = null) }
 
     viewModelScope.launch {
         try {
@@ -243,6 +273,7 @@ internal fun viewerItem(entry: ArchiveEntry) = ViewerItem(
     webUrl = entry.seite ?: entry.original,
     link = linkState(entry),
     entry = entry,
+    path = entry.pfad,
 )
 
 internal fun viewerItem(media: MediaJson, owner: String? = null) = ViewerItem(
@@ -252,4 +283,5 @@ internal fun viewerItem(media: MediaJson, owner: String? = null) = ViewerItem(
     subtitle = media.people.joinToString(", ") { it.name }.ifEmpty { owner.orEmpty() },
     webUrl = media.url,
     link = if (media.people.isNotEmpty() || owner != null) LinkState.Persons else LinkState.ObjectOnly,
+    path = media.path,
 )

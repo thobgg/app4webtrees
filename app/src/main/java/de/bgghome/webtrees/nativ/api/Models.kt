@@ -107,6 +107,8 @@ data class MediaJson(
     val url: String = "",
     /** Nur in der Fotouebersicht (MediaList): bis zu drei verknuepfte Personen. */
     val people: List<PersonRef> = emptyList(),
+    /** Pfad der Datei im Medienordner des Baums (ab API-Stufe 9); null bei Internetadressen oder aelterem Modul. */
+    val path: String? = null,
 )
 
 @Serializable

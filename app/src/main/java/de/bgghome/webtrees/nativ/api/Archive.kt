@@ -149,3 +149,7 @@ data class ExifRequest(
 /** Antwort von /archiv/api/exif: der Eintrag mit der neuen Beschriftung. */
 @Serializable
 data class ExifWriteResult(val ok: Boolean = false, val eintrag: ArchiveEntry? = null)
+
+/** Antwort von /archiv/api/eintrag: ein Eintrag zu einer Datei (Stufe 3). */
+@Serializable
+data class EntryResult(val ok: Boolean = false, val eintrag: ArchiveEntry? = null)

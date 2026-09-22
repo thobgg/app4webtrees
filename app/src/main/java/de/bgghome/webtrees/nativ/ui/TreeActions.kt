@@ -261,6 +261,7 @@ fun AppViewModel.back(): Boolean {
     return when {
         state.screen != Screen.Main -> false
         state.pdf != null -> { closePdf(); true }
+        state.exifEditing != null -> { cancelExif(); true }
         state.viewer != null -> { closeViewer(); true }
         state.section == Section.Photos && state.photosTab == PhotosTab.Archive && (state.collection != null || state.loadingCollection) -> {
             closeCollection(); true

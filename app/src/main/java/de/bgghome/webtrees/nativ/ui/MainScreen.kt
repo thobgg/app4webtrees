@@ -87,7 +87,8 @@ fun AppRoot(viewModel: AppViewModel) {
         WithMessages(state, viewModel) {
             PhotoViewer(
                 viewer, onIndex = viewModel::viewerMoved, onClose = viewModel::closeViewer, onOpenWeb = { webUrl = it },
-                canEditExif = viewModel.canEditExif, suggestPersons = viewModel.personSuggestions(), onSaveExif = viewModel::writeExif,
+                canEdit = viewModel::canEditExif, editing = state.exifEditing, suggestPersons = viewModel.personSuggestions(),
+                onEdit = viewModel::editExif, onCancelEdit = viewModel::cancelExif, onSaveExif = viewModel::writeExif,
             )
         }
         return

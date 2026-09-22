@@ -41,8 +41,8 @@ the app arrives as a pending change in the same webtrees installation, under its
   people, a media object without a person, or a free file. Editing stays in the module
 - **Capture:** on the road, photograph a picture from the drawer, pick a folder, add description, date and people (the
   app suggests names from the tree), done – it lands as a file in the archive with the details as EXIF inside the
-  file, without hanging on a person (Sammlungen module 1.7 or newer). Managers edit the details of an archive picture
-  right in the viewer
+  file, without hanging on a person (Sammlungen module 1.7 or newer). Managers edit the details of a picture
+  right in the viewer, from the archive, the tree and a profile
 - **Documents:** PDFs from the archive, the tree and a profile open in the app's own viewer, page by page, without a
   browser window
 - **Anniversaries:** upcoming birthdays, wedding days and days of death, with an optional daily reminder

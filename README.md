@@ -42,7 +42,7 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
 - **Festhalten:** unterwegs ein Foto aus der Schublade abfotografieren, Ordner wählen, Beschreibung, Datum und Personen
   dazu (Namen schlägt die App aus dem Baum vor), fertig – es landet als Datei im Archiv, mit den Angaben als EXIF in
   der Datei, ohne an einer Person zu hängen (Modul Sammlungen ab 1.7). Verwalter ändern die Beschriftung eines
-  Archivbilds direkt im Betrachter
+  Fotos direkt im Betrachter, aus Archiv, Baum und Profil
 - **Dokumente:** PDFs aus Archiv, Baum und Profil öffnen im eigenen Betrachter, Seite für Seite, ohne Browser-Fenster
 - **Jahrestage:** die nächsten Geburts-, Heirats- und Todestage, auf Wunsch mit täglicher Erinnerung
 - **Freigabe:** Moderatoren nehmen ausstehende Änderungen direkt in der App an oder verwerfen sie

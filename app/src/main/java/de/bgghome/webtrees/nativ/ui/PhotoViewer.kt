@@ -63,15 +63,17 @@ fun PhotoViewer(
     onIndex: (Int) -> Unit,
     onClose: () -> Unit,
     onOpenWeb: (String) -> Unit,
-    /** Beschriftung aendern - nur fuer Archivbilder und nur, wenn der Server es diesem Nutzer erlaubt */
-    canEditExif: Boolean = false,
+    /** Beschriftung aendern: ob dieses Bild beschriftbar ist, der Eintrag in Arbeit, und die drei Handgriffe dazu */
+    canEdit: (ViewerItem) -> Boolean = { false },
+    editing: ArchiveEntry? = null,
     suggestPersons: PlaceSuggest? = null,
+    onEdit: (ViewerItem) -> Unit = {},
+    onCancelEdit: () -> Unit = {},
     onSaveExif: (ArchiveEntry, ExifRequest) -> Unit = { _, _ -> },
 ) {
     val pagerState = rememberPagerState(initialPage = viewer.index) { viewer.items.size }
     var chrome by remember { mutableStateOf(true) }
     var zoomed by remember { mutableStateOf(false) }
-    var editing by remember { mutableStateOf<ArchiveEntry?>(null) }
 
     LaunchedEffect(pagerState.currentPage) { onIndex(pagerState.currentPage) }
 
@@ -92,8 +94,8 @@ fun PhotoViewer(
                     stringResource(R.string.viewer_position, pagerState.currentPage + 1, viewer.items.size),
                     Modifier.weight(1f), color = Color.White, style = MaterialTheme.typography.titleMedium,
                 )
-                item?.entry?.takeIf { canEditExif && it.istBild && it.pfad != null }?.let { entry ->
-                    IconButton(onClick = { editing = entry }) {
+                item?.takeIf(canEdit)?.let { editable ->
+                    IconButton(onClick = { onEdit(editable) }) {
                         Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.viewer_edit_exif), tint = Color.White)
                     }
                 }
@@ -106,7 +108,7 @@ fun PhotoViewer(
         }
 
         editing?.let { entry ->
-            ExifEditDialog(entry, suggestPersons, onDismiss = { editing = null }, onSave = { editing = null; onSaveExif(entry, it) })
+            ExifEditDialog(entry, suggestPersons, onDismiss = onCancelEdit, onSave = { onSaveExif(entry, it) })
         }
 
         AnimatedVisibility(chrome && item != null, Modifier.align(Alignment.BottomCenter), enter = fadeIn(), exit = fadeOut()) {
