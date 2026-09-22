@@ -29,7 +29,6 @@ import de.bgghome.webtrees.nativ.api.FactRequest
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.TagInfo
-import de.bgghome.webtrees.nativ.ui.tree.Placeholder
 import androidx.compose.ui.res.stringResource
 import de.bgghome.webtrees.nativ.R
 
@@ -165,9 +164,6 @@ data class RelativeTarget(
                 detail.spouseFamilies.map { it.xref to it.spouse?.name },
             )
         }
-
-        fun of(placeholder: Placeholder): RelativeTarget =
-            RelativeTarget(placeholder.relativeTo, listOf(placeholder.relation), placeholder.families)
     }
 }
 

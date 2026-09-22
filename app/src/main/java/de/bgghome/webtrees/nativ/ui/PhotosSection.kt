@@ -1,9 +1,14 @@
 package de.bgghome.webtrees.nativ.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,16 +87,13 @@ fun PhotosSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
             state.media.isEmpty() && state.mediaLoaded && !state.loadingMedia ->
                 Text(stringResource(R.string.photos_none), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             state.media.isNotEmpty() ->
+                // "Fotos" heisst Fotos: Bilder im Raster, alles andere (Urkunden als PDF, Ton, Video) als Liste darunter.
                 MediaGrid(
-                    state.media,
-                    onOpen = { item ->
-                        when {
-                            item.isImage -> viewModel.openMediaViewer(ViewerSource.Tree, state.media, item)
-                            item.mime == "application/pdf" -> viewModel.openPdf(item.file, item.title, item.url)
-                            else -> openWeb(item.url)
-                        }
-                    },
+                    state.media.filter { it.isImage },
+                    onOpen = { item -> viewModel.openMediaViewer(ViewerSource.Tree, state.media, item) },
                     showPeople = true, onEnd = viewModel::loadMoreMedia,
+                    documents = state.media.filter { !it.isImage },
+                    onOpenDocument = { item -> if (item.mime == "application/pdf") viewModel.openPdf(item.file, item.title, item.url) else openWeb(item.url) },
                 )
         }
     }
@@ -102,11 +106,22 @@ fun PhotosSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
  * @param onEnd wird gerufen, sobald das letzte Bild sichtbar ist - zum Nachladen der naechsten Seite
  */
 @Composable
-fun MediaGrid(media: List<MediaJson>, onOpen: (MediaJson) -> Unit, showPeople: Boolean = false, onEnd: (() -> Unit)? = null) {
-    if (media.isEmpty()) {
+fun MediaGrid(
+    media: List<MediaJson>,
+    onOpen: (MediaJson) -> Unit,
+    showPeople: Boolean = false,
+    onEnd: (() -> Unit)? = null,
+    /** Was kein Bild ist, als Liste unter dem Raster - PDFs mit Vorschau der ersten Seite */
+    documents: List<MediaJson> = emptyList(),
+    onOpenDocument: (MediaJson) -> Unit = onOpen,
+) {
+    if (media.isEmpty() && documents.isEmpty()) {
         Text(stringResource(R.string.media_none), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
+
+    // Nachladen, sobald das letzte Element der Seite sichtbar ist - egal ob Bild oder Dokument
+    val last = documents.lastOrNull() ?: media.lastOrNull()
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
@@ -116,7 +131,7 @@ fun MediaGrid(media: List<MediaJson>, onOpen: (MediaJson) -> Unit, showPeople: B
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(media) { item ->
-            if (onEnd != null && item === media.last()) LaunchedEffect(media.size) { onEnd() }
+            if (onEnd != null && item === last) LaunchedEffect(media.size + documents.size) { onEnd() }
 
             Column(Modifier.clickable { onOpen(item) }) {
                 Thumbnail(item.thumb, item.title)
@@ -131,6 +146,54 @@ fun MediaGrid(media: List<MediaJson>, onOpen: (MediaJson) -> Unit, showPeople: B
                         modifier = Modifier.padding(start = 2.dp),
                     )
                 }
+            }
+        }
+        // Dokumente unter den Fotos: Urkunden als PDF, Ton, Film - was kein Bild ist
+        if (documents.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) { SectionHeading(stringResource(R.string.photos_documents)) }
+            items(documents, span = { GridItemSpan(maxLineSpan) }) { item ->
+                if (onEnd != null && item === last) LaunchedEffect(media.size + documents.size) { onEnd() }
+                DocumentRow(item, onClick = { onOpenDocument(item) })
+            }
+        }
+    }
+}
+
+/** Ein Medienobjekt, das kein Bild ist: PDF mit Vorschau der ersten Seite und Kennzeichen, sonst das Format im Kasten. */
+@Composable
+private fun DocumentRow(item: MediaJson, onClick: () -> Unit) {
+    val format = item.mime.substringAfter('/').substringBefore(';').uppercase().ifEmpty { "?" }
+    val chip: @Composable () -> Unit = {
+        Surface(shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+            Text(format.take(5), Modifier.padding(horizontal = 8.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+        }
+    }
+
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (item.mime == "application/pdf") {
+            PdfThumbnail(item.file, Modifier.width(64.dp).height(84.dp)) { bitmap ->
+                if (bitmap == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { chip() }
+                } else {
+                    Image(
+                        bitmap.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
+                    )
+                    Surface(Modifier.align(Alignment.BottomEnd).padding(3.dp), shape = RoundedCornerShape(5.dp), color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f)) {
+                        Text("PDF", Modifier.padding(horizontal = 5.dp, vertical = 1.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    }
+                }
+            }
+        } else {
+            chip()
+        }
+        Column(Modifier.weight(1f)) {
+            Text(item.title.ifEmpty { item.mime }, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (item.people.isNotEmpty()) {
+                Text(item.people.joinToString(", ") { it.name }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

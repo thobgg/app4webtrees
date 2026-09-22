@@ -13,11 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -48,19 +46,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.BuildConfig
 import de.bgghome.webtrees.nativ.R
-import de.bgghome.webtrees.nativ.ui.tree.Placeholder
 
 /** Ab dieser Breite: seitliche Leiste und Profil dauerhaft neben dem Baum (Tablet, aufgeklapptes Foldable). */
 private val WIDE_MIN_WIDTH = 840.dp
 
 private data class NavItem(val section: Section, val label: Int, val icon: ImageVector)
 
-// Symbole aus dem Material-Grundsatz; "Baum" und "Fotos" bekommen eigene Zeichen, sobald ein Symbolsatz gewaehlt ist.
+// Baum und Fotos haben eigene Zeichen (Icons.kt), der Rest kommt aus dem Material-Grundsatz.
 private val NAV = listOf(
     NavItem(Section.Home, R.string.nav_home, Icons.Default.Home),
-    NavItem(Section.Tree, R.string.nav_tree, Icons.Default.Share),
+    NavItem(Section.Tree, R.string.nav_tree, TreeIcon),
     NavItem(Section.Search, R.string.nav_search, Icons.Default.Search),
-    NavItem(Section.Photos, R.string.nav_photos, Icons.Default.AccountCircle),
+    NavItem(Section.Photos, R.string.nav_photos, PhotoIcon),
 )
 
 @Composable
@@ -114,7 +111,7 @@ fun AppRoot(viewModel: AppViewModel) {
         Screen.Loading -> LoadingScreen()
         Screen.Setup -> SetupScreen(state, viewModel::submitUrl)
         Screen.Login -> LoginScreen(state, viewModel::login, viewModel::continueAsGuest, viewModel::changeServer)
-        Screen.Trees -> TreesScreen(state, viewModel::chooseTree, viewModel::logout, viewModel::showLogin)
+        Screen.Trees -> TreesScreen(state, viewModel::chooseTree, viewModel::logout, viewModel::showLogin, onCancel = if (state.tree != null) viewModel::cancelTreePicker else null)
         Screen.Main -> MainScreen(state, viewModel, openWeb = { webUrl = it })
     }
 }
@@ -140,7 +137,6 @@ private fun WithMessages(state: UiState, viewModel: AppViewModel, content: @Comp
 @Composable
 private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit) {
     val snackbar = remember { SnackbarHostState() }
-    var placeholderTarget by remember { mutableStateOf<RelativeTarget?>(null) }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -190,7 +186,7 @@ private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String
 
                     when (state.section) {
                         Section.Home -> HomeSection(state, viewModel, openWeb)
-                        Section.Tree -> TreeSection(state, viewModel, wide, openWeb, onPlaceholder = { placeholderTarget = RelativeTarget.of(it) })
+                        Section.Tree -> TreeSection(state, viewModel, wide, openWeb)
                         Section.Search -> SearchSection(state, viewModel, openWeb)
                         Section.Photos -> PhotosSection(state, viewModel, openWeb)
                     }
@@ -199,7 +195,7 @@ private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String
         }
     }
 
-    // Verwandte hinzufuegen - aus dem Profil, von der "+"-Lasche einer Karte oder von einer Geisterkarte.
+    // Verwandte hinzufuegen - aus dem Profil oder von der "+"-Lasche einer Karte.
     // Die Dialoge haengen hier oben, weil am Handy das Profil gar nicht offen sein muss.
     val detail = state.detail
     if (state.addRelativeFor != null && detail != null && detail.person.xref == state.addRelativeFor && !state.loadingDetail) {
@@ -209,9 +205,6 @@ private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String
             onDismiss = viewModel::addRelativeHandled,
             onSave = { viewModel.addRelativeHandled(); viewModel.addRelative(it) },
         )
-    }
-    placeholderTarget?.let { target ->
-        RelativeDialog(target = target, suggestPlaces = viewModel.placeSuggestions(), onDismiss = { placeholderTarget = null }, onSave = { placeholderTarget = null; viewModel.addRelative(it) })
     }
 }
 

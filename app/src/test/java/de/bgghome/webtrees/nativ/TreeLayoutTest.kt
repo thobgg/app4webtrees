@@ -47,44 +47,39 @@ class TreeLayoutTest {
             val a = boxes[i]; val b = boxes[j]
             val apart = a.right <= b.x || b.right <= a.x ||
                 a.y + TreeLayout.BOX_H <= b.y || b.y + TreeLayout.BOX_H <= a.y
-            assertTrue("Ueberlappung: ${a.person?.xref ?: a.placeholder} / ${b.person?.xref ?: b.placeholder}", apart)
+            assertTrue("Ueberlappung: ${a.person.xref} / ${b.person.xref}", apart)
         }
     }
 
     @Test
-    fun readOnlyTreeHasEveryPersonOnceAndNoPlaceholders() {
+    fun readOnlyTreeHasEveryPersonOnce() {
         val layout = sample(canEdit = false)
 
         assertNoOverlap(layout)
-        assertTrue(layout.boxes.none { it.placeholder != null })
         // 7 Ahnen (inkl. Mittelperson) + 3 Partner + 3 Kinder + 3 Enkel
         assertEquals(16, layout.boxes.size)
         assertEquals(1, layout.boxes.count { it.isFocus })
-        assertEquals(layout.boxes.size, layout.boxes.map { it.person!!.xref }.toSet().size)
+        assertEquals(layout.boxes.size, layout.boxes.map { it.person.xref }.toSet().size)
     }
 
     @Test
-    fun editableTreeOffersMissingRelatives() {
+    fun editableTreeHasNoGhostCardsOnlyPlusTabs() {
         val layout = sample(canEdit = true)
 
         assertNoOverlap(layout)
-
-        val placeholders = layout.boxes.mapNotNull { it.placeholder }
-        // Mutter der Mittelperson fehlt
-        assertNotNull(placeholders.firstOrNull { it.relation == "mother" && it.relativeTo.xref == "I1" })
-        // Fehlende Eltern werden nur fuer die Mittelperson angeboten - I5 (Generation 2) hat zwar nur die Mutter,
-        // bekommt aber keinen Platzhalter: jede Karte hat ihre "+"-Lasche, und die oberen Reihen bleiben schlank.
-        assertNull(placeholders.firstOrNull { it.relation == "father" && it.relativeTo.xref == "I5" })
-        assertNull(placeholders.firstOrNull { it.relativeTo.xref == "I8" })
-        // Partner und Kind nur fuer die Mittelperson, das Kind mit beiden Verbindungen zur Wahl
-        assertEquals(1, placeholders.count { it.relation == "spouse" })
-        assertEquals(listOf("F1", "F2"), placeholders.single { it.relation == "child" }.families.map { it.first })
+        // Bearbeiter sehen dieselben Karten wie Leser - Verwandte kommen ueber die "+"-Lasche jeder Karte
+        assertEquals(sample(canEdit = false).boxes, layout.boxes)
+        assertTrue(layout.boxes.all { layout.hasPlus(it) })
+        assertTrue(sample(canEdit = false).boxes.none { sample(canEdit = false).hasPlus(it) })
+        // Die Lasche haengt an der Unterkante und ist dort treffbar
+        val focus = layout.focus
+        assertEquals("I1", layout.plusAt(focus.centerX, focus.bottom)?.person?.xref)
     }
 
     @Test
     fun generationsAreRowsAndFocusSitsBetweenParentsAndChildren() {
         val layout = sample(canEdit = false)
-        val y = layout.boxes.associate { it.person!!.xref to it.y }
+        val y = layout.boxes.associate { it.person.xref to it.y }
 
         assertTrue(y.getValue("I8") < y.getValue("I4"))
         assertTrue(y.getValue("I4") < y.getValue("I2"))
@@ -108,16 +103,15 @@ class TreeLayoutTest {
         )
         assertNoOverlap(layout)
 
-        val box = layout.boxes.filter { it.person != null }.associateBy { it.person!!.xref }
+        val box = layout.boxes.filter { it.person != null }.associateBy { it.person.xref }
         // Mittelperson und Vater: Geschwister links; Mutter-Seite (I5): rechts
         assertEquals(box.getValue("I1").y, box.getValue("B1").y, 0.01f)
         assertTrue(box.getValue("B2").x < box.getValue("B1").x || box.getValue("B1").x < box.getValue("I1").x)
         assertTrue(box.getValue("B2S").x > box.getValue("B2").x && box.getValue("B2S").x < box.getValue("I1").x)
         assertTrue(box.getValue("U1").x < box.getValue("I2").x && box.getValue("U1").y == box.getValue("I2").y)
         assertTrue(box.getValue("A1").x > box.getValue("I5").x && box.getValue("A1S").x > box.getValue("A1").x)
-        // Der Ahnenbaum steht weiter mittig ueber der Mittelperson: Vater links, Mutter-Platzhalter rechts
-        val mother = layout.boxes.first { it.placeholder?.relation == "mother" && it.placeholder.relativeTo.xref == "I1" }
-        assertTrue(box.getValue("I2").centerX < box.getValue("I1").centerX && mother.centerX > box.getValue("I1").centerX)
+        // Ohne Mutter im Baum steht der Vater mittig ueber der Mittelperson - kein Platzhalter schiebt ihn zur Seite
+        assertEquals(box.getValue("I1").centerX, box.getValue("I2").centerX, 0.01f)
         assertTrue(layout.boxes.all { it.x >= 0 && it.right <= layout.width })
     }
 
@@ -134,9 +128,9 @@ class TreeLayoutTest {
         assertNoOverlap(without)
         assertNoOverlap(with)
 
-        assertNull(without.boxes.firstOrNull { it.person?.xref == "K1" })
+        assertNull(without.boxes.firstOrNull { it.person.xref == "K1" })
 
-        val box = with.boxes.filter { it.person != null }.associateBy { it.person!!.xref }
+        val box = with.boxes.filter { it.person != null }.associateBy { it.person.xref }
         // Cousins in der Reihe der Mittelperson, unter dem Onkel, links von deren Geschwistern
         listOf("K1", "K2", "K3").forEach { assertEquals(box.getValue("I1").y, box.getValue(it).y, 0.01f) }
         assertTrue(box.getValue("K3").x + TreeLayout.BOX_W <= box.getValue("B1").x)
@@ -148,7 +142,7 @@ class TreeLayoutTest {
     @Test
     fun childrenAndSpousesKeepTheirOrder() {
         val layout = sample(canEdit = false)
-        val box = layout.boxes.associateBy { it.person!!.xref }
+        val box = layout.boxes.associateBy { it.person.xref }
 
         // Partner rechts von der Person, die Kinder der ersten Verbindung links von denen der zweiten
         assertTrue(box.getValue("I1").x < box.getValue("S1").x && box.getValue("S1").x < box.getValue("S2").x)
@@ -187,15 +181,12 @@ class TreeLayoutTest {
         val layout = TreeLayout.build(pedigree, DescendantNode(p("I1")), canEdit = true)
         assertNoOverlap(layout)
 
-        val father = layout.boxes.first { it.person?.xref == "I2" }
-        val mother = layout.boxes.first { it.person?.xref == "I3" }
+        val father = layout.boxes.first { it.person.xref == "I2" }
+        val mother = layout.boxes.first { it.person.xref == "I3" }
         assertTrue(father.canExpand)
         assertEquals(2, father.ahnen)
-        // Die Mutter hat keine Eltern: kein Symbol - und auch keine "+"-Kaesten, die gibt es nur fuer die Mittelperson
+        // Die Mutter hat keine Eltern: kein Symbol
         assertTrue(!mother.canExpand)
-        assertEquals(0, layout.boxes.count { it.placeholder?.relativeTo?.xref == "I3" })
-        // Dem Vater wird nichts angeboten: seine Eltern gibt es schon, sie sind nur nicht geladen
-        assertEquals(0, layout.boxes.count { it.placeholder?.relativeTo?.xref == "I2" })
         // Das Symbol sitzt mittig ueber der Karte und ist dort treffbar - daneben nicht
         assertEquals("I2", layout.expandAt(father.centerX, father.y - TreeLayout.EXPAND_OFFSET)?.person?.xref)
         assertNull(layout.expandAt(father.centerX + 60, father.y - TreeLayout.EXPAND_OFFSET))
@@ -210,7 +201,7 @@ class TreeLayoutTest {
         val expanded = TreeLayout.build(after, DescendantNode(p("I1")), canEdit = false)
         assertNoOverlap(expanded)
 
-        val box = expanded.boxes.associateBy { it.person!!.xref }
+        val box = expanded.boxes.associateBy { it.person.xref }
         assertTrue(!box.getValue("I2").canExpand)
         assertTrue(box.getValue("I4").canExpand)
         assertTrue(box.getValue("I4").y < box.getValue("I2").y && box.getValue("I2").y < box.getValue("I1").y)
@@ -220,17 +211,16 @@ class TreeLayoutTest {
     }
 
     @Test
-    fun privatePeopleGetNoPlusAndNoPlaceholders() {
+    fun privatePeopleGetNoPlus() {
         val pedigree = Pedigree(
             root = "I1", generations = 2,
             ancestors = listOf(Ancestor(1, p("I1")), Ancestor(2, Person(xref = "I2", name = "Privat", isPrivate = true))),
         )
         val layout = TreeLayout.build(pedigree, DescendantNode(p("I1")), canEdit = true)
 
-        val father = layout.boxes.first { it.person?.xref == "I2" }
+        val father = layout.boxes.first { it.person.xref == "I2" }
         assertTrue(!layout.hasPlus(father))
         assertNull(layout.plusAt(father.centerX, father.bottom))
-        assertEquals(0, layout.boxes.count { it.placeholder?.relativeTo?.xref == "I2" })
 
         val focus = layout.focus
         assertTrue(layout.hasPlus(focus))
@@ -245,7 +235,7 @@ class TreeLayoutTest {
         val layout = TreeLayout.build(pedigree, DescendantNode(p("I1")), canEdit = false, siblings = mapOf("I1" to listOf(Sibling(p("B1")))))
         assertNoOverlap(layout)
 
-        val box = layout.boxes.associateBy { it.person!!.xref }
+        val box = layout.boxes.associateBy { it.person.xref }
         assertEquals(box.getValue("I1").y, box.getValue("B1").y, 0.01f)
         assertTrue(box.getValue("B1").x + TreeLayout.BOX_W + TreeLayout.SIBLING_GAP <= box.getValue("I1").x + 0.01f)
         assertTrue(layout.connectors.isEmpty())
@@ -254,7 +244,7 @@ class TreeLayoutTest {
     @Test
     fun tapHitsTheRightBox() {
         val layout = sample(canEdit = false)
-        val box = layout.boxes.first { it.person?.xref == "C3" }
+        val box = layout.boxes.first { it.person.xref == "C3" }
 
         assertEquals("C3", layout.boxAt(box.centerX, box.centerY)?.person?.xref)
         assertNull(layout.boxAt(-5f, -5f))

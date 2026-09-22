@@ -259,6 +259,7 @@ fun AppViewModel.back(): Boolean {
     val state = uiState.value
 
     return when {
+        state.screen == Screen.Trees && state.tree != null -> { cancelTreePicker(); true }
         state.screen != Screen.Main -> false
         state.pdf != null -> { closePdf(); true }
         state.exifEditing != null -> { cancelExif(); true }
@@ -280,6 +281,6 @@ fun AppViewModel.back(): Boolean {
 }
 
 fun AppViewModel.canGoBack(): Boolean = uiState.value.let {
-    it.screen == Screen.Main &&
+    (it.screen == Screen.Trees && it.tree != null) || it.screen == Screen.Main &&
         (it.pdf != null || it.viewer != null || it.treeFullscreen || it.profileOpen || it.section != Section.Home || it.rootHistory.isNotEmpty())
 }

@@ -37,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -60,7 +59,6 @@ import de.bgghome.webtrees.nativ.R
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.ui.Avatar
 import de.bgghome.webtrees.nativ.ui.forSex
-import de.bgghome.webtrees.nativ.ui.relationLabel
 import de.bgghome.webtrees.nativ.ui.treeColors
 import kotlinx.coroutines.launch
 
@@ -104,7 +102,6 @@ fun FamilyTreeView(
     onToggleFullscreen: () -> Unit,
     onPerson: (Person) -> Unit,
     onPlus: (Person) -> Unit,
-    onPlaceholder: (Placeholder) -> Unit,
     onExpand: (n: Int, xref: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -180,10 +177,9 @@ fun FamilyTreeView(
                             val plus = layout.plusAt(x, y)
                             val box = layout.boxAt(x, y)
                             when {
-                                expand?.person != null && expand.ahnen != null -> onExpand(expand.ahnen, expand.person.xref)
-                                plus?.person != null -> onPlus(plus.person)
-                                box?.placeholder != null -> onPlaceholder(box.placeholder)
-                                box?.person != null && !box.person.isPrivate -> {
+                                expand != null && expand.ahnen != null -> onExpand(expand.ahnen, expand.person.xref)
+                                plus != null -> onPlus(plus.person)
+                                box != null && !box.person.isPrivate -> {
                                     centerOn(box)
                                     onPerson(box.person)
                                 }
@@ -240,7 +236,7 @@ fun FamilyTreeView(
                 }
 
                 layout.boxes.forEach { box ->
-                    TreeCard(box, level, isSelected = box.person != null && box.person.xref == selected, showPlus = layout.hasPlus(box))
+                    TreeCard(box, level, isSelected = box.person.xref == selected, showPlus = layout.hasPlus(box))
                 }
             }
         }
@@ -267,24 +263,8 @@ private fun ToolButton(glyph: String, description: String, onClick: () -> Unit) 
 @Composable
 private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, showPlus: Boolean) {
     val shape = RoundedCornerShape(8.dp)
-    val base = Modifier.offset(box.x.dp, box.y.dp).size(box.w.dp, TreeLayout.BOX_H.dp)
-
-    // Platzhalter: gestrichelter Kasten mit "+", nur nah dran - weiter weg ist er Rauschen
-    val placeholder = box.placeholder
-    if (placeholder != null) {
-        if (level == DetailLevel.Full) {
-            val label = relationLabel(placeholder.relation)
-            Box(
-                base.dashedBorder(MaterialTheme.colorScheme.outline, shape).semantics { contentDescription = label },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("+", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.headlineSmall)
-            }
-        }
-        return
-    }
-
-    val person = box.person ?: return
+    val base = Modifier.offset(box.x.dp, box.y.dp).size(TreeLayout.BOX_W.dp, TreeLayout.BOX_H.dp)
+    val person = box.person
     val gender = treeColors.forSex(person.sex)
     // Rahmen und Schrift wachsen mit der Stufe, damit sie auf dem Schirm gleich bleiben
     val borderWidth = (if (isSelected) 2.5f else 1.5f) * level.textScale
@@ -356,14 +336,6 @@ private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, show
 
 /** Der Rufname vor dem Familiennamen - "Lorenzo" aus "Lorenzo de' Medici"; bei einem einzigen Wort das Wort selbst. */
 fun givenName(name: String): String = name.trim().split(' ').firstOrNull().orEmpty()
-
-private fun Modifier.dashedBorder(color: Color, shape: RoundedCornerShape) = this.then(
-    Modifier.drawWithContent {
-        drawContent()
-        val stroke = Stroke(width = 1.5f * density, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f * density, 5f * density)))
-        drawRoundRect(color, style = stroke, cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f * density))
-    }
-)
 
 /** Zwei kleine Kaestchen (Vater blau, Mutter rosa) - das Zeichen fuer "hier geht es weiter nach oben". */
 @Composable

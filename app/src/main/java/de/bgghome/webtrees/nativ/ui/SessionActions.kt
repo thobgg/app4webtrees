@@ -170,6 +170,9 @@ internal fun AppViewModel.showTrees(info: Info) {
 
 fun AppViewModel.showTreePicker() = uiState.update { it.copy(screen = Screen.Trees) }
 
+/** Baumwahl ohne Wechsel verlassen - geht nur, wenn schon ein Baum gewaehlt ist. */
+fun AppViewModel.cancelTreePicker() = uiState.update { if (it.tree != null) it.copy(screen = Screen.Main) else it }
+
 fun AppViewModel.chooseTree(tree: TreeInfo) {
     settings.tree = tree.name
     val home = tree.userXref.ifEmpty { tree.defaultXref }.ifEmpty { null }

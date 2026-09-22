@@ -130,7 +130,7 @@ fun LoginScreen(state: UiState, onLogin: (String, String) -> Unit, onGuest: () -
 }
 
 @Composable
-fun TreesScreen(state: UiState, onChoose: (de.bgghome.webtrees.nativ.api.TreeInfo) -> Unit, onLogout: () -> Unit, onLogin: () -> Unit) {
+fun TreesScreen(state: UiState, onChoose: (de.bgghome.webtrees.nativ.api.TreeInfo) -> Unit, onLogout: () -> Unit, onLogin: () -> Unit, onCancel: (() -> Unit)? = null) {
     val trees = state.info?.trees.orEmpty()
 
     val user = state.info?.user
@@ -151,6 +151,10 @@ fun TreesScreen(state: UiState, onChoose: (de.bgghome.webtrees.nativ.api.TreeInf
                     supportingContent = { Text(roleLabel(tree.role)) },
                 )
             }
+        }
+        // Aus dem Hauptbildschirm gekommen: ein Weg zurueck, ohne den Baum zu wechseln
+        if (onCancel != null) {
+            TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_cancel)) }
         }
         if (state.info?.user?.loggedIn == true) {
             TextButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_sign_out)) }

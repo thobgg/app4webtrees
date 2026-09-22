@@ -211,6 +211,7 @@
     <string name="msg_archive_saved_no_exif">Im Archiv abgelegt: %1$s. Die Angaben konnten nicht in die Datei geschrieben werden.</string>
     <string name="viewer_edit_exif">Beschriftung bearbeiten</string>
     <string name="pdf_pages">%1$d Seiten</string>
+    <string name="photos_documents">Dokumente</string>
     <string name="pdf_error">Das Dokument ließ sich nicht laden.</string>
     <string name="msg_exif_saved">Beschriftung in die Datei geschrieben</string>
     <string name="err_not_manager">Nur Verwalter des Stammbaums dürfen die Beschriftung ändern.</string>

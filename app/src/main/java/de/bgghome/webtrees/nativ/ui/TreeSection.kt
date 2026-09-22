@@ -43,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.R
 import de.bgghome.webtrees.nativ.ui.tree.FamilyTreeView
-import de.bgghome.webtrees.nativ.ui.tree.Placeholder
 import de.bgghome.webtrees.nativ.ui.tree.TreeLayout
 
 /**
@@ -51,7 +50,7 @@ import de.bgghome.webtrees.nativ.ui.tree.TreeLayout
  * daneben (Tablet) oder, nach einem Tipp auf eine Karte, als eigene Seite (Handy).
  */
 @Composable
-fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb: (String) -> Unit, onPlaceholder: (Placeholder) -> Unit) {
+fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb: (String) -> Unit) {
     val detail = state.detail
 
     // Handy: das Profil ist eine eigene Seite; bis die Daten der angetippten Person da sind, ein Ladekreis.
@@ -101,7 +100,7 @@ fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb:
             }
 
             Box(Modifier.weight(1f).fillMaxHeight()) {
-                TreeCanvas(state, viewModel, wide, onPlaceholder)
+                TreeCanvas(state, viewModel, wide)
             }
         }
     }
@@ -124,7 +123,7 @@ private fun FindPersonField(onClick: () -> Unit) {
 }
 
 @Composable
-private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean, onPlaceholder: (Placeholder) -> Unit) {
+private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean) {
     val pedigree = state.pedigree
     val descendants = state.descendants
     val canEdit = state.tree?.canEdit == true
@@ -149,7 +148,6 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean, o
         onToggleFullscreen = { viewModel.setTreeFullscreen(!state.treeFullscreen) },
         onPerson = { viewModel.openPerson(it.xref, wide) },
         onPlus = { viewModel.requestAddRelative(it.xref) },
-        onPlaceholder = onPlaceholder,
         onExpand = viewModel::expandAncestors,
     )
 }
