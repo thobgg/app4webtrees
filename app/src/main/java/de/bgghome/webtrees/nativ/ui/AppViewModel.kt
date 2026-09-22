@@ -69,6 +69,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         uiState.value.selected?.let { select(it) }
         loadPeople(reset = true)
         if (uiState.value.mediaLoaded) loadMedia(reset = true)
+        if (uiState.value.archiveStatus != ArchiveStatus.Loading) probeArchive()
+        uiState.value.collection?.let { loadCollection(it.slug, it.typ.orEmpty(), 1) }
         loadAnniversaries()
         loadPending()
     }

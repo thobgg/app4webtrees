@@ -141,7 +141,9 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                         onDelete = { fact, record -> dialog = ProfileDialog.DeleteFact(fact, record) },
                         onPerson = viewModel::select,
                     )
-                    1 -> MediaGrid(detail.media, openWeb)
+                    1 -> MediaGrid(detail.media, onOpen = { item ->
+                        if (item.isImage) viewModel.openMediaViewer(ViewerSource.Profile, detail.media, item, owner = detail.person.name) else openWeb(item.url)
+                    })
                     2 -> Relatives(
                         detail, canEdit, onSelect = viewModel::select,
                         onUnlink = { family, who -> dialog = ProfileDialog.Unlink(family, who) },

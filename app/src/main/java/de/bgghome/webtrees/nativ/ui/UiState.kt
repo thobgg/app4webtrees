@@ -1,6 +1,9 @@
 package de.bgghome.webtrees.nativ.ui
 
 import de.bgghome.webtrees.nativ.api.Anniversary
+import de.bgghome.webtrees.nativ.api.ArchiveEntry
+import de.bgghome.webtrees.nativ.api.ArchiveOverview
+import de.bgghome.webtrees.nativ.api.CollectionPage
 import de.bgghome.webtrees.nativ.api.Descendants
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Info
@@ -19,6 +22,23 @@ enum class Screen { Loading, Setup, Login, Trees, Main }
 
 /** Die vier Bereiche der unteren Leiste (Tablet: seitliche Leiste). */
 enum class Section { Home, Tree, Search, Photos }
+
+/** Die zwei Reiter im Bereich Fotos: die Medienobjekte des Baums und das Archiv des Sammlungen-Moduls. */
+enum class PhotosTab { Tree, Archive }
+
+/** Ob der Server das Archiv anbietet (Modul "Sammlungen"): Missing = kein Modul, Forbidden = Gast oder kein Mitglied. */
+enum class ArchiveStatus { Unknown, Loading, Missing, Forbidden, Ready }
+
+/** Wie ein Bild am Stammbaum haengt: an Personen, als Medienobjekt ohne Person, oder nur als Datei im Archiv. */
+enum class LinkState { Persons, ObjectOnly, FileOnly }
+
+/** Ein Bild im Betrachter: Adresse in voller Groesse, Kachel zum Vorabladen, Unterschrift und die webtrees-Seite dazu. */
+data class ViewerItem(val image: String, val thumb: String?, val caption: String, val subtitle: String, val webUrl: String?, val link: LinkState)
+
+/** Woher die Bilder im Betrachter kommen - entscheidet, wo beim Erreichen des Endes nachgeladen wird. */
+enum class ViewerSource { Tree, Profile, Collection }
+
+data class ViewerState(val items: List<ViewerItem>, val index: Int, val source: ViewerSource)
 
 /** Ein Kopplungs-Link (webtreesand://connect), der auf die Bestaetigung des Nutzers wartet. */
 data class ConnectRequest(val url: String, val tree: String, val code: String, val user: String)
@@ -87,4 +107,18 @@ data class UiState(
     val mediaNextPage: Int? = null,
     val loadingMedia: Boolean = false,
     val mediaLoaded: Boolean = false,
+    val photosTab: PhotosTab = PhotosTab.Tree,
+
+    // ── Archiv (Modul "Sammlungen") ──────────────────────────────────
+    val archiveStatus: ArchiveStatus = ArchiveStatus.Unknown,
+    val archive: ArchiveOverview? = null,
+    /** Die geoeffnete Sammlung (Kopfdaten der zuletzt geladenen Seite); null = Uebersicht */
+    val collection: CollectionPage? = null,
+    /** Alle bisher geladenen Eintraege der geoeffneten Sammlung */
+    val collectionEntries: List<ArchiveEntry> = emptyList(),
+    val collectionNextPage: Int? = null,
+    val loadingCollection: Boolean = false,
+
+    /** Der Vollbild-Betrachter, wenn offen - liegt ueber allem anderen */
+    val viewer: ViewerState? = null,
 )

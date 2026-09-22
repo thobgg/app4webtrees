@@ -189,6 +189,7 @@ fun AppViewModel.chooseTree(tree: TreeInfo) {
 
     loadAnniversaries()
     loadPending()
+    probeArchive()
 
     if (tree.canEdit) {
         viewModelScope.launch {

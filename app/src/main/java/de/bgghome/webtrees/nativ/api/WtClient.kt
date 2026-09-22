@@ -142,6 +142,20 @@ class WtClient(private val context: Context) {
     suspend fun mediaList(tree: String, page: Int): MediaPage =
         get("MediaList", tree, mapOf("page" to page.toString()), MediaPage.serializer())
 
+    // ── Archiv: Modul "Sammlungen" (eigene Routen, nicht Teil von api4webtrees) ──
+
+    /** Uebersicht des Archivs. Kein JSON (404-Seite von webtrees): das Modul fehlt. JSON-Fehler 403: kein Zugriff. */
+    suspend fun archive(tree: String): ArchiveOverview =
+        getRoute("/tree/$tree/archiv/api/sammlungen", emptyMap(), ArchiveOverview.serializer())
+
+    /** Eine Seite einer Sammlung. typ nur fuer nicht eingebundene Medien (kategorie "__unlinked__"). */
+    suspend fun collection(tree: String, kategorie: String, typ: String, page: Int, perPage: Int): CollectionPage =
+        getRoute(
+            "/tree/$tree/archiv/api/sammlung",
+            mapOf("kategorie" to kategorie, "typ" to typ, "seite" to page.toString(), "pro_seite" to perPage.toString()),
+            CollectionPage.serializer(),
+        )
+
     suspend fun pedigree(tree: String, xref: String, generations: Int): Pedigree =
         get("Pedigree", tree, mapOf("xref" to xref, "generations" to generations.toString()), Pedigree.serializer())
 
@@ -277,6 +291,13 @@ class WtClient(private val context: Context) {
 
     private suspend fun <T> get(action: String, tree: String?, params: Map<String, String>, deserializer: DeserializationStrategy<T>): T {
         val request = Request.Builder().url(url(apiRoute(action, tree), params)).build()
+
+        return decode(execute(request), deserializer)
+    }
+
+    /** Wie get(), aber fuer eine beliebige webtrees-Route statt einer Aktion von api4webtrees. */
+    private suspend fun <T> getRoute(route: String, params: Map<String, String>, deserializer: DeserializationStrategy<T>): T {
+        val request = Request.Builder().url(url(route, params)).build()
 
         return decode(execute(request), deserializer)
     }

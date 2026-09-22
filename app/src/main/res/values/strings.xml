@@ -182,6 +182,29 @@
     <string name="home_role">Your role: %1$s</string>
     <string name="photos_none">No photos in this family tree.</string>
     <string name="photos_needs_update">The photo overview needs version 0.4 or newer of the “api4webtrees” module on the server.</string>
+    <!-- Archiv: das Modul "Sammlungen" auf dem Server -->
+    <string name="photos_tab_tree">Family tree</string>
+    <string name="photos_tab_archive">Archive</string>
+    <string name="archive_folders">Archive folders</string>
+    <string name="archive_thematic">Thematic collections</string>
+    <string name="archive_by_type">By media type</string>
+    <string name="archive_unlinked">Media not linked to anyone</string>
+    <string name="archive_free">Free holdings</string>
+    <string name="archive_free_text">%1$d of %2$d files in the archive appear nowhere in the family tree.</string>
+    <string name="archive_root_folder">Main folder</string>
+    <string name="archive_none">No collections yet.</string>
+    <string name="archive_more_files">Other files</string>
+    <string name="collection_empty">Nothing in this collection.</string>
+    <string name="viewer_position">%1$d / %2$d</string>
+    <string name="viewer_open_web">Open in webtrees</string>
+    <string name="archive_badge_gedcom">GEDCOM</string>
+    <string name="archive_badge_free">free</string>
+    <string name="archive_link_object">Media object, linked to nobody</string>
+    <string name="archive_link_file">File only, not in the family tree</string>
+    <plurals name="archive_files">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
     <string name="person_private">Private</string>
     <!-- Sprache dieser Datei; die App nennt sie dem Server, damit dessen Beschriftungen dazu passen. -->
     <string name="api_language">en</string>

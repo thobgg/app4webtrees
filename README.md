@@ -32,7 +32,11 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
   Baum über das „+" an jeder Karte anlegen; Verknüpfungen lösen, Personen löschen. Datumsangaben werden ausgewählt
   (genau, um, vor, nach, zwischen · Tag, Monat, Jahr), Orte schlägt die App beim Tippen aus dem Baum vor
 - **Fotos:** aufnehmen oder auswählen und einer Person zuordnen – sie werden passend zum Upload-Limit des Servers
-  verkleinert; Fotoübersicht des ganzen Baums
+  verkleinert; Fotoübersicht des ganzen Baums. Ein Tipp öffnet den Betrachter: wischen, kneifen, Doppeltipp
+- **Archiv:** Läuft auf dem Server das Modul [Sammlungen](https://github.com/thobgg/webtrees-sammlungen) (ab 1.6),
+  zeigt der Bereich „Fotos“ auch dessen Archiv – Ordner-Sammlungen, thematische Sammlungen, Sammlungen nach
+  Medientyp, und vor allem die Bilder, die an keiner Person hängen. Jede Kachel sagt, wie das Bild am Stammbaum
+  hängt: an Personen, als Medienobjekt ohne Person oder als freie Datei. Nur zum Anschauen; bearbeitet wird im Modul
 - **Jahrestage:** die nächsten Geburts-, Heirats- und Todestage, auf Wunsch mit täglicher Erinnerung
 - **Freigabe:** Moderatoren nehmen ausstehende Änderungen direkt in der App an oder verwerfen sie
 - **Handy kompakt, Tablet umfassend:** am Tablet stehen Profil und Baum nebeneinander
@@ -45,6 +49,9 @@ Alles, was (noch) nicht nativ geht, öffnet die App als webtrees-Seite in dersel
 webtrees hat keine Schnittstelle für Apps. Die App spricht deshalb mit dem Modul
 **[api4webtrees](https://github.com/thobgg/api4webtrees)**, das auf dem eigenen webtrees-Server (2.2.x)
 nach `modules_v4/` kopiert wird. Der webtrees-Kern bleibt unverändert.
+
+Optional: Mit dem Modul **[Sammlungen](https://github.com/thobgg/webtrees-sammlungen)** ab Version 1.6 zeigt die App
+zusätzlich das Archiv. Fehlt es, fehlt nur der Reiter.
 
 ## Datenschutz
 

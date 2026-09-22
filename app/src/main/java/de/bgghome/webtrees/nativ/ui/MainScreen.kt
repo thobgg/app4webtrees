@@ -76,6 +76,12 @@ fun AppRoot(viewModel: AppViewModel) {
         return
     }
 
+    // Der Betrachter liegt ueber allem: Vollbild, eigene Zurueck-Behandlung (BackHandler oben).
+    state.viewer?.let { viewer ->
+        PhotoViewer(viewer, onIndex = viewModel::viewerMoved, onClose = viewModel::closeViewer, onOpenWeb = { webUrl = it })
+        return
+    }
+
     // Kopplungs-Link: erst bestaetigen lassen - er kann von jeder Webseite kommen.
     state.pendingConnect?.let { request ->
         ConfirmDialog(

@@ -177,6 +177,29 @@
     <string name="home_role">Deine Rolle: %1$s</string>
     <string name="photos_none">Keine Fotos in diesem Stammbaum.</string>
     <string name="photos_needs_update">Für die Fotoübersicht braucht der Server das Modul „api4webtrees“ ab Version 0.4.</string>
+    <!-- Archiv: das Modul "Sammlungen" auf dem Server -->
+    <string name="photos_tab_tree">Stammbaum</string>
+    <string name="photos_tab_archive">Archiv</string>
+    <string name="archive_folders">Archivordner</string>
+    <string name="archive_thematic">Thematische Sammlungen</string>
+    <string name="archive_by_type">Nach Medientyp</string>
+    <string name="archive_unlinked">Mit niemandem verknüpfte Medien</string>
+    <string name="archive_free">Freier Bestand</string>
+    <string name="archive_free_text">%1$d von %2$d Dateien im Archiv tauchen im Stammbaum nirgends auf.</string>
+    <string name="archive_root_folder">Hauptordner</string>
+    <string name="archive_none">Noch keine Sammlungen.</string>
+    <string name="archive_more_files">Weitere Dateien</string>
+    <string name="collection_empty">Nichts in dieser Sammlung.</string>
+    <string name="viewer_position">%1$d / %2$d</string>
+    <string name="viewer_open_web">In webtrees öffnen</string>
+    <string name="archive_badge_gedcom">GEDCOM</string>
+    <string name="archive_badge_free">frei</string>
+    <string name="archive_link_object">Medienobjekt, mit niemandem verknüpft</string>
+    <string name="archive_link_file">Nur Datei, nicht im Stammbaum</string>
+    <plurals name="archive_files">
+        <item quantity="one">%d Datei</item>
+        <item quantity="other">%d Dateien</item>
+    </plurals>
     <string name="person_private">Privat</string>
     <!-- Sprache dieser Datei; die App nennt sie dem Server, damit dessen Beschriftungen dazu passen. -->
     <string name="api_language">de</string>

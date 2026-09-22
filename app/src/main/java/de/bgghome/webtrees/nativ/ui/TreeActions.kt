@@ -260,6 +260,10 @@ fun AppViewModel.back(): Boolean {
 
     return when {
         state.screen != Screen.Main -> false
+        state.viewer != null -> { closeViewer(); true }
+        state.section == Section.Photos && state.photosTab == PhotosTab.Archive && (state.collection != null || state.loadingCollection) -> {
+            closeCollection(); true
+        }
         state.treeFullscreen -> { uiState.update { it.copy(treeFullscreen = false) }; true }
         state.profileOpen -> { uiState.update { it.copy(profileOpen = false) }; true }
         state.section == Section.Tree && state.rootHistory.isNotEmpty() -> {
@@ -275,5 +279,5 @@ fun AppViewModel.back(): Boolean {
 
 fun AppViewModel.canGoBack(): Boolean = uiState.value.let {
     it.screen == Screen.Main &&
-        (it.treeFullscreen || it.profileOpen || it.section != Section.Home || it.rootHistory.isNotEmpty())
+        (it.viewer != null || it.treeFullscreen || it.profileOpen || it.section != Section.Home || it.rootHistory.isNotEmpty())
 }

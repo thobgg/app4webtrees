@@ -32,7 +32,11 @@ the app arrives as a pending change in the same webtrees installation, under its
   with the “+” on every card; remove links, delete individuals. Dates are picked (exact, about, before, after,
   between · day, month, year), places are suggested from the tree while typing
 - **Photos:** take or choose a picture and attach it to a person – it is shrunk to fit the server's upload limit;
-  photo overview of the whole tree
+  photo overview of the whole tree. A tap opens the viewer: swipe, pinch, double-tap
+- **Archive:** if the server runs the [Sammlungen](https://github.com/thobgg/webtrees-sammlungen) module (1.6 or
+  newer), the “Photos” section also shows its archive – folder collections, thematic collections, collections by media
+  type, and above all the pictures that hang on nobody. Every tile says how the picture relates to the tree: linked to
+  people, a media object without a person, or a free file. Viewing only; editing stays in the module
 - **Anniversaries:** upcoming birthdays, wedding days and days of death, with an optional daily reminder
 - **Moderation:** moderators accept or reject pending changes in the app
 - **Compact on phones, comprehensive on tablets**
@@ -45,6 +49,9 @@ Whatever is not native (yet) opens as the webtrees page in the same session.
 webtrees has no interface for apps. The app therefore talks to the module
 **[api4webtrees](https://github.com/thobgg/api4webtrees)**, which you copy into `modules_v4/` of your own
 webtrees server (2.2.x). The webtrees core stays untouched.
+
+Optional: with the **[Sammlungen](https://github.com/thobgg/webtrees-sammlungen)** module, version 1.6 or newer, the
+app also shows the archive. Without it, only that tab is missing.
 
 ## Privacy
 

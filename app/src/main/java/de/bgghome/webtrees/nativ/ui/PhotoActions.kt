@@ -35,9 +35,11 @@ internal fun AppViewModel.loadMedia(reset: Boolean) {
         try {
             val result = client.mediaList(tree.name, page)
             uiState.update {
+                val media = if (reset) result.data else it.media + result.data
                 it.copy(
-                    media = if (reset) result.data else it.media + result.data,
+                    media = media,
                     mediaNextPage = result.nextPage, loadingMedia = false, mediaLoaded = true,
+                    viewer = it.viewer?.let { v -> if (v.source == ViewerSource.Tree) v.copy(items = media.filter { m -> m.isImage }.map { m -> viewerItem(m) }) else v },
                 )
             }
         } catch (e: Exception) {
