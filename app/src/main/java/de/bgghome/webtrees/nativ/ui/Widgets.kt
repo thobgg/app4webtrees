@@ -1,12 +1,16 @@
 package de.bgghome.webtrees.nativ.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -15,6 +19,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,26 +39,46 @@ import de.bgghome.webtrees.nativ.api.Person
 @Composable
 fun TreeTitleBar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, trailing: @Composable () -> Unit = {}) {
     val tree = state.tree
-    val canSwitch = (state.info?.trees?.size ?: 0) > 1
+    val trees = state.info?.trees.orEmpty()
+    val canSwitch = trees.size > 1
+    // Baumwechsel als Aufklappliste direkt unter dem Namen - keine eigene Seite, kein Weg, der nicht zurueckfuehrt
+    var pickerOpen by remember { mutableStateOf(false) }
 
     Surface(color = MaterialTheme.colorScheme.surface) {
         Row(
             Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f).then(if (canSwitch) Modifier.clickable { viewModel.showTreePicker() } else Modifier)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        tree?.title.orEmpty(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
-                    if (canSwitch) Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.menu_switch_tree))
+            Box(Modifier.weight(1f)) {
+                Column(if (canSwitch) Modifier.clickable { pickerOpen = true } else Modifier) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            tree?.title.orEmpty(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                        if (canSwitch) Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.menu_switch_tree))
+                    }
+                    if ((tree?.individuals ?: 0) > 0) {
+                        Text(
+                            stringResource(R.string.tree_people_count, tree!!.individuals),
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
-                if ((tree?.individuals ?: 0) > 0) {
-                    Text(
-                        stringResource(R.string.tree_people_count, tree!!.individuals),
-                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                DropdownMenu(expanded = pickerOpen, onDismissRequest = { pickerOpen = false }) {
+                    trees.forEach { candidate ->
+                        val current = candidate.name == tree?.name
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(candidate.title, fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal)
+                                    Text(roleLabel(candidate.role), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            },
+                            leadingIcon = if (current) ({ Icon(Icons.Default.Check, contentDescription = null) }) else null,
+                            onClick = { pickerOpen = false; if (!current) viewModel.chooseTree(candidate) },
+                        )
+                    }
                 }
             }
             trailing()
