@@ -172,6 +172,19 @@ class WtClient(private val context: Context) {
         return postRoute("/tree/$tree/archiv/api/hochladen", body, ArchiveUploadResult.serializer())
     }
 
+    /** Beschriftung eines Archivbildes in die Datei schreiben - nur Verwalter (Modul Sammlungen ab Stufe 2). */
+    suspend fun writeExif(tree: String, pfad: String, request: ExifRequest): ExifWriteResult {
+        val form = FormBody.Builder()
+            .add("pfad", pfad)
+            .add("beschreibung", request.beschreibung)
+            .add("datum", request.datum)
+            .add("personen", request.personen.joinToString(", "))
+            .add("keywords", request.keywords.joinToString(", "))
+            .build()
+
+        return postRoute("/tree/$tree/archiv/api/exif", form, ExifWriteResult.serializer())
+    }
+
     suspend fun pedigree(tree: String, xref: String, generations: Int): Pedigree =
         get("Pedigree", tree, mapOf("xref" to xref, "generations" to generations.toString()), Pedigree.serializer())
 

@@ -8,6 +8,7 @@ import de.bgghome.webtrees.nativ.R
 import de.bgghome.webtrees.nativ.api.ApiException
 import de.bgghome.webtrees.nativ.api.ArchiveEntry
 import de.bgghome.webtrees.nativ.api.ArchiveUploadRequest
+import de.bgghome.webtrees.nativ.api.ExifRequest
 import de.bgghome.webtrees.nativ.api.MediaJson
 import de.bgghome.webtrees.nativ.api.NotJsonException
 import de.bgghome.webtrees.nativ.data.ImagePrep
@@ -150,6 +151,46 @@ fun AppViewModel.uploadArchivePhoto(uri: Uri, request: ArchiveUploadRequest) {
     }
 }
 
+// ── Beschriftung aendern ─────────────────────────────────────────
+
+/** Ob dieser Nutzer die Beschriftung von Archivbildern aendern darf (Verwalter, Modul ab Stufe 2). */
+val AppViewModel.canEditExif: Boolean
+    get() = uiState.value.archive?.let { it.api >= 2 && it.darfExif } == true
+
+/** Schreibt die Beschriftung in die Datei und tauscht den Eintrag in Sammlung und Betrachter aus. */
+fun AppViewModel.writeExif(entry: ArchiveEntry, request: ExifRequest) {
+    val tree = uiState.value.tree ?: return
+    val pfad = entry.pfad ?: return
+    uiState.update { it.copy(busy = true) }
+
+    viewModelScope.launch {
+        try {
+            val result = client.writeExif(tree.name, pfad, request)
+            val neu = result.eintrag ?: entry
+            uiState.update { state ->
+                val entries = state.collectionEntries.map { e -> if (e.pfad == pfad) neu else e }
+                state.copy(
+                    busy = false, message = text(R.string.msg_exif_saved),
+                    collectionEntries = entries,
+                    viewer = state.viewer?.let { v ->
+                        v.copy(items = v.items.map { item -> if (item.entry?.pfad == pfad) viewerItem(neu) else item })
+                    },
+                )
+            }
+        } catch (e: Exception) {
+            uiState.update { it.copy(busy = false) }
+            fail(e)
+        }
+    }
+}
+
+// ── PDF ──────────────────────────────────────────────────────────
+
+fun AppViewModel.openPdf(url: String, title: String, webUrl: String?) =
+    uiState.update { it.copy(pdf = PdfTarget(url, title, webUrl)) }
+
+fun AppViewModel.closePdf() = uiState.update { it.copy(pdf = null) }
+
 // ── Betrachter ───────────────────────────────────────────────────
 
 fun AppViewModel.openArchiveViewer(entry: ArchiveEntry) {
@@ -201,6 +242,7 @@ internal fun viewerItem(entry: ArchiveEntry) = ViewerItem(
     subtitle = listOf(entry.datum, entry.personen.joinToString(", ") { it.name }).filter { it.isNotBlank() }.joinToString(" · "),
     webUrl = entry.seite ?: entry.original,
     link = linkState(entry),
+    entry = entry,
 )
 
 internal fun viewerItem(media: MediaJson, owner: String? = null) = ViewerItem(

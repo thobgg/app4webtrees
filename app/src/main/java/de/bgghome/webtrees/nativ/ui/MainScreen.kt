@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -76,9 +77,19 @@ fun AppRoot(viewModel: AppViewModel) {
         return
     }
 
-    // Der Betrachter liegt ueber allem: Vollbild, eigene Zurueck-Behandlung (BackHandler oben).
+    // Die Betrachter liegen ueber allem: Vollbild, eigene Zurueck-Behandlung (BackHandler oben). Meldungen
+    // ("Beschriftung geschrieben", Fehler) brauchen hier eine eigene Snackbar - die des Hauptbildschirms ist verdeckt.
+    state.pdf?.let { pdf ->
+        WithMessages(state, viewModel) { PdfViewer(pdf, onClose = viewModel::closePdf, onOpenWeb = { webUrl = it }) }
+        return
+    }
     state.viewer?.let { viewer ->
-        PhotoViewer(viewer, onIndex = viewModel::viewerMoved, onClose = viewModel::closeViewer, onOpenWeb = { webUrl = it })
+        WithMessages(state, viewModel) {
+            PhotoViewer(
+                viewer, onIndex = viewModel::viewerMoved, onClose = viewModel::closeViewer, onOpenWeb = { webUrl = it },
+                canEditExif = viewModel.canEditExif, suggestPersons = viewModel.personSuggestions(), onSaveExif = viewModel::writeExif,
+            )
+        }
         return
     }
 
@@ -104,6 +115,24 @@ fun AppRoot(viewModel: AppViewModel) {
         Screen.Login -> LoginScreen(state, viewModel::login, viewModel::continueAsGuest, viewModel::changeServer)
         Screen.Trees -> TreesScreen(state, viewModel::chooseTree, viewModel::logout, viewModel::showLogin)
         Screen.Main -> MainScreen(state, viewModel, openWeb = { webUrl = it })
+    }
+}
+
+/** Inhalt mit eigener Snackbar fuer die einmaligen Meldungen aus dem View-Model. */
+@Composable
+private fun WithMessages(state: UiState, viewModel: AppViewModel, content: @Composable () -> Unit) {
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.message) {
+        state.message?.let {
+            snackbar.showSnackbar(it)
+            viewModel.messageShown()
+        }
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        content()
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = 96.dp))
     }
 }
 

@@ -45,7 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import de.bgghome.webtrees.nativ.R
+import de.bgghome.webtrees.nativ.api.ArchiveEntry
 import de.bgghome.webtrees.nativ.api.ArchiveOverview
+import de.bgghome.webtrees.nativ.api.ExifRequest
 import de.bgghome.webtrees.nativ.api.ArchiveUploadRequest
 import kotlinx.coroutines.delay
 
@@ -92,7 +94,33 @@ fun ArchiveCaptureButton(state: UiState, viewModel: AppViewModel, modifier: Modi
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Die Beschriftung im Formular - beim Festhalten und beim Bearbeiten dieselben vier Felder. */
+private class ExifForm(beschreibung: String = "", datum: String = "", personen: List<String> = emptyList(), keywords: List<String> = emptyList()) {
+    var description by mutableStateOf(beschreibung)
+    var date by mutableStateOf(datum)
+    var persons by mutableStateOf(personen)
+    var keywords by mutableStateOf(keywords.joinToString(", "))
+
+    val dateOk: Boolean get() = date.isBlank() || ISO_DATE.matches(date.trim())
+
+    fun request() = ExifRequest(
+        beschreibung = description.trim(), datum = date.trim(), personen = persons,
+        keywords = keywords.split(',').map { it.trim() }.filter { it.isNotEmpty() },
+    )
+}
+
+@Composable
+private fun ExifFields(form: ExifForm, suggestPersons: PlaceSuggest?) {
+    Field(form.description, { form.description = it }, R.string.field_description, minLines = 2)
+    OutlinedTextField(
+        value = form.date, onValueChange = { form.date = it }, label = { Text(stringResource(R.string.field_date)) },
+        supportingText = { Text(stringResource(R.string.hint_iso_date)) }, isError = !form.dateOk,
+        singleLine = true, modifier = Modifier.fillMaxWidth(),
+    )
+    PersonsField(form.persons, { form.persons = it }, suggestPersons)
+    Field(form.keywords, { form.keywords = it }, R.string.field_keywords)
+}
+
 @Composable
 private fun ArchiveUploadDialog(
     uri: Uri,
@@ -104,13 +132,9 @@ private fun ArchiveUploadDialog(
     onSave: (ArchiveUploadRequest) -> Unit,
 ) {
     var folder by remember { mutableStateOf(defaultFolder) }
-    var description by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var persons by remember { mutableStateOf(listOf<String>()) }
-    var keywords by remember { mutableStateOf("") }
     var collection by remember { mutableStateOf(defaultCollection) }
+    val form = remember { ExifForm() }
 
-    val dateOk = ISO_DATE.matches(date.trim()) || date.isBlank()
     val rootLabel = stringResource(R.string.archive_root_folder)
     val noneLabel = stringResource(R.string.option_none)
     val thematic = archive.sammlungen.filter { it.art == "thematisch" }
@@ -129,14 +153,7 @@ private fun ArchiveUploadDialog(
                     options = listOf("" to rootLabel) + archive.ordnerListe.map { it to it },
                     selected = folder, onSelect = { folder = it },
                 )
-                Field(description, { description = it }, R.string.field_description, minLines = 2)
-                OutlinedTextField(
-                    value = date, onValueChange = { date = it }, label = { Text(stringResource(R.string.field_date)) },
-                    supportingText = { Text(stringResource(R.string.hint_iso_date)) }, isError = !dateOk,
-                    singleLine = true, modifier = Modifier.fillMaxWidth(),
-                )
-                PersonsField(persons, { persons = it }, suggestPersons)
-                Field(keywords, { keywords = it }, R.string.field_keywords)
+                ExifFields(form, suggestPersons)
                 if (thematic.isNotEmpty()) {
                     Choice(
                         label = R.string.field_collection,
@@ -148,17 +165,40 @@ private fun ArchiveUploadDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = dateOk,
+                enabled = form.dateOk,
                 onClick = {
+                    val exif = form.request()
                     onSave(
                         ArchiveUploadRequest(
-                            ordner = folder, beschreibung = description.trim(), datum = date.trim(), personen = persons,
-                            keywords = keywords.split(',').map { it.trim() }.filter { it.isNotEmpty() }, sammlung = collection,
+                            ordner = folder, beschreibung = exif.beschreibung, datum = exif.datum, personen = exif.personen,
+                            keywords = exif.keywords, sammlung = collection,
                         )
                     )
                 },
             ) { Text(stringResource(R.string.action_save)) }
         },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+/**
+ * Beschriftung eines Archivbildes aendern - im Betrachter, nativ. Dieselben vier Felder wie die Seitenleiste der
+ * Lightbox im Modul; geschrieben wird ueber dessen Route, mit dessen Regel (nur Verwalter).
+ */
+@Composable
+fun ExifEditDialog(entry: ArchiveEntry, suggestPersons: PlaceSuggest?, onDismiss: () -> Unit, onSave: (ExifRequest) -> Unit) {
+    val form = remember(entry.pfad) { ExifForm(entry.beschreibung, entry.datumIso.ifEmpty { entry.datum }, entry.exifPersonen, entry.keywords) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.viewer_edit_exif)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(entry.datei, style = MaterialTheme.typography.labelMedium)
+                ExifFields(form, suggestPersons)
+            }
+        },
+        confirmButton = { TextButton(enabled = form.dateOk, onClick = { onSave(form.request()) }) { Text(stringResource(R.string.action_save)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

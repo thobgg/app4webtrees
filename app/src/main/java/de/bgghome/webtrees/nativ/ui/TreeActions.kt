@@ -260,6 +260,7 @@ fun AppViewModel.back(): Boolean {
 
     return when {
         state.screen != Screen.Main -> false
+        state.pdf != null -> { closePdf(); true }
         state.viewer != null -> { closeViewer(); true }
         state.section == Section.Photos && state.photosTab == PhotosTab.Archive && (state.collection != null || state.loadingCollection) -> {
             closeCollection(); true
@@ -279,5 +280,5 @@ fun AppViewModel.back(): Boolean {
 
 fun AppViewModel.canGoBack(): Boolean = uiState.value.let {
     it.screen == Screen.Main &&
-        (it.viewer != null || it.treeFullscreen || it.profileOpen || it.section != Section.Home || it.rootHistory.isNotEmpty())
+        (it.pdf != null || it.viewer != null || it.treeFullscreen || it.profileOpen || it.section != Section.Home || it.rootHistory.isNotEmpty())
 }

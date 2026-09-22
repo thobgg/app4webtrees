@@ -136,3 +136,16 @@ data class ArchiveUploadResult(
     val hinweis: String? = null,
     val eintrag: ArchiveEntry? = null,
 )
+
+/** Die Beschriftung eines Bildes im Archiv - was die App in die Datei schreiben laesst (EXIF/XMP). */
+data class ExifRequest(
+    val beschreibung: String = "",
+    /** YYYY, YYYY-MM oder YYYY-MM-DD */
+    val datum: String = "",
+    val personen: List<String> = emptyList(),
+    val keywords: List<String> = emptyList(),
+)
+
+/** Antwort von /archiv/api/exif: der Eintrag mit der neuen Beschriftung. */
+@Serializable
+data class ExifWriteResult(val ok: Boolean = false, val eintrag: ArchiveEntry? = null)

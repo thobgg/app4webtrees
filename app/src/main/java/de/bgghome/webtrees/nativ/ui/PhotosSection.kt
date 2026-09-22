@@ -82,7 +82,13 @@ fun PhotosSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
             state.media.isNotEmpty() ->
                 MediaGrid(
                     state.media,
-                    onOpen = { item -> if (item.isImage) viewModel.openMediaViewer(ViewerSource.Tree, state.media, item) else openWeb(item.url) },
+                    onOpen = { item ->
+                        when {
+                            item.isImage -> viewModel.openMediaViewer(ViewerSource.Tree, state.media, item)
+                            item.mime == "application/pdf" -> viewModel.openPdf(item.file, item.title, item.url)
+                            else -> openWeb(item.url)
+                        }
+                    },
                     showPeople = true, onEnd = viewModel::loadMoreMedia,
                 )
         }

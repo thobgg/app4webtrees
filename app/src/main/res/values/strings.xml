@@ -214,6 +214,14 @@
     <string name="option_none">none</string>
     <string name="msg_archive_saved">Saved to the archive: %1$s</string>
     <string name="msg_archive_saved_no_exif">Saved to the archive: %1$s. The details could not be written into the file.</string>
+    <string name="viewer_edit_exif">Edit details</string>
+    <string name="pdf_pages">%1$d pages</string>
+    <string name="pdf_error">The document could not be loaded.</string>
+    <string name="msg_exif_saved">Details written into the file</string>
+    <string name="err_not_manager">Only managers of the family tree may change the details.</string>
+    <string name="err_exif_failed">The details could not be written into the file. Is Imagick installed on the server?</string>
+    <string name="err_folder_not_found">This folder does not exist in the media folder.</string>
+    <string name="err_bad_file">The server does not accept this file name or type.</string>
     <plurals name="archive_files">
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>

@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -214,13 +217,13 @@ fun CollectionView(state: UiState, viewModel: AppViewModel, openWeb: (String) ->
                         }
                     }
                 } else {
-                    FileRow(entry, onClick = { openWeb(entry.seite ?: entry.original) })
+                    FileRow(entry, onClick = { openFile(entry, viewModel, openWeb) })
                 }
             }
             if (extra.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) { SectionHeading(stringResource(R.string.archive_more_files)) }
                 items(extra, span = { GridItemSpan(maxLineSpan) }) { entry ->
-                    FileRow(entry, onClick = { openWeb(entry.seite ?: entry.original) })
+                    FileRow(entry, onClick = { openFile(entry, viewModel, openWeb) })
                 }
             }
         }
@@ -255,6 +258,12 @@ fun LinkBadge(entry: ArchiveEntry, modifier: Modifier = Modifier) {
     }
 }
 
+/** PDFs im eigenen Betrachter, alles andere (Ton, Video, Office) als webtrees-Seite bzw. Datei im Browser-Fenster. */
+private fun openFile(entry: ArchiveEntry, viewModel: AppViewModel, openWeb: (String) -> Unit) {
+    if (entry.format == "pdf") viewModel.openPdf(entry.original, entry.titel.ifEmpty { entry.datei }, entry.seite)
+    else openWeb(entry.seite ?: entry.original)
+}
+
 /** Eine Datei, die kein Bild ist: Formatkuerzel im Kasten, dann Titel oder Dateiname. */
 @Composable
 private fun FileRow(entry: ArchiveEntry, onClick: () -> Unit) {
@@ -262,11 +271,34 @@ private fun FileRow(entry: ArchiveEntry, onClick: () -> Unit) {
         Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Surface(shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
-            Text(
-                entry.format.uppercase().ifEmpty { "?" }, Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
+        val chip: @Composable () -> Unit = {
+            Surface(shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+                Text(
+                    entry.format.uppercase().ifEmpty { "?" }, Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
+        if (entry.format == "pdf") {
+            // Die erste Seite als Vorschau, dazu das Kennzeichen; ist die Datei zu gross fuer eine Vorschau, bleibt das Kuerzel.
+            PdfThumbnail(entry.original, Modifier.width(64.dp).height(84.dp)) { bitmap ->
+                if (bitmap == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { chip() }
+                } else {
+                    Image(
+                        bitmap.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
+                    )
+                    Surface(
+                        Modifier.align(Alignment.BottomEnd).padding(3.dp), shape = RoundedCornerShape(5.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f),
+                    ) {
+                        Text("PDF", Modifier.padding(horizontal = 5.dp, vertical = 1.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    }
+                }
+            }
+        } else {
+            chip()
         }
         Column(Modifier.weight(1f)) {
             Text(entry.titel.ifEmpty { entry.datei }, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)

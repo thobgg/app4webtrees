@@ -209,6 +209,14 @@
     <string name="option_none">keine</string>
     <string name="msg_archive_saved">Im Archiv abgelegt: %1$s</string>
     <string name="msg_archive_saved_no_exif">Im Archiv abgelegt: %1$s. Die Angaben konnten nicht in die Datei geschrieben werden.</string>
+    <string name="viewer_edit_exif">Beschriftung bearbeiten</string>
+    <string name="pdf_pages">%1$d Seiten</string>
+    <string name="pdf_error">Das Dokument ließ sich nicht laden.</string>
+    <string name="msg_exif_saved">Beschriftung in die Datei geschrieben</string>
+    <string name="err_not_manager">Nur Verwalter des Stammbaums dürfen die Beschriftung ändern.</string>
+    <string name="err_exif_failed">Die Angaben ließen sich nicht in die Datei schreiben. Ist Imagick auf dem Server installiert?</string>
+    <string name="err_folder_not_found">Diesen Ordner gibt es im Medienordner nicht.</string>
+    <string name="err_bad_file">Der Server nimmt diesen Dateinamen oder Dateityp nicht an.</string>
     <plurals name="archive_files">
         <item quantity="one">%d Datei</item>
         <item quantity="other">%d Dateien</item>

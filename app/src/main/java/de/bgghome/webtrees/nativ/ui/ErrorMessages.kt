@@ -31,6 +31,10 @@ fun Context.explain(e: Exception): String = when (e) {
         "tree-disabled" -> getString(R.string.err_tree_disabled)
         "pair-invalid", "pair-expired" -> getString(R.string.err_pair)
         "not-supported" -> getString(R.string.err_not_supported)
+        "not-manager" -> getString(R.string.err_not_manager)
+        "exif-failed" -> getString(R.string.err_exif_failed)
+        "folder-not-found" -> getString(R.string.err_folder_not_found)
+        "blocked-extension", "bad-filename" -> getString(R.string.err_bad_file)
         else -> getString(R.string.err_rejected, e.code)
     }
     // Keine JSON-Antwort: bei 404 fehlt das Modul auf dem Server, sonst hat der Webserver etwas anderes geliefert.

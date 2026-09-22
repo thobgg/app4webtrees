@@ -142,7 +142,11 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                         onPerson = viewModel::select,
                     )
                     1 -> MediaGrid(detail.media, onOpen = { item ->
-                        if (item.isImage) viewModel.openMediaViewer(ViewerSource.Profile, detail.media, item, owner = detail.person.name) else openWeb(item.url)
+                        when {
+                            item.isImage -> viewModel.openMediaViewer(ViewerSource.Profile, detail.media, item, owner = detail.person.name)
+                            item.mime == "application/pdf" -> viewModel.openPdf(item.file, item.title, item.url)
+                            else -> openWeb(item.url)
+                        }
                     })
                     2 -> Relatives(
                         detail, canEdit, onSelect = viewModel::select,

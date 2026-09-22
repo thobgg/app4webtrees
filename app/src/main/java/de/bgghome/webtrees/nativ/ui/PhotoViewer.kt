@@ -20,6 +20,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,6 +47,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import de.bgghome.webtrees.nativ.R
+import de.bgghome.webtrees.nativ.api.ArchiveEntry
+import de.bgghome.webtrees.nativ.api.ExifRequest
 
 /**
  * Vollbild-Betrachter: wischen zum naechsten Bild, kneifen zum Vergroessern (bis 5x), ein Finger schiebt das vergroesserte
@@ -55,10 +58,20 @@ import de.bgghome.webtrees.nativ.R
  * Kurz vor dem Ende meldet onIndex die Stelle; das View-Model laedt dann die naechste Seite nach, und die Liste waechst.
  */
 @Composable
-fun PhotoViewer(viewer: ViewerState, onIndex: (Int) -> Unit, onClose: () -> Unit, onOpenWeb: (String) -> Unit) {
+fun PhotoViewer(
+    viewer: ViewerState,
+    onIndex: (Int) -> Unit,
+    onClose: () -> Unit,
+    onOpenWeb: (String) -> Unit,
+    /** Beschriftung aendern - nur fuer Archivbilder und nur, wenn der Server es diesem Nutzer erlaubt */
+    canEditExif: Boolean = false,
+    suggestPersons: PlaceSuggest? = null,
+    onSaveExif: (ArchiveEntry, ExifRequest) -> Unit = { _, _ -> },
+) {
     val pagerState = rememberPagerState(initialPage = viewer.index) { viewer.items.size }
     var chrome by remember { mutableStateOf(true) }
     var zoomed by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf<ArchiveEntry?>(null) }
 
     LaunchedEffect(pagerState.currentPage) { onIndex(pagerState.currentPage) }
 
@@ -79,12 +92,21 @@ fun PhotoViewer(viewer: ViewerState, onIndex: (Int) -> Unit, onClose: () -> Unit
                     stringResource(R.string.viewer_position, pagerState.currentPage + 1, viewer.items.size),
                     Modifier.weight(1f), color = Color.White, style = MaterialTheme.typography.titleMedium,
                 )
+                item?.entry?.takeIf { canEditExif && it.istBild && it.pfad != null }?.let { entry ->
+                    IconButton(onClick = { editing = entry }) {
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.viewer_edit_exif), tint = Color.White)
+                    }
+                }
                 item?.webUrl?.let { url ->
                     IconButton(onClick = { onOpenWeb(url) }) {
                         Icon(Icons.Default.ExitToApp, contentDescription = stringResource(R.string.viewer_open_web), tint = Color.White)
                     }
                 }
             }
+        }
+
+        editing?.let { entry ->
+            ExifEditDialog(entry, suggestPersons, onDismiss = { editing = null }, onSave = { editing = null; onSaveExif(entry, it) })
         }
 
         AnimatedVisibility(chrome && item != null, Modifier.align(Alignment.BottomCenter), enter = fadeIn(), exit = fadeOut()) {

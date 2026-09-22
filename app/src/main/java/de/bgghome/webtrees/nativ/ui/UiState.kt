@@ -33,12 +33,19 @@ enum class ArchiveStatus { Unknown, Loading, Missing, Forbidden, Ready }
 enum class LinkState { Persons, ObjectOnly, FileOnly }
 
 /** Ein Bild im Betrachter: Adresse in voller Groesse, Kachel zum Vorabladen, Unterschrift und die webtrees-Seite dazu. */
-data class ViewerItem(val image: String, val thumb: String?, val caption: String, val subtitle: String, val webUrl: String?, val link: LinkState)
+data class ViewerItem(
+    val image: String, val thumb: String?, val caption: String, val subtitle: String, val webUrl: String?, val link: LinkState,
+    /** Bei Bildern aus dem Archiv der Eintrag dazu - fuer das Bearbeiten der Beschriftung */
+    val entry: ArchiveEntry? = null,
+)
 
 /** Woher die Bilder im Betrachter kommen - entscheidet, wo beim Erreichen des Endes nachgeladen wird. */
 enum class ViewerSource { Tree, Profile, Collection }
 
 data class ViewerState(val items: List<ViewerItem>, val index: Int, val source: ViewerSource)
+
+/** Ein PDF im eigenen Betrachter: Adresse der Datei, Titel und die webtrees-Seite dazu (falls Medienobjekt). */
+data class PdfTarget(val url: String, val title: String, val webUrl: String?)
 
 /** Ein Kopplungs-Link (webtreesand://connect), der auf die Bestaetigung des Nutzers wartet. */
 data class ConnectRequest(val url: String, val tree: String, val code: String, val user: String)
@@ -121,4 +128,6 @@ data class UiState(
 
     /** Der Vollbild-Betrachter, wenn offen - liegt ueber allem anderen */
     val viewer: ViewerState? = null,
+    /** Der PDF-Betrachter, wenn offen */
+    val pdf: PdfTarget? = null,
 )
