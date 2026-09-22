@@ -26,3 +26,7 @@ __pycache__/
 docs/offline-konzept.md
 docs/icon/icon_webtreesand.*
 tools/
+
+# Bleibt lokal, nie auf GitHub: Regieanweisungen, Arbeitsstand, Hilfswerkzeuge, Testdaten, Schluessel
+CLAUDE.md
+STAND.md
