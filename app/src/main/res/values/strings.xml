@@ -217,6 +217,12 @@
     <string name="viewer_edit_exif">Edit details</string>
     <string name="pdf_pages">%1$d pages</string>
     <string name="photos_documents">Documents</string>
+    <string name="photos_dense">Dense grid</string>
+    <string name="timeline_age">age %1$d</string>
+    <string name="timeline_age_approx">about %1$d</string>
+    <string name="timeline_marriage_son">Marriage of son %1$s</string>
+    <string name="timeline_marriage_daughter">Marriage of daughter %1$s</string>
+    <string name="timeline_marriage_child">Marriage of child %1$s</string>
     <string name="pdf_error">The document could not be loaded.</string>
     <string name="msg_exif_saved">Details written into the file</string>
     <string name="err_not_manager">Only managers of the family tree may change the details.</string>

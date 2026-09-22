@@ -30,6 +30,11 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("showCousins", true)
         set(value) = prefs.edit().putBoolean("showCousins", value).apply()
 
+    /** Fotos: dichtes Raster ohne Unterschriften (drei und mehr Spalten) statt Kacheln mit Text */
+    var denseGrid: Boolean
+        get() = prefs.getBoolean("denseGrid", false)
+        set(value) = prefs.edit().putBoolean("denseGrid", value).apply()
+
     var tree: String
         get() = prefs.getString("tree", "").orEmpty()
         set(value) = prefs.edit().putString("tree", value).apply()

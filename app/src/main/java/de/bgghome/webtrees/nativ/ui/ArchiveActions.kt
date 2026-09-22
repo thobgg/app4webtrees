@@ -56,6 +56,11 @@ internal fun AppViewModel.probeArchive() {
 
 fun AppViewModel.setPhotosTab(tab: PhotosTab) = uiState.update { it.copy(photosTab = tab) }
 
+fun AppViewModel.setDenseGrid(dense: Boolean) {
+    settings.denseGrid = dense
+    uiState.update { it.copy(denseGrid = dense) }
+}
+
 /** Oeffnet eine Sammlung mit ihrer ersten Seite. typ: nur fuer nicht eingebundene Medien (kategorie "__unlinked__"). */
 fun AppViewModel.openCollection(slug: String, typ: String = "") {
     uiState.update { it.copy(collection = null, collectionEntries = emptyList(), collectionNextPage = null, photosTab = PhotosTab.Archive) }

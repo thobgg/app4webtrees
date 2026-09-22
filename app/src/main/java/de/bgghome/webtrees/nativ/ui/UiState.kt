@@ -117,6 +117,8 @@ data class UiState(
     val loadingMedia: Boolean = false,
     val mediaLoaded: Boolean = false,
     val photosTab: PhotosTab = PhotosTab.Tree,
+    /** Dichtes Raster ohne Unterschriften (Einstellung, bleibt erhalten) */
+    val denseGrid: Boolean = false,
 
     // ── Archiv (Modul "Sammlungen") ──────────────────────────────────
     val archiveStatus: ArchiveStatus = ArchiveStatus.Unknown,

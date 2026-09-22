@@ -187,12 +187,15 @@ fun CollectionView(state: UiState, viewModel: AppViewModel, openWeb: (String) ->
             return@Column
         }
 
+        val dense = state.denseGrid
+        val gap = if (dense) 2.dp else 8.dp
+
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(150.dp),
+            columns = GridCells.Adaptive(if (dense) 110.dp else 150.dp),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 88.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(start = gap, end = gap, top = 4.dp, bottom = 88.dp),
+            horizontalArrangement = Arrangement.spacedBy(gap),
+            verticalArrangement = Arrangement.spacedBy(gap),
         ) {
             items(entries, span = { if (it.istBild) GridItemSpan(1) else GridItemSpan(maxLineSpan) }) { entry ->
                 if (entry === entries.last()) LaunchedEffect(entries.size) { viewModel.loadMoreCollection() }
@@ -200,15 +203,15 @@ fun CollectionView(state: UiState, viewModel: AppViewModel, openWeb: (String) ->
                 if (entry.istBild) {
                     Column(Modifier.clickable { viewModel.openArchiveViewer(entry) }) {
                         Box {
-                            Thumbnail(entry.kachel, entry.bildunterschrift)
-                            LinkBadge(entry, Modifier.align(Alignment.BottomEnd).padding(6.dp))
+                            Thumbnail(entry.kachel, entry.bildunterschrift, rounded = !dense)
+                            LinkBadge(entry, Modifier.align(Alignment.BottomEnd).padding(if (dense) 3.dp else 6.dp))
                         }
-                        Text(
+                        if (!dense) Text(
                             entry.bildunterschrift.ifEmpty { entry.datei }, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 2.dp, top = 4.dp),
                         )
                         val people = entry.personen.joinToString(", ") { it.name }.ifEmpty { entry.datum }
-                        if (people.isNotEmpty()) {
+                        if (!dense && people.isNotEmpty()) {
                             Text(
                                 people, maxLines = 1, overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,

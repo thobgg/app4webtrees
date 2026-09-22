@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -50,17 +53,25 @@ fun PhotosSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
     Column(Modifier.fillMaxSize()) {
         TreeTitleBar(state, viewModel, openWeb)
 
-        if (state.archiveStatus == ArchiveStatus.Ready) {
-            SingleChoiceSegmentedButtonRow(Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                PhotosTab.entries.forEachIndexed { index, tab ->
-                    SegmentedButton(
-                        selected = state.photosTab == tab,
-                        onClick = { viewModel.setPhotosTab(tab) },
-                        shape = SegmentedButtonDefaults.itemShape(index, PhotosTab.entries.size),
-                    ) {
-                        Text(stringResource(if (tab == PhotosTab.Tree) R.string.photos_tab_tree else R.string.photos_tab_archive))
+        // Umschaltung Stammbaum/Archiv (nur mit Modul) und rechts der Schalter fuer das dichte Raster
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (state.archiveStatus == ArchiveStatus.Ready) {
+                SingleChoiceSegmentedButtonRow(Modifier.weight(1f).widthIn(max = 480.dp)) {
+                    PhotosTab.entries.forEachIndexed { index, tab ->
+                        SegmentedButton(
+                            selected = state.photosTab == tab,
+                            onClick = { viewModel.setPhotosTab(tab) },
+                            shape = SegmentedButtonDefaults.itemShape(index, PhotosTab.entries.size),
+                        ) {
+                            Text(stringResource(if (tab == PhotosTab.Tree) R.string.photos_tab_tree else R.string.photos_tab_archive))
+                        }
                     }
                 }
+            } else {
+                Spacer(Modifier.weight(1f))
+            }
+            IconToggleButton(checked = state.denseGrid, onCheckedChange = viewModel::setDenseGrid) {
+                Icon(GridIcon, contentDescription = stringResource(R.string.photos_dense), tint = if (state.denseGrid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -91,7 +102,7 @@ fun PhotosSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
                 MediaGrid(
                     state.media.filter { it.isImage },
                     onOpen = { item -> viewModel.openMediaViewer(ViewerSource.Tree, state.media, item) },
-                    showPeople = true, onEnd = viewModel::loadMoreMedia,
+                    showPeople = true, onEnd = viewModel::loadMoreMedia, dense = state.denseGrid,
                     documents = state.media.filter { !it.isImage },
                     onOpenDocument = { item -> if (item.mime == "application/pdf") viewModel.openPdf(item.file, item.title, item.url) else openWeb(item.url) },
                 )
@@ -114,6 +125,8 @@ fun MediaGrid(
     /** Was kein Bild ist, als Liste unter dem Raster - PDFs mit Vorschau der ersten Seite */
     documents: List<MediaJson> = emptyList(),
     onOpenDocument: (MediaJson) -> Unit = onOpen,
+    /** Dicht: drei und mehr Spalten, kaum Luft, keine Unterschriften - die Details zeigt der Betrachter */
+    dense: Boolean = false,
 ) {
     if (media.isEmpty() && documents.isEmpty()) {
         Text(stringResource(R.string.media_none), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -123,23 +136,25 @@ fun MediaGrid(
     // Nachladen, sobald das letzte Element der Seite sichtbar ist - egal ob Bild oder Dokument
     val last = documents.lastOrNull() ?: media.lastOrNull()
 
+    val gap = if (dense) 2.dp else 8.dp
+
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(150.dp),
+        columns = GridCells.Adaptive(if (dense) 110.dp else 150.dp),
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 88.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(start = gap, end = gap, top = gap, bottom = 88.dp),
+        horizontalArrangement = Arrangement.spacedBy(gap),
+        verticalArrangement = Arrangement.spacedBy(gap),
     ) {
         items(media) { item ->
             if (onEnd != null && item === last) LaunchedEffect(media.size + documents.size) { onEnd() }
 
             Column(Modifier.clickable { onOpen(item) }) {
-                Thumbnail(item.thumb, item.title)
-                Text(
+                Thumbnail(item.thumb, item.title, rounded = !dense)
+                if (!dense) Text(
                     item.title.ifEmpty { item.mime }, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 2.dp, top = 4.dp),
                 )
-                if (showPeople && item.people.isNotEmpty()) {
+                if (!dense && showPeople && item.people.isNotEmpty()) {
                     Text(
                         item.people.joinToString(", ") { it.name }, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -201,8 +216,8 @@ private fun DocumentRow(item: MediaJson, onClick: () -> Unit) {
 
 /** Quadratische Kachel mit abgerundeten Ecken; ohne Bild bleibt eine graue Flaeche. */
 @Composable
-fun Thumbnail(url: String?, description: String, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+fun Thumbnail(url: String?, description: String, modifier: Modifier = Modifier, rounded: Boolean = true) {
+    Box(modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(if (rounded) 8.dp else 0.dp)), contentAlignment = Alignment.Center) {
         Surface(color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxSize()) {}
         if (url != null) {
             AsyncImage(model = url, contentDescription = description, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())

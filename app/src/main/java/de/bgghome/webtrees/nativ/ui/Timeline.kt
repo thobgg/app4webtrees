@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.R
+import de.bgghome.webtrees.nativ.api.DateJson
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
@@ -40,6 +41,8 @@ private data class TimelineRow(
     val child: Person? = null,
     /** Familien-XREF, wenn das Ereignis an der Familie haengt (Heirat ...); null = an der Person */
     val record: String? = null,
+    /** Beim Tod: das erreichte Alter, unter der Jahreszahl */
+    val age: String? = null,
 )
 
 /**
@@ -72,14 +75,17 @@ private fun buildTimeline(detail: IndividualDetail, canEdit: Boolean): List<Time
     // Eigene Ereignisse in der Reihenfolge von webtrees; undatierte erben den Platz des Vorgaengers.
     var last = Int.MIN_VALUE + 1
 
+    val birth = detail.facts.firstOrNull { it.tag == "BIRT" }?.date
+
     // Geschlecht steckt in der Farbe des Portraets; unbekannte Hersteller-Tags (_INET ...) sagen dem Leser nichts.
     detail.facts.filter { it.tag != "SEX" && it.known }.forEach { fact ->
         val key = if (fact.tag == "NAME") Int.MIN_VALUE else fact.date?.jd?.takeIf { it > 0 } ?: last
         if (fact.tag != "NAME") last = key
 
         val label = fact.label + if (fact.type.isNotEmpty()) " · ${fact.type}" else ""
+        val age = if (fact.tag == "DEAT") ageAt(birth, fact.date) else null
         // Der Sperrvermerk (RESN) haengt an Rechten - vorerst nur in webtrees aendern.
-        add(TimelineRow(key, fact.date?.year?.takeIf { it != 0 }, label, fact, editable = canEdit && fact.tag != "RESN"))
+        add(TimelineRow(key, fact.date?.year?.takeIf { it != 0 }, label, fact, editable = canEdit && fact.tag != "RESN", age = age))
     }
 
     detail.spouseFamilies.forEach { family ->
@@ -107,8 +113,41 @@ private fun buildTimeline(detail: IndividualDetail, canEdit: Boolean): List<Time
             val fact = FactJson(id = "child-" + child.xref, date = date, place = child.birth.place)
             add(TimelineRow(date.jd, date.year.takeIf { it != 0 }, label, fact, editable = false, child = child))
         }
+        // Und ihre Heiraten (ab API-Stufe 10) - undatierte ans Ende, wie bei den Familienereignissen
+        family.children.forEach { child ->
+            child.marriages.forEach { marriage ->
+                val who = stringResource(
+                    when (child.sex) {
+                        "M" -> R.string.timeline_marriage_son
+                        "F" -> R.string.timeline_marriage_daughter
+                        else -> R.string.timeline_marriage_child
+                    },
+                    child.name,
+                )
+                val label = if (marriage.spouse.isNotEmpty()) stringResource(R.string.fact_with_spouse, who, marriage.spouse) else who
+                val fact = FactJson(id = "marriage-" + marriage.family, date = marriage.date, place = marriage.place)
+                add(TimelineRow(marriage.date?.jd?.takeIf { it > 0 } ?: Int.MAX_VALUE, marriage.date?.year?.takeIf { it != 0 }, label, fact, editable = false, child = child))
+            }
+        }
     }
 }.sortedBy { it.sortKey }
+
+/**
+ * Das Alter beim Tod in ganzen Jahren, aus den Julianischen Tagen. Fehlt bei einem der Daten der Tag, ist es eine
+ * Schaetzung ("etwa"); ohne beide Daten null.
+ */
+@Composable
+private fun ageAt(birth: DateJson?, death: DateJson?): String? {
+    if (birth == null || death == null || birth.jd <= 0 || death.jd <= 0 || death.jd < birth.jd) return null
+    val years = ((death.jd - birth.jd) / 365.2425).toInt()
+    val exact = isDayPrecise(birth) && isDayPrecise(death)
+    return stringResource(if (exact) R.string.timeline_age else R.string.timeline_age_approx, years)
+}
+
+/** "14 MAR 1985" ist tagesgenau, "1985" oder "ABT 1985" nicht; ohne GEDCOM-Form (aeltere Module) gilt: nicht genau. */
+private val DAY_PRECISE = Regex("^\\d{1,2} [A-Z]{3} \\d{1,4}$")
+
+private fun isDayPrecise(date: DateJson): Boolean = DAY_PRECISE.matches(date.gedcom.trim())
 
 @Composable
 private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, onDelete: (FactJson, String?) -> Unit, onPerson: (String) -> Unit) {
@@ -121,11 +160,14 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
             .padding(start = 16.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Grosse Jahreszahl links
-        Text(
-            row.year?.toString().orEmpty(), modifier = Modifier.width(64.dp),
-            style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Light, color = MaterialTheme.colorScheme.primary,
-        )
+        // Grosse Jahreszahl links, beim Tod das Alter darunter
+        Column(Modifier.width(64.dp)) {
+            Text(
+                row.year?.toString().orEmpty(),
+                style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Light, color = MaterialTheme.colorScheme.primary,
+            )
+            row.age?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        }
         Column(Modifier.weight(1f)) {
             Text(row.label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             if (fact.value.isNotEmpty()) Text(fact.value, style = MaterialTheme.typography.bodyMedium)

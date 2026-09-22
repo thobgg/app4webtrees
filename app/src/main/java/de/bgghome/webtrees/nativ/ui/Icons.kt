@@ -45,3 +45,17 @@ val PhotoIcon: ImageVector by lazy {
         }
         .build()
 }
+
+/** Dichtes Raster: neun kleine Quadrate. */
+val GridIcon: ImageVector by lazy {
+    ImageVector.Builder(name = "Grid", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
+        .apply {
+            path(fill = SolidColor(Color.Black)) {
+                for (row in 0..2) for (col in 0..2) {
+                    val x = 3f + col * 7f; val y = 3f + row * 7f
+                    moveTo(x, y); lineTo(x + 5f, y); lineTo(x + 5f, y + 5f); lineTo(x, y + 5f); close()
+                }
+            }
+        }
+        .build()
+}

@@ -212,6 +212,12 @@
     <string name="viewer_edit_exif">Beschriftung bearbeiten</string>
     <string name="pdf_pages">%1$d Seiten</string>
     <string name="photos_documents">Dokumente</string>
+    <string name="photos_dense">Dichtes Raster</string>
+    <string name="timeline_age">Alter %1$d</string>
+    <string name="timeline_age_approx">etwa %1$d</string>
+    <string name="timeline_marriage_son">Heirat des Sohnes %1$s</string>
+    <string name="timeline_marriage_daughter">Heirat der Tochter %1$s</string>
+    <string name="timeline_marriage_child">Heirat des Kindes %1$s</string>
     <string name="pdf_error">Das Dokument ließ sich nicht laden.</string>
     <string name="msg_exif_saved">Beschriftung in die Datei geschrieben</string>
     <string name="err_not_manager">Nur Verwalter des Stammbaums dürfen die Beschriftung ändern.</string>

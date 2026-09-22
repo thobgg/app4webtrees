@@ -76,7 +76,13 @@ data class Person(
     val death: EventJson? = null,
     val thumb: String? = null,
     val url: String = "",
+    /** Nur bei Kindern in den Partnerfamilien (ab API-Stufe 10): ihre Heiraten, fuer die Lebenslinie der Eltern. */
+    val marriages: List<MarriageJson> = emptyList(),
 )
+
+/** Eine Heirat eines Kindes: Partner (leer, wenn privat), Datum und Ort (beides kann fehlen). */
+@Serializable
+data class MarriageJson(val family: String = "", val spouse: String = "", val date: DateJson? = null, val place: PlaceJson? = null)
 
 @Serializable
 data class SourceRef(val xref: String = "", val title: String = "")
