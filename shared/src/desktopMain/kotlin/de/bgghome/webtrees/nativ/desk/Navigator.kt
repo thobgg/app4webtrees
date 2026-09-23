@@ -67,10 +67,13 @@ import org.jetbrains.compose.resources.stringResource
  * Klick auf jede andere Person macht sie zur Zentralperson; Doppelklick oeffnet, rechte Taste zeigt das Menue.
  */
 
-private val BOX_W = 290.dp
+private val BOX_W = 330.dp
 private val BOX_H = 58.dp
 private val GAP = 10.dp
-private val COL_GAP = 44.dp
+/** Spaltenabstand kleiner als die Kastenbreite: die Spalten ueberlappen wie beim Vorbild, die Linie zu den Eltern
+ *  laeuft hinter dem Kasten des Kindes bei zwei Dritteln seiner Breite. */
+private val COL = 245.dp
+private val LINE_X = 222.dp
 private val INFO_H = 236.dp
 private val ICON_ROW = 32.dp
 
@@ -143,7 +146,8 @@ fun Navigator(
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val rand = 24.dp
         // Massgeblich sind Vorfahren und Infokasten; eine lange Kinderspalte rollt, statt alles zu verkleinern. Nie unter 70 Prozent.
-        val fit = minOf((maxWidth - rand) / masse.breite, (maxHeight - rand) / masse.hoeheFit, 1.15f).coerceIn(0.7f, 1.15f)
+        // Bei wenigen Generationen darf die Tafel wachsen (bis 150 Prozent), bei vielen nie unter 70 Prozent schrumpfen.
+        val fit = minOf((maxWidth - rand) / masse.breite, (maxHeight - rand) / masse.hoeheFit).coerceIn(0.7f, 1.5f)
         val skala = fit * zoom
         CompositionLocalProvider(LocalFarben provides farben, LocalDensity provides Density(basis.density * skala, basis.fontScale)) {
             Box(Modifier.fillMaxSize()) {
@@ -163,7 +167,9 @@ private class ChartMasse(val slots: Int, val slotH: Dp, val ancH: Dp, val kinder
 
 private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, hatFamilien: Boolean): ChartMasse {
     val slots = 1 shl (g - 1)
-    val slotH = BOX_H + GAP
+    // Zeilenabstand gut zwei Kastenhoehen: nur so passt der Elternkasten senkrecht zwischen die beiden Grosseltern,
+    // wenn sich die Spalten waagerecht ueberlappen (Vorbild). Die Kinderspalte bleibt dicht (BOX_H + GAP).
+    val slotH = BOX_H * 2 + 8.dp
     val ancH = slotH * slots
     val kinder = familie?.children?.size ?: 0
     val partner = if (hatFamilien) 1 else 0
@@ -171,12 +177,13 @@ private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson
     // Die Zentralperson sitzt in der Mitte der Vorfahren; nur wenn ihr Kasten in den Infokasten ragt, rutscht alles nach unten.
     val centerY = maxOf(ancH / 2, INFO_H + ICON_ROW + BOX_H / 2)
     // Die Kinderspalte beginnt unter dem Infokasten und ist sonst um die Zentralperson zentriert.
-    val kinderH = slotH * kinder
+    val kinderH = (BOX_H + GAP) * kinder
     val kinderTop = maxOf(centerY - kinderH / 2, INFO_H + ICON_ROW)
     val partnerH = (BOX_H + GAP) * partner
     val hoeheFit = maxOf(centerY + ancH / 2, centerY + BOX_H / 2 + partnerH + 30.dp) + 24.dp
-    val hoehe = maxOf(hoeheFit, kinderTop + kinderH + 24.dp)
-    val breite = xZentral + BOX_W + (BOX_W + COL_GAP) * (g - 1) + 24.dp
+    // Die Kinderspalte rollt in ihrem eigenen Bereich; die Tafel wird durch sie nicht hoeher.
+    val hoehe = hoeheFit
+    val breite = xZentral + COL * (g - 1) + BOX_W + 24.dp
     return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe, hoeheFit)
 }
 
@@ -194,29 +201,26 @@ private fun Chart(
     val line = MaterialTheme.colorScheme.outline
 
     fun top(n: Int): Dp { val gg = gen(n); val span = slots shr gg; val i = n - (1 shl gg); return centerY - ancH / 2 + slotH * (i * span) + (slotH * span - BOX_H) / 2 }
-    fun left(n: Int): Dp = xZentral + (BOX_W + COL_GAP) * gen(n)
+    fun left(n: Int): Dp = xZentral + COL * gen(n)
     val kinderTop = m.kinderTop
+    val kinderBereich = hoehe - kinderTop - 12.dp
 
     Box(Modifier.size(breite, hoehe)) {
         Canvas(Modifier.fillMaxSize()) {
             val w = 1.2.dp.toPx()
-            // Vorfahren: vom Kind nach rechts, senkrecht, zu beiden Eltern (auch zu leeren Kaesten)
+            // Vorfahren: senkrechte Linie hinter dem Kasten des Kindes (bei zwei Dritteln), von Vater zu Mutter,
+            // von dort waagerecht zu den Elternkaesten - auch zu leeren
             for (n in 1 until (1 shl (g - 1))) {
                 if (n !in ahnen) continue
-                val x0 = (left(n) + BOX_W).toPx(); val y0 = (top(n) + BOX_H / 2).toPx(); val xm = x0 + (COL_GAP / 2).toPx()
-                drawLine(line, Offset(x0, y0), Offset(xm, y0), w)
-                listOf(2 * n, 2 * n + 1).forEach { p ->
-                    val y1 = (top(p) + BOX_H / 2).toPx()
-                    drawLine(line, Offset(xm, y0), Offset(xm, y1), w); drawLine(line, Offset(xm, y1), Offset(left(p).toPx(), y1), w)
-                }
+                val xm = (left(n) + LINE_X).toPx()
+                val yV = (top(2 * n) + BOX_H / 2).toPx(); val yM = (top(2 * n + 1) + BOX_H / 2).toPx()
+                drawLine(line, Offset(xm, yV), Offset(xm, yM), w)
+                drawLine(line, Offset(xm, yV), Offset(left(2 * n).toPx(), yV), w); drawLine(line, Offset(xm, yM), Offset(left(2 * n + 1).toPx(), yM), w)
             }
-            // Kinder: Klammer links der Zentralperson
+            // Kinder: von der Klammer waagerecht zur Zentralperson (die Klammer selbst liegt im rollbaren Kinderbereich)
             if (kinder.isNotEmpty()) {
-                val xb = (xZentral - 26.dp).toPx(); val yc = (centerY).toPx()
+                val xb = (BOX_W + 16.dp).toPx(); val yc = centerY.toPx()
                 drawLine(line, Offset(xb, yc), Offset(xZentral.toPx(), yc), w)
-                val y0 = (kinderTop + BOX_H / 2).toPx(); val y1 = (kinderTop + slotH * (kinder.size - 1) + BOX_H / 2).toPx()
-                drawLine(line, Offset(xb, minOf(y0, yc)), Offset(xb, maxOf(y1, yc)), w)
-                kinder.indices.forEach { i -> val y = (kinderTop + slotH * i + BOX_H / 2).toPx(); drawLine(line, Offset(BOX_W.toPx(), y), Offset(xb, y), w) }
             }
             // Partner: senkrecht unter der Zentralperson
             if (familie != null) {
@@ -228,9 +232,28 @@ private fun Chart(
         // Infokasten oben links
         if (detail != null) InfoBox(detail, fIndex, Modifier.offset(0.dp, 0.dp).size(BOX_W * 2 + 56.dp, INFO_H - 12.dp), onOpen = { onOpenSheet(zentral.xref) })
 
-        // Kinder
-        kinder.forEachIndexed { i, k ->
-            PersonBox(k, Art.Kind, viewModel, onOpenSheet, openWeb, Modifier.offset(0.dp, kinderTop + slotH * i), pfeilLinks = k.xref in mitNachkommen)
+        // Kinder in eigenem Rollbereich: viele Kinder rollen, statt die Tafel zu verkleinern (wie beim Vorbild)
+        if (kinder.isNotEmpty()) {
+            val roll = rememberScrollState()
+            val kslot = BOX_H + GAP
+            val innen = kslot * kinder.size
+            Box(Modifier.offset(0.dp, kinderTop).size(BOX_W + 32.dp, minOf(innen, kinderBereich))) {
+                Box(Modifier.fillMaxSize().verticalScroll(roll)) {
+                    Box(Modifier.size(BOX_W + 32.dp, innen)) {
+                        Canvas(Modifier.fillMaxSize()) {
+                            val w = 1.2.dp.toPx(); val xb = (BOX_W + 16.dp).toPx()
+                            val y0 = (BOX_H / 2).toPx(); val y1 = (kslot * (kinder.size - 1) + BOX_H / 2).toPx()
+                            val yc = (centerY - kinderTop).toPx().coerceIn(y0, y1)
+                            drawLine(line, Offset(xb, minOf(y0, yc)), Offset(xb, maxOf(y1, yc)), w)
+                            kinder.indices.forEach { i -> val y = (kslot * i + BOX_H / 2).toPx(); drawLine(line, Offset(BOX_W.toPx(), y), Offset(xb, y), w) }
+                        }
+                        kinder.forEachIndexed { i, k ->
+                            PersonBox(k, Art.Kind, viewModel, onOpenSheet, openWeb, Modifier.offset(0.dp, kslot * i), pfeilLinks = k.xref in mitNachkommen)
+                        }
+                    }
+                }
+                if (innen > kinderBereich) SenkrechteLeiste(roll)
+            }
         }
         // Zentralperson mit Stift und Verwandte-hinzufuegen
         if (canEdit) {
