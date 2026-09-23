@@ -10,7 +10,7 @@ plugins {
 
 // Release-Signierung: liest Keystore-Angaben aus keystore.properties (nicht
 // einchecken). Fehlt die Datei, wird mit dem Debug-Key signiert statt den Build
-// zu brechen — gleiches Muster wie MyPhotoDiary/wtAnd.
+// zu brechen — gleiches Muster wie mpd-app.
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) FileInputStream(keystorePropsFile).use { load(it) }
@@ -24,8 +24,9 @@ android {
         applicationId = "de.bgghome.webtrees.nativ"
         minSdk = 26
         targetSdk = 36
-        versionCode = 18
-        versionName = "1.16"
+        // Zentral in gradle.properties, weil der Desktop-Client dieselbe Nummer traegt.
+        versionCode = (property("wtand.versionCode") as String).toInt()
+        versionName = property("wtand.versionName") as String
     }
 
     signingConfigs {
@@ -62,31 +63,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions { jvmTarget = "11" }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
+    buildFeatures { compose = true }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.activity.compose)
-
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-
-    implementation(libs.coil.compose)
-    implementation(libs.androidx.exifinterface)
-    implementation(libs.androidx.work)
-    implementation(libs.osmdroid)
-    implementation(libs.okhttp)
-    implementation(libs.kotlinx.serialization.json)
-
-    testImplementation(libs.junit)
+    // Der gesamte Code liegt im geteilten Modul; die App-Huelle hat nur
+    // MainActivity, Manifest, Launcher-Symbol und Signatur. Alle
+    // Bibliotheken kommen als api-Abhaengigkeiten aus :shared.
+    implementation(project(":shared"))
 }

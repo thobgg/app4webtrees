@@ -30,3 +30,4 @@ tools/
 # Bleibt lokal, nie auf GitHub: Regieanweisungen, Arbeitsstand, Hilfswerkzeuge, Testdaten, Schluessel
 CLAUDE.md
 STAND.md
+STARTPROMPT.md
