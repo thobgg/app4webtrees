@@ -1,5 +1,14 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -76,7 +85,8 @@ fun PersonSheet(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Un
     fun step(delta: Int) {
         if (index >= 0) people.getOrNull(index + delta)?.let { viewModel.select(it.xref) }
     }
-    val title = detail?.person?.name.orEmpty() + if (index >= 0) "  (${index + 1} / ${people.size})" else ""
+    val gesamt = state.tree?.individuals ?: people.size
+    val title = (detail?.person?.let { registerName(it, "", "") }.orEmpty()) + if (index >= 0 && state.query.isEmpty()) "  [${index + 1} von $gesamt]" else ""
 
     DialogWindow(
         onCloseRequest = onClose,
@@ -87,6 +97,8 @@ fun PersonSheet(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Un
                 Key.Escape -> { onClose(); true }
                 Key.PageUp -> { step(-1); true }
                 Key.PageDown -> { step(1); true }
+                Key.MoveHome -> { if (e.isCtrlPressed) { step(-index); true } else false }
+                Key.MoveEnd -> { if (e.isCtrlPressed) { step(people.lastIndex - index); true } else false }
                 else -> false
             }
         },
@@ -103,7 +115,7 @@ fun PersonSheet(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Un
                     RelativesColumn(detail, viewModel, Modifier.width(260.dp).fillMaxHeight())
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                SheetFooter(state, detail, viewModel, canPrev = index > 0, canNext = index >= 0 && index < people.lastIndex, onStep = ::step, onClose = onClose)
+                SheetFooter(state, detail, viewModel, canPrev = index > 0, canNext = index >= 0 && index < people.lastIndex, onStep = ::step, onFirst = { step(-index) }, onLast = { step(people.lastIndex - index) }, onClose = onClose)
             }
         }
     }
@@ -116,10 +128,10 @@ private fun SheetHeader(detail: IndividualDetail) {
     val endYear = if (person.isDead) person.death?.date?.year?.takeIf { it > 0 } else LocalDate.now().year
     val age = if (birthYear != null && endYear != null && endYear >= birthYear) endYear - birthYear else null
     Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Avatar(person, 36.dp)
-        Spacer(Modifier.width(10.dp))
-        Text(person.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        age?.let { Text(stringResource(Res.string.desk_age, it), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Avatar(person, 56.dp)
+        Spacer(Modifier.width(12.dp))
+        Text(person.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        age?.let { Text(stringResource(Res.string.desk_age, it), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
 }
 
@@ -135,7 +147,15 @@ private fun SheetTabs(state: UiState, detail: IndividualDetail, viewModel: AppVi
 
     Column(modifier.background(MaterialTheme.colorScheme.surface)) {
         ScrollableTabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface, edgePadding = 0.dp) {
-            labels.forEachIndexed { i, l -> Tab(selected = tab == i, onClick = { tab = i }, text = { Text(stringResource(l), style = MaterialTheme.typography.labelLarge) }) }
+            val icons = listOf(Icons.AutoMirrored.Filled.List, Icons.Default.Person, Icons.Default.Favorite, Icons.Default.Create, Icons.Default.Info, PhotoIcon, Icons.Default.DateRange, Icons.Default.Place)
+            labels.forEachIndexed { i, l ->
+                Tab(selected = tab == i, onClick = { tab = i }, text = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(icons[i], contentDescription = null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                        Text(stringResource(l), style = MaterialTheme.typography.labelLarge)
+                    }
+                })
+            }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when (tab) {
@@ -373,7 +393,7 @@ private fun Group(title: String, people: List<Person>, viewModel: AppViewModel) 
 @Composable
 private fun SheetFooter(
     state: UiState, detail: IndividualDetail, viewModel: AppViewModel,
-    canPrev: Boolean, canNext: Boolean, onStep: (Int) -> Unit, onClose: () -> Unit,
+    canPrev: Boolean, canNext: Boolean, onStep: (Int) -> Unit, onFirst: () -> Unit, onLast: () -> Unit, onClose: () -> Unit,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -384,8 +404,10 @@ private fun SheetFooter(
         TextButton(onClick = { drucken(listenPdf(personenblattZeilen(detail), appName, baum), titel) }) { Text(stringResource(Res.string.desk_print)) }
         TextButton(onClick = { alsPdf(listenPdf(personenblattZeilen(detail), appName, baum), titel) }) { Text("PDF") }
         Spacer(Modifier.weight(1f))
+        IconButton(onClick = onFirst, enabled = canPrev) { Text("⏮", fontSize = 16.sp) }
         IconButton(onClick = { onStep(-1) }, enabled = canPrev) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
         IconButton(onClick = { onStep(1) }, enabled = canNext) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null) }
+        IconButton(onClick = onLast, enabled = canNext) { Text("⏭", fontSize = 16.sp) }
         Spacer(Modifier.weight(1f))
         OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { viewModel.setRoot(detail.person.xref); onClose() }) { Text(stringResource(Res.string.desk_as_centre)) }
         Spacer(Modifier.width(6.dp))

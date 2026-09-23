@@ -1,13 +1,12 @@
 package de.bgghome.webtrees.nativ.desk
 
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -25,24 +24,33 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.IndividualDetail
@@ -52,77 +60,19 @@ import de.bgghome.webtrees.nativ.ui.*
 import org.jetbrains.compose.resources.stringResource
 
 /*
- * Aufbau "Navigator": die Zentralperson links mit Bild und Eckdaten, darunter Partner und Kinder, rechts daneben
- * ihre Vorfahren als waagerechte Ahnentafel - Generation fuer Generation eine Spalte. Ein Klick macht eine Person
- * zur Zentralperson, ein Doppelklick oeffnet den Eingabedialog, die rechte Taste das Kontextmenue.
+ * Aufbau "Navigator" (Fassung 2, 23.09.2026, nach dem Vergleich mit dem Vorbild): links die Kinder als Spalte mit
+ * Klammer, in der Mitte die Zentralperson mit den Partnern darunter, rechts die Vorfahren ueber die volle Hoehe -
+ * Generation fuer Generation eine Spalte, unbekannte Eltern als leere Kaesten, Pfeile wo es weitergeht. Oben links
+ * der Infokasten mit grossem Portraet und allen Ehen. Klick auf die Zentralperson oeffnet den Eingabedialog,
+ * Klick auf jede andere Person macht sie zur Zentralperson; Doppelklick oeffnet, rechte Taste zeigt das Menue.
  */
 
-private val BOX_W = 190.dp
-private val BOX_H = 38.dp
-private val SLOT_GAP = 6.dp
-private val COL_GAP = 28.dp
-
-/** Farben der Kaesten nach Geschlecht - hell gefuellt, dunklerer Rand. */
-private data class BoxColors(val fill: Color, val border: Color)
-
-@Composable
-private fun boxColors(sex: String): BoxColors {
-    val dark = MaterialTheme.colorScheme.background.red < 0.5f
-    return when (sex) {
-        "M" -> if (dark) BoxColors(Color(0xFF1E3A4F), Color(0xFF5FA3C8)) else BoxColors(Color(0xFFD7E9F5), Color(0xFF7DAFD0))
-        "F" -> if (dark) BoxColors(Color(0xFF4A2A30), Color(0xFFD08A94)) else BoxColors(Color(0xFFF7DCDF), Color(0xFFD9989F))
-        else -> if (dark) BoxColors(Color(0xFF2E3434), Color(0xFF7D8887)) else BoxColors(Color(0xFFE8ECEC), Color(0xFFA3ACAB))
-    }
-}
-
-/** "Nachname, Vorname" wie in einem Register; webtrees liefert das als sortName. */
-internal fun registerName(person: Person, privateLabel: String, noName: String): String = when {
-    person.isPrivate -> privateLabel
-    person.sortName.isNotBlank() -> person.sortName.replace(Regex(",(?=\\S)"), ", ")
-    else -> person.name.ifBlank { noName }
-}
-
-@Composable
-fun Navigator(state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, farben: Map<String, Color> = emptyMap()) {
-    CompositionLocalProvider(LocalFarben provides farben) {
-    // Wie der Baum: nach jedem Wechsel der Zentralperson die Ahnen neu holen.
-    LaunchedEffect(state.root, state.pedigree == null) {
-        if (state.root != null && state.pedigree == null) viewModel.loadChart()
-    }
-    // Der Eingabedialog kann eine andere Person zeigen (Verwandte, Blaettern) - die Zentralperson bleibt hier stehen.
-    var rootDetail by remember { mutableStateOf<IndividualDetail?>(null) }
-    LaunchedEffect(state.detail) { state.detail?.takeIf { it.person.xref == state.root }?.let { rootDetail = it } }
-    val detail = rootDetail?.takeIf { it.person.xref == state.root }
-
-    Row(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // Links: Zentralperson, Partner, Kinder
-        val links = rememberScrollState()
-        Box(Modifier.width(300.dp).fillMaxHeight()) {
-            Column(
-                Modifier.fillMaxSize().verticalScroll(links).padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                if (detail != null) {
-                    CentreCard(detail, onOpen = { onOpenSheet(detail.person.xref) })
-                    FamilyList(detail, viewModel, onOpenSheet, openWeb)
-                }
-            }
-            SenkrechteLeiste(links)
-        }
-        // Rechts: die Ahnentafel
-        val quer = rememberScrollState()
-        val hoch = rememberScrollState()
-        Box(Modifier.weight(1f).fillMaxHeight()) {
-            Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
-                val pedigree = state.pedigree
-                if (pedigree != null) AncestorChart(pedigree.ancestors.associateBy { it.n }.mapValues { it.value.person }, state.ancestorGenerations, state.root, viewModel, onOpenSheet, openWeb)
-            }
-            SenkrechteLeiste(hoch)
-            WaagerechteLeiste(quer)
-        }
-    }
-    }
-}
+private val BOX_W = 290.dp
+private val BOX_H = 58.dp
+private val GAP = 10.dp
+private val COL_GAP = 44.dp
+private val INFO_H = 236.dp
+private val ICON_ROW = 32.dp
 
 /** Farbkodierung nach Mary Hill: xref -> Farbe des Streifens am rechten Kastenrand (leer = aus). */
 val LocalFarben = staticCompositionLocalOf { emptyMap<String, Color>() }
@@ -132,7 +82,6 @@ object MaryHill {
     val start = Color(0xFF1F3A6B); val vaterVater = Color(0xFF3B6FB6); val vaterMutter = Color(0xFF3E9B4F)
     val mutterVater = Color(0xFFC8453B); val mutterMutter = Color(0xFFE0B82E); val nachkommen = Color(0xFFE48FB0)
 
-    /** Farbe einer Ahnennummer (Kekule) der Startperson. */
     fun fuer(n: Int): Color {
         if (n == 1) return start
         val g = 31 - Integer.numberOfLeadingZeros(n)
@@ -141,131 +90,227 @@ object MaryHill {
     }
 }
 
-/** Der Kasten der Zentralperson: Bild, Name, Beruf, Geburt, Heirat, Tod - wie eine Karteikarte. */
+private data class BoxColors(val fill: Color, val border: Color)
+
 @Composable
-private fun CentreCard(detail: IndividualDetail, onOpen: () -> Unit) {
-    val person = detail.person
-    val colors = MaterialTheme.colorScheme
-    val occupation = detail.facts.firstOrNull { it.tag == "OCCU" }?.value
-    fun line(prefix: String, fact: FactJson?) = fact?.let { f ->
-        listOfNotNull(f.date?.text?.takeIf { it.isNotBlank() }, f.place?.name?.takeIf { it.isNotBlank() }).joinToString(" ").takeIf { it.isNotBlank() }?.let { "$prefix $it" }
-    }
-    val birth = line("*", detail.facts.firstOrNull { it.tag == "BIRT" } ?: detail.facts.firstOrNull { it.tag == "CHR" })
-    val death = line("†", detail.facts.firstOrNull { it.tag == "DEAT" } ?: detail.facts.firstOrNull { it.tag == "BURI" })
-    val marriage = detail.spouseFamilies.firstOrNull()?.marriage?.let { m ->
-        listOfNotNull(m.date?.text?.takeIf { it.isNotBlank() }, m.place?.name?.takeIf { it.isNotBlank() }).joinToString(" ").takeIf { it.isNotBlank() }?.let { "⚭ $it" }
-    }
-    Row(
-        Modifier.fillMaxWidth().background(colors.surface).border(1.dp, colors.outline).combinedClickable(onClick = {}, onDoubleClick = onOpen).padding(8.dp),
-    ) {
-        Box(Modifier.size(84.dp, 104.dp).background(colors.surfaceVariant).border(1.dp, colors.outlineVariant)) {
-            val url = person.thumb
-            if (url != null) AsyncImage(url, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            else Avatar(person, 60.dp, Modifier.align(Alignment.Center))
-        }
-        Column(Modifier.padding(start = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(person.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-            occupation?.takeIf { it.isNotBlank() }?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-            listOfNotNull(birth, marriage, death).forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
-        }
+private fun boxColors(sex: String): BoxColors {
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    return when (sex) {
+        "M" -> if (dark) BoxColors(Color(0xFF244B6B), Color(0xFF7FB2DA)) else BoxColors(Color(0xFFB9D0E8), Color(0xFF4F7FAE))
+        "F" -> if (dark) BoxColors(Color(0xFF5E2F36), Color(0xFFE09AA2)) else BoxColors(Color(0xFFF3C4BE), Color(0xFFC2706A))
+        else -> if (dark) BoxColors(Color(0xFF3A4242), Color(0xFF8E9998)) else BoxColors(Color(0xFFDDE2E2), Color(0xFF8A9493))
     }
 }
 
-/** Partner und Kinder der Zentralperson, darueber die Eltern-Familie ist in der Ahnentafel rechts zu sehen. */
-@Composable
-private fun FamilyList(detail: IndividualDetail, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit) {
-    if (detail.spouseFamilies.isEmpty()) return
-    Text(stringResource(Res.string.desk_partners), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    detail.spouseFamilies.forEach { family ->
-        family.spouse?.let { PersonBox(it, false, viewModel, onOpenSheet, openWeb, Modifier.fillMaxWidth()) }
-        family.children.forEach { child ->
-            Row {
-                Spacer(Modifier.width(18.dp))
-                PersonBox(child, false, viewModel, onOpenSheet, openWeb, Modifier.weight(1f))
-            }
-        }
-    }
+/** "Nachname, Vorname" wie in einem Register - mit Namenszusatz ("de' Medici, Cosimo I"), wenn der Server ihn liefert. */
+internal fun registerName(person: Person, privateLabel: String, noName: String): String = when {
+    person.isPrivate -> privateLabel
+    person.surname.isNotBlank() || person.given.isNotBlank() -> listOf(person.surname, person.given).filter(String::isNotBlank).joinToString(", ")
+    person.sortName.isNotBlank() -> person.sortName.replace(Regex(",(?=\\S)"), ", ")
+    else -> person.name.ifBlank { noName }
 }
 
-/** Die Vorfahren in Spalten: Generation g hat 2^g Plaetze, jeder mittig ueber seinen zwei Eltern-Plaetzen. */
+private fun gen(n: Int) = 31 - Integer.numberOfLeadingZeros(n)
+
 @Composable
-private fun AncestorChart(
-    byNumber: Map<Int, Person>, generations: Int, root: String?,
-    viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit,
+fun Navigator(
+    state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit,
+    farben: Map<String, Color> = emptyMap(), zoom: Float = 1f,
 ) {
-    val slots = 1 shl (generations - 1)
-    val slotH = BOX_H + SLOT_GAP
-    val height = slotH * slots
-    val width = BOX_W * generations + COL_GAP * (generations - 1)
+    LaunchedEffect(state.root, state.pedigree == null || state.descendants == null) {
+        if (state.root != null && (state.pedigree == null || state.descendants == null)) viewModel.loadChart()
+    }
+    // Der Eingabedialog kann eine andere Person zeigen - die Zentralperson bleibt hier stehen.
+    var rootDetail by remember { mutableStateOf<IndividualDetail?>(null) }
+    LaunchedEffect(state.detail) { state.detail?.takeIf { it.person.xref == state.root }?.let { rootDetail = it } }
+    val detail = rootDetail?.takeIf { it.person.xref == state.root }
+    val ahnen = state.pedigree?.ancestors?.associateBy { it.n }.orEmpty()
+    val zentral = ahnen[1]?.person ?: detail?.person ?: return
+    val canEdit = state.tree?.canEdit == true
+    // Kinder, die selbst Kinder haben (aus dem Nachkommenbaum) - bekommen einen Pfeil nach links.
+    val mitNachkommen = state.descendants?.tree?.families?.flatMap { it.children }?.filter { k -> k.families.any { it.children.isNotEmpty() } }?.map { it.person.xref }?.toSet().orEmpty()
+
+    val quer = rememberScrollState(); val hoch = rememberScrollState()
+    val basis = LocalDensity.current
+    CompositionLocalProvider(LocalFarben provides farben, LocalDensity provides Density(basis.density * zoom, basis.fontScale)) {
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
+                Chart(detail, zentral, ahnen, state.ancestorGenerations.coerceIn(2, 7), canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb)
+            }
+            SenkrechteLeiste(hoch)
+            WaagerechteLeiste(quer)
+        }
+    }
+}
+
+@Composable
+private fun Chart(
+    detail: IndividualDetail?, zentral: Person, ahnen: Map<Int, de.bgghome.webtrees.nativ.api.Ancestor>, g: Int, canEdit: Boolean,
+    mitNachkommen: Set<String>, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit,
+) {
+    val slots = 1 shl (g - 1)
+    val slotH = BOX_H + GAP
+    val ancH = slotH * slots
+    val familien = detail?.spouseFamilies.orEmpty()
+    val kinder = familien.flatMap { it.children }.distinctBy { it.xref }
+    val partner = familien.mapNotNull { it.spouse }
+    val kinderH = slotH * kinder.size
+    val xZentral = BOX_W + 56.dp
+    val centerY = maxOf(ancH / 2, INFO_H + ICON_ROW + kinderH / 2, INFO_H + ICON_ROW + BOX_H / 2)
+    val partnerH = (BOX_H + GAP) * partner.size
+    val hoehe = maxOf(centerY + ancH / 2, centerY + kinderH / 2, centerY + BOX_H / 2 + partnerH) + 24.dp
+    val breite = xZentral + BOX_W + (BOX_W + COL_GAP) * (g - 1) + 24.dp
     val line = MaterialTheme.colorScheme.outline
 
-    fun top(n: Int): Dp {
-        val g = 31 - Integer.numberOfLeadingZeros(n)
-        val span = slots shr g
-        val index = n - (1 shl g)
-        return slotH * (index * span) + (slotH * span - BOX_H) / 2
-    }
-    fun left(n: Int): Dp = (BOX_W + COL_GAP) * (31 - Integer.numberOfLeadingZeros(n))
+    fun top(n: Int): Dp { val gg = gen(n); val span = slots shr gg; val i = n - (1 shl gg); return centerY - ancH / 2 + slotH * (i * span) + (slotH * span - BOX_H) / 2 }
+    fun left(n: Int): Dp = xZentral + (BOX_W + COL_GAP) * gen(n)
+    val kinderTop = centerY - kinderH / 2
 
-    Box(Modifier.size(width, height)) {
-        // Verbindungslinien: vom Kind rechts heraus, senkrecht zu beiden Eltern
+    Box(Modifier.size(breite, hoehe)) {
         Canvas(Modifier.fillMaxSize()) {
-            byNumber.keys.filter { it * 2 in byNumber || it * 2 + 1 in byNumber }.forEach { n ->
-                if (31 - Integer.numberOfLeadingZeros(n) >= generations - 1) return@forEach
-                val x0 = (left(n) + BOX_W).toPx(); val y0 = (top(n) + BOX_H / 2).toPx()
-                val xm = x0 + (COL_GAP / 2).toPx(); val x1 = left(n * 2).toPx()
-                drawLine(line, Offset(x0, y0), Offset(xm, y0), 1.dp.toPx())
-                listOf(n * 2, n * 2 + 1).filter { it in byNumber }.forEach { p ->
+            val w = 1.2.dp.toPx()
+            // Vorfahren: vom Kind nach rechts, senkrecht, zu beiden Eltern (auch zu leeren Kaesten)
+            for (n in 1 until (1 shl (g - 1))) {
+                if (n !in ahnen) continue
+                val x0 = (left(n) + BOX_W).toPx(); val y0 = (top(n) + BOX_H / 2).toPx(); val xm = x0 + (COL_GAP / 2).toPx()
+                drawLine(line, Offset(x0, y0), Offset(xm, y0), w)
+                listOf(2 * n, 2 * n + 1).forEach { p ->
                     val y1 = (top(p) + BOX_H / 2).toPx()
-                    drawLine(line, Offset(xm, y0), Offset(xm, y1), 1.dp.toPx())
-                    drawLine(line, Offset(xm, y1), Offset(x1, y1), 1.dp.toPx())
+                    drawLine(line, Offset(xm, y0), Offset(xm, y1), w); drawLine(line, Offset(xm, y1), Offset(left(p).toPx(), y1), w)
                 }
             }
+            // Kinder: Klammer links der Zentralperson
+            if (kinder.isNotEmpty()) {
+                val xb = (xZentral - 26.dp).toPx(); val yc = (centerY).toPx()
+                drawLine(line, Offset(xb, yc), Offset(xZentral.toPx(), yc), w)
+                val y0 = (kinderTop + BOX_H / 2).toPx(); val y1 = (kinderTop + slotH * (kinder.size - 1) + BOX_H / 2).toPx()
+                drawLine(line, Offset(xb, minOf(y0, yc)), Offset(xb, maxOf(y1, yc)), w)
+                kinder.indices.forEach { i -> val y = (kinderTop + slotH * i + BOX_H / 2).toPx(); drawLine(line, Offset(BOX_W.toPx(), y), Offset(xb, y), w) }
+            }
+            // Partner: senkrecht unter der Zentralperson
+            if (partner.isNotEmpty()) {
+                val x = (xZentral + 40.dp).toPx()
+                drawLine(line, Offset(x, (centerY + BOX_H / 2).toPx()), Offset(x, (centerY + BOX_H / 2 + (BOX_H + GAP) * (partner.size - 1) + GAP).toPx()), w * 2)
+            }
         }
-        byNumber.forEach { (n, person) ->
-            if (31 - Integer.numberOfLeadingZeros(n) < generations) {
-                PersonBox(person, person.xref == root, viewModel, onOpenSheet, openWeb, Modifier.offset(left(n), top(n)).width(BOX_W))
+
+        // Infokasten oben links
+        if (detail != null) InfoBox(detail, Modifier.offset(0.dp, 0.dp).size(BOX_W * 2 + 56.dp, INFO_H - 12.dp), onOpen = { onOpenSheet(zentral.xref) })
+
+        // Kinder
+        kinder.forEachIndexed { i, k ->
+            PersonBox(k, Art.Kind, viewModel, onOpenSheet, openWeb, Modifier.offset(0.dp, kinderTop + slotH * i), pfeilLinks = k.xref in mitNachkommen)
+        }
+        // Zentralperson mit Stift und Verwandte-hinzufuegen
+        if (canEdit) {
+            Row(Modifier.offset(xZentral, centerY - BOX_H / 2 - ICON_ROW + 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                KleinKnopf(Icons.Default.Edit, stringResource(Res.string.desk_sheet)) { onOpenSheet(zentral.xref) }
+                KleinKnopf(Icons.Default.Add, stringResource(Res.string.action_add_relative)) { viewModel.requestAddRelative(zentral.xref) }
+            }
+        }
+        PersonBox(zentral, Art.Zentral, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral, centerY - BOX_H / 2))
+        partner.forEachIndexed { i, p ->
+            PersonBox(p, Art.Partner, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral + 40.dp, centerY + BOX_H / 2 + GAP + (BOX_H + GAP) * i))
+        }
+        // Vorfahren, leere Kaesten fuer unbekannte Eltern bekannter Personen
+        for (n in 2 until (1 shl g)) {
+            val a = ahnen[n]
+            if (a != null) {
+                PersonBox(a.person, Art.Ahn, viewModel, onOpenSheet, openWeb, Modifier.offset(left(n), top(n)), pfeilRechts = gen(n) == g - 1 && a.hasParents)
+            } else if ((n / 2) in ahnen) {
+                val kind = ahnen.getValue(n / 2).person
+                LeerBox(if (n % 2 == 0) "M" else "F", Modifier.offset(left(n), top(n)), onClick = if (canEdit && !kind.isPrivate) ({ viewModel.requestAddRelative(kind.xref) }) else null)
             }
         }
     }
 }
 
-/** Ein Personenkaesten: "Nachname, Vorname" und Jahre, gefuellt nach Geschlecht; die Zentralperson dick umrandet. */
+/** Infokasten: grosses Portraet, Name in Registerform, Geburt, Ehen mit roemischer Nummer, Tod, Beruf. */
+@Composable
+private fun InfoBox(detail: IndividualDetail, modifier: Modifier, onOpen: () -> Unit) {
+    val p = detail.person
+    val colors = MaterialTheme.colorScheme
+    fun ort(f: FactJson?) = f?.let { listOfNotNull(it.date?.text?.takeIf(String::isNotBlank), it.place?.short?.takeIf(String::isNotBlank)).joinToString(" ") }.orEmpty()
+    val geburt = ort(detail.facts.firstOrNull { it.tag == "BIRT" } ?: detail.facts.firstOrNull { it.tag == "CHR" })
+    val tod = ort(detail.facts.firstOrNull { it.tag == "DEAT" } ?: detail.facts.firstOrNull { it.tag == "BURI" })
+    val beruf = listOfNotNull(detail.facts.firstOrNull { it.tag == "TITL" }?.value, detail.facts.firstOrNull { it.tag == "OCCU" }?.value).filter(String::isNotBlank).joinToString(" · ")
+    val roemisch = listOf("I", "II", "III", "IV", "V", "VI", "VII", "VIII")
+    val priv = stringResource(Res.string.person_private); val none = stringResource(Res.string.person_no_name)
+    Row(modifier.background(colors.surface).border(1.dp, colors.outline).combinedClickable(onClick = onOpen).padding(8.dp)) {
+        Box(Modifier.width(160.dp).fillMaxHeight().background(colors.surfaceVariant).border(1.dp, colors.outlineVariant)) {
+            if (p.thumb != null) AsyncImage(p.thumb, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            else Avatar(p, 96.dp, Modifier.align(Alignment.Center))
+        }
+        Column(Modifier.padding(start = 12.dp).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(registerName(p, priv, none), fontSize = 17.sp, fontWeight = FontWeight.Bold, lineHeight = 22.sp)
+            if (beruf.isNotBlank()) Text(beruf, fontSize = 14.sp, color = colors.onSurfaceVariant)
+            if (geburt.isNotBlank()) Text("*  $geburt", fontSize = 14.sp)
+            detail.spouseFamilies.forEachIndexed { i, fam ->
+                val wann = ort(fam.facts.firstOrNull { it.tag == "MARR" })
+                val wer = fam.spouse?.name ?: "…"
+                Text("⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  $wer" + (if (wann.isNotBlank()) "  ($wann)" else ""), fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            if (tod.isNotBlank()) Text("†  $tod", fontSize = 14.sp)
+        }
+    }
+}
+
+private enum class Art { Zentral, Ahn, Kind, Partner }
+
+/** Ein Personenkasten: Portraet ueber die ganze Hoehe, "Nachname, Vorname" gross, Jahre darunter, Pfeile wo es weitergeht. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PersonBox(person: Person, centre: Boolean, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, modifier: Modifier) {
+private fun PersonBox(
+    person: Person, art: Art, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, modifier: Modifier,
+    pfeilLinks: Boolean = false, pfeilRechts: Boolean = false,
+) {
     val c = boxColors(person.sex)
     val name = registerName(person, stringResource(Res.string.person_private), stringResource(Res.string.person_no_name))
-    val asCentre = stringResource(Res.string.desk_as_centre)
-    val edit = stringResource(Res.string.desk_sheet)
-    val web = stringResource(Res.string.chip_open_web)
+    val asCentre = stringResource(Res.string.desk_as_centre); val edit = stringResource(Res.string.desk_sheet); val web = stringResource(Res.string.chip_open_web)
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val klick: () -> Unit = if (art == Art.Zentral) ({ onOpenSheet(person.xref) }) else ({ viewModel.setRoot(person.xref) })
     ContextMenuArea(items = {
-        if (person.isPrivate) emptyList() else listOf(
-            ContextMenuItem(asCentre) { viewModel.setRoot(person.xref) },
+        if (person.isPrivate) emptyList() else listOfNotNull(
+            if (art != Art.Zentral) ContextMenuItem(asCentre) { viewModel.setRoot(person.xref) } else null,
             ContextMenuItem(edit) { onOpenSheet(person.xref) },
             ContextMenuItem(web) { openWeb(person.url) },
         )
     }) {
         Row(
-            modifier
-                .height(BOX_H)
-                .clip(MaterialTheme.shapes.extraSmall)
+            modifier.size(BOX_W, BOX_H)
                 .background(c.fill)
-                .border(if (centre) 2.dp else 1.dp, if (centre) MaterialTheme.colorScheme.onSurface else c.border, MaterialTheme.shapes.extraSmall)
+                .border(if (art == Art.Zentral) 2.5.dp else 1.dp, if (art == Art.Zentral) onSurface else c.border)
                 .fokusRahmen()
-                .combinedClickable(enabled = !person.isPrivate, onClick = { viewModel.setRoot(person.xref) }, onDoubleClick = { onOpenSheet(person.xref) })
-                .padding(horizontal = 6.dp),
+                .combinedClickable(enabled = !person.isPrivate, onClick = klick, onDoubleClick = { onOpenSheet(person.xref) }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (pfeilLinks) Text("◀", fontSize = 11.sp, color = onSurface, modifier = Modifier.padding(start = 2.dp))
             if (person.thumb != null) {
-                AsyncImage(person.thumb, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(26.dp).clip(MaterialTheme.shapes.extraSmall))
-                Spacer(Modifier.width(6.dp))
+                AsyncImage(person.thumb, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(BOX_H - 2.dp).padding(1.dp))
+            } else Spacer(Modifier.width(6.dp))
+            Column(Modifier.weight(1f).padding(start = 6.dp, end = 4.dp)) {
+                Text(name, fontSize = 15.sp, fontWeight = if (art == Art.Zentral) FontWeight.Bold else FontWeight.SemiBold, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = onSurface)
+                Text(person.lifespan.ifBlank { " " }, fontSize = 12.sp, lineHeight = 15.sp, color = onSurface.copy(alpha = 0.75f), maxLines = 1)
             }
-            Column(Modifier.weight(1f)) {
-                Text(name, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
-                if (person.lifespan.isNotBlank()) Text(person.lifespan, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-            }
-            LocalFarben.current[person.xref]?.let { farbe -> Box(Modifier.width(5.dp).fillMaxHeight().padding(vertical = 4.dp).background(farbe)) }
+            LocalFarben.current[person.xref]?.let { farbe -> Box(Modifier.width(6.dp).fillMaxHeight().background(farbe)) }
+            if (pfeilRechts) Text("▶", fontSize = 11.sp, color = onSurface, modifier = Modifier.padding(end = 2.dp))
         }
+    }
+}
+
+/** Leerer Kasten fuer einen unbekannten Elternteil; mit Schreibrecht legt ein Klick die Person an. */
+@Composable
+private fun LeerBox(sex: String, modifier: Modifier, onClick: (() -> Unit)?) {
+    val c = boxColors(sex)
+    Box(
+        modifier.size(BOX_W, BOX_H).background(c.fill.copy(alpha = 0.55f)).border(1.dp, c.border.copy(alpha = 0.6f))
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it },
+    )
+}
+
+@Composable
+private fun KleinKnopf(icon: androidx.compose.ui.graphics.vector.ImageVector, beschreibung: String, onClick: () -> Unit) {
+    Box(Modifier.size(26.dp).background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.extraSmall).border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.extraSmall).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        Icon(icon, contentDescription = beschreibung, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface)
     }
 }

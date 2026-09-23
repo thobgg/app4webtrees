@@ -131,6 +131,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         }.getOrElse { emptyMap() }
     }
     val drucke = DeskDruck(state, viewModel, LocalAppName.current)
+    var zoom by remember { mutableStateOf(DeskLayout.prefs.getString("zoom", null)?.toFloatOrNull() ?: 1f) }
 
     DeskMenuBar(
         state, viewModel, openWeb, layout = layout, onLayout = { layout = it; DeskLayout.save(it) },
@@ -161,7 +162,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize()) {
             if (layout == DeskLayout.Navigator) {
-                ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { hilfe = true }, nav = nav, drucke = drucke)
+                ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { hilfe = true }, nav = nav, drucke = drucke,
+                    zoom = zoom, onZoom = { zoom = it; DeskLayout.prefs.putString("zoom", it.toString()) })
             } else {
                 WorkspaceBar(state, viewModel)
             }
@@ -173,7 +175,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
                 when (state.section) {
                     Section.Home -> HomeSection(state, viewModel, openWeb)
                     Section.Photos -> PhotosSection(state, viewModel, openWeb)
-                    else -> Navigator(state, viewModel, openSheet, openWeb, farben)
+                    else -> Navigator(state, viewModel, openSheet, openWeb, farben, zoom)
                 }
             } else Row(Modifier.weight(1f).fillMaxWidth()) {
                 PersonIndex(state, viewModel, openWeb, search, Modifier.width(280.dp).fillMaxHeight())
@@ -367,7 +369,7 @@ enum class DeskLayout {
 // ── Klassische Symbolleiste (Aufbau Navigator) ───────────────────────
 
 @Composable
-private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, nav: DeskNav, drucke: DeskDruck) {
+private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, nav: DeskNav, drucke: DeskDruck, zoom: Float, onZoom: (Float) -> Unit) {
     val canEdit = state.tree?.canEdit == true
     Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -391,7 +393,14 @@ private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (St
             ToolItem(Icons.AutoMirrored.Filled.ExitToApp, "webtrees") { openWeb(state.detail?.person?.url ?: state.baseUrl) }
             ToolItem(Icons.Default.Info, stringResource(Res.string.desk_help), onClick = onAbout)
             Spacer(Modifier.weight(1f))
-            if (state.section == Section.Tree || state.section == Section.Search) GenerationsChip(state, viewModel)
+            if (state.section == Section.Tree || state.section == Section.Search) {
+                GenerationsChip(state, viewModel)
+                // Zoom wie beim Vorbild rechts oben: Minus, Prozent, Plus (60 bis 160 Prozent); Klick auf die Zahl setzt zurueck.
+                ToolSeparator()
+                ZoomKnopf("−") { onZoom((zoom - 0.1f).coerceAtLeast(0.6f)) }
+                Text("${(zoom * 100).toInt()} %", Modifier.clickable { onZoom(1f) }.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelLarge)
+                ZoomKnopf("+") { onZoom((zoom + 0.1f).coerceAtMost(1.6f)) }
+            }
         }
     }
 }
@@ -412,6 +421,15 @@ private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, 
         Icon(icon, contentDescription = null, Modifier.size(22.dp), tint = tint)
         Text(label, style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
+}
+
+@Composable
+private fun ZoomKnopf(zeichen: String, onClick: () -> Unit) {
+    Box(
+        Modifier.size(26.dp).background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.extraSmall)
+            .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.extraSmall).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { Text(zeichen, style = MaterialTheme.typography.titleMedium) }
 }
 
 @Composable

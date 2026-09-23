@@ -68,6 +68,9 @@ data class Person(
     val xref: String,
     val name: String = "",
     val sortName: String = "",
+    /** Vor- und Nachname getrennt (Nachname samt Zusatz wie "de' Medici"), ab api4webtrees 1.6; sonst leer. */
+    val given: String = "",
+    val surname: String = "",
     val sex: String = "U",
     val isDead: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
