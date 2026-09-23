@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "wtAnd"
+rootProject.name = "app4webtrees"
 // shared/  — geteilter Kern (API, Zustand, Oberflaeche), Android + Desktop-JVM
 // app/     — Android-Huelle (Activity, Manifest, Launcher, Signatur)
 // desktop/ — Linux/Windows-Huelle (Fenster, Pakete deb/msi/exe)

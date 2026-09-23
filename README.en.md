@@ -2,7 +2,7 @@
 
 [Deutsch](README.md) · **English**
 
-### [⬇ Download the APK](https://github.com/thobgg/wtAnd/releases/latest)
+### [⬇ Download the APK](https://github.com/thobgg/app4webtrees/releases/latest)
 
 Signed. To install outside the Play Store, Android asks once to allow your browser to install apps.
 Your webtrees server needs the [api4webtrees](https://github.com/thobgg/api4webtrees) module.
