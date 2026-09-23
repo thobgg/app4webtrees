@@ -621,6 +621,10 @@ private fun PersonIndex(state: UiState, viewModel: AppViewModel, openWeb: (Strin
 @Composable
 private fun SearchField(query: String, onChange: (String) -> Unit, focus: FocusRequester) {
     val colors = MaterialTheme.colorScheme
+    // Eigener Textzustand: kaeme der Text verzoegert aus dem ViewModel zurueck, spraenge der Cursor an den Anfang
+    // (Rueckmeldung Thomas, 23.09.2026). Nur wenn der Zustand von aussen einen anderen Text bringt (Leeren), folgen wir ihm.
+    var feld by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(query)) }
+    LaunchedEffect(query) { if (query != feld.text) feld = androidx.compose.ui.text.input.TextFieldValue(query, androidx.compose.ui.text.TextRange(query.length)) }
     Row(
         Modifier.fillMaxWidth().padding(8.dp)
             .border(1.dp, colors.outline, MaterialTheme.shapes.small)
@@ -632,7 +636,7 @@ private fun SearchField(query: String, onChange: (String) -> Unit, focus: FocusR
         Box(Modifier.weight(1f)) {
             if (query.isEmpty()) Text(stringResource(Res.string.tree_find), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             BasicTextField(
-                value = query, onValueChange = onChange, singleLine = true,
+                value = feld, onValueChange = { feld = it; onChange(it.text) }, singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
                 cursorBrush = SolidColor(colors.primary),
                 modifier = Modifier.fillMaxWidth().focusRequester(focus),

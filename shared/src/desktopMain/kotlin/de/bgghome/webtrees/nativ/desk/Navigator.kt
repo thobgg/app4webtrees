@@ -132,39 +132,63 @@ fun Navigator(
 
     val quer = rememberScrollState(); val hoch = rememberScrollState()
     val basis = LocalDensity.current
-    CompositionLocalProvider(LocalFarben provides farben, LocalDensity provides Density(basis.density * zoom, basis.fontScale)) {
-        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-            Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
-                Chart(detail, zentral, ahnen, state.ancestorGenerations.coerceIn(2, 7), canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb)
+    val g = state.ancestorGenerations.coerceIn(2, 7)
+    val masse = chartMasse(g, detail)
+    // Einpassen wie beim Vorbild: die Tafel fuellt das Fenster, der Zoom vergroessert oder verkleinert davon ausgehend.
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        val rand = 24.dp
+        val fit = minOf((maxWidth - rand) / masse.breite, (maxHeight - rand) / masse.hoehe, 1.15f).coerceAtLeast(0.35f)
+        val skala = fit * zoom
+        CompositionLocalProvider(LocalFarben provides farben, LocalDensity provides Density(basis.density * skala, basis.fontScale)) {
+            Box(Modifier.fillMaxSize()) {
+                Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
+                    Chart(detail, zentral, ahnen, g, canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb, masse)
+                }
+                SenkrechteLeiste(hoch)
+                WaagerechteLeiste(quer)
             }
-            SenkrechteLeiste(hoch)
-            WaagerechteLeiste(quer)
         }
     }
+}
+
+/** Die Masse der Tafel in dp vor dem Zeichnen - fuer das Einpassen. */
+private class ChartMasse(val slots: Int, val slotH: Dp, val ancH: Dp, val kinder: Int, val partner: Int, val xZentral: Dp, val centerY: Dp, val kinderTop: Dp, val breite: Dp, val hoehe: Dp)
+
+private fun chartMasse(g: Int, detail: IndividualDetail?): ChartMasse {
+    val slots = 1 shl (g - 1)
+    val slotH = BOX_H + GAP
+    val ancH = slotH * slots
+    val familien = detail?.spouseFamilies.orEmpty()
+    val kinder = familien.flatMap { it.children }.distinctBy { it.xref }.size
+    val partner = familien.count { it.spouse != null }
+    val xZentral = BOX_W + 56.dp
+    // Die Zentralperson sitzt in der Mitte der Vorfahren; nur wenn ihr Kasten in den Infokasten ragt, rutscht alles nach unten.
+    val centerY = maxOf(ancH / 2, INFO_H + ICON_ROW + BOX_H / 2)
+    // Die Kinderspalte beginnt unter dem Infokasten und ist sonst um die Zentralperson zentriert.
+    val kinderH = slotH * kinder
+    val kinderTop = maxOf(centerY - kinderH / 2, INFO_H + ICON_ROW)
+    val partnerH = (BOX_H + GAP) * partner
+    val hoehe = maxOf(centerY + ancH / 2, kinderTop + kinderH, centerY + BOX_H / 2 + partnerH) + 24.dp
+    val breite = xZentral + BOX_W + (BOX_W + COL_GAP) * (g - 1) + 24.dp
+    return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe)
 }
 
 @Composable
 private fun Chart(
     detail: IndividualDetail?, zentral: Person, ahnen: Map<Int, de.bgghome.webtrees.nativ.api.Ancestor>, g: Int, canEdit: Boolean,
-    mitNachkommen: Set<String>, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit,
+    mitNachkommen: Set<String>, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, m: ChartMasse,
 ) {
-    val slots = 1 shl (g - 1)
-    val slotH = BOX_H + GAP
-    val ancH = slotH * slots
+    val slots = m.slots; val slotH = m.slotH; val ancH = m.ancH
     val familien = detail?.spouseFamilies.orEmpty()
     val kinder = familien.flatMap { it.children }.distinctBy { it.xref }
     val partner = familien.mapNotNull { it.spouse }
-    val kinderH = slotH * kinder.size
-    val xZentral = BOX_W + 56.dp
-    val centerY = maxOf(ancH / 2, INFO_H + ICON_ROW + kinderH / 2, INFO_H + ICON_ROW + BOX_H / 2)
-    val partnerH = (BOX_H + GAP) * partner.size
-    val hoehe = maxOf(centerY + ancH / 2, centerY + kinderH / 2, centerY + BOX_H / 2 + partnerH) + 24.dp
-    val breite = xZentral + BOX_W + (BOX_W + COL_GAP) * (g - 1) + 24.dp
+    val xZentral = m.xZentral; val centerY = m.centerY
+    val hoehe = m.hoehe; val breite = m.breite
     val line = MaterialTheme.colorScheme.outline
 
     fun top(n: Int): Dp { val gg = gen(n); val span = slots shr gg; val i = n - (1 shl gg); return centerY - ancH / 2 + slotH * (i * span) + (slotH * span - BOX_H) / 2 }
     fun left(n: Int): Dp = xZentral + (BOX_W + COL_GAP) * gen(n)
-    val kinderTop = centerY - kinderH / 2
+    val kinderTop = m.kinderTop
 
     Box(Modifier.size(breite, hoehe)) {
         Canvas(Modifier.fillMaxSize()) {
