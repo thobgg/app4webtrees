@@ -368,4 +368,13 @@ GEDCOM, merging, places and sources are managed by webtrees itself – the webtr
     <string name="desk_light">Light</string>
     <string name="desk_dark">Dark</string>
     <string name="desk_system">Like the system</string>
+    <string name="desk_bookmarks">Bookmarks</string>
+    <string name="desk_bookmark_add">Bookmark</string>
+    <string name="desk_bookmark_remove">Remove bookmark</string>
+    <string name="desk_bookmarks_empty">No bookmarks yet. Right-click a person and choose “Bookmark”.</string>
+    <string name="desk_list">List</string>
+    <string name="desk_chart">Chart</string>
+    <string name="desk_check">Check</string>
+    <string name="desk_remove">Remove</string>
+    <string name="err_not_logged_in">Please sign in for this.</string>
 </resources>

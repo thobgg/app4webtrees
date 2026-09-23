@@ -1,5 +1,14 @@
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Star
 import de.bgghome.webtrees.nativ.Texte
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -30,6 +39,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.input.key.key
 import androidx.compose.material.icons.filled.Refresh
@@ -106,6 +116,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     var goTo by remember { mutableStateOf(false) }
     var hilfe by remember { mutableStateOf(false) }
     var liste by remember { mutableStateOf<ListenArt?>(null) }
+    var merkliste by remember { mutableStateOf(false) }
     val openSheet: (String) -> Unit = { xref -> viewModel.select(xref); sheetOpen = true }
 
     // Zurueck/Vor zwischen Zentralpersonen: das ViewModel kennt nur den Rueckweg, den Vorwaertsweg haelt der Desktop.
@@ -140,6 +151,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         onAbout = { about = true }, onQuit = onQuit,
         nav = nav, drucke = drucke, onListe = { liste = it }, onHilfe = { hilfe = true },
         farbkodierung = farbkodierung, onFarbkodierung = { farbkodierung = it; DeskLayout.prefs.putBoolean("farbkodierung", it) },
+        onMerkliste = { merkliste = true },
     )
 
     // Vor der Anmeldung und bei der Baumwahl: die Startbildschirme der App, mittig im Fenster.
@@ -163,7 +175,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         Column(Modifier.fillMaxSize()) {
             if (layout == DeskLayout.Navigator) {
                 ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { hilfe = true }, nav = nav, drucke = drucke,
-                    zoom = zoom, onZoom = { zoom = it; DeskLayout.prefs.putString("zoom", it.toString()) })
+                    zoom = zoom, onZoom = { zoom = it; DeskLayout.prefs.putString("zoom", it.toString()) },
+                    onMerkliste = { merkliste = true }, onListe = { liste = it }, onQuit = onQuit)
             } else {
                 WorkspaceBar(state, viewModel)
             }
@@ -231,6 +244,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     if (goTo) GoToDialog(state, viewModel, openWeb, onClose = { goTo = false })
     liste?.let { art -> ListenFenster(art, state, viewModel, onClose = { liste = null }) }
     if (hilfe) HilfeFenster(onClose = { hilfe = false })
+    if (merkliste) MerklisteFenster(state, viewModel, openSheet, onClose = { merkliste = false })
 
     if (about) {
         AlertDialog(
@@ -262,6 +276,7 @@ private fun FrameWindowScope.DeskMenuBar(
     onSearch: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, onQuit: () -> Unit,
     nav: DeskNav, drucke: DeskDruck, onListe: (ListenArt) -> Unit, onHilfe: () -> Unit,
     farbkodierung: Boolean, onFarbkodierung: (Boolean) -> Unit,
+    onMerkliste: () -> Unit,
 ) {
     val main = state.screen == Screen.Main
     val loggedIn = state.info?.user?.loggedIn == true
@@ -293,6 +308,12 @@ private fun FrameWindowScope.DeskMenuBar(
             Item(stringResource(Res.string.action_add_relative), enabled = selected?.canEdit == true,
                 shortcut = KeyShortcut(Key.N, ctrl = true), onClick = { selected?.let { viewModel.requestAddRelative(it.person.xref) } })
             Item(stringResource(Res.string.chip_open_web), enabled = selected != null, onClick = { selected?.let { openWeb(it.person.url) } })
+            if (viewModel.bookmarksSupported) {
+                val root = state.root
+                Item(stringResource(if (root != null && viewModel.isBookmarked(root)) Res.string.desk_bookmark_remove else Res.string.desk_bookmark_add),
+                    enabled = root != null, shortcut = KeyShortcut(Key.D, ctrl = true), onClick = { root?.let(viewModel::toggleBookmark) })
+                Item(stringResource(Res.string.desk_bookmarks), shortcut = KeyShortcut(Key.B, ctrl = true), onClick = onMerkliste)
+            }
             Separator()
             Item(stringResource(Res.string.action_back), enabled = nav.kannZurueck, shortcut = KeyShortcut(Key.DirectionLeft, alt = true), onClick = nav.zurueck)
             Item(stringResource(Res.string.desk_forward), enabled = nav.kannVor, shortcut = KeyShortcut(Key.DirectionRight, alt = true), onClick = nav.vor)
@@ -369,8 +390,15 @@ enum class DeskLayout {
 // ── Klassische Symbolleiste (Aufbau Navigator) ───────────────────────
 
 @Composable
-private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, nav: DeskNav, drucke: DeskDruck, zoom: Float, onZoom: (Float) -> Unit) {
+private fun ClassicToolbar(
+    state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit,
+    nav: DeskNav, drucke: DeskDruck, zoom: Float, onZoom: (Float) -> Unit,
+    onMerkliste: () -> Unit, onListe: (ListenArt) -> Unit, onQuit: () -> Unit,
+) {
     val canEdit = state.tree?.canEdit == true
+    val manager = state.tree?.role == "manager"
+    val t = state.tree?.name.orEmpty()
+    fun web(route: String) = runCatching { viewModel.client.url(route, emptyMap()).toString() }.getOrNull()?.let(openWeb)
     Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
             TreePicker(state, viewModel)
@@ -378,28 +406,94 @@ private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (St
             ToolItem(Icons.Default.Search, stringResource(Res.string.desk_goto), onClick = onGoTo)
             ToolItem(Icons.Default.Edit, stringResource(Res.string.action_edit), enabled = state.root != null, onClick = onSheet)
             ToolItem(Icons.Default.Add, stringResource(Res.string.action_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) }
+            if (viewModel.bookmarksSupported) ToolItem(Icons.Default.Star, stringResource(Res.string.desk_bookmarks), onClick = onMerkliste)
             ToolSeparator()
             ToolItem(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.action_back), enabled = nav.kannZurueck, onClick = nav.zurueck)
             ToolItem(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.desk_forward), enabled = nav.kannVor, onClick = nav.vor)
             HistoryItem(state, viewModel)
             ToolItem(Icons.Default.Person, stringResource(Res.string.home_start_person), enabled = state.home != null) { state.home?.let(viewModel::setRoot) }
-            ToolItem(Icons.Default.Refresh, stringResource(Res.string.action_reload), onClick = viewModel::refresh)
+            ToolSeparator()
+            MenuItem(Icons.AutoMirrored.Filled.List, stringResource(Res.string.desk_list), enabled = state.root != null) { close ->
+                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_ancestors)) }, onClick = { close(); onListe(ListenArt.Ahnen) })
+                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_descendants)) }, onClick = { close(); onListe(ListenArt.Stamm) })
+                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_events)) }, onClick = { close(); onListe(ListenArt.Ereignisse) })
+                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_title_sheet, state.detail?.person?.name ?: "…")) }, onClick = { close(); onListe(ListenArt.Personenblatt) })
+            }
+            MenuItem(TreeIcon, stringResource(Res.string.desk_chart), enabled = state.pedigree != null) { close ->
+                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_print_chart)) }, onClick = { close(); drucke.ahnentafel() })
+                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_pdf_chart)) }, onClick = { close(); drucke.ahnentafelPdf() })
+            }
             ToolItem(DruckerIcon, stringResource(Res.string.desk_print), enabled = state.root != null, onClick = drucke::personenblatt)
             ToolSeparator()
             ToolItem(Icons.Default.Home, stringResource(Res.string.nav_home), active = state.section == Section.Home) { viewModel.setSection(Section.Home) }
             ToolItem(TreeIcon, stringResource(Res.string.desk_layout_navigator), active = state.section == Section.Tree || state.section == Section.Search) { viewModel.setSection(Section.Tree) }
             ToolItem(PhotoIcon, stringResource(Res.string.nav_photos), active = state.section == Section.Photos) { viewModel.setSection(Section.Photos) }
             ToolSeparator()
+            ToolItem(Icons.Default.Check, stringResource(Res.string.desk_check), enabled = manager) { web("/tree/$t/check") }
+            ToolItem(Icons.Default.Place, stringResource(Res.string.desk_web_places), enabled = state.tree != null) { web("/tree/$t/place-list") }
+            ToolItem(Icons.Default.Info, stringResource(Res.string.desk_web_sources), enabled = state.tree != null) { web("/tree/$t/source-list") }
             ToolItem(Icons.AutoMirrored.Filled.ExitToApp, "webtrees") { openWeb(state.detail?.person?.url ?: state.baseUrl) }
+            ToolSeparator()
             ToolItem(Icons.Default.Info, stringResource(Res.string.desk_help), onClick = onAbout)
+            ToolItem(Icons.Default.Close, stringResource(Res.string.desk_quit), onClick = onQuit)
             Spacer(Modifier.weight(1f))
             if (state.section == Section.Tree || state.section == Section.Search) {
                 GenerationsChip(state, viewModel)
-                // Zoom wie beim Vorbild rechts oben: Minus, Prozent, Plus (60 bis 160 Prozent); Klick auf die Zahl setzt zurueck.
                 ToolSeparator()
                 ZoomKnopf("−") { onZoom((zoom - 0.1f).coerceAtLeast(0.6f)) }
                 Text("${(zoom * 100).toInt()} %", Modifier.clickable { onZoom(1f) }.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelLarge)
                 ZoomKnopf("+") { onZoom((zoom + 0.1f).coerceAtMost(1.6f)) }
+            }
+        }
+    }
+}
+
+/** Leistenknopf mit Aufklappmenue. */
+@Composable
+private fun MenuItem(icon: ImageVector, label: String, enabled: Boolean = true, inhalt: @Composable (close: () -> Unit) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        ToolItem(icon, label, enabled = enabled) { open = true }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) { inhalt { open = false } }
+    }
+}
+
+/** Merkliste: die gemerkten Personen; Klick macht zur Zentralperson, Doppelklick oeffnet den Eingabedialog. */
+@Composable
+private fun MerklisteFenster(state: UiState, viewModel: AppViewModel, openSheet: (String) -> Unit, onClose: () -> Unit) {
+    androidx.compose.ui.window.DialogWindow(
+        onCloseRequest = onClose, title = stringResource(Res.string.desk_bookmarks),
+        state = androidx.compose.ui.window.rememberDialogState(width = 420.dp, height = 560.dp),
+        onPreviewKeyEvent = { e -> if (e.key == Key.Escape) { onClose(); true } else false },
+    ) {
+        DeskTheme {
+            Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
+                if (state.bookmarks.isEmpty()) {
+                    Text(stringResource(Res.string.desk_bookmarks_empty), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    val list = rememberLazyListState()
+                    Box(Modifier.fillMaxSize()) {
+                        LazyColumn(Modifier.fillMaxSize(), state = list) {
+                            items(state.bookmarks, key = { it.xref }) { p ->
+                                Row(
+                                    Modifier.fillMaxWidth().fokusRahmen()
+                                        .combinedClickable(onClick = { viewModel.setRoot(p.xref) }, onDoubleClick = { openSheet(p.xref) })
+                                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Portrait(p, Modifier.size(32.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text(registerName(p, stringResource(Res.string.person_private), stringResource(Res.string.person_no_name)), style = MaterialTheme.typography.bodyMedium, fontWeight = if (p.xref == state.root) FontWeight.SemiBold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        if (p.lifespan.isNotBlank()) Text(p.lifespan, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    TextButton(onClick = { viewModel.toggleBookmark(p.xref) }) { Text(stringResource(Res.string.desk_remove)) }
+                                }
+                            }
+                        }
+                        ListenLeiste(list)
+                    }
+                }
             }
         }
     }
@@ -414,8 +508,8 @@ private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, 
             .background(if (active) colors.surface else colors.surfaceVariant, MaterialTheme.shapes.extraSmall)
             .fokusRahmen()
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 4.dp)
-            .width(58.dp),
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+            .width(54.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, contentDescription = null, Modifier.size(22.dp), tint = tint)
@@ -654,12 +748,14 @@ private fun IndexRow(person: Person, selected: Boolean, root: Boolean, viewModel
     val makeRoot = stringResource(Res.string.action_make_root)
     val profile = stringResource(Res.string.action_profile)
     val web = stringResource(Res.string.chip_open_web)
+    val merken = stringResource(Res.string.desk_bookmark_add); val merkWeg = stringResource(Res.string.desk_bookmark_remove)
     ContextMenuArea(items = {
         if (person.isPrivate) emptyList() else listOf(
             ContextMenuItem(makeRoot) { viewModel.setRoot(person.xref) },
             ContextMenuItem(profile) { viewModel.select(person.xref) },
+            if (viewModel.bookmarksSupported) ContextMenuItem(if (viewModel.isBookmarked(person.xref)) merkWeg else merken) { viewModel.toggleBookmark(person.xref) } else null,
             ContextMenuItem(web) { openWeb(person.url) },
-        )
+        ).filterNotNull()
     }) {
         Row(
             Modifier

@@ -32,6 +32,7 @@ fun explain(e: Exception): String = when (e) {
         "pair-invalid", "pair-expired" -> Texte.t(Res.string.err_pair)
         "not-supported" -> Texte.t(Res.string.err_not_supported)
         "not-manager" -> Texte.t(Res.string.err_not_manager)
+        "not-logged-in" -> Texte.t(Res.string.err_not_logged_in)
         "exif-failed" -> Texte.t(Res.string.err_exif_failed)
         "folder-not-found" -> Texte.t(Res.string.err_folder_not_found)
         "blocked-extension", "bad-filename" -> Texte.t(Res.string.err_bad_file)

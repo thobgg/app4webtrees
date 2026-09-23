@@ -335,12 +335,14 @@ private fun PersonBox(
     val c = boxColors(person.sex)
     val name = registerName(person, stringResource(Res.string.person_private), stringResource(Res.string.person_no_name))
     val asCentre = stringResource(Res.string.desk_as_centre); val edit = stringResource(Res.string.desk_sheet); val web = stringResource(Res.string.chip_open_web)
+    val merken = stringResource(Res.string.desk_bookmark_add); val merkWeg = stringResource(Res.string.desk_bookmark_remove)
     val onSurface = MaterialTheme.colorScheme.onSurface
     val klick: () -> Unit = if (art == Art.Zentral) ({ onOpenSheet(person.xref) }) else ({ viewModel.setRoot(person.xref) })
     ContextMenuArea(items = {
         if (person.isPrivate) emptyList() else listOfNotNull(
             if (art != Art.Zentral) ContextMenuItem(asCentre) { viewModel.setRoot(person.xref) } else null,
             ContextMenuItem(edit) { onOpenSheet(person.xref) },
+            if (viewModel.bookmarksSupported) ContextMenuItem(if (viewModel.isBookmarked(person.xref)) merkWeg else merken) { viewModel.toggleBookmark(person.xref) } else null,
             ContextMenuItem(web) { openWeb(person.url) },
         )
     }) {

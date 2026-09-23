@@ -41,6 +41,8 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
         const val API_PHOTOS = 2
         /** Ab dieser API-Stufe: Ortsvorschlaege (Places) und Ereignisdaten zusaetzlich im GEDCOM-Format. */
         const val API_PLACES = 8
+        /** Ab dieser API-Stufe: Merkliste je Benutzer und Baum. */
+        const val API_BOOKMARKS = 11
         const val DESCENDANT_GENERATIONS = 3
         /** Geschwister gibt es fuer so viele Reihen von unten (Mittelperson, Eltern, Grosseltern) - je Person eine Anfrage. */
         const val SIBLING_ROWS = 3
@@ -78,6 +80,7 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
         uiState.value.collection?.let { loadCollection(it.slug, it.typ.orEmpty(), 1) }
         loadAnniversaries()
         loadPending()
+        loadBookmarks()
     }
 
     fun messageShown() = uiState.update { it.copy(message = null) }

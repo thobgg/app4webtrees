@@ -110,6 +110,8 @@ data class UiState(
     /** Fuer Moderatoren: Datensaetze, deren Aenderungen auf Freigabe warten */
     val pending: List<PendingRecord> = emptyList(),
     val reminders: Boolean = false,
+    /** Merkliste des Benutzers in diesem Baum (ab API-Stufe 11) */
+    val bookmarks: List<Person> = emptyList(),
 
     // ── Fotos ────────────────────────────────────────────────────────
     val media: List<MediaJson> = emptyList(),

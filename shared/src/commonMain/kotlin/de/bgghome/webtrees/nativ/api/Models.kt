@@ -188,6 +188,13 @@ data class DescendantNode(val person: Person, val families: List<DescendantFamil
 @Serializable
 data class Descendants(val root: String = "", val generations: Int = 0, val tree: DescendantNode)
 
+/** Merkliste (ab API-Stufe 11): die gemerkten Personen des Benutzers in diesem Baum. */
+@Serializable
+data class BookmarkList(val data: List<Person> = emptyList())
+
+@Serializable
+data class BookmarkRequest(val xref: String, val add: Boolean)
+
 @Serializable
 data class PendingRecord(
     val xref: String,

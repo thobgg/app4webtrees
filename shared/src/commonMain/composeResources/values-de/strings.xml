@@ -363,4 +363,13 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_light">Hell</string>
     <string name="desk_dark">Dunkel</string>
     <string name="desk_system">Wie Windows</string>
+    <string name="desk_bookmarks">Merkliste</string>
+    <string name="desk_bookmark_add">Merken</string>
+    <string name="desk_bookmark_remove">Nicht mehr merken</string>
+    <string name="desk_bookmarks_empty">Noch nichts gemerkt. Rechtsklick auf eine Person und „Merken" wählen.</string>
+    <string name="desk_list">Liste</string>
+    <string name="desk_chart">Tafel</string>
+    <string name="desk_check">Prüfung</string>
+    <string name="desk_remove">Entfernen</string>
+    <string name="err_not_logged_in">Dafür bitte anmelden.</string>
 </resources>
