@@ -305,9 +305,8 @@ private fun InfoBox(detail: IndividualDetail, gewaehlt: Int, modifier: Modifier,
     val roemisch = listOf("I", "II", "III", "IV", "V", "VI", "VII", "VIII")
     val priv = stringResource(Res.string.person_private); val none = stringResource(Res.string.person_no_name)
     Row(modifier.background(colors.surface).border(1.dp, colors.outline).combinedClickable(onClick = onOpen).padding(8.dp)) {
-        Box(Modifier.width(160.dp).fillMaxHeight().background(colors.surfaceVariant).border(1.dp, colors.outlineVariant)) {
-            if (p.thumb != null) AsyncImage(p.thumb, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            else Avatar(p, 96.dp, Modifier.align(Alignment.Center))
+        Box(Modifier.width(160.dp).fillMaxHeight().border(1.dp, colors.outlineVariant)) {
+            Portrait(p, Modifier.fillMaxSize())
         }
         Column(Modifier.padding(start = 12.dp).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(registerName(p, priv, none), fontSize = 17.sp, fontWeight = FontWeight.Bold, lineHeight = 22.sp)
@@ -354,9 +353,7 @@ private fun PersonBox(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (pfeilLinks) Text("◀", fontSize = 11.sp, color = onSurface, modifier = Modifier.padding(start = 2.dp))
-            if (person.thumb != null) {
-                AsyncImage(person.thumb, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(BOX_H - 2.dp).padding(1.dp))
-            } else Spacer(Modifier.width(6.dp))
+            Portrait(person, Modifier.padding(1.dp).size(BOX_H - 2.dp))
             Column(Modifier.weight(1f).padding(start = 6.dp, end = 4.dp)) {
                 Text(name, fontSize = 15.sp, fontWeight = if (art == Art.Zentral) FontWeight.Bold else FontWeight.SemiBold, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = onSurface)
                 Text(person.lifespan.ifBlank { " " }, fontSize = 12.sp, lineHeight = 15.sp, color = onSurface.copy(alpha = 0.75f), maxLines = 1)

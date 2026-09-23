@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.unit.sp
@@ -130,7 +131,7 @@ private fun SheetHeader(detail: IndividualDetail) {
     val endYear = if (person.isDead) person.death?.date?.year?.takeIf { it > 0 } else LocalDate.now().year
     val age = if (birthYear != null && endYear != null && endYear >= birthYear) endYear - birthYear else null
     Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Avatar(person, 56.dp)
+        Portrait(person, Modifier.size(56.dp).clip(MaterialTheme.shapes.small))
         Spacer(Modifier.width(12.dp))
         Text(person.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         age?.let { Text(stringResource(Res.string.desk_age, it), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) }
