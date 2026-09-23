@@ -16,6 +16,10 @@ plugins {
 }
 
 kotlin {
+    compilerOptions {
+        // ui-backhandler ist in Compose Multiplatform noch experimentell; expect/actual-Klassen ebenso.
+        freeCompilerArgs.addAll("-opt-in=androidx.compose.ui.ExperimentalComposeUiApi", "-Xexpect-actual-classes")
+    }
     androidTarget {
         compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
     }
@@ -36,15 +40,20 @@ kotlin {
             // JVM-Bibliotheken duerfen hier stehen: beide Ziele (Android,
             // Desktop) sind JVM, commonMain darf JDK-APIs benutzen.
             api(libs.okhttp)
+            // ViewModel + viewModelScope fuer beide Ziele
+            api(libs.jetbrains.lifecycle.viewmodel)
+            api(libs.jetbrains.lifecycle.viewmodel.compose)
+            // Bilder ueber die Sitzung des API-Clients (Cookie), Coil 3 fuer beide Ziele
+            api(libs.coil.compose)
+            api(libs.coil.network.okhttp)
+            // Zurueck: Android-Systemgeste, Desktop Escape
+            api(libs.compose.ui.backhandler)
         }
         androidMain.dependencies {
             api(libs.androidx.core.ktx)
             api(libs.androidx.lifecycle.runtime)
             api(libs.androidx.lifecycle.viewmodel.compose)
             api(libs.androidx.activity.compose)
-            // Bilder ueber die Sitzung des API-Clients (Coil 2, nur Android;
-            // Coil 3 kommt, sobald die Fotos nach commonMain wandern)
-            api(libs.coil.compose)
             api(libs.androidx.exifinterface)
             // Taegliche Erinnerung an Jahrestage
             api(libs.androidx.work)
@@ -58,6 +67,8 @@ kotlin {
                 // bringt ihn mit, der Desktop nicht - ohne ihn stirbt der
                 // erste viewModelScope.launch mit "Main dispatcher is missing".
                 api(libs.kotlinx.coroutines.swing)
+                // PDF-Seiten rendern (Android: PdfRenderer im System)
+                implementation("org.apache.pdfbox:pdfbox:3.0.8")
             }
         }
         val desktopTest by getting {

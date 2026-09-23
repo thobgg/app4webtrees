@@ -1,8 +1,5 @@
 package de.bgghome.webtrees.nativ.ui
 
-import android.app.Application
-import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.ApiException
@@ -11,7 +8,6 @@ import de.bgghome.webtrees.nativ.api.ArchiveUploadRequest
 import de.bgghome.webtrees.nativ.api.ExifRequest
 import de.bgghome.webtrees.nativ.api.MediaJson
 import de.bgghome.webtrees.nativ.api.NotJsonException
-import de.bgghome.webtrees.nativ.data.ImagePrep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -125,19 +121,15 @@ fun AppViewModel.personSuggestions(): PlaceSuggest? {
  * Foto verkleinern wie beim Personenfoto und mit der Beschriftung ins Archiv legen. Danach Uebersicht und offene
  * Sammlung neu laden, damit Zaehler und Raster den neuen Eintrag zeigen.
  */
-fun AppViewModel.uploadArchivePhoto(uri: Uri, request: ArchiveUploadRequest) {
+fun AppViewModel.uploadArchivePhoto(photo: PhotoFile, request: ArchiveUploadRequest) {
     val tree = uiState.value.tree ?: return
     uiState.update { it.copy(busy = true) }
 
     viewModelScope.launch {
         try {
-            val resolver = getApplication<Application>().contentResolver
-            var name = "foto.jpg"
-            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) cursor.getString(0)?.let { name = it }
-            }
+            val name = photo.name
             val limit = (uiState.value.info?.maxUpload?.takeIf { it > 0 } ?: AppViewModel.DEFAULT_MAX_UPLOAD) * 9 / 10
-            val prepared = withContext(Dispatchers.IO) { runCatching { ImagePrep.toUploadJpeg(resolver, uri, limit) }.getOrNull() }
+            val prepared = withContext(Dispatchers.IO) { runCatching { photo.prepareJpeg(limit) }.getOrNull() }
                 ?: throw UserMessageException(text(Res.string.err_image_prepare))
 
             val result = client.uploadArchive(tree.name, request, prepared, name.substringBeforeLast('.') + ".jpg", "image/jpeg")

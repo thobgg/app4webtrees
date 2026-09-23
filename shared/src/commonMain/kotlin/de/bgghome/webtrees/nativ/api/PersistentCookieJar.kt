@@ -1,6 +1,6 @@
 package de.bgghome.webtrees.nativ.api
 
-import android.content.Context
+import de.bgghome.webtrees.nativ.data.Ablage
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -8,16 +8,14 @@ import okhttp3.HttpUrl
 /**
  * Haelt die webtrees-Sitzung ueber App-Neustarts hinweg - wie es der WebView-Wrapper auch tut.
  * webtrees setzt ein Sitzungs-Cookie ohne Ablaufdatum; wie lange es gilt, bestimmt der Server.
- * Gespeichert wird in den privaten App-Daten (allowBackup=false, siehe Manifest).
+ * Gespeichert wird in den privaten App-Daten (Android: allowBackup=false, siehe Manifest; Desktop: Benutzerprofil).
  */
-class PersistentCookieJar(context: Context) : CookieJar {
-
-    private val prefs = context.getSharedPreferences("cookies", Context.MODE_PRIVATE)
+class PersistentCookieJar(private val prefs: Ablage) : CookieJar {
     private val cookies = mutableMapOf<String, Cookie>()
 
     init {
-        prefs.all.forEach { (key, value) ->
-            val parts = (value as? String)?.split('\n') ?: return@forEach
+        prefs.alle().forEach { (key, value) ->
+            val parts = value.split('\n')
             if (parts.size == 2) {
                 val url = HttpUrl.Builder().scheme("https").host(parts[0]).build()
                 Cookie.parse(url, parts[1])?.let { cookies[key] = it }
@@ -27,15 +25,15 @@ class PersistentCookieJar(context: Context) : CookieJar {
 
     @Synchronized
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        val editor = prefs.edit()
+        val changed = mutableMapOf<String, String>()
 
         cookies.forEach { cookie ->
             val key = cookie.domain + '|' + cookie.path + '|' + cookie.name
             this.cookies[key] = cookie
-            editor.putString(key, cookie.domain + '\n' + cookie.toString())
+            changed[key] = cookie.domain + '\n' + cookie.toString()
         }
 
-        editor.apply()
+        prefs.putStrings(changed)
     }
 
     @Synchronized
@@ -49,6 +47,6 @@ class PersistentCookieJar(context: Context) : CookieJar {
     @Synchronized
     fun clear() {
         cookies.clear()
-        prefs.edit().clear().apply()
+        prefs.leeren()
     }
 }

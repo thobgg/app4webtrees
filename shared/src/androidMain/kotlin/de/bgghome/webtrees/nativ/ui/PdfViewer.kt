@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -76,7 +77,7 @@ import okhttp3.Request
  * Speicher.
  */
 @Composable
-fun PdfViewer(target: PdfTarget, onClose: () -> Unit, onOpenWeb: (String) -> Unit) {
+actual fun PdfViewer(target: PdfTarget, onClose: () -> Unit, onOpenWeb: (String) -> Unit) {
     val context = LocalContext.current
     val app = context.applicationContext as WtApp
     var document by remember { mutableStateOf<PdfDocument?>(null) }
@@ -190,7 +191,7 @@ private fun PdfPage(doc: PdfDocument, index: Int, widthPx: Int, onZoom: (Boolean
  * es beim Kuerzel.
  */
 @Composable
-fun PdfThumbnail(url: String, modifier: Modifier = Modifier, content: @Composable BoxScope.(Bitmap?) -> Unit) {
+actual fun PdfThumbnail(url: String, modifier: Modifier, content: @Composable BoxScope.(ImageBitmap?) -> Unit) {
     val app = LocalContext.current.applicationContext as WtApp
     val cacheDir = LocalContext.current.cacheDir
     val bitmap by produceState<Bitmap?>(null, url) {
@@ -200,7 +201,7 @@ fun PdfThumbnail(url: String, modifier: Modifier = Modifier, content: @Composabl
             }.getOrNull()
         }
     }
-    Box(modifier) { content(bitmap) }
+    Box(modifier) { content(bitmap?.asImageBitmap()) }
 }
 
 private const val PDF_THUMB_MAX_BYTES = 3L * 1024 * 1024

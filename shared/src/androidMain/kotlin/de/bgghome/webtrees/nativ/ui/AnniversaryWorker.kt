@@ -38,7 +38,7 @@ class AnniversaryWorker(context: Context, params: WorkerParameters) : CoroutineW
 
         if (!app.settings.reminders || tree.isEmpty() || app.settings.baseUrl.isEmpty()) return Result.success()
 
-        val today = runCatching { app.client.anniversaries(tree, 1).data }.getOrNull() ?: return Result.success()
+        val today = runCatching { app.plattform.client.anniversaries(tree, 1).data }.getOrNull() ?: return Result.success()
         if (today.isEmpty()) return Result.success()
 
         val lines = today.map { Texte.t(Res.string.anniv_notification_line, it.name, it.label, it.years) }

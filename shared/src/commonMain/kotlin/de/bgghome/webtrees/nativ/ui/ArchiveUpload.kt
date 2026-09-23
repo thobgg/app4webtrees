@@ -1,7 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
 import org.jetbrains.compose.resources.StringResource
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.KeyboardActions
@@ -44,7 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.ArchiveEntry
 import de.bgghome.webtrees.nativ.api.ArchiveOverview
@@ -63,7 +62,7 @@ private val ISO_DATE = Regex("""^\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?
 fun ArchiveCaptureButton(state: UiState, viewModel: AppViewModel, modifier: Modifier = Modifier) {
     val archive = state.archive ?: return
     var chooseSource by remember { mutableStateOf(false) }
-    var photo by remember { mutableStateOf<Uri?>(null) }
+    var photo by remember { mutableStateOf<PhotoFile?>(null) }
     val sources = rememberPhotoSources { photo = it }
 
     ExtendedFloatingActionButton(
@@ -76,21 +75,24 @@ fun ArchiveCaptureButton(state: UiState, viewModel: AppViewModel, modifier: Modi
     if (chooseSource) {
         ChoiceDialog(
             title = stringResource(Res.string.archive_capture),
-            options = listOf("take" to stringResource(Res.string.action_take_photo), "pick" to stringResource(Res.string.action_pick_photo)),
+            options = listOf(
+                "take" to stringResource(Res.string.action_take_photo),
+                "pick" to stringResource(Res.string.action_pick_photo),
+            ).filter { sources.canTake || it.first != "take" },
             onDismiss = { chooseSource = false },
             onChoose = { chooseSource = false; if (it == "take") sources.take() else sources.pick() },
         )
     }
 
-    photo?.let { uri ->
+    photo?.let { picked ->
         val collection = state.collection
         ArchiveUploadDialog(
-            uri = uri, archive = archive,
+            photo = picked, archive = archive,
             defaultFolder = collection?.takeIf { it.art == "ordner" }?.ordner.orEmpty(),
             defaultCollection = collection?.takeIf { it.art == "thematisch" }?.slug.orEmpty(),
             suggestPersons = viewModel.personSuggestions(),
             onDismiss = { photo = null },
-            onSave = { photo = null; viewModel.uploadArchivePhoto(uri, it) },
+            onSave = { photo = null; viewModel.uploadArchivePhoto(picked, it) },
         )
     }
 }
@@ -124,7 +126,7 @@ private fun ExifFields(form: ExifForm, suggestPersons: PlaceSuggest?) {
 
 @Composable
 private fun ArchiveUploadDialog(
-    uri: Uri,
+    photo: PhotoFile,
     archive: ArchiveOverview,
     defaultFolder: String,
     defaultCollection: String,
@@ -146,7 +148,7 @@ private fun ArchiveUploadDialog(
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 AsyncImage(
-                    model = uri, contentDescription = null, contentScale = ContentScale.Crop,
+                    model = photo.preview, contentDescription = null, contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxWidth().height(140.dp).clip(RoundedCornerShape(8.dp)),
                 )
                 Choice(

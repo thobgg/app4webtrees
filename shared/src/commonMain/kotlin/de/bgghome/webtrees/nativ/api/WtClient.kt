@@ -1,7 +1,6 @@
 package de.bgghome.webtrees.nativ.api
 
-import android.content.Context
-import de.bgghome.webtrees.nativ.shared.BuildConfig
+import de.bgghome.webtrees.nativ.data.Ablage
 import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.res.*
 import kotlinx.coroutines.Dispatchers
@@ -59,9 +58,14 @@ class WriteInterruptedException(cause: IOException) : IOException(cause.message,
  * _api4webtrees_, bis 1.2 hiess es _webtreesand-api_. Welcher Name gilt, stellt info() fest (404 unter dem
  * neuen -> der alte); die Antwort merkt sich die App, damit auch der Hintergrunddienst sie kennt.
  */
-class WtClient(private val context: Context) {
+/**
+ * @param prefs     eigene Ablage des Clients (gewaehlter Modulname), Datei "wtclient" wie vor der Aufteilung
+ * @param cookies   Ablage der Sitzungs-Cookies, Datei "cookies"
+ * @param userAgent ehrliche Kennung gegenueber dem Server, z. B. "wtAnd/1.16 (Android 15)"
+ */
+class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String) {
 
-    val cookieJar = PersistentCookieJar(context)
+    val cookieJar = PersistentCookieJar(cookies)
 
     /** Fuer Lesezugriffe und Bilder. Darf bei Verbindungsproblemen still wiederholen (OkHttp-Standard) - Schreibzugriffe nicht, siehe writeHttp. */
     val http: OkHttpClient = OkHttpClient.Builder()
@@ -71,7 +75,7 @@ class WtClient(private val context: Context) {
         .addInterceptor { chain ->
             chain.proceed(
                 chain.request().newBuilder()
-                    .header("User-Agent", USER_AGENT)
+                    .header("User-Agent", userAgent)
                     .header("Accept-Language", Locale.getDefault().toLanguageTag() + ",en;q=0.5")
                     .build()
             )
@@ -103,12 +107,11 @@ class WtClient(private val context: Context) {
 
     private var csrf: String = ""
 
-    private val prefs = context.getSharedPreferences("wtclient", Context.MODE_PRIVATE)
 
     /** Name des Moduls in der Route - siehe Klassenkommentar. */
     var module: String
         get() = prefs.getString("module", MODULE) ?: MODULE
-        private set(value) = prefs.edit().putString("module", value).apply()
+        private set(value) = prefs.putString("module", value)
 
     // ── Lesen ────────────────────────────────────────────────────────
 
@@ -409,7 +412,6 @@ class WtClient(private val context: Context) {
 
         /** Modul bis 1.2 (Ordner webtreesand-api) */
         const val LEGACY_MODULE = "_webtreesand-api_"
-        val USER_AGENT = "wtAnd/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
 
         /**
          * Unverschluesselte Adresse (http://)? Android blockiert Klartext ohnehin - die App lehnt sie

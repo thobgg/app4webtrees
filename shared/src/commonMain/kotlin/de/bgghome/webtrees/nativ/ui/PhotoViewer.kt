@@ -45,7 +45,7 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.ArchiveEntry
 import de.bgghome.webtrees.nativ.api.ExifRequest

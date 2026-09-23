@@ -12,6 +12,7 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.add("-opt-in=androidx.compose.ui.ExperimentalComposeUiApi")
     }
 }
 
@@ -33,6 +34,7 @@ compose.desktop {
     application {
         mainClass = "de.bgghome.webtrees.nativ.desktop.MainKt"
         jvmArgs += "-Dwtand.desktopBuild=${property("wtand.desktopBuild")}"
+        jvmArgs += "-Dwtand.versionName=$versionName"
 
         nativeDistributions {
             targetFormats(TargetFormat.Deb, TargetFormat.Msi, TargetFormat.Exe)

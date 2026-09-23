@@ -1,12 +1,11 @@
 package de.bgghome.webtrees.nativ.ui
 
-import android.app.Application
 import org.jetbrains.compose.resources.StringResource
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import de.bgghome.webtrees.nativ.Plattform
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.res.*
-import de.bgghome.webtrees.nativ.WtApp
 import de.bgghome.webtrees.nativ.api.NotJsonException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +26,7 @@ import kotlinx.coroutines.flow.update
  * Jeder Netzaufruf laeuft in viewModelScope; Ergebnisse kommen nur an, wenn der Zustand noch zu ihnen passt
  * (z. B. ist die Suche inzwischen eine andere, wird die Antwort verworfen).
  */
-class AppViewModel(application: Application) : AndroidViewModel(application) {
+class AppViewModel(internal val plattform: Plattform) : ViewModel() {
 
     internal companion object {
         /** Kleinste API-Version des Server-Moduls, mit der diese App arbeiten kann (Feld "api" in Info). */
@@ -47,9 +46,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         const val SIBLING_ROWS = 3
     }
 
-    private val app = application as WtApp
-    internal val client = app.client
-    internal val settings = app.settings
+    internal val client = plattform.client
+    internal val settings = plattform.settings
+
+    /** Fassung der App fuer die Ueber-Zeile im Menue. */
+    val versionName: String get() = plattform.versionName
+
+    /** Ob das Menue die taegliche Erinnerung anbietet (Android ja, Desktop nicht). */
+    val kannErinnern: Boolean get() = plattform.kannErinnern
 
     internal val uiState = MutableStateFlow(UiState(baseUrl = settings.baseUrl, userName = settings.userName))
     val state: StateFlow<UiState> = uiState

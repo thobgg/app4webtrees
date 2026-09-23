@@ -1,9 +1,5 @@
 package de.bgghome.webtrees.nativ.ui
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,18 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
-import java.io.File
 
 /** Reiter des Profils, in dieser Reihenfolge: Ereignisse (Timeline.kt), Medien, Familie (Relatives.kt), Karte (LifeMap.kt). */
 private val TABS = listOf(Res.string.tab_facts, Res.string.tab_media, Res.string.tab_family, Res.string.tab_map)
@@ -81,7 +74,7 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
     val canEdit = detail.canEdit
     val canUpload = canEdit && state.tree?.canUpload == true
     val person = detail.person
-    val photos = rememberPhotoSources { uri -> viewModel.uploadPhoto(uri, person.name) }
+    val photos = rememberPhotoSources { photo -> viewModel.uploadPhoto(photo, person.name) }
 
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Box {
@@ -186,7 +179,9 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                             )
                         }
                         if (canUpload) {
-                            DropdownMenuItem(text = { Text(stringResource(Res.string.action_take_photo)) }, onClick = { addMenu = false; photos.take() })
+                            if (photos.canTake) {
+                                DropdownMenuItem(text = { Text(stringResource(Res.string.action_take_photo)) }, onClick = { addMenu = false; photos.take() })
+                            }
                             DropdownMenuItem(text = { Text(stringResource(Res.string.action_pick_photo)) }, onClick = { addMenu = false; photos.pick() })
                         }
                     }
@@ -231,39 +226,6 @@ private fun ProfileHeader(
             if (!isRoot) OutlinedButton(onClick = onMakeRoot) { Text(stringResource(Res.string.action_make_root)) }
             OutlinedButton(onClick = onOpenWeb) { Text(stringResource(Res.string.chip_open_web)) }
         }
-    }
-}
-
-/** Die zwei Wege zu einem Foto: aus der Galerie waehlen oder mit der Kamera aufnehmen. */
-internal class PhotoSources(val pick: () -> Unit, val take: () -> Unit)
-
-@Composable
-internal fun rememberPhotoSources(onPhoto: (Uri) -> Unit): PhotoSources {
-    val context = LocalContext.current
-
-    // Galerie: der Photo Picker des Systems braucht keine Berechtigung.
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) onPhoto(uri)
-    }
-
-    // Kamera: die Aufnahme landet in einer eigenen Datei im Cache, die nur die Kamera-App beschreiben darf (FileProvider).
-    var cameraUri by remember { mutableStateOf<Uri?>(null) }
-    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
-        val uri = cameraUri
-        if (saved && uri != null) onPhoto(uri)
-    }
-
-    return remember {
-        PhotoSources(
-            pick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-            take = {
-                val folder = File(context.cacheDir, "camera").apply { mkdirs() }
-                val file = File(folder, "aufnahme-${System.currentTimeMillis()}.jpg")
-                val uri = FileProvider.getUriForFile(context, context.packageName + ".files", file)
-                cameraUri = uri
-                camera.launch(uri)
-            },
-        )
     }
 }
 

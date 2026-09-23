@@ -35,12 +35,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.MediaJson
 
@@ -194,7 +193,7 @@ private fun DocumentRow(item: MediaJson, onClick: () -> Unit) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { chip() }
                 } else {
                     Image(
-                        bitmap.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop,
+                        bitmap, contentDescription = null, contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
                     )
                     Surface(Modifier.align(Alignment.BottomEnd).padding(3.dp), shape = RoundedCornerShape(5.dp), color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f)) {

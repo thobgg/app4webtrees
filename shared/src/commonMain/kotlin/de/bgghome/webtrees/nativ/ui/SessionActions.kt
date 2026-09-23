@@ -1,8 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
-import android.app.Application
 import androidx.lifecycle.viewModelScope
-import de.bgghome.webtrees.nativ.shared.BuildConfig
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.Info
 import de.bgghome.webtrees.nativ.api.TreeInfo
@@ -95,7 +93,7 @@ fun AppViewModel.cancelConnect() = uiState.update { it.copy(pendingConnect = nul
  * http:// wird abgelehnt - ausser im Debug-Build, der Klartext erlaubt (debug/AndroidManifest.xml), damit die
  * lokale Testinstanz (php -S) erreichbar bleibt. Im Release blockiert Android Klartext ohnehin.
  */
-internal fun AppViewModel.rejectCleartext(input: String): Boolean = !BuildConfig.DEBUG && WtClient.isCleartext(input)
+internal fun AppViewModel.rejectCleartext(input: String): Boolean = !plattform.isDebug && WtClient.isCleartext(input)
 
 /** Adresse setzen, Einmal-Code einloesen, Baum oeffnen. Eine bestehende Anmeldung an einem anderen Server wird ersetzt. */
 fun AppViewModel.confirmConnect() {

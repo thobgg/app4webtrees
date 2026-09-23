@@ -1,11 +1,7 @@
 package de.bgghome.webtrees.nativ.ui
 
 import org.jetbrains.compose.resources.StringResource
-import android.Manifest
-import android.os.Build
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -45,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import de.bgghome.webtrees.nativ.shared.BuildConfig
 import de.bgghome.webtrees.nativ.res.*
 
 /** Ab dieser Breite: seitliche Leiste und Profil dauerhaft neben dem Baum (Tablet, aufgeklapptes Foldable). */
@@ -215,25 +210,19 @@ fun MainMenu(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit)
     var open by remember { mutableStateOf(false) }
 
     // Benachrichtigungen brauchen ab Android 13 eine Erlaubnis - sie wird erst beim Einschalten erfragt.
-    val askNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) viewModel.setReminders(true)
-    }
+    val askNotifications = rememberNotificationPermission { viewModel.setReminders(true) }
 
     Box {
         IconButton(onClick = { open = true }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu)) }
 
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(text = { Text(stringResource(Res.string.action_reload)) }, onClick = { open = false; viewModel.refresh() })
-            if (viewModel.anniversariesSupported) {
+            if (viewModel.anniversariesSupported && viewModel.kannErinnern) {
                 DropdownMenuItem(
                     text = { Text(stringResource(if (state.reminders) Res.string.menu_reminders_off else Res.string.menu_reminders_on)) },
                     onClick = {
                         open = false
-                        when {
-                            state.reminders -> viewModel.setReminders(false)
-                            Build.VERSION.SDK_INT >= 33 -> askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            else -> viewModel.setReminders(true)
-                        }
+                        if (state.reminders) viewModel.setReminders(false) else askNotifications()
                     },
                 )
             }
@@ -261,7 +250,7 @@ fun MainMenu(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit)
                 text = {
                     Column {
                         Text(
-                            stringResource(Res.string.menu_about, stringResource(Res.string.app_name), BuildConfig.VERSION_NAME),
+                            stringResource(Res.string.menu_about, stringResource(Res.string.app_name), viewModel.versionName),
                             style = MaterialTheme.typography.labelMedium,
                         )
                         Text(stringResource(Res.string.app_author), style = MaterialTheme.typography.labelSmall)

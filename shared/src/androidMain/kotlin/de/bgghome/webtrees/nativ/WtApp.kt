@@ -1,37 +1,34 @@
 package de.bgghome.webtrees.nativ
 
 import android.app.Application
-import coil.ImageLoader
-import coil.ImageLoaderFactory
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.data.Settings
+import de.bgghome.webtrees.nativ.ui.wtImageLoader
 import org.osmdroid.config.Configuration
 import java.io.File
 
-class WtApp : Application(), ImageLoaderFactory {
+class WtApp : Application(), SingletonImageLoader.Factory {
 
-    lateinit var client: WtClient
+    lateinit var plattform: AndroidPlattform
         private set
-    lateinit var settings: Settings
-        private set
+    val client: WtClient get() = plattform.client
+    val settings: Settings get() = plattform.settings
 
     override fun onCreate() {
         super.onCreate()
-        settings = Settings(this)
-        client = WtClient(this).also { it.baseUrl = settings.baseUrl }
+        plattform = AndroidPlattform(this)
 
         // Karte (osmdroid): Kacheln im eigenen Cache-Ordner, ehrliche Kennung gegenueber den OSM-Servern.
         Configuration.getInstance().apply {
-            userAgentValue = WtClient.USER_AGENT
+            userAgentValue = client.userAgent
             osmdroidBasePath = File(cacheDir, "osmdroid")
             osmdroidTileCache = File(cacheDir, "osmdroid/tiles")
         }
     }
 
     // Bilder sind signierte webtrees-Routen und brauchen dieselbe Sitzung (Cookie) wie die API.
-    override fun newImageLoader(): ImageLoader =
-        ImageLoader.Builder(this)
-            .okHttpClient(client.http)
-            .crossfade(true)
-            .build()
+    override fun newImageLoader(context: PlatformContext): ImageLoader = wtImageLoader(context, client)
 }

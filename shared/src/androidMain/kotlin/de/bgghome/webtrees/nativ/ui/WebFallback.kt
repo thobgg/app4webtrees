@@ -30,7 +30,7 @@ import de.bgghome.webtrees.nativ.res.*
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebFallbackScreen(url: String, onClose: () -> Unit) {
+actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
     val app = LocalContext.current.applicationContext as WtApp
 
     Scaffold(

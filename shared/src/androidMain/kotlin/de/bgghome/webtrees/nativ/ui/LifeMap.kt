@@ -29,7 +29,7 @@ import org.osmdroid.views.overlay.Polyline
  * ein Marker je Ereignis mit Koordinaten, in zeitlicher Reihenfolge durch eine Linie verbunden.
  */
 @Composable
-fun LifeMap(facts: List<FactJson>) {
+actual fun LifeMap(facts: List<FactJson>) {
     val stations = facts.filter { it.place?.lat != null && it.place.lng != null }
 
     if (stations.isEmpty()) {

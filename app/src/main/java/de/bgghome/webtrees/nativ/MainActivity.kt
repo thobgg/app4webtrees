@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import de.bgghome.webtrees.nativ.ui.AppRoot
 import de.bgghome.webtrees.nativ.ui.AppViewModel
 import de.bgghome.webtrees.nativ.ui.connect
@@ -13,7 +15,10 @@ import de.bgghome.webtrees.nativ.ui.WtTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: AppViewModel by viewModels()
+    // Das ViewModel bekommt die Plattform der App (SharedPreferences, WorkManager) - es kennt Android selbst nicht mehr.
+    private val viewModel: AppViewModel by viewModels {
+        viewModelFactory { initializer { AppViewModel((application as WtApp).plattform) } }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

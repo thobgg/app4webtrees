@@ -1,13 +1,7 @@
 package de.bgghome.webtrees.nativ.ui
 
-import android.app.Application
-import android.net.Uri
-import android.provider.OpenableColumns
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.res.*
-import de.bgghome.webtrees.nativ.data.ImagePrep
-import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -49,42 +43,26 @@ internal fun AppViewModel.loadMedia(reset: Boolean) {
     }
 }
 
-fun AppViewModel.uploadPhoto(uri: Uri, title: String) = write(Res.string.msg_photo_uploaded) { tree, xref ->
-    val resolver = getApplication<Application>().contentResolver
-    var name = "foto.jpg"
-
-    resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-        if (cursor.moveToFirst()) cursor.getString(0)?.let { name = it }
-    }
-
-    // Verkleinern und drehen (ImagePrep); was sich nicht als Bild lesen laesst, geht unveraendert hoch.
+fun AppViewModel.uploadPhoto(photo: PhotoFile, title: String) = write(Res.string.msg_photo_uploaded) { tree, xref ->
+    // Verkleinern und drehen; was sich nicht als Bild lesen laesst, geht unveraendert hoch.
     // Limit des Servers (meist 2-8 MB) mit etwas Luft fuer den Rest der Anfrage; aeltere Module nennen es nicht.
     val limit = (uiState.value.info?.maxUpload?.takeIf { it > 0 } ?: AppViewModel.DEFAULT_MAX_UPLOAD) * 9 / 10
-    val prepared = withContext(Dispatchers.IO) {
-        runCatching { ImagePrep.toUploadJpeg(resolver, uri, limit) }
-            .onFailure { Log.w("wtAnd", "Bild liess sich nicht verkleinern", it) }
-            .getOrNull()
-    }
-    Log.i("wtAnd", "Upload $name: ${prepared?.size} Bytes vorbereitet, Limit $limit (Server: ${uiState.value.info?.maxUpload})")
-
-    val mime = resolver.getType(uri).orEmpty()
+    val prepared = withContext(Dispatchers.IO) { runCatching { photo.prepareJpeg(limit) }.getOrNull() }
 
     when {
         prepared != null -> {
-            val jpegName = name.substringBeforeLast('.') + ".jpg"
+            val jpegName = photo.name.substringBeforeLast('.') + ".jpg"
             client.uploadMedia(tree, xref, prepared, jpegName, "image/jpeg", title)
         }
         // Ein Bild, das sich nicht verkleinern liess: nicht das riesige Original hinterherschicken - das scheitert
         // am Limit des Servers nur mit einer nichtssagenden Meldung.
-        mime.startsWith("image/") -> throw UserMessageException(text(Res.string.err_image_prepare))
+        photo.mime.startsWith("image/") -> throw UserMessageException(text(Res.string.err_image_prepare))
         else -> {
-            val bytes = withContext(Dispatchers.IO) {
-                resolver.openInputStream(uri)?.use { it.readBytes() } ?: throw IOException("file not readable")
-            }
+            val bytes = withContext(Dispatchers.IO) { photo.readBytes() }
             if (bytes.size > limit) {
                 throw UserMessageException(text(Res.string.err_file_too_large, bytes.size / 1048576 + 1, limit / 1048576))
             }
-            client.uploadMedia(tree, xref, bytes, name, mime.ifEmpty { "application/octet-stream" }, title)
+            client.uploadMedia(tree, xref, bytes, photo.name, photo.mime.ifEmpty { "application/octet-stream" }, title)
         }
     }
 }

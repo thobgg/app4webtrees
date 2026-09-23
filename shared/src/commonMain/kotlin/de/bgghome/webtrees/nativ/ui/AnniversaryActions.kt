@@ -23,5 +23,5 @@ internal fun AppViewModel.loadAnniversaries() {
 fun AppViewModel.setReminders(on: Boolean) {
     settings.reminders = on
     uiState.update { it.copy(reminders = on) }
-    AnniversaryWorker.schedule(getApplication(), on)
+    plattform.setReminders(on)
 }
