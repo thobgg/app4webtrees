@@ -47,6 +47,8 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.platform.LocalDensity
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -104,6 +106,12 @@ fun FamilyTreeView(
     onPlus: (Person) -> Unit,
     onExpand: (n: Int, xref: String) -> Unit,
     modifier: Modifier = Modifier,
+    /** Desktop: Rechtsklick auf eine Karte, mit der Stelle im Baumfenster (fuer das Kontextmenue). */
+    onSecondary: ((Person, Offset) -> Unit)? = null,
+    /** Desktop: Doppelklick auf eine Karte; ohne diesen Weg zoomt der Doppeltipp wie bisher. */
+    onOpen: ((Person) -> Unit)? = null,
+    /** Desktop: kein Vollbild-Knopf, das Fenster selbst laesst sich maximieren. */
+    showFullscreen: Boolean = true,
 ) {
     if (layout == null) {
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -157,9 +165,33 @@ fun FamilyTreeView(
             }
         }
 
+        fun boxAtScreen(p: Offset): TreeBox? =
+            layout.boxAt((p.x - offset.x) / (scale * density), (p.y - offset.y) / (scale * density))?.takeIf { !it.person.isPrivate }
+
         Box(
             Modifier
                 .fillMaxSize()
+                // Maus: das Rad zoomt um den Zeiger, die rechte Taste oeffnet das Kontextmenue einer Karte.
+                // Am Handy kommen diese Ereignisse nicht vor (nur mit angeschlossener Maus).
+                .pointerInput(layout) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull() ?: continue
+                            when {
+                                event.type == PointerEventType.Scroll -> {
+                                    val dy = change.scrollDelta.y
+                                    if (dy != 0f) zoomBy(if (dy < 0) 1.12f else 1 / 1.12f, change.position)
+                                    change.consume()
+                                }
+                                event.type == PointerEventType.Press && event.buttons.isSecondaryPressed && onSecondary != null -> {
+                                    boxAtScreen(change.position)?.let { onSecondary(it.person, change.position) }
+                                    change.consume()
+                                }
+                            }
+                        }
+                    }
+                }
                 .pointerInput(layout) {
                     detectTransformGestures { centroid, pan, zoom, _ ->
                         zoomBy(zoom, centroid)
@@ -168,7 +200,10 @@ fun FamilyTreeView(
                 }
                 .pointerInput(layout) {
                     detectTapGestures(
-                        onDoubleTap = { zoomBy(1.6f, it) },
+                        onDoubleTap = { tap ->
+                            val box = if (onOpen != null) boxAtScreen(tap) else null
+                            if (box != null) onOpen?.invoke(box.person) else zoomBy(1.6f, tap)
+                        },
                         onTap = { tap ->
                             val x = (tap.x - offset.x) / (scale * density)
                             val y = (tap.y - offset.y) / (scale * density)
@@ -242,7 +277,7 @@ fun FamilyTreeView(
         }
 
         Column(Modifier.align(Alignment.BottomEnd).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (!compact || fullscreen) ToolButton(if (fullscreen) "⤡" else "⤢", stringResource(Res.string.tree_fullscreen), onToggleFullscreen)
+            if (showFullscreen && (!compact || fullscreen)) ToolButton(if (fullscreen) "⤡" else "⤢", stringResource(Res.string.tree_fullscreen), onToggleFullscreen)
             ToolButton("◎", stringResource(Res.string.tree_center)) { centerOn(layout.focus) }
             ToolButton("▣", stringResource(Res.string.tree_fit)) { fitAll() }
             if (!compact) {

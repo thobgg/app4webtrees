@@ -19,6 +19,9 @@ import de.bgghome.webtrees.nativ.api.FactJson
  */
 val LocalAppName = staticCompositionLocalOf { "wtAnd" }
 
+/** Desktop-Aufbau aktiv: Handy-Bedienelemente (Titelleiste mit Drei-Punkte-Menue) bleiben weg. */
+val LocalDeskMode = staticCompositionLocalOf { false }
+
 /**
  * Ein Foto, das hochgeladen werden soll - unabhaengig davon, woher es kommt (Android: content://-Adresse aus
  * Galerie oder Kamera, Desktop: Datei). [preview] ist das Modell fuer die Vorschau (Coil kennt beide Arten).

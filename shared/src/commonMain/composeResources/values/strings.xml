@@ -286,4 +286,32 @@
     <string name="err_write_interrupted">The connection was lost before the server answered. Please check whether the change arrived before you repeat it.</string>
     <string name="err_pair">The connect code has expired or was already used. Open the “App” page in webtrees again and tap “Connect now”.</string>
     <string name="err_tree_disabled">The manager has not enabled this family tree for the app.</string>
+    <!-- Desktop (wtWin/wtTux): Menueleiste und Statuszeile -->
+    <string name="desk_menu_file">File</string>
+    <string name="desk_menu_edit">Edit</string>
+    <string name="desk_menu_view">View</string>
+    <string name="desk_menu_person">Person</string>
+    <string name="desk_menu_help">Help</string>
+    <string name="desk_quit">Quit</string>
+    <string name="desk_about">About %1$s</string>
+    <string name="desk_people">People</string>
+    <string name="desk_open_browser">Open webtrees in the browser</string>
+    <string name="desk_about_text">%1$s %2$s – a client for webtrees. Needs the api4webtrees module on the server.</string>
+    <string name="desk_guest">Guest</string>
+    <string name="desk_age">%1$d years</string>
+    <string name="desk_col_event">Event</string>
+    <string name="desk_col_date">Date</string>
+    <string name="desk_col_place">Place / description</string>
+    <string name="desk_siblings">Siblings</string>
+    <string name="desk_children">Children</string>
+    <string name="desk_tab_data">Data</string>
+    <string name="desk_tab_life">Life story</string>
+    <string name="desk_goto">Go to</string>
+    <string name="desk_layout">Layout</string>
+    <string name="desk_layout_navigator">Navigator</string>
+    <string name="desk_layout_tree">Tree in the centre</string>
+    <string name="desk_sheet">Edit person</string>
+    <string name="desk_as_centre">Show as central person</string>
+    <string name="desk_people_count">%1$d people</string>
+    <string name="desk_partners">Partners and children</string>
 </resources>

@@ -38,6 +38,8 @@ import de.bgghome.webtrees.nativ.api.Person
 /** Kopfzeile: Baumname mit Wechsel-Pfeil und Personenzahl - wie beim Vorbild. Rechts das Drei-Punkte-Menue. */
 @Composable
 fun TreeTitleBar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, trailing: @Composable () -> Unit = {}) {
+    // Am Desktop uebernehmen Menueleiste, Arbeitsbereiche und Statuszeile diese Aufgaben.
+    if (LocalDeskMode.current) return
     val tree = state.tree
     val trees = state.info?.trees.orEmpty()
     val canSwitch = trees.size > 1

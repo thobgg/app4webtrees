@@ -154,7 +154,7 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean) {
 
 /** Wie viele Ahnen-Generationen der Baum zeigt (2 bis 6). */
 @Composable
-private fun GenerationsChip(state: UiState, viewModel: AppViewModel) {
+internal fun GenerationsChip(state: UiState, viewModel: AppViewModel) {
     var open by remember { mutableStateOf(false) }
 
     Box {
@@ -175,7 +175,7 @@ private fun GenerationsChip(state: UiState, viewModel: AppViewModel) {
 
 /** Zahnrad: Einstellungen der Baumansicht - wie das Einstellungsblatt beim Vorbild, nur kuerzer. */
 @Composable
-private fun TreeSettings(state: UiState, viewModel: AppViewModel) {
+internal fun TreeSettings(state: UiState, viewModel: AppViewModel) {
     var open by remember { mutableStateOf(false) }
 
     Box {

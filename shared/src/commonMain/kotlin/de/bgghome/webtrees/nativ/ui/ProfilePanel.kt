@@ -25,6 +25,8 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +49,7 @@ import de.bgghome.webtrees.nativ.api.Person
 private val TABS = listOf(Res.string.tab_facts, Res.string.tab_media, Res.string.tab_family, Res.string.tab_map)
 
 /** Welcher Dialog gerade offen ist - hoechstens einer zur Zeit. */
-private sealed interface ProfileDialog {
+internal sealed interface ProfileDialog {
     data object DeletePerson : ProfileDialog
     data class Unlink(val family: String, val person: Person) : ProfileDialog
     data object NewFact : ProfileDialog
@@ -75,13 +77,49 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
     val canUpload = canEdit && state.tree?.canUpload == true
     val person = detail.person
     val photos = rememberPhotoSources { photo -> viewModel.uploadPhoto(photo, person.name) }
+    val desk = LocalDeskMode.current
+
+    // Was sich hinzufuegen laesst: Ereignis, Verwandte, Familienereignis, Foto - am Handy im runden Knopf, am Desktop im Kopf.
+    val addMenuItems: @Composable () -> Unit = {
+        DropdownMenuItem(
+            text = { Text(stringResource(Res.string.action_add_event)) },
+            onClick = { addMenu = false; dialog = ProfileDialog.NewFact },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(Res.string.action_add_relative)) },
+            onClick = { addMenu = false; viewModel.requestAddRelative(person.xref) },
+        )
+        if (detail.spouseFamilies.isNotEmpty()) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.action_add_family_event)) },
+                onClick = {
+                    addMenu = false
+                    val only = detail.spouseFamilies.singleOrNull()
+                    dialog = if (only != null) ProfileDialog.NewFamilyFact(only.xref) else ProfileDialog.PickFamily
+                },
+            )
+        }
+        if (canUpload) {
+            if (photos.canTake) {
+                DropdownMenuItem(text = { Text(stringResource(Res.string.action_take_photo)) }, onClick = { addMenu = false; photos.take() })
+            }
+            DropdownMenuItem(text = { Text(stringResource(Res.string.action_pick_photo)) }, onClick = { addMenu = false; photos.pick() })
+        }
+    }
 
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Box {
             Column(Modifier.fillMaxSize()) {
                 if (state.loadingDetail || state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
 
-                Box(Modifier.fillMaxWidth()) {
+                if (desk) {
+                    DeskProfileHeader(
+                        detail, isRoot = state.root == person.xref, canEdit = canEdit, canUpload = canUpload,
+                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick,
+                        addMenu = addMenu, onAddMenu = { addMenu = it }, addMenuItems = addMenuItems,
+                        onDelete = { dialog = ProfileDialog.DeletePerson },
+                    )
+                } else Box(Modifier.fillMaxWidth()) {
                     ProfileHeader(
                         detail, isRoot = state.root == person.xref, canUpload = canUpload,
                         onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick,
@@ -113,7 +151,7 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                 // Verschiebbar: vier Reiter passen in das schmale Tablet-Panel sonst nur mit Zeilenumbruch.
                 ScrollableTabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface, edgePadding = 4.dp) {
                     TABS.forEachIndexed { index, title ->
-                        val label = stringResource(title).uppercase()
+                        val label = stringResource(title).let { if (desk) it else it.uppercase() }
                         val withCount = index == 1 && detail.media.isNotEmpty()
                         Tab(
                             selected = tab == index, onClick = { viewModel.setDetailTab(index) },
@@ -149,8 +187,8 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                 }
             }
 
-            // Runder Aktionsknopf: Ereignis, Verwandte, Familienereignis, Foto
-            if (canEdit) {
+            // Runder Aktionsknopf: Ereignis, Verwandte, Familienereignis, Foto (am Desktop steckt das im Kopf)
+            if (canEdit && !desk) {
                 Box(Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
                     // Klein gehalten: er liegt ueber der Liste und soll moeglichst wenig verdecken.
                     SmallFloatingActionButton(
@@ -159,32 +197,7 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                     ) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.action_add))
                     }
-                    DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(Res.string.action_add_event)) },
-                            onClick = { addMenu = false; dialog = ProfileDialog.NewFact },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(Res.string.action_add_relative)) },
-                            onClick = { addMenu = false; viewModel.requestAddRelative(person.xref) },
-                        )
-                        if (detail.spouseFamilies.isNotEmpty()) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.action_add_family_event)) },
-                                onClick = {
-                                    addMenu = false
-                                    val only = detail.spouseFamilies.singleOrNull()
-                                    dialog = if (only != null) ProfileDialog.NewFamilyFact(only.xref) else ProfileDialog.PickFamily
-                                },
-                            )
-                        }
-                        if (canUpload) {
-                            if (photos.canTake) {
-                                DropdownMenuItem(text = { Text(stringResource(Res.string.action_take_photo)) }, onClick = { addMenu = false; photos.take() })
-                            }
-                            DropdownMenuItem(text = { Text(stringResource(Res.string.action_pick_photo)) }, onClick = { addMenu = false; photos.pick() })
-                        }
-                    }
+                    DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) { addMenuItems() }
                 }
             }
         }
@@ -229,9 +242,63 @@ private fun ProfileHeader(
     }
 }
 
+/** Kopf der Personentafel am Desktop: Bild links, Name und Lebensdaten daneben, darunter schlichte Knoepfe. */
+@Composable
+private fun DeskProfileHeader(
+    detail: IndividualDetail,
+    isRoot: Boolean,
+    canEdit: Boolean,
+    canUpload: Boolean,
+    onMakeRoot: () -> Unit,
+    onOpenWeb: () -> Unit,
+    onPickPhoto: () -> Unit,
+    addMenu: Boolean,
+    onAddMenu: (Boolean) -> Unit,
+    addMenuItems: @Composable () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val person = detail.person
+    val relationship = detail.relationship.replaceFirstChar { it.uppercase() }
+    Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Avatar(person, 64.dp, if (canUpload) Modifier.clip(RoundedCornerShape(32.dp)).clickable(onClick = onPickPhoto) else Modifier)
+            Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                Text(person.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (person.lifespan.isNotBlank()) Text(person.lifespan, style = MaterialTheme.typography.bodyMedium)
+                if (relationship.isNotEmpty()) {
+                    Text(relationship, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+        Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (canEdit) {
+                Box {
+                    TextButton(onClick = { onAddMenu(true) }) {
+                        Icon(Icons.Default.Add, contentDescription = null, Modifier.padding(end = 4.dp))
+                        Text(stringResource(Res.string.action_add))
+                    }
+                    DropdownMenu(expanded = addMenu, onDismissRequest = { onAddMenu(false) }) { addMenuItems() }
+                }
+            }
+            if (!isRoot) TextButton(onClick = onMakeRoot) { Text(stringResource(Res.string.action_make_root)) }
+            TextButton(onClick = onOpenWeb) { Text(stringResource(Res.string.chip_open_web)) }
+            if (canEdit) {
+                var more by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { more = true }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu)) }
+                    DropdownMenu(expanded = more, onDismissRequest = { more = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(Res.string.action_delete_person)) }, onClick = { more = false; onDelete() })
+                    }
+                }
+            }
+        }
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+}
+
 /** Die Dialoge des Profils - je nach dem, was gerade in `dialog` steht. */
 @Composable
-private fun ProfileDialogs(
+internal fun ProfileDialogs(
     dialog: ProfileDialog?,
     state: UiState,
     detail: IndividualDetail,
@@ -291,7 +358,7 @@ private fun ProfileDialogs(
 }
 
 /** Ereignisse mit Ort, zeitlich geordnet: die eigenen plus Heirat & Co. aus den Partnerschaften - fuer die Karte. */
-private fun mapFacts(detail: IndividualDetail): List<FactJson> =
+internal fun mapFacts(detail: IndividualDetail): List<FactJson> =
     (detail.facts + detail.spouseFamilies.flatMap { it.facts })
         .filter { it.place != null }
         .sortedBy { it.date?.jd?.takeIf { jd -> jd > 0 } ?: Int.MAX_VALUE }

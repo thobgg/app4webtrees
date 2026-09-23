@@ -9,16 +9,15 @@ import androidx.compose.ui.window.rememberWindowState
 import coil3.SingletonImageLoader
 import de.bgghome.webtrees.nativ.Desktop
 import de.bgghome.webtrees.nativ.DesktopPlattform
-import de.bgghome.webtrees.nativ.ui.AppRoot
+import de.bgghome.webtrees.nativ.desk.DeskRoot
+import de.bgghome.webtrees.nativ.desk.DeskTheme
 import de.bgghome.webtrees.nativ.ui.AppViewModel
 import de.bgghome.webtrees.nativ.ui.LocalAppName
-import de.bgghome.webtrees.nativ.ui.WtTheme
 import de.bgghome.webtrees.nativ.ui.wtImageLoader
 
 /**
- * Etappe 2 (23.09.2026): dieselbe Oberflaeche wie am Handy im Fenster - Anmeldung, Baum, Profil, Suche, Fotos.
- * Ab 840 dp Breite zeigt sie schon heute Leiste und Profil neben dem Baum; das Fenster-Layout (Menueleiste,
- * drei Spalten) folgt in der naechsten Etappe.
+ * wtWin / wtTux: derselbe Kern wie wtAnd, am Schreibtisch im Aufbau "Baum im Mittelpunkt" (desk/DeskRoot.kt) -
+ * Menueleiste, Arbeitsbereiche, Personenliste, Baum, Personentafel, Statuszeile (Etappe 3, 23.09.2026).
  */
 fun main() {
     val plattform = DesktopPlattform().also { Desktop.plattform = it }
@@ -32,7 +31,7 @@ fun main() {
             state = rememberWindowState(width = 1280.dp, height = 820.dp),
         ) {
             CompositionLocalProvider(LocalAppName provides plattform.appName) {
-                WtTheme { AppRoot(viewModel) }
+                DeskTheme { DeskRoot(viewModel, onQuit = ::exitApplication) }
             }
         }
     }

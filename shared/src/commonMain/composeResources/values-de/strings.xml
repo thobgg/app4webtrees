@@ -281,4 +281,32 @@
     <string name="err_write_interrupted">Die Verbindung brach ab, bevor der Server geantwortet hat. Bitte prüfe, ob die Änderung angekommen ist, bevor du sie wiederholst.</string>
     <string name="err_pair">Der Verbinden-Code ist abgelaufen oder wurde schon benutzt. Öffne in webtrees die Seite „App“ erneut und tippe auf „Jetzt verbinden“.</string>
     <string name="err_tree_disabled">Dieser Stammbaum ist vom Verwalter nicht für die App freigegeben.</string>
+    <!-- Desktop (wtWin/wtTux): Menueleiste und Statuszeile -->
+    <string name="desk_menu_file">Datei</string>
+    <string name="desk_menu_edit">Bearbeiten</string>
+    <string name="desk_menu_view">Ansicht</string>
+    <string name="desk_menu_person">Person</string>
+    <string name="desk_menu_help">Hilfe</string>
+    <string name="desk_quit">Beenden</string>
+    <string name="desk_about">Über %1$s</string>
+    <string name="desk_people">Personen</string>
+    <string name="desk_open_browser">webtrees im Browser öffnen</string>
+    <string name="desk_about_text">%1$s %2$s – ein Programm für webtrees. Braucht auf dem Server das Modul api4webtrees.</string>
+    <string name="desk_guest">Gast</string>
+    <string name="desk_age">%1$d Jahre</string>
+    <string name="desk_col_event">Ereignis</string>
+    <string name="desk_col_date">Datum</string>
+    <string name="desk_col_place">Ort / Beschreibung</string>
+    <string name="desk_siblings">Geschwister</string>
+    <string name="desk_children">Kinder</string>
+    <string name="desk_tab_data">Daten</string>
+    <string name="desk_tab_life">Lebenslauf</string>
+    <string name="desk_goto">Gehe zu</string>
+    <string name="desk_layout">Aufbau</string>
+    <string name="desk_layout_navigator">Navigator</string>
+    <string name="desk_layout_tree">Baum im Mittelpunkt</string>
+    <string name="desk_sheet">Person bearbeiten</string>
+    <string name="desk_as_centre">Als Zentralperson zeigen</string>
+    <string name="desk_people_count">%1$d Personen</string>
+    <string name="desk_partners">Partner und Kinder</string>
 </resources>
