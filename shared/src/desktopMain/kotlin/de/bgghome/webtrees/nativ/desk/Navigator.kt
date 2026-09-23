@@ -141,18 +141,22 @@ fun Navigator(
     val quer = rememberScrollState(); val hoch = rememberScrollState()
     val basis = LocalDensity.current
     val g = state.ancestorGenerations.coerceIn(2, 7)
-    val masse = chartMasse(g, familie, familien.isNotEmpty())
+    val eng = chartMasse(g, familie, familien.isNotEmpty(), COL)
     // Einpassen wie beim Vorbild: die Tafel fuellt das Fenster, der Zoom vergroessert oder verkleinert davon ausgehend.
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val rand = 24.dp
         // Massgeblich sind Vorfahren und Infokasten; eine lange Kinderspalte rollt, statt alles zu verkleinern. Nie unter 70 Prozent.
         // Bei wenigen Generationen darf die Tafel wachsen (bis 150 Prozent), bei vielen nie unter 70 Prozent schrumpfen.
-        val fit = minOf((maxWidth - rand) / masse.breite, (maxHeight - rand) / masse.hoeheFit).coerceIn(0.7f, 1.5f)
+        val fit = minOf((maxWidth - rand) / eng.breite, (maxHeight - rand) / eng.hoeheFit).coerceIn(0.7f, 1.5f)
         val skala = fit * zoom
+        // Bleibt Breite uebrig, ruecken die Spalten auseinander, bis die Tafel das Fenster ausfuellt (Vorbild).
+        val frei = (maxWidth - rand) / skala - eng.breite
+        val col = if (g > 1 && frei > 0.dp) minOf(COL + frei / (g - 1), BOX_W + 40.dp) else COL
+        val masse = chartMasse(g, familie, familien.isNotEmpty(), col)
         CompositionLocalProvider(LocalFarben provides farben, LocalDensity provides Density(basis.density * skala, basis.fontScale)) {
             Box(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
-                    Chart(detail, zentral, ahnen, g, canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb, masse,
+                    Chart(detail, zentral, ahnen, g, canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb, masse, col,
                         familie, fIndex, familien.size, onNaechste = { gewaehlt = (fIndex + 1) % familien.size })
                 }
                 SenkrechteLeiste(hoch)
@@ -165,7 +169,7 @@ fun Navigator(
 /** Die Masse der Tafel in dp vor dem Zeichnen - fuer das Einpassen. */
 private class ChartMasse(val slots: Int, val slotH: Dp, val ancH: Dp, val kinder: Int, val partner: Int, val xZentral: Dp, val centerY: Dp, val kinderTop: Dp, val breite: Dp, val hoehe: Dp, val hoeheFit: Dp)
 
-private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, hatFamilien: Boolean): ChartMasse {
+private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, hatFamilien: Boolean, col: Dp): ChartMasse {
     val slots = 1 shl (g - 1)
     // Zeilenabstand gut zwei Kastenhoehen: nur so passt der Elternkasten senkrecht zwischen die beiden Grosseltern,
     // wenn sich die Spalten waagerecht ueberlappen (Vorbild). Die Kinderspalte bleibt dicht (BOX_H + GAP).
@@ -183,7 +187,7 @@ private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson
     val hoeheFit = maxOf(centerY + ancH / 2, centerY + BOX_H / 2 + partnerH + 30.dp) + 24.dp
     // Die Kinderspalte rollt in ihrem eigenen Bereich; die Tafel wird durch sie nicht hoeher.
     val hoehe = hoeheFit
-    val breite = xZentral + COL * (g - 1) + BOX_W + 24.dp
+    val breite = xZentral + col * (g - 1) + BOX_W + 24.dp
     return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe, hoeheFit)
 }
 
@@ -191,7 +195,7 @@ private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson
 private fun Chart(
     detail: IndividualDetail?, zentral: Person, ahnen: Map<Int, de.bgghome.webtrees.nativ.api.Ancestor>, g: Int, canEdit: Boolean,
     mitNachkommen: Set<String>, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, m: ChartMasse,
-    familie: de.bgghome.webtrees.nativ.api.FamilyJson?, fIndex: Int, anzahlFamilien: Int, onNaechste: () -> Unit,
+    col: Dp, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, fIndex: Int, anzahlFamilien: Int, onNaechste: () -> Unit,
 ) {
     val slots = m.slots; val slotH = m.slotH; val ancH = m.ancH
     val kinder = familie?.children.orEmpty()
@@ -201,7 +205,7 @@ private fun Chart(
     val line = MaterialTheme.colorScheme.outline
 
     fun top(n: Int): Dp { val gg = gen(n); val span = slots shr gg; val i = n - (1 shl gg); return centerY - ancH / 2 + slotH * (i * span) + (slotH * span - BOX_H) / 2 }
-    fun left(n: Int): Dp = xZentral + COL * gen(n)
+    fun left(n: Int): Dp = xZentral + col * gen(n)
     val kinderTop = m.kinderTop
     val kinderBereich = hoehe - kinderTop - 12.dp
 
@@ -212,7 +216,7 @@ private fun Chart(
             // von dort waagerecht zu den Elternkaesten - auch zu leeren
             for (n in 1 until (1 shl (g - 1))) {
                 if (n !in ahnen) continue
-                val xm = (left(n) + LINE_X).toPx()
+                val xm = minOf(left(n) + LINE_X, left(2 * n) - 12.dp).toPx()
                 val yV = (top(2 * n) + BOX_H / 2).toPx(); val yM = (top(2 * n + 1) + BOX_H / 2).toPx()
                 drawLine(line, Offset(xm, yV), Offset(xm, yM), w)
                 drawLine(line, Offset(xm, yV), Offset(left(2 * n).toPx(), yV), w); drawLine(line, Offset(xm, yM), Offset(left(2 * n + 1).toPx(), yM), w)
