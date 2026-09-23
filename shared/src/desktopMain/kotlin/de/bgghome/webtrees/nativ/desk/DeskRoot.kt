@@ -320,6 +320,12 @@ private fun FrameWindowScope.DeskMenuBar(
             Item(stringResource(Res.string.desk_web_import), enabled = manager, onClick = { web("/tree/$t/import") })
         }
         Menu(stringResource(Res.string.desk_menu_view), enabled = main) {
+            Menu(stringResource(Res.string.desk_appearance)) {
+                val w = DeskErscheinung.wahl.value
+                RadioButtonItem(stringResource(Res.string.desk_light), selected = w == DeskErscheinung.Wahl.Hell, onClick = { DeskErscheinung.setzen(DeskErscheinung.Wahl.Hell) })
+                RadioButtonItem(stringResource(Res.string.desk_dark), selected = w == DeskErscheinung.Wahl.Dunkel, onClick = { DeskErscheinung.setzen(DeskErscheinung.Wahl.Dunkel) })
+                RadioButtonItem(stringResource(Res.string.desk_system), selected = w == DeskErscheinung.Wahl.System, onClick = { DeskErscheinung.setzen(DeskErscheinung.Wahl.System) })
+            }
             Menu(stringResource(Res.string.desk_layout)) {
                 RadioButtonItem(stringResource(Res.string.desk_layout_navigator), selected = layout == DeskLayout.Navigator, onClick = { onLayout(DeskLayout.Navigator) })
                 RadioButtonItem(stringResource(Res.string.desk_layout_tree), selected = layout == DeskLayout.TreeCentre, onClick = { onLayout(DeskLayout.TreeCentre) })

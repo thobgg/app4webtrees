@@ -7,6 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 
 /**
  * Festes Farbschema (Petrol) statt der Geraetefarben: Die App soll auf jedem Geraet gleich aussehen.
@@ -51,7 +52,7 @@ private val LightTree = TreeColors(Color(0xFF4FA9C4), Color(0xFFE58A86), Color(0
 private val DarkTree = TreeColors(Color(0xFF5FB6CF), Color(0xFFE39892), Color(0xFF7D8887), Color(0xFF6A7473), Color(0xFF2A3131), Color(0xFF4A5453))
 
 val treeColors: TreeColors
-    @Composable @ReadOnlyComposable get() = if (isSystemInDarkTheme()) DarkTree else LightTree
+    @Composable @ReadOnlyComposable get() = if (MaterialTheme.colorScheme.background.luminance() < 0.5f) DarkTree else LightTree
 
 fun TreeColors.forSex(sex: String): Color = when (sex) {
     "M" -> male
@@ -59,7 +60,8 @@ fun TreeColors.forSex(sex: String): Color = when (sex) {
     else -> unknown
 }
 
+/** [dark] = null folgt dem System; der Desktop waehlt selbst (Ansicht -> Erscheinungsbild, Voreinstellung hell). */
 @Composable
-fun WtTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) Dark else Light, content = content)
+fun WtTheme(dark: Boolean? = null, content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = if (dark ?: isSystemInDarkTheme()) Dark else Light, content = content)
 }

@@ -359,4 +359,8 @@ Personenfenster: Bild-auf/Bild-ab blättert durch die Liste, Esc schließt, ein 
 Tasten: Strg+F Gehe zu · Strg+E Person bearbeiten · Strg+N Verwandte hinzufügen · Strg+P Personenblatt drucken · Alt+Links zurück · Alt+Rechts vor · Alt+Pos1 Startperson · Strg+Umschalt+C Personentext kopieren · F5 neu laden · F1 Hilfe.
 
 GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Menü webtrees öffnet diese Seiten im Browser.</string>
+    <string name="desk_appearance">Erscheinungsbild</string>
+    <string name="desk_light">Hell</string>
+    <string name="desk_dark">Dunkel</string>
+    <string name="desk_system">Wie Windows</string>
 </resources>

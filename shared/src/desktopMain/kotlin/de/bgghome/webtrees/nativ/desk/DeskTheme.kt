@@ -12,6 +12,7 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -22,9 +23,18 @@ import de.bgghome.webtrees.nativ.ui.WtTheme
  * Das Aussehen am Schreibtisch: dieselben Farben wie wtAnd, aber dichter und eckiger - Schrift eine Stufe kleiner,
  * kaum Rundungen, keine 48-dp-Tippflaechen. So wirkt das Fenster wie ein Arbeitsprogramm, nicht wie ein Handy.
  */
+/** Hell, dunkel oder wie das System - gilt fuer alle Fenster; Voreinstellung hell wie bei Arbeitsprogrammen ueblich. */
+object DeskErscheinung {
+    enum class Wahl { Hell, Dunkel, System }
+    private val prefs = de.bgghome.webtrees.nativ.data.DesktopAblage("desk")
+    val wahl = mutableStateOf(Wahl.entries.firstOrNull { it.name == prefs.getString("erscheinung", null) } ?: Wahl.Hell)
+    fun setzen(w: Wahl) { wahl.value = w; prefs.putString("erscheinung", w.name) }
+    val dunkel: Boolean? get() = when (wahl.value) { Wahl.Hell -> false; Wahl.Dunkel -> true; Wahl.System -> null }
+}
+
 @Composable
 fun DeskTheme(content: @Composable () -> Unit) {
-    WtTheme {
+    WtTheme(dark = DeskErscheinung.dunkel) {
         MaterialTheme(
             colorScheme = MaterialTheme.colorScheme,
             typography = MaterialTheme.typography.dichter(),

@@ -364,4 +364,8 @@ Person window: Page Up/Page Down move through the list, Esc closes, double-click
 Keys: Ctrl+F go to · Ctrl+E edit person · Ctrl+N add relative · Ctrl+P print person sheet · Alt+Left back · Alt+Right forward · Alt+Home start person · Ctrl+Shift+C copy person text · F5 reload · F1 help.
 
 GEDCOM, merging, places and sources are managed by webtrees itself – the webtrees menu opens those pages in the browser.</string>
+    <string name="desk_appearance">Appearance</string>
+    <string name="desk_light">Light</string>
+    <string name="desk_dark">Dark</string>
+    <string name="desk_system">Like the system</string>
 </resources>

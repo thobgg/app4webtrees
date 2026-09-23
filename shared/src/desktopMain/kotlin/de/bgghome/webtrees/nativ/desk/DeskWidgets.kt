@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -48,7 +50,9 @@ fun BoxScope.WaagerechteLeiste(state: ScrollState) {
 /** Rahmen, solange das Element den Tastaturfokus hat. Vor clickable/combinedClickable setzen. */
 fun Modifier.fokusRahmen(): Modifier = composed {
     var fokus by remember { mutableStateOf(false) }
-    val farbe = if (fokus) MaterialTheme.colorScheme.primary else Color.Transparent
+    // Nur bei Tastaturbedienung sichtbar - nach einem Mausklick bliebe der Rahmen sonst stehen (Rueckmeldung Thomas, 23.09.2026).
+    val tastatur = LocalInputModeManager.current.inputMode == InputMode.Keyboard
+    val farbe = if (fokus && tastatur) MaterialTheme.colorScheme.primary else Color.Transparent
     this.onFocusChanged { fokus = it.isFocused }.border(1.5.dp, farbe, MaterialTheme.shapes.extraSmall)
 }
 

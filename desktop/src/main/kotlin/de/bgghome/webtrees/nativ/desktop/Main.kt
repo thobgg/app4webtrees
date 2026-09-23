@@ -54,10 +54,21 @@ private class FensterAblage {
 
     fun laden(): WindowState {
         val w = zahl("win_w"); val h = zahl("win_h"); val x = zahl("win_x"); val y = zahl("win_y")
+        // Bildschirm in dp (Windows-Skalierung beruecksichtigt): nie groesser oeffnen, als Platz ist.
+        val schirm = runCatching {
+            val gc = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            val skala = gc.defaultTransform.scaleX.toFloat()
+            val b = gc.bounds; val rand = java.awt.Toolkit.getDefaultToolkit().getScreenInsets(gc)
+            DpSize(((b.width - rand.left - rand.right) / skala).dp, ((b.height - rand.top - rand.bottom) / skala).dp)
+        }.getOrNull()
+        val erstesMal = w == null || h == null
+        val breite = minOf(w ?: 1280f, schirm?.width?.value ?: 1280f)
+        val hoehe = minOf(h ?: 820f, (schirm?.height?.value ?: 820f) - 40f)
         return WindowState(
-            placement = if (prefs.getBoolean("win_max", false)) WindowPlacement.Maximized else WindowPlacement.Floating,
+            // Erster Start: maximiert - ein Arbeitsprogramm nutzt den ganzen Bildschirm (Rueckmeldung Thomas, 23.09.2026).
+            placement = if (erstesMal || prefs.getBoolean("win_max", false)) WindowPlacement.Maximized else WindowPlacement.Floating,
             position = if (x != null && y != null) WindowPosition(x.dp, y.dp) else WindowPosition.PlatformDefault,
-            size = DpSize((w ?: 1280f).dp, (h ?: 820f).dp),
+            size = DpSize(breite.dp, hoehe.dp),
         )
     }
 
