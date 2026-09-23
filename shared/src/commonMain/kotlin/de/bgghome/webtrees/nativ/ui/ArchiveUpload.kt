@@ -142,7 +142,7 @@ private fun ArchiveUploadDialog(
     val noneLabel = stringResource(Res.string.option_none)
     val thematic = archive.sammlungen.filter { it.art == "thematisch" }
 
-    AlertDialog(
+    WtAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.archive_upload_title)) },
         text = {
@@ -192,7 +192,7 @@ private fun ArchiveUploadDialog(
 fun ExifEditDialog(entry: ArchiveEntry, suggestPersons: PlaceSuggest?, onDismiss: () -> Unit, onSave: (ExifRequest) -> Unit) {
     val form = remember(entry.pfad) { ExifForm(entry.beschreibung, entry.datumIso.ifEmpty { entry.datum }, entry.exifPersonen, entry.keywords) }
 
-    AlertDialog(
+    WtAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.viewer_edit_exif)) },
         text = {

@@ -1,5 +1,11 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.platform.SystemFont
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.foundation.ScrollbarStyle
+import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -27,12 +33,30 @@ fun DeskTheme(content: @Composable () -> Unit) {
                 large = RoundedCornerShape(6.dp), extraLarge = RoundedCornerShape(8.dp),
             ),
         ) {
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp, LocalDeskMode provides true, content = content)
+            CompositionLocalProvider(
+                LocalMinimumInteractiveComponentSize provides 0.dp,
+                LocalDeskMode provides true,
+                LocalScrollbarStyle provides ScrollbarStyle(
+                    minimalHeight = 24.dp, thickness = 10.dp, shape = RoundedCornerShape(2.dp), hoverDurationMillis = 200,
+                    unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                    hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                ),
+                content = content,
+            )
         }
     }
 }
 
-private fun TextStyle.kleiner(): TextStyle = copy(fontSize = fontSize * 0.9f, lineHeight = lineHeight * 0.9f)
+/** Unter Windows die Schrift des Systems (Segoe UI), sonst die Vorgabe der Plattform. */
+@OptIn(ExperimentalTextApi::class)
+private val systemSchrift: FontFamily? =
+    if (System.getProperty("os.name").orEmpty().startsWith("Windows")) FontFamily(
+        SystemFont("Segoe UI", FontWeight.Normal), SystemFont("Segoe UI Semibold", FontWeight.SemiBold),
+        SystemFont("Segoe UI", FontWeight.Bold), SystemFont("Segoe UI Semibold", FontWeight.Medium),
+    ) else null
+
+private fun TextStyle.kleiner(): TextStyle =
+    copy(fontSize = fontSize * 0.9f, lineHeight = lineHeight * 0.9f, fontFamily = systemSchrift ?: fontFamily)
 
 private fun Typography.dichter() = Typography(
     displayLarge = displayLarge.kleiner(), displayMedium = displayMedium.kleiner(), displaySmall = displaySmall.kleiner(),

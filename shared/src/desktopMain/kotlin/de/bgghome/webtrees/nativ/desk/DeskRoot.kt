@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
@@ -323,6 +324,7 @@ private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, 
     Column(
         Modifier
             .background(if (active) colors.surface else colors.surfaceVariant, MaterialTheme.shapes.extraSmall)
+            .fokusRahmen()
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .width(64.dp),
@@ -435,7 +437,9 @@ private fun PersonIndex(state: UiState, viewModel: AppViewModel, openWeb: (Strin
                     Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            LazyColumn(Modifier.fillMaxSize()) {
+            val list = rememberLazyListState()
+            Box(Modifier.fillMaxSize()) {
+            LazyColumn(Modifier.fillMaxSize(), state = list) {
                 itemsIndexed(state.people, key = { _, p -> p.xref }) { index, person ->
                     if (index >= state.people.size - 10) LaunchedEffect(state.nextPage) { viewModel.loadMore() }
                     IndexRow(person, selected = person.xref == state.selected, root = person.xref == state.root, viewModel, openWeb)
@@ -443,6 +447,8 @@ private fun PersonIndex(state: UiState, viewModel: AppViewModel, openWeb: (Strin
                 if (state.loadingPeople) {
                     item { Box(Modifier.fillMaxWidth().padding(12.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp) } }
                 }
+            }
+            ListenLeiste(list)
             }
         }
     }
@@ -492,6 +498,7 @@ private fun IndexRow(person: Person, selected: Boolean, root: Boolean, viewModel
             Modifier
                 .fillMaxWidth()
                 .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
+                .fokusRahmen()
                 .clickable(enabled = !person.isPrivate) { viewModel.setRoot(person.xref) }
                 .padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,

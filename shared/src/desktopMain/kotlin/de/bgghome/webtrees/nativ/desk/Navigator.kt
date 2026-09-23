@@ -93,19 +93,29 @@ fun Navigator(state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> 
 
     Row(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // Links: Zentralperson, Partner, Kinder
-        Column(
-            Modifier.width(300.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            if (detail != null) {
-                CentreCard(detail, onOpen = { onOpenSheet(detail.person.xref) })
-                FamilyList(detail, viewModel, onOpenSheet, openWeb)
+        val links = rememberScrollState()
+        Box(Modifier.width(300.dp).fillMaxHeight()) {
+            Column(
+                Modifier.fillMaxSize().verticalScroll(links).padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                if (detail != null) {
+                    CentreCard(detail, onOpen = { onOpenSheet(detail.person.xref) })
+                    FamilyList(detail, viewModel, onOpenSheet, openWeb)
+                }
             }
+            SenkrechteLeiste(links)
         }
         // Rechts: die Ahnentafel
-        Box(Modifier.weight(1f).fillMaxHeight().horizontalScroll(rememberScrollState()).verticalScroll(rememberScrollState()).padding(12.dp)) {
-            val pedigree = state.pedigree
-            if (pedigree != null) AncestorChart(pedigree.ancestors.associateBy { it.n }.mapValues { it.value.person }, state.ancestorGenerations, state.root, viewModel, onOpenSheet, openWeb)
+        val quer = rememberScrollState()
+        val hoch = rememberScrollState()
+        Box(Modifier.weight(1f).fillMaxHeight()) {
+            Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
+                val pedigree = state.pedigree
+                if (pedigree != null) AncestorChart(pedigree.ancestors.associateBy { it.n }.mapValues { it.value.person }, state.ancestorGenerations, state.root, viewModel, onOpenSheet, openWeb)
+            }
+            SenkrechteLeiste(hoch)
+            WaagerechteLeiste(quer)
         }
     }
 }
@@ -221,6 +231,7 @@ private fun PersonBox(person: Person, centre: Boolean, viewModel: AppViewModel, 
                 .clip(MaterialTheme.shapes.extraSmall)
                 .background(c.fill)
                 .border(if (centre) 2.dp else 1.dp, if (centre) MaterialTheme.colorScheme.onSurface else c.border, MaterialTheme.shapes.extraSmall)
+                .fokusRahmen()
                 .combinedClickable(enabled = !person.isPrivate, onClick = { viewModel.setRoot(person.xref) }, onDoubleClick = { onOpenSheet(person.xref) })
                 .padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,

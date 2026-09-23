@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -175,7 +176,9 @@ private fun FactTable(detail: IndividualDetail, canEdit: Boolean, onEdit: (FactR
             Text(stringResource(Res.string.desk_col_date), Modifier.weight(0.22f), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
             Text(stringResource(Res.string.desk_col_place), Modifier.weight(0.5f), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         }
-        LazyColumn(Modifier.weight(1f).fillMaxWidth()) {
+        val list = rememberLazyListState()
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+        LazyColumn(Modifier.fillMaxSize(), state = list) {
             itemsIndexed(rows) { i, row ->
                 val f = row.fact
                 val where = listOfNotNull(f.value.takeIf { it.isNotBlank() && f.tag != "NAME" }, f.place?.name?.takeIf { it.isNotBlank() }).joinToString(" · ")
@@ -183,6 +186,7 @@ private fun FactTable(detail: IndividualDetail, canEdit: Boolean, onEdit: (FactR
                 Row(
                     Modifier.fillMaxWidth()
                         .background(if (i == selected) colors.secondaryContainer else if (i % 2 == 1) colors.surfaceContainerLow else colors.surface)
+                        .fokusRahmen()
                         .combinedClickable(onClick = { selected = i }, onDoubleClick = { if (canEdit) onEdit(row) })
                         .padding(horizontal = 8.dp, vertical = 5.dp),
                 ) {
@@ -192,6 +196,8 @@ private fun FactTable(detail: IndividualDetail, canEdit: Boolean, onEdit: (FactR
                 }
                 HorizontalDivider(color = colors.outlineVariant)
             }
+        }
+        ListenLeiste(list)
         }
         if (canEdit) {
             Row(Modifier.fillMaxWidth().padding(6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -212,12 +218,16 @@ private fun RelativesColumn(detail: IndividualDetail, viewModel: AppViewModel, m
     val partners = detail.spouseFamilies.mapNotNull { it.spouse }
     val children = detail.spouseFamilies.flatMap { it.children }
     Column(modifier.background(MaterialTheme.colorScheme.surface)) {
-        LazyColumn(Modifier.weight(1f)) {
+        val list = rememberLazyListState()
+        Box(Modifier.weight(1f)) {
+        LazyColumn(Modifier.fillMaxSize(), state = list) {
             item { Group(stringResource(Res.string.rel_father), listOfNotNull(parents?.husband), viewModel) }
             item { Group(stringResource(Res.string.rel_mother), listOfNotNull(parents?.wife), viewModel) }
             item { Group(stringResource(Res.string.desk_siblings), siblings, viewModel) }
             item { Group(stringResource(Res.string.rel_partner), partners, viewModel) }
             item { Group(stringResource(Res.string.desk_children), children, viewModel) }
+        }
+        ListenLeiste(list)
         }
         if (detail.canEdit) {
             TextButton(onClick = { viewModel.requestAddRelative(self) }, modifier = Modifier.padding(4.dp)) {

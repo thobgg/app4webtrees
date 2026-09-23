@@ -36,7 +36,7 @@ import de.bgghome.webtrees.nativ.res.*
 
 @Composable
 fun ConfirmDialog(title: String, text: String, confirm: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(
+    WtAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { if (text.isNotEmpty()) Text(text) },
@@ -48,7 +48,7 @@ fun ConfirmDialog(title: String, text: String, confirm: String, onDismiss: () ->
 /** Einfache Auswahl aus einer kurzen Liste (z. B. zu welcher Partnerschaft ein Ereignis gehoert). */
 @Composable
 fun ChoiceDialog(title: String, options: List<Pair<String, String>>, onDismiss: () -> Unit, onChoose: (String) -> Unit) {
-    AlertDialog(
+    WtAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -82,7 +82,7 @@ fun FactDialog(
     val originalNote = fact?.notes?.firstOrNull().orEmpty()
     val isNameOrNote = fact?.tag == "NAME" || fact?.tag == "NOTE" || (fact == null && tag?.tag == "NOTE")
 
-    AlertDialog(
+    WtAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(fact?.label ?: stringResource(Res.string.fact_new)) },
         text = {
@@ -189,7 +189,7 @@ fun RelativeDialog(target: RelativeTarget, suggestPlaces: PlaceSuggest?, onDismi
     val marriageDate = rememberDateInput()
     var marriagePlace by remember { mutableStateOf("") }
 
-    AlertDialog(
+    WtAlertDialog(
         onDismissRequest = onDismiss,
         title = {
             val only = target.relations.singleOrNull()
@@ -278,3 +278,26 @@ fun relationLabel(relation: String): String = stringResource(
         else -> Res.string.rel_child
     }
 )
+
+/**
+ * Der Dialog der App. Am Handy der Material-Dialog wie gehabt ("Abbrechen" vor "OK"); am Desktop in der
+ * Windows-Reihenfolge - erst die Bestaetigung, dann "Abbrechen", beide rechts.
+ */
+@Composable
+internal fun WtAlertDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    dismissButton: (@Composable () -> Unit)? = null,
+    title: (@Composable () -> Unit)? = null,
+    text: (@Composable () -> Unit)? = null,
+) {
+    if (LocalDeskMode.current && dismissButton != null) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = title, text = text,
+            confirmButton = { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { confirmButton(); dismissButton() } },
+        )
+    } else {
+        AlertDialog(onDismissRequest = onDismissRequest, confirmButton = confirmButton, dismissButton = dismissButton, title = title, text = text)
+    }
+}
