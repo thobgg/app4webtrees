@@ -57,6 +57,8 @@ compose.desktop {
                 menuGroup = "Office"
                 packageName = "wttux"
                 appRelease = property("wtand.desktopBuild") as String
+                // Dasselbe Symbol wie wtAnd; ohne Angabe zeigt das Menue das Java-Standardsymbol.
+                iconFile.set(project.file("icons/app.png"))
             }
             windows {
                 packageVersion = windowsVersion
@@ -67,6 +69,7 @@ compose.desktop {
                 // NIE aendern: nur mit gleicher Kennung ersetzt eine neue
                 // Version die alte, statt zweimal im Startmenue zu stehen.
                 upgradeUuid = "b3f1d7a2-4c58-4e9b-8f60-1d2e7a9c5b41"
+                iconFile.set(project.file("icons/app.ico"))
             }
         }
     }
