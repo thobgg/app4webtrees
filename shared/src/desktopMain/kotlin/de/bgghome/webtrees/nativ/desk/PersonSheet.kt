@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.material.icons.filled.Place
@@ -91,7 +93,7 @@ fun PersonSheet(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Un
     DialogWindow(
         onCloseRequest = onClose,
         title = title,
-        state = rememberDialogState(width = 980.dp, height = 680.dp),
+        state = rememberDialogState(width = 1100.dp, height = 700.dp),
         onPreviewKeyEvent = { e ->
             if (e.type != KeyEventType.KeyDown) false else when (e.key) {
                 Key.Escape -> { onClose(); true }
@@ -146,17 +148,26 @@ private fun SheetTabs(state: UiState, detail: IndividualDetail, viewModel: AppVi
     )
 
     Column(modifier.background(MaterialTheme.colorScheme.surface)) {
-        ScrollableTabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface, edgePadding = 0.dp) {
-            val icons = listOf(Icons.AutoMirrored.Filled.List, Icons.Default.Person, Icons.Default.Favorite, Icons.Default.Create, Icons.Default.Info, PhotoIcon, Icons.Default.DateRange, Icons.Default.Place)
+        // Kompakte Reiter mit Symbol, alle sichtbar; bei zu wenig Platz waagerecht rollbar.
+        val icons = listOf(Icons.AutoMirrored.Filled.List, Icons.Default.Person, Icons.Default.Favorite, Icons.Default.Create, Icons.Default.Info, PhotoIcon, Icons.Default.DateRange, Icons.Default.Place)
+        val tabScroll = androidx.compose.foundation.rememberScrollState()
+        Row(Modifier.fillMaxWidth().horizontalScroll(tabScroll)) {
             labels.forEachIndexed { i, l ->
-                Tab(selected = tab == i, onClick = { tab = i }, text = {
+                val aktiv = tab == i
+                Column(
+                    Modifier.clickable { tab = i }.padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(icons[i], contentDescription = null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
-                        Text(stringResource(l), style = MaterialTheme.typography.labelLarge)
+                        Icon(icons[i], contentDescription = null, Modifier.size(15.dp), tint = if (aktiv) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(5.dp))
+                        Text(stringResource(l), style = MaterialTheme.typography.labelLarge, color = if (aktiv) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, maxLines = 1)
                     }
-                })
+                    Box(Modifier.padding(top = 4.dp).height(2.dp).fillMaxWidth().background(if (aktiv) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Transparent))
+                }
             }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when (tab) {
                 0 -> FactTable(detail, canEdit, onEdit = { r -> dialog = ProfileDialog.EditFact(r.fact, r.record) }, onDelete = { r -> dialog = ProfileDialog.DeleteFact(r.fact, r.record) }, onNew = { dialog = ProfileDialog.NewFact })

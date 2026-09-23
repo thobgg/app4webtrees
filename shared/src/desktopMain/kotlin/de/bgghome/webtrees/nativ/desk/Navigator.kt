@@ -130,19 +130,26 @@ fun Navigator(
     // Kinder, die selbst Kinder haben (aus dem Nachkommenbaum) - bekommen einen Pfeil nach links.
     val mitNachkommen = state.descendants?.tree?.families?.flatMap { it.children }?.filter { k -> k.families.any { it.children.isNotEmpty() } }?.map { it.person.xref }?.toSet().orEmpty()
 
+    // Wie beim Vorbild eine Partnerschaft auf einmal: Partner und deren Kinder; der Pfeil unter dem Partner wechselt.
+    val familien = detail?.spouseFamilies.orEmpty()
+    var gewaehlt by remember(state.root) { mutableStateOf(-1) }
+    val fIndex = if (gewaehlt in familien.indices) gewaehlt else familien.indexOfFirst { it.spouse != null }.coerceAtLeast(0)
+    val familie = familien.getOrNull(fIndex)
     val quer = rememberScrollState(); val hoch = rememberScrollState()
     val basis = LocalDensity.current
     val g = state.ancestorGenerations.coerceIn(2, 7)
-    val masse = chartMasse(g, detail)
+    val masse = chartMasse(g, familie, familien.isNotEmpty())
     // Einpassen wie beim Vorbild: die Tafel fuellt das Fenster, der Zoom vergroessert oder verkleinert davon ausgehend.
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val rand = 24.dp
-        val fit = minOf((maxWidth - rand) / masse.breite, (maxHeight - rand) / masse.hoehe, 1.15f).coerceAtLeast(0.35f)
+        // Massgeblich sind Vorfahren und Infokasten; eine lange Kinderspalte rollt, statt alles zu verkleinern. Nie unter 70 Prozent.
+        val fit = minOf((maxWidth - rand) / masse.breite, (maxHeight - rand) / masse.hoeheFit, 1.15f).coerceIn(0.7f, 1.15f)
         val skala = fit * zoom
         CompositionLocalProvider(LocalFarben provides farben, LocalDensity provides Density(basis.density * skala, basis.fontScale)) {
             Box(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxSize().horizontalScroll(quer).verticalScroll(hoch).padding(12.dp)) {
-                    Chart(detail, zentral, ahnen, g, canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb, masse)
+                    Chart(detail, zentral, ahnen, g, canEdit, mitNachkommen, viewModel, onOpenSheet, openWeb, masse,
+                        familie, fIndex, familien.size, onNaechste = { gewaehlt = (fIndex + 1) % familien.size })
                 }
                 SenkrechteLeiste(hoch)
                 WaagerechteLeiste(quer)
@@ -152,15 +159,14 @@ fun Navigator(
 }
 
 /** Die Masse der Tafel in dp vor dem Zeichnen - fuer das Einpassen. */
-private class ChartMasse(val slots: Int, val slotH: Dp, val ancH: Dp, val kinder: Int, val partner: Int, val xZentral: Dp, val centerY: Dp, val kinderTop: Dp, val breite: Dp, val hoehe: Dp)
+private class ChartMasse(val slots: Int, val slotH: Dp, val ancH: Dp, val kinder: Int, val partner: Int, val xZentral: Dp, val centerY: Dp, val kinderTop: Dp, val breite: Dp, val hoehe: Dp, val hoeheFit: Dp)
 
-private fun chartMasse(g: Int, detail: IndividualDetail?): ChartMasse {
+private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, hatFamilien: Boolean): ChartMasse {
     val slots = 1 shl (g - 1)
     val slotH = BOX_H + GAP
     val ancH = slotH * slots
-    val familien = detail?.spouseFamilies.orEmpty()
-    val kinder = familien.flatMap { it.children }.distinctBy { it.xref }.size
-    val partner = familien.count { it.spouse != null }
+    val kinder = familie?.children?.size ?: 0
+    val partner = if (hatFamilien) 1 else 0
     val xZentral = BOX_W + 56.dp
     // Die Zentralperson sitzt in der Mitte der Vorfahren; nur wenn ihr Kasten in den Infokasten ragt, rutscht alles nach unten.
     val centerY = maxOf(ancH / 2, INFO_H + ICON_ROW + BOX_H / 2)
@@ -168,20 +174,21 @@ private fun chartMasse(g: Int, detail: IndividualDetail?): ChartMasse {
     val kinderH = slotH * kinder
     val kinderTop = maxOf(centerY - kinderH / 2, INFO_H + ICON_ROW)
     val partnerH = (BOX_H + GAP) * partner
-    val hoehe = maxOf(centerY + ancH / 2, kinderTop + kinderH, centerY + BOX_H / 2 + partnerH) + 24.dp
+    val hoeheFit = maxOf(centerY + ancH / 2, centerY + BOX_H / 2 + partnerH + 30.dp) + 24.dp
+    val hoehe = maxOf(hoeheFit, kinderTop + kinderH + 24.dp)
     val breite = xZentral + BOX_W + (BOX_W + COL_GAP) * (g - 1) + 24.dp
-    return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe)
+    return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe, hoeheFit)
 }
 
 @Composable
 private fun Chart(
     detail: IndividualDetail?, zentral: Person, ahnen: Map<Int, de.bgghome.webtrees.nativ.api.Ancestor>, g: Int, canEdit: Boolean,
     mitNachkommen: Set<String>, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, m: ChartMasse,
+    familie: de.bgghome.webtrees.nativ.api.FamilyJson?, fIndex: Int, anzahlFamilien: Int, onNaechste: () -> Unit,
 ) {
     val slots = m.slots; val slotH = m.slotH; val ancH = m.ancH
-    val familien = detail?.spouseFamilies.orEmpty()
-    val kinder = familien.flatMap { it.children }.distinctBy { it.xref }
-    val partner = familien.mapNotNull { it.spouse }
+    val kinder = familie?.children.orEmpty()
+    val partner = listOfNotNull(familie?.spouse)
     val xZentral = m.xZentral; val centerY = m.centerY
     val hoehe = m.hoehe; val breite = m.breite
     val line = MaterialTheme.colorScheme.outline
@@ -212,14 +219,14 @@ private fun Chart(
                 kinder.indices.forEach { i -> val y = (kinderTop + slotH * i + BOX_H / 2).toPx(); drawLine(line, Offset(BOX_W.toPx(), y), Offset(xb, y), w) }
             }
             // Partner: senkrecht unter der Zentralperson
-            if (partner.isNotEmpty()) {
+            if (familie != null) {
                 val x = (xZentral + 40.dp).toPx()
-                drawLine(line, Offset(x, (centerY + BOX_H / 2).toPx()), Offset(x, (centerY + BOX_H / 2 + (BOX_H + GAP) * (partner.size - 1) + GAP).toPx()), w * 2)
+                drawLine(line, Offset(x, (centerY + BOX_H / 2).toPx()), Offset(x, (centerY + BOX_H / 2 + GAP).toPx()), w * 2)
             }
         }
 
         // Infokasten oben links
-        if (detail != null) InfoBox(detail, Modifier.offset(0.dp, 0.dp).size(BOX_W * 2 + 56.dp, INFO_H - 12.dp), onOpen = { onOpenSheet(zentral.xref) })
+        if (detail != null) InfoBox(detail, fIndex, Modifier.offset(0.dp, 0.dp).size(BOX_W * 2 + 56.dp, INFO_H - 12.dp), onOpen = { onOpenSheet(zentral.xref) })
 
         // Kinder
         kinder.forEachIndexed { i, k ->
@@ -233,8 +240,18 @@ private fun Chart(
             }
         }
         PersonBox(zentral, Art.Zentral, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral, centerY - BOX_H / 2))
-        partner.forEachIndexed { i, p ->
-            PersonBox(p, Art.Partner, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral + 40.dp, centerY + BOX_H / 2 + GAP + (BOX_H + GAP) * i))
+        val partnerY = centerY + BOX_H / 2 + GAP
+        if (familie != null) {
+            val p = familie.spouse
+            if (p != null) PersonBox(p, Art.Partner, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral + 40.dp, partnerY))
+            else LeerBox(if (zentral.sex == "F") "M" else "F", Modifier.offset(xZentral + 40.dp, partnerY), onClick = if (canEdit) ({ viewModel.requestAddRelative(zentral.xref) }) else null, text = "…")
+            // Mehrere Partnerschaften: Pfeil wechselt zur naechsten, mit Zaehler
+            if (anzahlFamilien > 1) {
+                Row(Modifier.offset(xZentral + 40.dp, partnerY + BOX_H + 4.dp).clickable(onClick = onNaechste).padding(2.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("➜", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("  ${fIndex + 1} / $anzahlFamilien", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
         // Vorfahren, leere Kaesten fuer unbekannte Eltern bekannter Personen
         for (n in 2 until (1 shl g)) {
@@ -251,7 +268,7 @@ private fun Chart(
 
 /** Infokasten: grosses Portraet, Name in Registerform, Geburt, Ehen mit roemischer Nummer, Tod, Beruf. */
 @Composable
-private fun InfoBox(detail: IndividualDetail, modifier: Modifier, onOpen: () -> Unit) {
+private fun InfoBox(detail: IndividualDetail, gewaehlt: Int, modifier: Modifier, onOpen: () -> Unit) {
     val p = detail.person
     val colors = MaterialTheme.colorScheme
     fun ort(f: FactJson?) = f?.let { listOfNotNull(it.date?.text?.takeIf(String::isNotBlank), it.place?.short?.takeIf(String::isNotBlank)).joinToString(" ") }.orEmpty()
@@ -272,7 +289,8 @@ private fun InfoBox(detail: IndividualDetail, modifier: Modifier, onOpen: () -> 
             detail.spouseFamilies.forEachIndexed { i, fam ->
                 val wann = ort(fam.facts.firstOrNull { it.tag == "MARR" })
                 val wer = fam.spouse?.name ?: "…"
-                Text("⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  $wer" + (if (wann.isNotBlank()) "  ($wann)" else ""), fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  $wer" + (if (wann.isNotBlank()) "  ($wann)" else ""), fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    fontWeight = if (i == gewaehlt) FontWeight.SemiBold else FontWeight.Normal)
             }
             if (tod.isNotBlank()) Text("†  $tod", fontSize = 14.sp)
         }
@@ -324,12 +342,13 @@ private fun PersonBox(
 
 /** Leerer Kasten fuer einen unbekannten Elternteil; mit Schreibrecht legt ein Klick die Person an. */
 @Composable
-private fun LeerBox(sex: String, modifier: Modifier, onClick: (() -> Unit)?) {
+private fun LeerBox(sex: String, modifier: Modifier, onClick: (() -> Unit)?, text: String = "") {
     val c = boxColors(sex)
     Box(
         modifier.size(BOX_W, BOX_H).background(c.fill.copy(alpha = 0.55f)).border(1.dp, c.border.copy(alpha = 0.6f))
             .let { if (onClick != null) it.clickable(onClick = onClick) else it },
-    )
+        contentAlignment = Alignment.CenterStart,
+    ) { if (text.isNotEmpty()) Text(text, Modifier.padding(start = 10.dp), fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
 }
 
 @Composable
