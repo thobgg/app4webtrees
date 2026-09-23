@@ -250,7 +250,7 @@ fun MainMenu(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit)
                 text = {
                     Column {
                         Text(
-                            stringResource(Res.string.menu_about, stringResource(Res.string.app_name), viewModel.versionName),
+                            stringResource(Res.string.menu_about, LocalAppName.current, viewModel.versionName),
                             style = MaterialTheme.typography.labelMedium,
                         )
                         Text(stringResource(Res.string.app_author), style = MaterialTheme.typography.labelSmall)

@@ -2,6 +2,7 @@ package de.bgghome.webtrees.nativ.ui
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import de.bgghome.webtrees.nativ.api.FactJson
@@ -10,6 +11,13 @@ import de.bgghome.webtrees.nativ.api.FactJson
  * Was jede Plattform selbst zeichnet oder selbst holt (Aufteilung 23.09.2026). Android behaelt, was es schon
  * hatte (osmdroid, PdfRenderer, WebView, Photo Picker und Kamera); der Desktop setzt eigene Stuecke ein.
  */
+
+/**
+ * Name des Programms auf dieser Plattform: wtAnd (Android), wtWin (Windows), wtTux (Linux) - Entscheidung Thomas,
+ * 23.09.2026. Das Gesamtprojekt heisst app4webtrees; die Namen folgen dem Muster, das der webtrees-Autor akzeptiert
+ * (kein "webtrees" vorn, das nach offiziellem Produkt klingt).
+ */
+val LocalAppName = staticCompositionLocalOf { "wtAnd" }
 
 /**
  * Ein Foto, das hochgeladen werden soll - unabhaengig davon, woher es kommt (Android: content://-Adresse aus

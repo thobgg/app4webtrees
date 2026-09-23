@@ -71,7 +71,7 @@ fun SetupScreen(state: UiState, onSubmit: (String) -> Unit) {
     var url by rememberSaveable { mutableStateOf(state.baseUrl) }
 
     StartFrame(
-        title = stringResource(Res.string.app_name),
+        title = LocalAppName.current,
         subtitle = stringResource(Res.string.setup_subtitle),
         error = state.error,
     ) {

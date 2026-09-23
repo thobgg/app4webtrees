@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desktop
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -8,12 +9,11 @@ import androidx.compose.ui.window.rememberWindowState
 import coil3.SingletonImageLoader
 import de.bgghome.webtrees.nativ.Desktop
 import de.bgghome.webtrees.nativ.DesktopPlattform
-import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.ui.AppRoot
 import de.bgghome.webtrees.nativ.ui.AppViewModel
+import de.bgghome.webtrees.nativ.ui.LocalAppName
 import de.bgghome.webtrees.nativ.ui.WtTheme
 import de.bgghome.webtrees.nativ.ui.wtImageLoader
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * Etappe 2 (23.09.2026): dieselbe Oberflaeche wie am Handy im Fenster - Anmeldung, Baum, Profil, Suche, Fotos.
@@ -28,10 +28,12 @@ fun main() {
         val viewModel = remember { AppViewModel(plattform) }
         Window(
             onCloseRequest = ::exitApplication,
-            title = stringResource(Res.string.app_name),
+            title = plattform.appName,
             state = rememberWindowState(width = 1280.dp, height = 820.dp),
         ) {
-            WtTheme { AppRoot(viewModel) }
+            CompositionLocalProvider(LocalAppName provides plattform.appName) {
+                WtTheme { AppRoot(viewModel) }
+            }
         }
     }
 }

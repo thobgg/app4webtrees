@@ -10,6 +10,8 @@ import java.io.File
  * Keine Erinnerung im Hintergrund (kannErinnern bleibt false, das Menue bietet sie nicht an).
  */
 class DesktopPlattform : Plattform {
+    /** wtWin unter Windows, wtTux unter Linux (Thomas, 23.09.2026). */
+    val appName: String = if (System.getProperty("os.name").orEmpty().startsWith("Windows")) "wtWin" else "wtTux"
     /** Kommt als -Dwtand.versionName aus desktop/build.gradle.kts (dieselbe Nummer wie die APK). */
     override val versionName: String = System.getProperty("wtand.versionName") ?: "dev"
     /** http:// fuer den lokalen Testserver nur mit WTAND_DEBUG=1 - wie der Debug-Build auf Android. */
@@ -17,7 +19,7 @@ class DesktopPlattform : Plattform {
     override val settings = Settings(DesktopAblage("settings"))
     override val client = WtClient(
         DesktopAblage("wtclient"), DesktopAblage("cookies"),
-        userAgent = "app4webtrees/$versionName (${System.getProperty("os.name")})",
+        userAgent = "$appName/$versionName (${System.getProperty("os.name")})",
     ).also { it.baseUrl = settings.baseUrl }
     override val cacheOrdner: File by lazy {
         val basis = System.getenv("XDG_CACHE_HOME")?.takeIf { it.isNotBlank() }?.let(::File)

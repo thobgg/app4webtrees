@@ -30,6 +30,11 @@ dependencies {
 val versionName = property("wtand.versionName") as String
 val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.0" else versionName
 
+// Ein Code, zwei Namen (Thomas, 23.09.2026): wtWin unter Windows, wtTux unter Linux. Jedes Paket wird auf
+// seinem eigenen System gebaut, darum entscheidet das System, auf dem Gradle laeuft.
+val onWindows = System.getProperty("os.name").orEmpty().startsWith("Windows")
+val appName = if (onWindows) "wtWin" else "wtTux"
+
 compose.desktop {
     application {
         mainClass = "de.bgghome.webtrees.nativ.desktop.MainKt"
@@ -38,26 +43,25 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Deb, TargetFormat.Msi, TargetFormat.Exe)
-            // Arbeitsname; der endgueltige Name des Windows-Programms ist noch
-            // offen (Thomas, 23.09.2026) - vor dem ERSTEN Windows-Paket festlegen,
-            // denn upgradeUuid und Paketname duerfen sich danach nicht mehr aendern.
-            packageName = "wtAnd"
+            // NIE mehr aendern, sobald das erste Paket verteilt ist: Installationsordner und
+            // Startmenue haengen daran (wie upgradeUuid unten).
+            packageName = appName
             modules("java.instrument", "java.prefs", "jdk.unsupported")
             // Dieselbe Nummer wie die APK (gradle.properties). Windows
             // Installer verlangt rein numerisch x.y.z.
             packageVersion = versionName
-            description = "wtAnd - webtrees client"
+            description = "$appName - client for webtrees (app4webtrees)"
             vendor = "bgg-home.de"
 
             linux {
                 menuGroup = "Office"
-                packageName = "wtand"
+                packageName = "wttux"
                 appRelease = property("wtand.desktopBuild") as String
             }
             windows {
                 packageVersion = windowsVersion
                 perUserInstall = true
-                menuGroup = "wtAnd"
+                menuGroup = "wtWin"
                 shortcut = true
                 dirChooser = true
                 // NIE aendern: nur mit gleicher Kennung ersetzt eine neue
