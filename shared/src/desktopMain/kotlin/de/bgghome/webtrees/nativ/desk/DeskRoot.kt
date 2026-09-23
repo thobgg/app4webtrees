@@ -1,5 +1,11 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.Texte
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
@@ -98,13 +104,41 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     var layout by remember { mutableStateOf(DeskLayout.load()) }
     var sheetOpen by remember { mutableStateOf(false) }
     var goTo by remember { mutableStateOf(false) }
+    var hilfe by remember { mutableStateOf(false) }
+    var liste by remember { mutableStateOf<ListenArt?>(null) }
     val openSheet: (String) -> Unit = { xref -> viewModel.select(xref); sheetOpen = true }
+
+    // Zurueck/Vor zwischen Zentralpersonen: das ViewModel kennt nur den Rueckweg, den Vorwaertsweg haelt der Desktop.
+    val vorwaerts = remember { mutableStateListOf<String>() }
+    var eigenerSchritt by remember { mutableStateOf(false) }
+    LaunchedEffect(state.root) { if (!eigenerSchritt) vorwaerts.clear(); eigenerSchritt = false }
+    val nav = DeskNav(
+        kannZurueck = state.rootHistory.isNotEmpty(), kannVor = vorwaerts.isNotEmpty(),
+        zurueck = { if (state.rootHistory.isNotEmpty()) { state.root?.let { vorwaerts.add(it) }; eigenerSchritt = true; viewModel.back() } },
+        vor = { vorwaerts.removeLastOrNull()?.let { eigenerSchritt = true; viewModel.setRoot(it) } },
+    )
+
+    // Farbkodierung nach Mary Hill, bezogen auf die Startperson; die Wahl bleibt gespeichert.
+    var farbkodierung by remember { mutableStateOf(DeskLayout.prefs.getBoolean("farbkodierung", false)) }
+    val farben by produceState(emptyMap<String, Color>(), farbkodierung, state.home, state.tree?.name) {
+        val tree = state.tree?.name; val home = state.home
+        value = if (!farbkodierung || tree == null || home == null) emptyMap() else runCatching {
+            val ahnen = viewModel.client.pedigree(tree, home, 7).ancestors.associate { it.person.xref to MaryHill.fuer(it.n) }
+            val nachkommen = mutableMapOf<String, Color>()
+            fun sammeln(k: de.bgghome.webtrees.nativ.api.DescendantNode) { k.families.forEach { f -> f.children.forEach { c -> nachkommen[c.person.xref] = MaryHill.nachkommen; sammeln(c) } } }
+            sammeln(viewModel.client.descendants(tree, home, 4).tree)
+            nachkommen + ahnen
+        }.getOrElse { emptyMap() }
+    }
+    val drucke = DeskDruck(state, viewModel, LocalAppName.current)
 
     DeskMenuBar(
         state, viewModel, openWeb, layout = layout, onLayout = { layout = it; DeskLayout.save(it) },
         onSearch = { if (layout == DeskLayout.Navigator) goTo = true else runCatching { search.requestFocus() } },
         onSheet = { (state.detail?.person?.xref ?: state.root)?.let(openSheet) },
         onAbout = { about = true }, onQuit = onQuit,
+        nav = nav, drucke = drucke, onListe = { liste = it }, onHilfe = { hilfe = true },
+        farbkodierung = farbkodierung, onFarbkodierung = { farbkodierung = it; DeskLayout.prefs.putBoolean("farbkodierung", it) },
     )
 
     // Vor der Anmeldung und bei der Baumwahl: die Startbildschirme der App, mittig im Fenster.
@@ -127,7 +161,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize()) {
             if (layout == DeskLayout.Navigator) {
-                ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { about = true })
+                ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { hilfe = true }, nav = nav, drucke = drucke)
             } else {
                 WorkspaceBar(state, viewModel)
             }
@@ -139,7 +173,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
                 when (state.section) {
                     Section.Home -> HomeSection(state, viewModel, openWeb)
                     Section.Photos -> PhotosSection(state, viewModel, openWeb)
-                    else -> Navigator(state, viewModel, openSheet, openWeb)
+                    else -> Navigator(state, viewModel, openSheet, openWeb, farben)
                 }
             } else Row(Modifier.weight(1f).fillMaxWidth()) {
                 PersonIndex(state, viewModel, openWeb, search, Modifier.width(280.dp).fillMaxHeight())
@@ -193,6 +227,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
 
     if (sheetOpen && state.detail != null) PersonSheet(state, viewModel, openWeb, onClose = { sheetOpen = false })
     if (goTo) GoToDialog(state, viewModel, openWeb, onClose = { goTo = false })
+    liste?.let { art -> ListenFenster(art, state, viewModel, onClose = { liste = null }) }
+    if (hilfe) HilfeFenster(onClose = { hilfe = false })
 
     if (about) {
         AlertDialog(
@@ -222,6 +258,8 @@ private fun FrameWindowScope.DeskMenuBar(
     state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit,
     layout: DeskLayout, onLayout: (DeskLayout) -> Unit,
     onSearch: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, onQuit: () -> Unit,
+    nav: DeskNav, drucke: DeskDruck, onListe: (ListenArt) -> Unit, onHilfe: () -> Unit,
+    farbkodierung: Boolean, onFarbkodierung: (Boolean) -> Unit,
 ) {
     val main = state.screen == Screen.Main
     val loggedIn = state.info?.user?.loggedIn == true
@@ -231,6 +269,11 @@ private fun FrameWindowScope.DeskMenuBar(
             if (main && (state.info?.trees?.size ?: 0) > 1) Item(stringResource(Res.string.menu_switch_tree), onClick = viewModel::showTreePicker)
             Item(stringResource(Res.string.action_reload), enabled = main, shortcut = KeyShortcut(Key.F5), onClick = viewModel::refresh)
             Item(stringResource(Res.string.desk_open_browser), enabled = state.baseUrl.isNotEmpty(), onClick = { openWeb(state.detail?.person?.url ?: state.baseUrl) })
+            Separator()
+            Item(stringResource(Res.string.desk_print_sheet), enabled = main && state.root != null, shortcut = KeyShortcut(Key.P, ctrl = true), onClick = drucke::personenblatt)
+            Item(stringResource(Res.string.desk_pdf_sheet), enabled = main && state.root != null, onClick = drucke::personenblattPdf)
+            Item(stringResource(Res.string.desk_print_chart), enabled = main && state.pedigree != null, onClick = drucke::ahnentafel)
+            Item(stringResource(Res.string.desk_pdf_chart), enabled = main && state.pedigree != null, onClick = drucke::ahnentafelPdf)
             Separator()
             if (loggedIn) {
                 Item(stringResource(Res.string.menu_sign_out_user, state.info?.user?.userName.orEmpty()), onClick = viewModel::logout)
@@ -249,7 +292,32 @@ private fun FrameWindowScope.DeskMenuBar(
                 shortcut = KeyShortcut(Key.N, ctrl = true), onClick = { selected?.let { viewModel.requestAddRelative(it.person.xref) } })
             Item(stringResource(Res.string.chip_open_web), enabled = selected != null, onClick = { selected?.let { openWeb(it.person.url) } })
             Separator()
-            Item(stringResource(Res.string.action_back), enabled = viewModel.canGoBack(), shortcut = KeyShortcut(Key.DirectionLeft, alt = true), onClick = { viewModel.back() })
+            Item(stringResource(Res.string.action_back), enabled = nav.kannZurueck, shortcut = KeyShortcut(Key.DirectionLeft, alt = true), onClick = nav.zurueck)
+            Item(stringResource(Res.string.desk_forward), enabled = nav.kannVor, shortcut = KeyShortcut(Key.DirectionRight, alt = true), onClick = nav.vor)
+            Item(stringResource(Res.string.desk_copy_text), enabled = state.detail != null, shortcut = KeyShortcut(Key.C, ctrl = true, shift = true), onClick = { state.detail?.let(::personentextKopieren) })
+        }
+        Menu(stringResource(Res.string.desk_menu_create), enabled = main) {
+            Item(stringResource(Res.string.desk_list_ancestors), enabled = state.root != null, onClick = { onListe(ListenArt.Ahnen) })
+            Item(stringResource(Res.string.desk_list_descendants), enabled = state.root != null, onClick = { onListe(ListenArt.Stamm) })
+            Item(stringResource(Res.string.desk_list_events), onClick = { onListe(ListenArt.Ereignisse) })
+            Separator()
+            Item(stringResource(Res.string.desk_title_sheet, state.detail?.person?.name ?: "…"), enabled = state.root != null, onClick = { onListe(ListenArt.Personenblatt) })
+            Item(stringResource(Res.string.desk_print_chart), enabled = state.pedigree != null, onClick = drucke::ahnentafel)
+        }
+        Menu(stringResource(Res.string.desk_menu_webtrees), enabled = main && state.tree != null) {
+            val t = state.tree?.name.orEmpty()
+            val manager = state.tree?.role == "manager"
+            fun web(route: String) = runCatching { viewModel.client.url(route, emptyMap()).toString() }.getOrNull()?.let(openWeb)
+            Item(stringResource(Res.string.desk_web_places), onClick = { web("/tree/$t/place-list") })
+            Item(stringResource(Res.string.desk_web_sources), onClick = { web("/tree/$t/source-list") })
+            Separator()
+            Item(stringResource(Res.string.desk_web_merge), enabled = manager, onClick = { web("/tree/$t/merge-step1") })
+            Item(stringResource(Res.string.desk_web_duplicates), enabled = manager, onClick = { web("/tree/$t/duplicates") })
+            Item(stringResource(Res.string.desk_web_check), enabled = manager, onClick = { web("/tree/$t/check") })
+            Item(stringResource(Res.string.desk_web_datafix), enabled = manager, onClick = { web("/tree/$t/data-fix") })
+            Separator()
+            Item(stringResource(Res.string.desk_web_export), enabled = manager, onClick = { web("/tree/$t/export") })
+            Item(stringResource(Res.string.desk_web_import), enabled = manager, onClick = { web("/tree/$t/import") })
         }
         Menu(stringResource(Res.string.desk_menu_view), enabled = main) {
             Menu(stringResource(Res.string.desk_layout)) {
@@ -262,14 +330,16 @@ private fun FrameWindowScope.DeskMenuBar(
             Item(stringResource(Res.string.nav_photos), shortcut = KeyShortcut(Key.Three, ctrl = true), onClick = { viewModel.setSection(Section.Photos) })
             Separator()
             Menu(stringResource(Res.string.tree_generations, state.ancestorGenerations)) {
-                (2..6).forEach { n ->
+                (2..7).forEach { n ->
                     CheckboxItem(stringResource(Res.string.tree_generations, n), checked = state.ancestorGenerations == n, onCheckedChange = { viewModel.setAncestorGenerations(n) })
                 }
             }
+            CheckboxItem(stringResource(Res.string.desk_color_coding), checked = farbkodierung, enabled = state.home != null, onCheckedChange = onFarbkodierung)
             CheckboxItem(stringResource(Res.string.tree_show_siblings), checked = state.showSiblings, onCheckedChange = viewModel::setShowSiblings)
             CheckboxItem(stringResource(Res.string.tree_show_cousins), checked = state.showCousins && state.showSiblings, enabled = state.showSiblings, onCheckedChange = viewModel::setShowCousins)
         }
         Menu(stringResource(Res.string.desk_menu_help)) {
+            Item(stringResource(Res.string.desk_help), shortcut = KeyShortcut(Key.F1), onClick = onHilfe)
             Item(stringResource(Res.string.desk_about, LocalAppName.current), onClick = onAbout)
         }
     }
@@ -282,7 +352,7 @@ enum class DeskLayout {
     Navigator, TreeCentre;
 
     companion object {
-        private val prefs = de.bgghome.webtrees.nativ.data.DesktopAblage("desk")
+        val prefs = de.bgghome.webtrees.nativ.data.DesktopAblage("desk")
         fun load(): DeskLayout = entries.firstOrNull { it.name == prefs.getString("layout", null) } ?: Navigator
         fun save(layout: DeskLayout) = prefs.putString("layout", layout.name)
     }
@@ -291,7 +361,7 @@ enum class DeskLayout {
 // ── Klassische Symbolleiste (Aufbau Navigator) ───────────────────────
 
 @Composable
-private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit) {
+private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, nav: DeskNav, drucke: DeskDruck) {
     val canEdit = state.tree?.canEdit == true
     Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -301,16 +371,19 @@ private fun ClassicToolbar(state: UiState, viewModel: AppViewModel, openWeb: (St
             ToolItem(Icons.Default.Edit, stringResource(Res.string.action_edit), enabled = state.root != null, onClick = onSheet)
             ToolItem(Icons.Default.Add, stringResource(Res.string.action_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) }
             ToolSeparator()
-            ToolItem(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.action_back), enabled = viewModel.canGoBack()) { viewModel.back() }
+            ToolItem(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.action_back), enabled = nav.kannZurueck, onClick = nav.zurueck)
+            ToolItem(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.desk_forward), enabled = nav.kannVor, onClick = nav.vor)
+            HistoryItem(state, viewModel)
             ToolItem(Icons.Default.Person, stringResource(Res.string.home_start_person), enabled = state.home != null) { state.home?.let(viewModel::setRoot) }
             ToolItem(Icons.Default.Refresh, stringResource(Res.string.action_reload), onClick = viewModel::refresh)
+            ToolItem(DruckerIcon, stringResource(Res.string.desk_print), enabled = state.root != null, onClick = drucke::personenblatt)
             ToolSeparator()
             ToolItem(Icons.Default.Home, stringResource(Res.string.nav_home), active = state.section == Section.Home) { viewModel.setSection(Section.Home) }
             ToolItem(TreeIcon, stringResource(Res.string.desk_layout_navigator), active = state.section == Section.Tree || state.section == Section.Search) { viewModel.setSection(Section.Tree) }
             ToolItem(PhotoIcon, stringResource(Res.string.nav_photos), active = state.section == Section.Photos) { viewModel.setSection(Section.Photos) }
             ToolSeparator()
             ToolItem(Icons.AutoMirrored.Filled.ExitToApp, "webtrees") { openWeb(state.detail?.person?.url ?: state.baseUrl) }
-            ToolItem(Icons.Default.Info, stringResource(Res.string.desk_menu_help), onClick = onAbout)
+            ToolItem(Icons.Default.Info, stringResource(Res.string.desk_help), onClick = onAbout)
             Spacer(Modifier.weight(1f))
             if (state.section == Section.Tree || state.section == Section.Search) GenerationsChip(state, viewModel)
         }
@@ -326,8 +399,8 @@ private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, 
             .background(if (active) colors.surface else colors.surfaceVariant, MaterialTheme.shapes.extraSmall)
             .fokusRahmen()
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .width(64.dp),
+            .padding(horizontal = 6.dp, vertical = 4.dp)
+            .width(58.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, contentDescription = null, Modifier.size(22.dp), tint = tint)
@@ -354,6 +427,72 @@ private fun GoToDialog(state: UiState, viewModel: AppViewModel, openWeb: (String
         DeskTheme {
             PersonIndex(state, viewModel, openWeb, focus, Modifier.fillMaxSize())
             LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+        }
+    }
+}
+
+/** Zurueck und Vor zwischen Zentralpersonen. */
+class DeskNav(val kannZurueck: Boolean, val kannVor: Boolean, val zurueck: () -> Unit, val vor: () -> Unit)
+
+/** Verlauf: die zuletzt angesehenen Personen, eine davon wird Zentralperson. */
+@Composable
+private fun HistoryItem(state: UiState, viewModel: AppViewModel) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        ToolItem(Icons.Default.DateRange, stringResource(Res.string.desk_history), enabled = state.recent.isNotEmpty()) { open = true }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            state.recent.forEach { p ->
+                DropdownMenuItem(text = { Text(p.name + if (p.lifespan.isNotBlank()) "  (${p.lifespan})" else "") }, onClick = { open = false; viewModel.setRoot(p.xref) })
+            }
+        }
+    }
+}
+
+/** Druck und PDF fuer die Zentralperson: Personenblatt und Ahnentafel. */
+class DeskDruck(private val state: UiState, private val viewModel: AppViewModel, private val appName: String) {
+    private val baum get() = state.tree?.title.orEmpty()
+    private fun blatt(pdf: Boolean) {
+        val d = state.detail?.takeIf { it.person.xref == state.root } ?: state.detail ?: return
+        val titel = Texte.t(Res.string.desk_title_sheet, d.person.name)
+        val doc = listenPdf(personenblattZeilen(d), appName, baum)
+        if (pdf) alsPdf(doc, titel) else drucken(doc, titel)
+    }
+    private fun tafel(pdf: Boolean) {
+        val ahnen = state.pedigree?.ancestors?.associate { it.n to it.person } ?: return
+        val zentral = ahnen[1] ?: return
+        val titel = Texte.t(Res.string.desk_title_chart, zentral.name)
+        val doc = ahnentafelPdf(zentral, ahnen, state.ancestorGenerations, appName, baum)
+        if (pdf) alsPdf(doc, titel) else drucken(doc, titel)
+    }
+    fun personenblatt() = blatt(false)
+    fun personenblattPdf() = blatt(true)
+    fun ahnentafel() = tafel(false)
+    fun ahnentafelPdf() = tafel(true)
+}
+
+/** Personentext in die Zwischenablage - fuer E-Mail oder Textverarbeitung. */
+fun personentextKopieren(d: de.bgghome.webtrees.nativ.api.IndividualDetail) {
+    val text = personenblattZeilen(d).joinToString("\n") { "  ".repeat(it.einzug) + it.text }
+    java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(text), null)
+}
+
+/** Hilfe (F1): Bedienung, Tastenkuerzel und der Hinweis auf die Verwaltung in webtrees. */
+@Composable
+private fun HilfeFenster(onClose: () -> Unit) {
+    androidx.compose.ui.window.DialogWindow(
+        onCloseRequest = onClose, title = stringResource(Res.string.desk_help),
+        state = androidx.compose.ui.window.rememberDialogState(width = 620.dp, height = 520.dp),
+        onPreviewKeyEvent = { e -> if (e.key == Key.Escape) { onClose(); true } else false },
+    ) {
+        DeskTheme {
+            Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(Res.string.desk_help), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(Res.string.desk_help_text), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                Text(stringResource(Res.string.desk_web_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    androidx.compose.material3.OutlinedButton(shape = MaterialTheme.shapes.small, onClick = onClose) { Text(stringResource(Res.string.action_close)) }
+                }
+            }
         }
     }
 }

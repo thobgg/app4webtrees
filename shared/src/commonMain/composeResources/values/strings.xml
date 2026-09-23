@@ -314,4 +314,54 @@
     <string name="desk_as_centre">Show as central person</string>
     <string name="desk_people_count">%1$d people</string>
     <string name="desk_partners">Partners and children</string>
+    <string name="desk_print">Print</string>
+    <string name="desk_print_sheet">Print person sheet …</string>
+    <string name="desk_pdf_sheet">Person sheet as PDF …</string>
+    <string name="desk_print_chart">Print ancestor chart …</string>
+    <string name="desk_pdf_chart">Ancestor chart as PDF …</string>
+    <string name="desk_menu_create">Create</string>
+    <string name="desk_list_ancestors">Ancestor list</string>
+    <string name="desk_list_descendants">Descendant list</string>
+    <string name="desk_list_events">Event list</string>
+    <string name="desk_title_sheet">Person sheet – %1$s</string>
+    <string name="desk_title_chart">Ancestor chart of %1$s</string>
+    <string name="desk_title_ancestors">Ancestor list of %1$s</string>
+    <string name="desk_title_descendants">Descendant list of %1$s</string>
+    <string name="desk_title_events">Events – %1$s</string>
+    <string name="desk_generation">Generation %1$d</string>
+    <string name="desk_created">Created with %1$s on %2$s · %3$s</string>
+    <string name="desk_save_pdf">Save as PDF …</string>
+    <string name="desk_building">Building the list …</string>
+    <string name="desk_forward">Forward</string>
+    <string name="desk_history">History</string>
+    <string name="desk_color_coding">Colour coding</string>
+    <string name="desk_copy_text">Copy person text</string>
+    <string name="desk_menu_webtrees">webtrees</string>
+    <string name="desk_web_export">Export GEDCOM</string>
+    <string name="desk_web_import">Import GEDCOM</string>
+    <string name="desk_web_merge">Merge records</string>
+    <string name="desk_web_duplicates">Find duplicates</string>
+    <string name="desk_web_check">Check the family tree</string>
+    <string name="desk_web_datafix">Data fixes</string>
+    <string name="desk_web_places">Places</string>
+    <string name="desk_web_sources">Sources</string>
+    <string name="desk_web_hint">Opens in the browser – you may need to sign in there.</string>
+    <string name="desk_tab_parents">Parents/siblings</string>
+    <string name="desk_tab_partners">Partners/children</string>
+    <string name="desk_tab_notes">Notes</string>
+    <string name="desk_tab_sources">Sources</string>
+    <string name="desk_notes_none">No notes.</string>
+    <string name="desk_sources_none">No sources.</string>
+    <string name="desk_edit_in_web">Edit in webtrees</string>
+    <string name="desk_birth">Birth</string>
+    <string name="desk_death">Death</string>
+    <string name="desk_marriage">Marriage</string>
+    <string name="desk_help">Help</string>
+    <string name="desk_help_text">Navigator: click a person to make them the central person, double-click to open the person window, right-click for more.
+
+Person window: Page Up/Page Down move through the list, Esc closes, double-click a row to edit it.
+
+Keys: Ctrl+F go to · Ctrl+E edit person · Ctrl+N add relative · Ctrl+P print person sheet · Alt+Left back · Alt+Right forward · Alt+Home start person · Ctrl+Shift+C copy person text · F5 reload · F1 help.
+
+GEDCOM, merging, places and sources are managed by webtrees itself – the webtrees menu opens those pages in the browser.</string>
 </resources>

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,7 +31,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
@@ -127,22 +128,29 @@ private fun SheetTabs(state: UiState, detail: IndividualDetail, viewModel: AppVi
     var tab by remember { mutableStateOf(0) }
     var dialog by remember { mutableStateOf<ProfileDialog?>(null) }
     val canEdit = detail.canEdit
-    val labels = listOf(Res.string.desk_tab_data, Res.string.desk_tab_life, Res.string.tab_media, Res.string.tab_map)
+    val labels = listOf(
+        Res.string.desk_tab_data, Res.string.desk_tab_parents, Res.string.desk_tab_partners, Res.string.desk_tab_notes,
+        Res.string.desk_tab_sources, Res.string.tab_media, Res.string.desk_tab_life, Res.string.tab_map,
+    )
 
     Column(modifier.background(MaterialTheme.colorScheme.surface)) {
-        TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface) {
+        ScrollableTabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface, edgePadding = 0.dp) {
             labels.forEachIndexed { i, l -> Tab(selected = tab == i, onClick = { tab = i }, text = { Text(stringResource(l), style = MaterialTheme.typography.labelLarge) }) }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when (tab) {
                 0 -> FactTable(detail, canEdit, onEdit = { r -> dialog = ProfileDialog.EditFact(r.fact, r.record) }, onDelete = { r -> dialog = ProfileDialog.DeleteFact(r.fact, r.record) }, onNew = { dialog = ProfileDialog.NewFact })
-                1 -> Timeline(
+                1 -> ParentsTab(detail, viewModel)
+                2 -> PartnersTab(detail, viewModel, onFamilyFact = { family -> dialog = ProfileDialog.NewFamilyFact(family) })
+                3 -> NotesTab(detail, openWeb)
+                4 -> SourcesTab(detail, openWeb)
+                6 -> Timeline(
                     detail, canEdit,
                     onEdit = { fact, record -> dialog = ProfileDialog.EditFact(fact, record) },
                     onDelete = { fact, record -> dialog = ProfileDialog.DeleteFact(fact, record) },
                     onPerson = viewModel::select,
                 )
-                2 -> MediaGrid(detail.media, onOpen = { item ->
+                5 -> MediaGrid(detail.media, onOpen = { item ->
                     when {
                         item.isImage -> viewModel.openMediaViewer(ViewerSource.Profile, detail.media, item, owner = detail.person.name)
                         item.mime == "application/pdf" -> viewModel.openPdf(item.file, item.title, item.url)
@@ -154,6 +162,115 @@ private fun SheetTabs(state: UiState, detail: IndividualDetail, viewModel: AppVi
         }
     }
     ProfileDialogs(dialog, state, detail, viewModel, onDismiss = { dialog = null }, onPickFamily = { dialog = ProfileDialog.NewFamilyFact(it) })
+}
+
+/** Eine anklickbare Personenzeile im Stil der Verwandtenliste. */
+@Composable
+private fun PersonLine(p: Person, viewModel: AppViewModel, einzug: Int = 0) {
+    val priv = stringResource(Res.string.person_private)
+    val none = stringResource(Res.string.person_no_name)
+    Text(
+        registerName(p, priv, none) + (if (p.lifespan.isNotBlank()) "   ${p.lifespan}" else ""),
+        Modifier.fillMaxWidth().fokusRahmen().clickable(enabled = !p.isPrivate) { viewModel.select(p.xref) }.padding(start = (12 + einzug * 18).dp, end = 12.dp, top = 5.dp, bottom = 5.dp),
+        style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+    )
+}
+
+@Composable
+private fun Heading(text: String) {
+    Text(text, Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+}
+
+/** Reiter Eltern/Geschwister: jede Herkunftsfamilie mit Vater, Mutter und den Geschwistern. */
+@Composable
+private fun ParentsTab(detail: IndividualDetail, viewModel: AppViewModel) {
+    val list = rememberLazyListState()
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize(), state = list) {
+            detail.parentFamilies.forEach { fam ->
+                item { Heading(stringResource(Res.string.rel_father)) }
+                item { fam.husband?.let { PersonLine(it, viewModel) } ?: Text("–", Modifier.padding(12.dp, 4.dp)) }
+                item { Heading(stringResource(Res.string.rel_mother)) }
+                item { fam.wife?.let { PersonLine(it, viewModel) } ?: Text("–", Modifier.padding(12.dp, 4.dp)) }
+                item { Heading(stringResource(Res.string.desk_siblings)) }
+                items(fam.children) { c -> if (c.xref == detail.person.xref) Text(registerName(c, "", "") + "   " + c.lifespan, Modifier.padding(12.dp, 5.dp), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium) else PersonLine(c, viewModel) }
+            }
+            if (detail.parentFamilies.isEmpty()) item { Text("–", Modifier.padding(12.dp)) }
+        }
+        ListenLeiste(list)
+    }
+}
+
+/** Reiter Partner/Kinder: jede eigene Familie mit Partner, Heirat und Kindern. */
+@Composable
+private fun PartnersTab(detail: IndividualDetail, viewModel: AppViewModel, onFamilyFact: (String) -> Unit) {
+    val list = rememberLazyListState()
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize(), state = list) {
+            detail.spouseFamilies.forEach { fam ->
+                item { Heading(stringResource(Res.string.rel_partner)) }
+                item { fam.spouse?.let { PersonLine(it, viewModel) } ?: Text("–", Modifier.padding(12.dp, 4.dp)) }
+                item {
+                    val heirat = fam.marriage?.let { m -> listOfNotNull(m.date?.text?.takeIf(String::isNotBlank), m.place?.name?.takeIf(String::isNotBlank)).joinToString(", ") }.orEmpty()
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("⚭ " + heirat.ifBlank { "–" }, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                        if (detail.canEdit) TextButton(onClick = { onFamilyFact(fam.xref) }) { Text(stringResource(Res.string.action_add_family_event), style = MaterialTheme.typography.labelMedium) }
+                    }
+                }
+                item { Heading(stringResource(Res.string.desk_children)) }
+                items(fam.children) { PersonLine(it, viewModel) }
+                if (fam.children.isEmpty()) item { Text("–", Modifier.padding(12.dp, 4.dp)) }
+            }
+            if (detail.spouseFamilies.isEmpty()) item { Text("–", Modifier.padding(12.dp)) }
+        }
+        ListenLeiste(list)
+    }
+}
+
+/** Reiter Notizen: eigene Notizen und die an Ereignissen. Bearbeitet wird vorerst in webtrees. */
+@Composable
+private fun NotesTab(detail: IndividualDetail, openWeb: (String) -> Unit) {
+    val notizen = notizenVon(detail)
+    Column(Modifier.fillMaxSize()) {
+        val list = rememberLazyListState()
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            LazyColumn(Modifier.fillMaxSize(), state = list) {
+                if (notizen.isEmpty()) item { Text(stringResource(Res.string.desk_notes_none), Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                items(notizen) { (wo, text) ->
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        if (wo.isNotBlank()) Text(wo, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text, style = MaterialTheme.typography.bodyMedium)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
+            }
+            ListenLeiste(list)
+        }
+        TextButton(onClick = { openWeb(detail.person.url) }, modifier = Modifier.padding(4.dp)) { Text(stringResource(Res.string.desk_edit_in_web)) }
+    }
+}
+
+/** Reiter Quellen: jede Quelle mit den Ereignissen, die sie belegt. */
+@Composable
+private fun SourcesTab(detail: IndividualDetail, openWeb: (String) -> Unit) {
+    val quellen = quellenVon(detail)
+    Column(Modifier.fillMaxSize()) {
+        val list = rememberLazyListState()
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            LazyColumn(Modifier.fillMaxSize(), state = list) {
+                if (quellen.isEmpty()) item { Text(stringResource(Res.string.desk_sources_none), Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                items(quellen) { (titel, wo) ->
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        Text(titel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        Text(wo.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
+            }
+            ListenLeiste(list)
+        }
+        TextButton(onClick = { openWeb(detail.person.url) }, modifier = Modifier.padding(4.dp)) { Text(stringResource(Res.string.desk_edit_in_web)) }
+    }
 }
 
 /** Die Daten als Tabelle: Ereignis, Datum, Ort oder Beschreibung. Doppelklick bearbeitet, Knoepfe darunter. */
@@ -261,6 +378,11 @@ private fun SheetFooter(
     var confirmDelete by remember { mutableStateOf(false) }
     Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (detail.canEdit) TextButton(onClick = { confirmDelete = true }) { Text(stringResource(Res.string.action_delete_person)) }
+        val appName = LocalAppName.current
+        val baum = state.tree?.title.orEmpty()
+        val titel = stringResource(Res.string.desk_title_sheet, detail.person.name)
+        TextButton(onClick = { drucken(listenPdf(personenblattZeilen(detail), appName, baum), titel) }) { Text(stringResource(Res.string.desk_print)) }
+        TextButton(onClick = { alsPdf(listenPdf(personenblattZeilen(detail), appName, baum), titel) }) { Text("PDF") }
         Spacer(Modifier.weight(1f))
         IconButton(onClick = { onStep(-1) }, enabled = canPrev) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
         IconButton(onClick = { onStep(1) }, enabled = canNext) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null) }

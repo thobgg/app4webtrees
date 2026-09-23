@@ -309,4 +309,54 @@
     <string name="desk_as_centre">Als Zentralperson zeigen</string>
     <string name="desk_people_count">%1$d Personen</string>
     <string name="desk_partners">Partner und Kinder</string>
+    <string name="desk_print">Drucken</string>
+    <string name="desk_print_sheet">Personenblatt drucken …</string>
+    <string name="desk_pdf_sheet">Personenblatt als PDF …</string>
+    <string name="desk_print_chart">Ahnentafel drucken …</string>
+    <string name="desk_pdf_chart">Ahnentafel als PDF …</string>
+    <string name="desk_menu_create">Erstellen</string>
+    <string name="desk_list_ancestors">Ahnenliste</string>
+    <string name="desk_list_descendants">Stammliste</string>
+    <string name="desk_list_events">Ereignisliste</string>
+    <string name="desk_title_sheet">Personenblatt – %1$s</string>
+    <string name="desk_title_chart">Ahnentafel von %1$s</string>
+    <string name="desk_title_ancestors">Ahnenliste von %1$s</string>
+    <string name="desk_title_descendants">Stammliste von %1$s</string>
+    <string name="desk_title_events">Ereignisse – %1$s</string>
+    <string name="desk_generation">%1$d. Generation</string>
+    <string name="desk_created">Erstellt mit %1$s am %2$s · %3$s</string>
+    <string name="desk_save_pdf">Als PDF speichern …</string>
+    <string name="desk_building">Liste wird erstellt …</string>
+    <string name="desk_forward">Vor</string>
+    <string name="desk_history">Verlauf</string>
+    <string name="desk_color_coding">Farbkodierung</string>
+    <string name="desk_copy_text">Personentext kopieren</string>
+    <string name="desk_menu_webtrees">webtrees</string>
+    <string name="desk_web_export">GEDCOM exportieren</string>
+    <string name="desk_web_import">GEDCOM importieren</string>
+    <string name="desk_web_merge">Datensätze zusammenführen</string>
+    <string name="desk_web_duplicates">Doppelte finden</string>
+    <string name="desk_web_check">Stammbaum prüfen</string>
+    <string name="desk_web_datafix">Daten angleichen</string>
+    <string name="desk_web_places">Orte</string>
+    <string name="desk_web_sources">Quellen</string>
+    <string name="desk_web_hint">Öffnet sich im Browser – dort ggf. anmelden.</string>
+    <string name="desk_tab_parents">Eltern/Geschwister</string>
+    <string name="desk_tab_partners">Partner/Kinder</string>
+    <string name="desk_tab_notes">Notizen</string>
+    <string name="desk_tab_sources">Quellen</string>
+    <string name="desk_notes_none">Keine Notizen.</string>
+    <string name="desk_sources_none">Keine Quellen.</string>
+    <string name="desk_edit_in_web">In webtrees bearbeiten</string>
+    <string name="desk_birth">Geburt</string>
+    <string name="desk_death">Tod</string>
+    <string name="desk_marriage">Heirat</string>
+    <string name="desk_help">Hilfe</string>
+    <string name="desk_help_text">Navigator: Ein Klick macht eine Person zur Zentralperson, ein Doppelklick öffnet das Personenfenster, die rechte Maustaste zeigt weitere Möglichkeiten.
+
+Personenfenster: Bild-auf/Bild-ab blättert durch die Liste, Esc schließt, ein Doppelklick auf eine Zeile bearbeitet sie.
+
+Tasten: Strg+F Gehe zu · Strg+E Person bearbeiten · Strg+N Verwandte hinzufügen · Strg+P Personenblatt drucken · Alt+Links zurück · Alt+Rechts vor · Alt+Pos1 Startperson · Strg+Umschalt+C Personentext kopieren · F5 neu laden · F1 Hilfe.
+
+GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Menü webtrees öffnet diese Seiten im Browser.</string>
 </resources>

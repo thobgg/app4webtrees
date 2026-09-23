@@ -51,3 +51,15 @@ fun Modifier.fokusRahmen(): Modifier = composed {
     val farbe = if (fokus) MaterialTheme.colorScheme.primary else Color.Transparent
     this.onFocusChanged { fokus = it.isFocused }.border(1.5.dp, farbe, MaterialTheme.shapes.extraSmall)
 }
+
+/** Drucker-Symbol (Material hat es nur im erweiterten Satz, der hier nicht eingebunden ist). */
+val DruckerIcon: androidx.compose.ui.graphics.vector.ImageVector by lazy {
+    androidx.compose.ui.graphics.vector.ImageVector.Builder("Drucker", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            androidx.compose.ui.graphics.vector.PathParser().parsePathString(
+                "M19,8H5c-1.66,0 -3,1.34 -3,3v6h4v4h12v-4h4v-6c0,-1.66 -1.34,-3 -3,-3zM16,19H8v-5h8v5zM19,12c-0.55,0 -1,-0.45 -1,-1s0.45,-1 1,-1 1,0.45 1,1 -0.45,1 -1,1zM18,3H6v4h12V3z"
+            ).toNodes(),
+            fill = androidx.compose.ui.graphics.SolidColor(Color.Black),
+        )
+    }.build()
+}

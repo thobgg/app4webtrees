@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.Canvas
@@ -81,7 +83,8 @@ internal fun registerName(person: Person, privateLabel: String, noName: String):
 }
 
 @Composable
-fun Navigator(state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit) {
+fun Navigator(state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit, farben: Map<String, Color> = emptyMap()) {
+    CompositionLocalProvider(LocalFarben provides farben) {
     // Wie der Baum: nach jedem Wechsel der Zentralperson die Ahnen neu holen.
     LaunchedEffect(state.root, state.pedigree == null) {
         if (state.root != null && state.pedigree == null) viewModel.loadChart()
@@ -117,6 +120,24 @@ fun Navigator(state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> 
             SenkrechteLeiste(hoch)
             WaagerechteLeiste(quer)
         }
+    }
+    }
+}
+
+/** Farbkodierung nach Mary Hill: xref -> Farbe des Streifens am rechten Kastenrand (leer = aus). */
+val LocalFarben = staticCompositionLocalOf { emptyMap<String, Color>() }
+
+/** Farben des Systems nach Mary Hill (allgemeiner Genealogie-Standard). */
+object MaryHill {
+    val start = Color(0xFF1F3A6B); val vaterVater = Color(0xFF3B6FB6); val vaterMutter = Color(0xFF3E9B4F)
+    val mutterVater = Color(0xFFC8453B); val mutterMutter = Color(0xFFE0B82E); val nachkommen = Color(0xFFE48FB0)
+
+    /** Farbe einer Ahnennummer (Kekule) der Startperson. */
+    fun fuer(n: Int): Color {
+        if (n == 1) return start
+        val g = 31 - Integer.numberOfLeadingZeros(n)
+        if (g == 1) return if (n == 2) vaterVater else mutterVater
+        return when (n shr (g - 2)) { 4 -> vaterVater; 5 -> vaterMutter; 6 -> mutterVater; else -> mutterMutter }
     }
 }
 
@@ -244,6 +265,7 @@ private fun PersonBox(person: Person, centre: Boolean, viewModel: AppViewModel, 
                 Text(name, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
                 if (person.lifespan.isNotBlank()) Text(person.lifespan, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
             }
+            LocalFarben.current[person.xref]?.let { farbe -> Box(Modifier.width(5.dp).fillMaxHeight().padding(vertical = 4.dp).background(farbe)) }
         }
     }
 }
