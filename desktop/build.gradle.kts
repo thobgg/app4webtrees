@@ -26,9 +26,13 @@ dependencies {
     implementation(compose.desktop.currentOs)
 }
 
-// wtAnd zaehlt zweistellig (1.16); Windows-Installer verlangen x.y.z, also 1.16.0.
+// wtAnd zaehlt zweistellig (1.16); Windows-Installer verlangen x.y.z. Die dritte Stelle ist der
+// Desktop-Zaehler (gradle.properties, +1 je Paket): 1.16.1, 1.16.2 ... Frueher stand dort fest 0 -
+// dann trug jede neue exe dieselbe Nummer wie die installierte, und Windows Installer hielt sie fuer
+// schon installiert: Doppelklick, nichts passiert (24.09.2026).
 val versionName = property("wtand.versionName") as String
-val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.0" else versionName
+val desktopBuild = property("wtand.desktopBuild") as String
+val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.$desktopBuild" else versionName
 
 // Ein Code, zwei Namen (Thomas, 23.09.2026): wtWin unter Windows, wtTux unter Linux. Jedes Paket wird auf
 // seinem eigenen System gebaut, darum entscheidet das System, auf dem Gradle laeuft.
