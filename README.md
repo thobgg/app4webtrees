@@ -4,6 +4,8 @@
 
 ### [⬇ APK herunterladen](https://github.com/thobgg/app4webtrees/releases/latest)
 
+**Linux:** Das Desktop-Programm **wtTux** liegt als `wttux_…_amd64.deb` beim [selben Release](https://github.com/thobgg/app4webtrees/releases/latest), installieren mit `sudo apt install ./wttux_…_amd64.deb`. Windows (wtWin) folgt.
+
 Signiert. Für die Installation außerhalb des Play Store muss Android einmalig erlaubt werden, dass der Browser Apps installiert.
 Auf dem webtrees-Server muss das Modul [api4webtrees](https://github.com/thobgg/api4webtrees) installiert sein.
 
