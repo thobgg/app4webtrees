@@ -2,11 +2,18 @@
 
 [Deutsch](README.md) · **English**
 
-### [⬇ Download the APK](https://github.com/thobgg/app4webtrees/releases/latest)
+<p align="center">
+  <img src="docs/icon/icon-512.png" alt="wtAnd logo" width="112">
+</p>
 
-**Linux:** the desktop program **wtTux** comes as `wttux_…_amd64.deb` in the [same release](https://github.com/thobgg/app4webtrees/releases/latest); install with `sudo apt install ./wttux_…_amd64.deb`. Windows (wtWin) will follow.
+<p align="center">
+  <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Android-wtAnd%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android: wtAnd (APK)"></a>
+  <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
+</p>
 
-Signed. To install outside the Play Store, Android asks once to allow your browser to install apps.
+**Android:** the APK is signed. To install outside the Play Store, Android asks once to allow your browser to install apps.  
+**Linux:** install the package with `sudo apt install ./wttux_…_amd64.deb`. Windows (wtWin) will follow.
+
 Your webtrees server needs the [api4webtrees](https://github.com/thobgg/api4webtrees) module.
 
 A native Android app for [webtrees](https://webtrees.net/) – view **and edit** your family tree on phone and tablet,

@@ -2,11 +2,18 @@
 
 **Deutsch** · [English](README.en.md)
 
-### [⬇ APK herunterladen](https://github.com/thobgg/app4webtrees/releases/latest)
+<p align="center">
+  <img src="docs/icon/icon-512.png" alt="wtAnd-Logo" width="112">
+</p>
 
-**Linux:** Das Desktop-Programm **wtTux** liegt als `wttux_…_amd64.deb` beim [selben Release](https://github.com/thobgg/app4webtrees/releases/latest), installieren mit `sudo apt install ./wttux_…_amd64.deb`. Windows (wtWin) folgt.
+<p align="center">
+  <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Android-wtAnd%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android: wtAnd (APK)"></a>
+  <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
+</p>
 
-Signiert. Für die Installation außerhalb des Play Store muss Android einmalig erlaubt werden, dass der Browser Apps installiert.
+**Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
+**Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren. Windows (wtWin) folgt.
+
 Auf dem webtrees-Server muss das Modul [api4webtrees](https://github.com/thobgg/api4webtrees) installiert sein.
 
 Eine native Android-App für [webtrees](https://webtrees.net/) – den eigenen Stammbaum auf Handy und Tablet
