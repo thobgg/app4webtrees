@@ -11,6 +11,12 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/desktop-navigator.png" alt="wtTux am PC: Navigator mit Zentralperson, Kindern und vier Generationen Vorfahren" width="100%">
+  <br><b>wtTux am PC</b> – derselbe Stammbaum wie in wtAnd, aufgebaut wie ein klassisches Genealogie-Programm.
+  <br><sub>Historischer Stammbaum der Medici. Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; alle anderen Porträts gemeinfrei (Wikimedia Commons).</sub>
+</p>
+
 **Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
 **Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren. Windows (wtWin) folgt.
 
@@ -27,7 +33,7 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
 | - | - | - |
 | <img src="docs/screenshots/handy-baum.png" alt="Baum am Handy" width="250"> | <img src="docs/screenshots/handy-zeitleiste.png" alt="Profil mit Zeitleiste" width="250"> | <img src="docs/screenshots/handy-archiv.png" alt="Archiv des Sammlungen-Moduls" width="250"> |
 
-<sub>Alle Bilder zeigen den frei erfundenen Demo-Stammbaum „Familie Falkenrath" (siehe [demo-tree/](demo-tree/)).</sub>
+<sub>**wtAnd am Handy.** Die Handy-Bilder zeigen den frei erfundenen Demo-Stammbaum „Familie Falkenrath" (siehe [demo-tree/](demo-tree/)).</sub>
 
 ## Deine Daten bleiben deine
 
