@@ -46,10 +46,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -105,6 +107,8 @@ fun FamilyTreeView(
     onPerson: (Person) -> Unit,
     onPlus: (Person) -> Unit,
     onExpand: (n: Int, xref: String) -> Unit,
+    /** Handy: langer Druck auf eine Karte haengt den Baum um - sie wird Mittelperson. Ohne diesen Weg tut der lange Druck nichts. */
+    onMakeRoot: ((Person) -> Unit)? = null,
     modifier: Modifier = Modifier,
     /** Desktop: Rechtsklick auf eine Karte, mit der Stelle im Baumfenster (fuer das Kontextmenue). */
     onSecondary: ((Person, Offset) -> Unit)? = null,
@@ -121,6 +125,7 @@ fun FamilyTreeView(
     val density = LocalDensity.current.density
     val lineColor = treeColors.connector
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
 
     BoxWithConstraints(modifier.fillMaxSize().clipToBounds().background(MaterialTheme.colorScheme.background)) {
         val viewW = constraints.maxWidth.toFloat()
@@ -200,6 +205,15 @@ fun FamilyTreeView(
                 }
                 .pointerInput(layout) {
                     detectTapGestures(
+                        // Nur setzen, wenn der Aufrufer ihn will - sonst bliebe ein langsamer Klick ohne onTap.
+                        onLongPress = onMakeRoot?.let { makeRoot ->
+                            fun(tap: Offset) {
+                                boxAtScreen(tap)?.takeIf { !it.isFocus }?.let { box ->
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    makeRoot(box.person)
+                                }
+                            }
+                        },
                         onDoubleTap = { tap ->
                             val box = if (onOpen != null) boxAtScreen(tap) else null
                             if (box != null) onOpen?.invoke(box.person) else zoomBy(1.6f, tap)
