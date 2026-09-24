@@ -3,6 +3,7 @@ package de.bgghome.webtrees.nativ
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.data.DesktopAblage
 import de.bgghome.webtrees.nativ.data.Settings
+import de.bgghome.webtrees.nativ.ui.karte.kachelUserAgent
 import java.io.File
 
 /**
@@ -20,7 +21,11 @@ class DesktopPlattform : Plattform {
     override val client = WtClient(
         DesktopAblage("wtclient"), DesktopAblage("cookies"),
         userAgent = "$appName/$versionName (${System.getProperty("os.name")})",
-    ).also { it.baseUrl = settings.baseUrl }
+    ).also {
+        it.baseUrl = settings.baseUrl
+        // Kachelserver sehen denselben ehrlichen User-Agent, mit Projektadresse (OSM-Regel).
+        kachelUserAgent = "$appName/$versionName (https://github.com/thobgg/app4webtrees)"
+    }
     override val cacheOrdner: File by lazy {
         val basis = System.getenv("XDG_CACHE_HOME")?.takeIf { it.isNotBlank() }?.let(::File)
             ?: System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let(::File)

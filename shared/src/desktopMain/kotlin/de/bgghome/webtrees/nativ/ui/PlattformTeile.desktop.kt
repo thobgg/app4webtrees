@@ -139,30 +139,7 @@ private fun toUploadJpeg(file: File, maxBytes: Long): ByteArray? {
 @Composable
 actual fun rememberNotificationPermission(onGranted: () -> Unit): () -> Unit = onGranted
 
-// ── Karte: vorerst die Stationen als Liste, jede oeffnet OpenStreetMap im Browser ──
-
-@Composable
-actual fun LifeMap(facts: List<FactJson>) {
-    val stations = facts.filter { it.place?.lat != null && it.place.lng != null }
-    if (stations.isEmpty()) {
-        Text(stringResource(Res.string.map_none), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        return
-    }
-    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        stations.forEach { fact ->
-            val place = fact.place!!
-            val lat = place.lat!!; val lng = place.lng!!
-            val year = fact.date?.year?.takeIf { it != 0 }?.toString()
-            Text(
-                listOfNotNull(year, fact.label, place.short).joinToString(" · "),
-                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth()
-                    .clickable { openBrowser("https://www.openstreetmap.org/?mlat=$lat&mlon=$lng#map=12/$lat/$lng") }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-            )
-        }
-    }
-}
+// Karte: LifeMap.desktop.kt (Kachelkarte).
 
 // ── PDF: PDFBox zeichnet die Seiten, die Datei kommt ueber die Sitzung der App ──
 
