@@ -41,6 +41,13 @@ class NotJsonException(val httpStatus: Int) : Exception("Keine JSON-Antwort (HTT
  * Ein Schreibzugriff wurde gesendet, aber die Verbindung brach ab, bevor eine Antwort kam. Ob der Server
  * die Aenderung verarbeitet hat, ist unbekannt - der Nutzer muss nachsehen, bevor er sie wiederholt.
  */
+/**
+ * Vor webtrees sitzt eine fremde Anmeldung (SSO wie Authelia, Authentik, oauth2-proxy, Cloudflare Access):
+ * 401/407, eine Umleitung auf einen anderen Host oder JSON, das nicht von api4webtrees stammt. Frueher las
+ * die App solches JSON als Info mit api=0 und meldete "Modul zu alt" (Rueckmeldung 24.09.2026).
+ */
+class LoginWallException(val httpStatus: Int, val host: String = "") : Exception("Anmeldung vor webtrees (HTTP $httpStatus $host)")
+
 class WriteInterruptedException(cause: IOException) : IOException(cause.message, cause)
 
 /**
@@ -131,6 +138,9 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                 throw if (retry.httpStatus == 404) e else retry
             }
         }
+        // Jede Info-Antwort von api4webtrees traegt api >= 1 und den Modulstand. Fehlt beides, kam das JSON von
+        // etwas anderem vor webtrees - meist einer SSO-Anmeldung.
+        if (info.api == 0 && info.module.isEmpty()) throw LoginWallException(200)
         csrf = info.csrf
 
         return info
@@ -387,7 +397,14 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
             val type = response.header("Content-Type").orEmpty()
             val text = response.body?.string().orEmpty()
 
+            // webtrees selbst antwortet nie mit 401/407 - das tut eine vorgeschaltete Anmeldung (SSO, Basic-Auth, Proxy).
+            if (response.code == 401 || response.code == 407) throw LoginWallException(response.code)
+
             if (!type.contains("json")) {
+                // Umleitung auf einen anderen Host und dort kein JSON: die Anmeldeseite eines SSO-Dienstes.
+                // (example.org -> www.example.org mit JSON-Antwort ist dagegen in Ordnung und kommt hier nicht an.)
+                val finalHost = response.request.url.host
+                if (!finalHost.equals(request.url.host, ignoreCase = true)) throw LoginWallException(response.code, finalHost)
                 throw NotJsonException(response.code)
             }
 

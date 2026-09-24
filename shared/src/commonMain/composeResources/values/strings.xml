@@ -148,6 +148,7 @@
     <string name="err_unreachable">server not reachable</string>
     <string name="err_http_only">The app only connects over an encrypted connection (https). Please enter the address with https:// – without encryption, your password and your family's data would be sent in plain text.</string>
     <string name="err_module_too_old">The “api4webtrees” module on the server is too old for this app (version %1$s). Please update it in webtrees under modules_v4.</string>
+    <string name="err_login_wall">The server asks for its own sign-in before webtrees (e.g. SSO, OAuth or web server password protection). The app cannot sign in there. The operator can let the app’s requests bypass that sign-in; the webtrees login itself still applies.</string>
     <!-- Neue Struktur der Profilseite -->
     <string name="nav_home">Home</string>
     <string name="nav_tree">Tree</string>

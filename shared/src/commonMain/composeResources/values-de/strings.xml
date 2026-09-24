@@ -143,6 +143,7 @@
     <string name="err_unreachable">Server nicht erreichbar</string>
     <string name="err_http_only">Die App verbindet sich nur verschlüsselt (https). Bitte die Adresse mit https:// eingeben – ohne Verschlüsselung würden dein Passwort und die Daten deiner Familie im Klartext übertragen.</string>
     <string name="err_module_too_old">Das Modul „api4webtrees“ auf dem Server ist zu alt für diese App (Version %1$s). Bitte aktualisiere es in webtrees unter modules_v4.</string>
+    <string name="err_login_wall">Vor webtrees verlangt der Server eine eigene Anmeldung (z. B. SSO, OAuth oder ein Passwortschutz des Webservers). Dort kann sich die App nicht anmelden. Der Betreiber kann die Anfragen der App an dieser Anmeldung vorbeileiten, die Anmeldung bei webtrees selbst bleibt bestehen.</string>
     <!-- Neue Struktur der Profilseite -->
     <string name="nav_home">Start</string>
     <string name="nav_tree">Baum</string>

@@ -3,6 +3,7 @@ package de.bgghome.webtrees.nativ.ui
 import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.ApiException
+import de.bgghome.webtrees.nativ.api.LoginWallException
 import de.bgghome.webtrees.nativ.api.NotJsonException
 import de.bgghome.webtrees.nativ.api.WriteInterruptedException
 import java.io.IOException
@@ -43,6 +44,7 @@ fun explain(e: Exception): String = when (e) {
         404 -> Texte.t(Res.string.err_module_missing)
         else -> Texte.t(Res.string.err_unexpected, e.httpStatus)
     }
+    is LoginWallException -> Texte.t(Res.string.err_login_wall)
     is UserMessageException -> e.message.orEmpty()
     is WriteInterruptedException -> Texte.t(Res.string.err_write_interrupted)
     is IOException -> Texte.t(Res.string.err_no_connection, e.message ?: Texte.t(Res.string.err_unreachable))
