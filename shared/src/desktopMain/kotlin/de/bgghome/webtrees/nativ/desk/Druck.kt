@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 /*
- * Druck und PDF (Etappe 4, 23.09.2026): Personenblatt, Ahnentafel und Listen als PDF - gedruckt ueber den
+ * Druck und PDF (Etappe 4, 23.09.2026): Personenblatt und Listen als PDF (die Tafeln: Stammtafel.kt) - gedruckt ueber den
  * Druckdialog des Systems oder als Datei gespeichert. PDFBox ist schon da (PDF-Betrachter).
  */
 
@@ -161,55 +161,6 @@ fun notizenVon(d: IndividualDetail): List<Pair<String, String>> =
 fun quellenVon(d: IndividualDetail): List<Pair<String, List<String>>> =
     (d.facts + d.spouseFamilies.flatMap { it.facts }).flatMap { f -> f.sources.map { it.title.ifBlank { it.xref } to f.label } }
         .groupBy({ it.first }, { it.second }).map { (titel, wo) -> titel to wo.distinct() }
-
-/** Ahnentafel im Querformat: Spalte je Generation, hoechstens fuenf, damit die Kaesten lesbar bleiben. */
-fun ahnentafelPdf(zentral: Person, ahnen: Map<Int, Person>, generationen: Int, appName: String, baum: String): PDDocument {
-    val g = generationen.coerceIn(2, 5)
-    val doc = PDDocument()
-    val s = Schriften(doc)
-    val format = PDRectangle(PDRectangle.A4.height, PDRectangle.A4.width)
-    val page = PDPage(format); doc.addPage(page)
-    val rand = 30f; val oben = 46f; val unten = 34f
-    val spalte = (format.width - 2 * rand) / g
-    val kastenB = spalte - 14f
-    val plaetze = 1 shl (g - 1)
-    val platzH = (format.height - oben - unten) / plaetze
-    val kastenH = minOf(platzH - 4f, 34f)
-    fun gen(n: Int) = 31 - Integer.numberOfLeadingZeros(n)
-    fun x(n: Int) = rand + gen(n) * spalte
-    fun yMitte(n: Int): Float { val span = plaetze shr gen(n); val i = n - (1 shl gen(n)); return format.height - oben - platzH * (i * span + span / 2f) }
-
-    PDPageContentStream(doc, page).use { cs ->
-        cs.beginText(); cs.setFont(s.fett, 14f); cs.newLineAtOffset(rand, format.height - 30f)
-        cs.showText(s.fett.sicher(Texte.t(Res.string.desk_title_chart, zentral.name))); cs.endText()
-        cs.beginText(); cs.setFont(s.normal, 7.5f); cs.newLineAtOffset(rand, 16f); cs.showText(s.normal.sicher(fusszeile(appName, baum))); cs.endText()
-        // Linien
-        cs.setStrokingColor(Color(0x88, 0x92, 0x91)); cs.setLineWidth(0.6f)
-        ahnen.keys.filter { gen(it) < g - 1 }.forEach { n ->
-            listOf(2 * n, 2 * n + 1).filter { it in ahnen }.forEach { p ->
-                val x0 = x(n) + kastenB; val xm = x0 + 7f; val y0 = yMitte(n); val y1 = yMitte(p)
-                cs.moveTo(x0, y0); cs.lineTo(xm, y0); cs.lineTo(xm, y1); cs.lineTo(x(p), y1); cs.stroke()
-            }
-        }
-        // Kaesten
-        ahnen.filter { gen(it.key) < g }.forEach { (n, p) ->
-            val fuellung = when (p.sex) { "M" -> Color(0xD7, 0xE9, 0xF5); "F" -> Color(0xF7, 0xDC, 0xDF); else -> Color(0xE8, 0xEC, 0xEC) }
-            val rahmen = when (p.sex) { "M" -> Color(0x7D, 0xAF, 0xD0); "F" -> Color(0xD9, 0x98, 0x9F); else -> Color(0xA3, 0xAC, 0xAB) }
-            val y0 = yMitte(n) - kastenH / 2
-            cs.setNonStrokingColor(fuellung); cs.addRect(x(n), y0, kastenB, kastenH); cs.fill()
-            cs.setStrokingColor(rahmen); cs.setLineWidth(if (n == 1) 1.4f else 0.7f); cs.addRect(x(n), y0, kastenB, kastenH); cs.stroke()
-            cs.setNonStrokingColor(Color(0x24, 0x30, 0x2F))
-            val gr = if (kastenH < 22f) 6.5f else 8f
-            var name = p.name.ifBlank { "?" }
-            while (s.fett.breite("$n  $name", gr) > kastenB - 6f && name.length > 4) name = name.dropLast(2) + "…"
-            cs.beginText(); cs.setFont(s.fett, gr); cs.newLineAtOffset(x(n) + 3f, y0 + kastenH - gr - 3f); cs.showText(s.fett.sicher("$n  $name")); cs.endText()
-            if (p.lifespan.isNotBlank() && kastenH >= 18f) {
-                cs.beginText(); cs.setFont(s.normal, gr - 0.5f); cs.newLineAtOffset(x(n) + 3f, y0 + 3.5f); cs.showText(s.normal.sicher(p.lifespan)); cs.endText()
-            }
-        }
-    }
-    return doc
-}
 
 /** Den Druckdialog des Systems zeigen und drucken; das Dokument wird danach geschlossen. */
 fun drucken(doc: PDDocument, titel: String) {

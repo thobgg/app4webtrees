@@ -26,20 +26,28 @@ import java.awt.image.ColorConvertOp
 import java.awt.color.ColorSpace
 
 /*
- * Stammtafel (25.09.2026, Wunsch Thomas: "Apps brauchen schoene Tafeln"): alle Nachfahren einer Person als
- * ein grosses Blatt - Ausgangsperson oben, jede Generation eine Reihe, ueber jedem Kasten Portraet oder
- * Silhouette. Ein Zeichenkern fuer Vorschau und Ausgabe: das Layout rechnet in Punkt (1/72 Zoll), daraus
+ * Stammtafel und Ahnentafel (25.09.2026, Wunsch Thomas: "Apps brauchen schoene Tafeln"): alle Nachfahren oder
+ * Vorfahren einer Person als ein grosses Blatt - jede Generation eine Reihe, ueber jedem Kasten Portraet oder
+ * Silhouette. Die Ahnentafel ist dieselbe Zeichnung, gespiegelt: Ausgangsperson unten. Ein Zeichenkern fuer Vorschau und Ausgabe: das Layout rechnet in Punkt (1/72 Zoll), daraus
  * entsteht EIN PDF-Blatt; die Vorschau im Fenster ist dieses Blatt, gedruckt wird es verkleinert auf ein
  * Blatt oder in Originalgroesse auf mehrere A4-Blaetter zum Zusammenkleben.
  */
 
-/** Eine Person der Tafel mit ihren Kindern (aller Partnerschaften, in Familienfolge). */
-class TafelPerson(val person: Person, val kinder: List<TafelPerson>)
+/**
+ * Eine Person der Tafel mit den Personen der naechsten Reihe: bei der Stammtafel ihre Kinder (aller
+ * Partnerschaften, in Familienfolge), bei der Ahnentafel Vater und Mutter. [nummer]: Kekule-Nummer (Ahnentafel).
+ */
+class TafelPerson(val person: Person, val kinder: List<TafelPerson>, val nummer: Int? = null)
+
+/** Stammtafel: Ausgangsperson oben, Nachfahren darunter. Ahnentafel: Ausgangsperson unten, Vorfahren darueber. */
+enum class TafelArt { Stamm, Ahnen }
 
 enum class TafelStil { Pergament, Klassisch, Farbig, Schwarzweiss }
 
 data class TafelOptionen(
     val generationen: Int = 6,
+    /** Nur Ahnentafel: Kekule-Nummern an den Kaesten. */
+    val nummern: Boolean = true,
     val stil: TafelStil = TafelStil.Pergament,
     val rahmenMm: Int = 30,
     val bilder: Boolean = true,
@@ -200,14 +208,19 @@ private const val PDF_MAX = 14400f
 class TafelInfo(val personen: Int, val breiteCm: Int, val hoeheCm: Int)
 
 /**
- * Die Stammtafel als PDF mit einem Blatt. [bilder] liefert je Person ihr Portraet (null = Silhouette);
- * [privat] ist der Text fuer Personen, die der Server nicht zeigt.
+ * Eine Tafel als PDF mit einem Blatt. [bilder] liefert je Person ihr Portraet (null = Silhouette); [privat] ist
+ * der Text fuer Personen, die der Server nicht zeigt. Bei der Ahnentafel ([art] Ahnen) waechst der Baum nach oben.
  */
-fun stammtafelPdf(
-    wurzel: TafelPerson, o: TafelOptionen, bilder: (Person) -> BufferedImage?, privat: String, fuss: String,
+fun tafelPdf(
+    wurzel: TafelPerson, o: TafelOptionen, bilder: (Person) -> BufferedImage?, privat: String, fuss: String, art: TafelArt = TafelArt.Stamm,
 ): Pair<PDDocument, TafelInfo> {
     val masse = TafelMasse(o.rahmenMm * 72f / 25.4f, o.bilder)
     val layout = stammtafelLayout(wurzel, masse)
+    val aufwaerts = art == TafelArt.Ahnen
+    val tiefste = layout.plaetze.maxOf { it.ebene }
+    // Oberkante (Bild) einer Person auf dem Blatt: bei der Ahnentafel steht die Ausgangsperson in der untersten Reihe
+    fun oberkante(pl: TafelPlatz) = if (aufwaerts) (tiefste - pl.ebene) * masse.ebeneH else pl.obenY
+    val kastenUnten = masse.bild + masse.bildAbstand + masse.kastenH
     val nummern = doppelteNummern(layout.plaetze)
     val doc = PDDocument()
     val f = farben(o.stil)
@@ -256,21 +269,25 @@ fun stammtafelPdf(
         // Verbindungen: von der Unterkante der Eltern senkrecht auf halbe Hoehe, waagerecht ueber alle Kinder,
         // senkrecht hinunter zu jedem Kind
         cs.setStrokingColor(f.linie); cs.setLineWidth(maxOf(0.6f, masse.rahmen * 0.009f))
+        // (Ahnentafel spiegelbildlich: vom Bild der Person nach oben zu den Unterkanten von Vater und Mutter)
         layout.plaetze.groupBy { it.eltern }.forEach { (eltern, kinder) ->
             if (eltern == null) return@forEach
-            val unten = eltern.obenY + masse.bild + masse.bildAbstand + masse.kastenH
-            val mitte = unten + masse.verbinder / 2
-            cs.moveTo(x0 + eltern.mitteX, py(y0 + unten)); cs.lineTo(x0 + eltern.mitteX, py(y0 + mitte))
+            val start = if (aufwaerts) oberkante(eltern) else oberkante(eltern) + kastenUnten
+            val mitte = if (aufwaerts) start - masse.verbinder / 2 else start + masse.verbinder / 2
+            cs.moveTo(x0 + eltern.mitteX, py(y0 + start)); cs.lineTo(x0 + eltern.mitteX, py(y0 + mitte))
             val xs = kinder.map { it.mitteX }
             cs.moveTo(x0 + minOf(xs.min(), eltern.mitteX), py(y0 + mitte)); cs.lineTo(x0 + maxOf(xs.max(), eltern.mitteX), py(y0 + mitte))
-            kinder.forEach { k -> cs.moveTo(x0 + k.mitteX, py(y0 + mitte)); cs.lineTo(x0 + k.mitteX, py(y0 + k.obenY)) }
+            kinder.forEach { k ->
+                val ende = if (aufwaerts) oberkante(k) + kastenUnten else oberkante(k)
+                cs.moveTo(x0 + k.mitteX, py(y0 + mitte)); cs.lineTo(x0 + k.mitteX, py(y0 + ende))
+            }
             cs.stroke()
         }
 
         layout.plaetze.forEach { platz ->
             val p = platz.knoten.person
             val links = x0 + platz.mitteX - masse.rahmen / 2
-            val oben = y0 + platz.obenY
+            val oben = y0 + oberkante(platz)
             // Bild mit feinem Rand
             bildFuer(p)?.let { img ->
                 val bx = x0 + platz.mitteX - masse.bild / 2
@@ -304,11 +321,19 @@ fun stammtafelPdf(
             }
             val innen = masse.rahmen * 0.84f
             var y = ky + masse.rahmen * 0.06f
+            // Kekule-Nummer klein oben links im Kasten; die erste Zeile weicht ihr beidseitig aus
+            val nummer = platz.knoten.nummer?.takeIf { art == TafelArt.Ahnen && o.nummern }?.toString()
+            val nummerG = masse.schriftKlein * 0.85f
+            val nummerB = nummer?.let { s.normal.breite(it, nummerG) + masse.rahmen * 0.04f } ?: 0f
+            if (nummer != null) {
+                cs.setNonStrokingColor(f.linie)
+                cs.beginText(); cs.setFont(s.normal, nummerG); cs.newLineAtOffset(links + masse.rahmen * 0.05f, py(ky + nummerG * 1.25f)); cs.showText(nummer); cs.endText()
+            }
             cs.setNonStrokingColor(f.text)
-            zeilen.forEach { (text, schrift, groesse) ->
+            zeilen.forEachIndexed { i, (text, schrift, groesse) ->
                 y += groesse * 1.3f
                 if (text.isNotBlank()) {
-                    val (t, g) = passend(schrift, text, groesse, innen)
+                    val (t, g) = passend(schrift, text, groesse, if (i == 0) innen - 2 * nummerB else innen)
                     cs.beginText(); cs.setFont(schrift, g)
                     cs.newLineAtOffset(x0 + platz.mitteX - schrift.breite(t, g) / 2, py(y - groesse * 0.25f)); cs.showText(schrift.sicher(t)); cs.endText()
                 }

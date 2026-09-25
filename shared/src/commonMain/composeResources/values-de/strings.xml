@@ -313,14 +313,11 @@
     <string name="desk_print">Drucken</string>
     <string name="desk_print_sheet">Personenblatt drucken …</string>
     <string name="desk_pdf_sheet">Personenblatt als PDF …</string>
-    <string name="desk_print_chart">Ahnentafel drucken …</string>
-    <string name="desk_pdf_chart">Ahnentafel als PDF …</string>
     <string name="desk_menu_create">Erstellen</string>
     <string name="desk_list_ancestors">Ahnenliste</string>
     <string name="desk_list_descendants">Stammliste</string>
     <string name="desk_list_events">Ereignisliste</string>
     <string name="desk_title_sheet">Personenblatt – %1$s</string>
-    <string name="desk_title_chart">Ahnentafel von %1$s</string>
     <string name="desk_title_ancestors">Ahnenliste von %1$s</string>
     <string name="desk_title_descendants">Stammliste von %1$s</string>
     <string name="desk_title_events">Ereignisse – %1$s</string>
@@ -357,7 +354,7 @@
 
 Personenfenster: Bild-auf/Bild-ab blättert durch die Liste, Esc schließt, ein Doppelklick auf eine Zeile bearbeitet sie.
 
-Tasten: Strg+F Gehe zu · Strg+E Person bearbeiten · Strg+N Verwandte hinzufügen · Strg+P Personenblatt drucken · Strg+T Stammtafel · Alt+Links zurück · Alt+Rechts vor · Alt+Pos1 Startperson · Strg+Umschalt+C Personentext kopieren · F5 neu laden · F1 Hilfe.
+Tasten: Strg+F Gehe zu · Strg+E Person bearbeiten · Strg+N Verwandte hinzufügen · Strg+P Personenblatt drucken · Strg+T Stammtafel · Strg+Umschalt+T Ahnentafel · Alt+Links zurück · Alt+Rechts vor · Alt+Pos1 Startperson · Strg+Umschalt+C Personentext kopieren · F5 neu laden · F1 Hilfe.
 
 GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Menü webtrees öffnet diese Seiten im Browser.</string>
     <string name="desk_appearance">Erscheinungsbild</string>
@@ -401,4 +398,10 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_chart_pdf_tiles">Als PDF speichern (A4-Blätter)</string>
     <string name="desk_chart_loading">Nachfahren werden geladen …</string>
     <string name="desk_chart_zoom_hint">Klick auf die Vorschau vergrößert sie oder zeigt wieder das ganze Blatt.</string>
+    <string name="desk_chart_group_ancestors">Vorfahren</string>
+    <string name="desk_chart_ancestors">Ahnentafel</string>
+    <string name="desk_chart_ancestors_hint">Alle Vorfahren einer Person auf einem Blatt, die Ausgangsperson unten, jede Generation eine Reihe darüber.</string>
+    <string name="desk_chart_ancestors_open">Ahnentafel …</string>
+    <string name="desk_chart_title_ancestors">Ahnentafel %1$s</string>
+    <string name="desk_chart_numbers">Kekule-Nummern zeigen</string>
 </resources>

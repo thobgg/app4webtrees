@@ -318,14 +318,11 @@
     <string name="desk_print">Print</string>
     <string name="desk_print_sheet">Print person sheet …</string>
     <string name="desk_pdf_sheet">Person sheet as PDF …</string>
-    <string name="desk_print_chart">Print ancestor chart …</string>
-    <string name="desk_pdf_chart">Ancestor chart as PDF …</string>
     <string name="desk_menu_create">Create</string>
     <string name="desk_list_ancestors">Ancestor list</string>
     <string name="desk_list_descendants">Descendant list</string>
     <string name="desk_list_events">Event list</string>
     <string name="desk_title_sheet">Person sheet – %1$s</string>
-    <string name="desk_title_chart">Ancestor chart of %1$s</string>
     <string name="desk_title_ancestors">Ancestor list of %1$s</string>
     <string name="desk_title_descendants">Descendant list of %1$s</string>
     <string name="desk_title_events">Events – %1$s</string>
@@ -362,7 +359,7 @@
 
 Person window: Page Up/Page Down move through the list, Esc closes, double-click a row to edit it.
 
-Keys: Ctrl+F go to · Ctrl+E edit person · Ctrl+N add relative · Ctrl+P print person sheet · Ctrl+T descendant chart · Alt+Left back · Alt+Right forward · Alt+Home start person · Ctrl+Shift+C copy person text · F5 reload · F1 help.
+Keys: Ctrl+F go to · Ctrl+E edit person · Ctrl+N add relative · Ctrl+P print person sheet · Ctrl+T descendant chart · Ctrl+Shift+T ancestor chart · Alt+Left back · Alt+Right forward · Alt+Home start person · Ctrl+Shift+C copy person text · F5 reload · F1 help.
 
 GEDCOM, merging, places and sources are managed by webtrees itself – the webtrees menu opens those pages in the browser.</string>
     <string name="desk_appearance">Appearance</string>
@@ -406,4 +403,10 @@ GEDCOM, merging, places and sources are managed by webtrees itself – the webtr
     <string name="desk_chart_pdf_tiles">Save as PDF (A4 pages)</string>
     <string name="desk_chart_loading">Loading descendants…</string>
     <string name="desk_chart_zoom_hint">Click the preview to enlarge it or to see the whole sheet.</string>
+    <string name="desk_chart_group_ancestors">Ancestors</string>
+    <string name="desk_chart_ancestors">Ancestor chart</string>
+    <string name="desk_chart_ancestors_hint">All ancestors of a person on one sheet, the starting person at the bottom, each generation one row above.</string>
+    <string name="desk_chart_ancestors_open">Ancestor chart…</string>
+    <string name="desk_chart_title_ancestors">Ancestors of %1$s</string>
+    <string name="desk_chart_numbers">Show Kekulé numbers</string>
 </resources>

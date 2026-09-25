@@ -70,7 +70,7 @@ import javax.imageio.ImageIO
 /*
  * Fenster "Tafel erstellen" (25.09.2026): links die Tafelarten, in der Mitte die Einstellungen, rechts die
  * Vorschau - sie ist das fertige Blatt, gerendert aus demselben PDF, das gedruckt oder gespeichert wird.
- * Vorerst eine Art: die Stammtafel. Weitere (Ahnentafel, Sanduhr, Faecher) kommen auf denselben Zeichenkern.
+ * Ahnentafel und Stammtafel; Sanduhr und Faecher sollen auf denselben Zeichenkern folgen.
  */
 
 /**
@@ -118,62 +118,89 @@ private val stilNamen: Map<TafelStil, StringResource> = mapOf(
     TafelStil.Farbig to Res.string.desk_style_colour, TafelStil.Schwarzweiss to Res.string.desk_style_bw,
 )
 
-/** Die Einstellungen bleiben zwischen den Aufrufen erhalten (Desktop-Einstellungen). */
+/** Ahnentafel aus der Ahnenliste der API (Kekule-Nummern): Vater 2n, Mutter 2n+1, hoechstens [generationen] Reihen. */
+fun ahnenBaum(ahnen: Map<Int, de.bgghome.webtrees.nativ.api.Ancestor>, generationen: Int): TafelPerson? {
+    fun reihe(n: Int) = 31 - Integer.numberOfLeadingZeros(n)
+    fun knoten(n: Int): TafelPerson? = ahnen[n]?.let { a ->
+        TafelPerson(a.person, if (reihe(n) + 1 >= generationen) emptyList() else listOfNotNull(knoten(2 * n), knoten(2 * n + 1)), n)
+    }
+    return knoten(1)
+}
+
+/** Groesste Tiefe je Tafelart: Nachfahren liefert api4webtrees ab 1.8.0 bis 10, Vorfahren bis 7 Generationen. */
+private fun maxGen(art: TafelArt) = if (art == TafelArt.Stamm) 10 else 7
+
+/** Die Einstellungen bleiben je Tafelart zwischen den Aufrufen erhalten (Desktop-Einstellungen). */
 private object TafelWahl {
     private val prefs get() = DeskLayout.prefs
-    fun laden() = TafelOptionen(
-        generationen = prefs.getString("tafel_gen", null)?.toIntOrNull() ?: 6,
-        stil = TafelStil.entries.firstOrNull { it.name == prefs.getString("tafel_stil", null) } ?: TafelStil.Pergament,
-        rahmenMm = prefs.getString("tafel_rahmen", null)?.toIntOrNull() ?: 30,
-        bilder = prefs.getBoolean("tafel_bilder", true),
+    private fun k(art: TafelArt, name: String) = if (art == TafelArt.Stamm) "tafel_$name" else "tafel_ahnen_$name"
+    fun letzte(): TafelArt = TafelArt.entries.firstOrNull { it.name == prefs.getString("tafel_art", null) } ?: TafelArt.Stamm
+    fun laden(art: TafelArt) = TafelOptionen(
+        generationen = (prefs.getString(k(art, "gen"), null)?.toIntOrNull() ?: if (art == TafelArt.Stamm) 6 else 5).coerceIn(2, maxGen(art)),
+        stil = TafelStil.entries.firstOrNull { it.name == prefs.getString(k(art, "stil"), null) } ?: TafelStil.Pergament,
+        rahmenMm = prefs.getString(k(art, "rahmen"), null)?.toIntOrNull() ?: 30,
+        bilder = prefs.getBoolean(k(art, "bilder"), true),
+        nummern = prefs.getBoolean(k(art, "nummern"), true),
     )
-    fun sichern(o: TafelOptionen) {
-        prefs.putString("tafel_gen", o.generationen.toString()); prefs.putString("tafel_stil", o.stil.name)
-        prefs.putString("tafel_rahmen", o.rahmenMm.toString()); prefs.putBoolean("tafel_bilder", o.bilder)
+    fun sichern(art: TafelArt, o: TafelOptionen) {
+        prefs.putString("tafel_art", art.name)
+        prefs.putString(k(art, "gen"), o.generationen.toString()); prefs.putString(k(art, "stil"), o.stil.name)
+        prefs.putString(k(art, "rahmen"), o.rahmenMm.toString()); prefs.putBoolean(k(art, "bilder"), o.bilder)
+        prefs.putBoolean(k(art, "nummern"), o.nummern)
     }
 }
 
 @Composable
-fun TafelFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
+fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onClose: () -> Unit) {
     val appName = LocalAppName.current
     val tree = state.tree
     val root = state.root
     val wurzelName = state.detail?.takeIf { it.person.xref == root }?.person?.name ?: state.people.firstOrNull { it.xref == root }?.name.orEmpty()
-    val titelVorgabe = stringResource(Res.string.desk_chart_title_default, wurzelName)
-    var o by remember { mutableStateOf(TafelWahl.laden().copy(titel = titelVorgabe)) }
-    LaunchedEffect(o) { TafelWahl.sichern(o) }
+    var art by remember { mutableStateOf(start ?: TafelWahl.letzte()) }
+    val titelStamm = stringResource(Res.string.desk_chart_title_default, wurzelName)
+    val titelAhnen = stringResource(Res.string.desk_chart_title_ancestors, wurzelName)
+    val titelVorgabe = if (art == TafelArt.Stamm) titelStamm else titelAhnen
+    var o by remember(art) { mutableStateOf(TafelWahl.laden(art).copy(titel = titelVorgabe)) }
+    LaunchedEffect(art, o) { TafelWahl.sichern(art, o) }
     val privat = stringResource(Res.string.person_private)
     val fuss = remember(tree) { fusszeile(appName, tree?.title.orEmpty()) }
 
-    // Daten: einmal bis 10 Generationen laden, dann nur noch kuerzen - das Umstellen der Tiefe geht sofort.
-    val daten by produceState<Result<DescendantNode>?>(null, tree?.name, root) {
-        value = if (tree == null || root == null) null else withContext(Dispatchers.IO) { runCatching { nachfahrenLaden(viewModel.client, tree.name, root, 10) } }
+    // Daten: einmal in voller Tiefe laden, dann nur noch kuerzen - das Umstellen der Generationen geht sofort.
+    val daten by produceState<Result<(Int) -> TafelPerson?>?>(null, tree?.name, root, art) {
+        value = if (tree == null || root == null) null else withContext(Dispatchers.IO) {
+            runCatching {
+                when (art) {
+                    TafelArt.Stamm -> nachfahrenLaden(viewModel.client, tree.name, root, maxGen(art)).let { d -> { g: Int -> tafelBaum(d, g) } }
+                    TafelArt.Ahnen -> viewModel.client.pedigree(tree.name, root, maxGen(art)).ancestors.associateBy { it.n }.let { m -> { g: Int -> ahnenBaum(m, g) } }
+                }
+            }
+        }
     }
-    val baum = daten?.getOrNull()?.let { tafelBaum(it, o.generationen) }
+    val baum = daten?.getOrNull()?.invoke(o.generationen)
     // Bilder im Hintergrund laden; jedes fertige Bild zaehlt hoch und zeichnet die Vorschau neu.
     var bilderStand by remember { mutableStateOf(0) }
     LaunchedEffect(daten, o.bilder) {
-        val wurzel = daten?.getOrNull() ?: return@LaunchedEffect
+        val voll = daten?.getOrNull()?.invoke(maxGen(art)) ?: return@LaunchedEffect
         if (!o.bilder) return@LaunchedEffect
-        val urls = alle(tafelBaum(wurzel, 10)).mapNotNull { it.thumb }.distinct().filter { TafelBilder.bekannt(it) == null }
+        val urls = alle(voll).mapNotNull { it.thumb }.distinct().filter { TafelBilder.bekannt(it) == null }
         urls.chunked(8).forEach { gruppe ->
             withContext(Dispatchers.IO) { gruppe.forEach { TafelBilder.laden(it) } }
             bilderStand++
         }
     }
-    fun erzeugen() = baum?.let { stammtafelPdf(it, o, { p -> p.thumb?.let(TafelBilder::bekannt) }, privat, fuss) }
+    fun erzeugen() = baum?.let { tafelPdf(it, o, { p -> p.thumb?.let(TafelBilder::bekannt) }, privat, fuss, art) }
 
     // Vorschau: das Blatt als Bild, kurz verzoegert, damit schnelles Umstellen nicht jedes Mal rendert. Das PDF wird
     // dafuer einmal gespeichert und neu geladen - erst beim Speichern bettet PDFBox die Schriften ein, vorher zeichnet
     // der Renderer den Titel in einer Ersatzschrift. [gross]: Blatt in Lesegroesse, rollbar.
     var vorschauPx by remember { mutableStateOf(1000 to 800) }
     var gross by remember { mutableStateOf(false) }
-    val vorschau by produceState<Pair<ImageBitmap, TafelInfo>?>(null, baum, o, bilderStand, vorschauPx, gross) {
+    val vorschau by produceState<Pair<ImageBitmap, TafelInfo>?>(null, baum, o, art, bilderStand, vorschauPx, gross) {
         delay(150)
         val b = baum ?: return@produceState
         value = withContext(Dispatchers.Default) {
             runCatching {
-                val (doc, info) = stammtafelPdf(b, o, { p -> p.thumb?.let(TafelBilder::bekannt) }, privat, fuss)
+                val (doc, info) = tafelPdf(b, o, { p -> p.thumb?.let(TafelBilder::bekannt) }, privat, fuss, art)
                 val bytes = java.io.ByteArrayOutputStream().also { out -> doc.use { it.save(out) } }.toByteArray()
                 org.apache.pdfbox.Loader.loadPDF(bytes).use {
                     val box = it.getPage(0).mediaBox
@@ -195,18 +222,21 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
             Row(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 // Tafelarten
                 Column(Modifier.width(190.dp).fillMaxHeight().background(MaterialTheme.colorScheme.surface).padding(vertical = 8.dp)) {
-                    Text(stringResource(Res.string.desk_chart_group_descendants), Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(stringResource(Res.string.desk_chart_descendants), Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.secondaryContainer).padding(horizontal = 24.dp, vertical = 6.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                    ArtGruppe(stringResource(Res.string.desk_chart_group_ancestors))
+                    ArtEintrag(stringResource(Res.string.desk_chart_ancestors), art == TafelArt.Ahnen) { art = TafelArt.Ahnen }
+                    Spacer(Modifier.height(8.dp))
+                    ArtGruppe(stringResource(Res.string.desk_chart_group_descendants))
+                    ArtEintrag(stringResource(Res.string.desk_chart_descendants), art == TafelArt.Stamm) { art = TafelArt.Stamm }
                 }
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 // Einstellungen
                 Column(Modifier.width(330.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(Res.string.desk_chart_descendants), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(Res.string.desk_chart_descendants_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(if (art == TafelArt.Stamm) Res.string.desk_chart_descendants else Res.string.desk_chart_ancestors), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(if (art == TafelArt.Stamm) Res.string.desk_chart_descendants_hint else Res.string.desk_chart_ancestors_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Einstellung(stringResource(Res.string.desk_chart_person)) { Text(wurzelName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold) }
                     Einstellung(stringResource(Res.string.desk_chart_generations)) {
-                        Auswahl(o.generationen.toString(), (2..10).map { it.toString() }) { o = o.copy(generationen = it.toInt()) }
+                        Auswahl(o.generationen.toString(), (2..maxGen(art)).map { it.toString() }) { o = o.copy(generationen = it.toInt()) }
                     }
                     Einstellung(stringResource(Res.string.desk_chart_style)) {
                         val namen = TafelStil.entries.associateWith { stringResource(stilNamen.getValue(it)) }
@@ -218,6 +248,10 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     Row(Modifier.clickable { o = o.copy(bilder = !o.bilder) }, verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = o.bilder, onCheckedChange = { o = o.copy(bilder = it) })
                         Text(stringResource(Res.string.desk_chart_photos), style = MaterialTheme.typography.bodyMedium)
+                    }
+                    if (art == TafelArt.Ahnen) Row(Modifier.clickable { o = o.copy(nummern = !o.nummern) }, verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = o.nummern, onCheckedChange = { o = o.copy(nummern = it) })
+                        Text(stringResource(Res.string.desk_chart_numbers), style = MaterialTheme.typography.bodyMedium)
                     }
                     OutlinedTextField(o.titel, { o = o.copy(titel = it) }, label = { Text(stringResource(Res.string.desk_chart_heading)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     vorschau?.second?.let { info ->
@@ -266,6 +300,18 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun ArtGruppe(text: String) {
+    Text(text, Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+@Composable
+private fun ArtEintrag(text: String, aktiv: Boolean, onClick: () -> Unit) {
+    Text(text, Modifier.fillMaxWidth().background(if (aktiv) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent)
+        .fokusRahmen().clickable(onClick = onClick).padding(horizontal = 24.dp, vertical = 6.dp),
+        style = MaterialTheme.typography.bodyMedium, fontWeight = if (aktiv) FontWeight.SemiBold else FontWeight.Normal)
 }
 
 @Composable

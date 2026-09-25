@@ -120,7 +120,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     var hilfe by remember { mutableStateOf(false) }
     var liste by remember { mutableStateOf<ListenArt?>(null) }
     var merkliste by remember { mutableStateOf(false) }
-    var tafel by remember { mutableStateOf(false) }
+    // Tafelfenster: null = zu, sonst die Tafelart, mit der es oeffnet
+    var tafel by remember { mutableStateOf<TafelArt?>(null) }
     val openSheet: (String) -> Unit = { xref -> viewModel.select(xref); sheetOpen = true }
 
     // Zurueck/Vor zwischen Zentralpersonen: das ViewModel kennt nur den Rueckweg, den Vorwaertsweg haelt der Desktop.
@@ -158,7 +159,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         nav = nav, drucke = drucke, onListe = { liste = it }, onHilfe = { hilfe = true },
         farbkodierung = farbkodierung, onFarbkodierung = { farbkodierung = it; DeskLayout.prefs.putBoolean("farbkodierung", it) },
         symboltexte = symboltexte, onSymboltexte = { symboltexte = it; DeskLayout.prefs.putBoolean("symboltexte", it) },
-        onMerkliste = { merkliste = true }, onTafel = { tafel = true },
+        onMerkliste = { merkliste = true }, onTafel = { tafel = it },
     )
 
     // Vor der Anmeldung und bei der Baumwahl: die Startbildschirme der App, mittig im Fenster.
@@ -182,7 +183,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         Column(Modifier.fillMaxSize()) {
             if (layout == DeskLayout.Navigator) {
                 ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { hilfe = true }, nav = nav, drucke = drucke,
-                    symboltexte = symboltexte, onMerkliste = { merkliste = true }, onListe = { liste = it }, onTafel = { tafel = true }, onQuit = onQuit)
+                    symboltexte = symboltexte, onMerkliste = { merkliste = true }, onListe = { liste = it }, onTafel = { tafel = it }, onQuit = onQuit)
             } else {
                 WorkspaceBar(state, viewModel)
             }
@@ -251,7 +252,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     liste?.let { art -> ListenFenster(art, state, viewModel, onClose = { liste = null }) }
     if (hilfe) HilfeFenster(onClose = { hilfe = false })
     if (merkliste) MerklisteFenster(state, viewModel, openSheet, onClose = { merkliste = false })
-    if (tafel && state.root != null) TafelFenster(state, viewModel, onClose = { tafel = false })
+    tafel?.let { art -> if (state.root != null) TafelFenster(state, viewModel, art, onClose = { tafel = null }) }
 
     if (about) {
         AlertDialog(
@@ -284,7 +285,7 @@ private fun FrameWindowScope.DeskMenuBar(
     nav: DeskNav, drucke: DeskDruck, onListe: (ListenArt) -> Unit, onHilfe: () -> Unit,
     farbkodierung: Boolean, onFarbkodierung: (Boolean) -> Unit,
     symboltexte: Boolean, onSymboltexte: (Boolean) -> Unit,
-    onMerkliste: () -> Unit, onTafel: () -> Unit,
+    onMerkliste: () -> Unit, onTafel: (TafelArt) -> Unit,
 ) {
     val main = state.screen == Screen.Main
     val loggedIn = state.info?.user?.loggedIn == true
@@ -297,8 +298,8 @@ private fun FrameWindowScope.DeskMenuBar(
             Separator()
             Item(stringResource(Res.string.desk_print_sheet), enabled = main && state.root != null, shortcut = KeyShortcut(Key.P, ctrl = true), onClick = drucke::personenblatt)
             Item(stringResource(Res.string.desk_pdf_sheet), enabled = main && state.root != null, onClick = drucke::personenblattPdf)
-            Item(stringResource(Res.string.desk_print_chart), enabled = main && state.pedigree != null, onClick = drucke::ahnentafel)
-            Item(stringResource(Res.string.desk_pdf_chart), enabled = main && state.pedigree != null, onClick = drucke::ahnentafelPdf)
+            Item(stringResource(Res.string.desk_chart_ancestors_open), enabled = main && state.root != null, onClick = { onTafel(TafelArt.Ahnen) })
+            Item(stringResource(Res.string.desk_chart_open), enabled = main && state.root != null, onClick = { onTafel(TafelArt.Stamm) })
             Separator()
             if (loggedIn) {
                 Item(stringResource(Res.string.menu_sign_out_user, state.info?.user?.userName.orEmpty()), onClick = viewModel::logout)
@@ -333,9 +334,9 @@ private fun FrameWindowScope.DeskMenuBar(
             Item(stringResource(Res.string.desk_list_events), onClick = { onListe(ListenArt.Ereignisse) })
             Separator()
             Item(stringResource(Res.string.desk_title_sheet, state.detail?.person?.name ?: "…"), enabled = state.root != null, onClick = { onListe(ListenArt.Personenblatt) })
-            Item(stringResource(Res.string.desk_print_chart), enabled = state.pedigree != null, onClick = drucke::ahnentafel)
             Separator()
-            Item(stringResource(Res.string.desk_chart_open), enabled = state.root != null, shortcut = KeyShortcut(Key.T, ctrl = true), onClick = onTafel)
+            Item(stringResource(Res.string.desk_chart_ancestors_open), enabled = state.root != null, shortcut = KeyShortcut(Key.T, ctrl = true, shift = true), onClick = { onTafel(TafelArt.Ahnen) })
+            Item(stringResource(Res.string.desk_chart_open), enabled = state.root != null, shortcut = KeyShortcut(Key.T, ctrl = true), onClick = { onTafel(TafelArt.Stamm) })
         }
         Menu(stringResource(Res.string.desk_menu_webtrees), enabled = main && state.tree != null) {
             val t = state.tree?.name.orEmpty()
@@ -423,7 +424,7 @@ private const val TRENNER = 9f
 private fun ClassicToolbar(
     state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit,
     nav: DeskNav, drucke: DeskDruck, symboltexte: Boolean,
-    onMerkliste: () -> Unit, onListe: (ListenArt) -> Unit, onTafel: () -> Unit, onQuit: () -> Unit,
+    onMerkliste: () -> Unit, onListe: (ListenArt) -> Unit, onTafel: (TafelArt) -> Unit, onQuit: () -> Unit,
 ) {
     val canEdit = state.tree?.canEdit == true
     val manager = state.tree?.role == "manager"
@@ -451,9 +452,8 @@ private fun ClassicToolbar(
             DropdownMenuItem(text = { Text(stringResource(Res.string.desk_title_sheet, state.detail?.person?.name ?: "…")) }, onClick = { close(); onListe(ListenArt.Personenblatt) })
         }))
         add(Knopf(TreeIcon, stringResource(Res.string.desk_chart), enabled = state.root != null, menu = { close ->
-            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_chart_open)) }, onClick = { close(); onTafel() })
-            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_print_chart)) }, enabled = state.pedigree != null, onClick = { close(); drucke.ahnentafel() })
-            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_pdf_chart)) }, enabled = state.pedigree != null, onClick = { close(); drucke.ahnentafelPdf() })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_chart_ancestors_open)) }, onClick = { close(); onTafel(TafelArt.Ahnen) })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_chart_open)) }, onClick = { close(); onTafel(TafelArt.Stamm) })
         }))
         add(Knopf(DruckerIcon, stringResource(Res.string.desk_print), enabled = state.root != null, onClick = drucke::personenblatt))
         add(Trenner)
@@ -642,17 +642,8 @@ class DeskDruck(private val state: UiState, private val viewModel: AppViewModel,
         val doc = listenPdf(personenblattZeilen(d), appName, baum)
         if (pdf) alsPdf(doc, titel) else drucken(doc, titel)
     }
-    private fun tafel(pdf: Boolean) {
-        val ahnen = state.pedigree?.ancestors?.associate { it.n to it.person } ?: return
-        val zentral = ahnen[1] ?: return
-        val titel = Texte.t(Res.string.desk_title_chart, zentral.name)
-        val doc = ahnentafelPdf(zentral, ahnen, state.ancestorGenerations, appName, baum)
-        if (pdf) alsPdf(doc, titel) else drucken(doc, titel)
-    }
     fun personenblatt() = blatt(false)
     fun personenblattPdf() = blatt(true)
-    fun ahnentafel() = tafel(false)
-    fun ahnentafelPdf() = tafel(true)
 }
 
 /** Personentext in die Zwischenablage - fuer E-Mail oder Textverarbeitung. */
