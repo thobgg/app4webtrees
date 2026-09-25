@@ -12,15 +12,15 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/desktop-navigator.png" alt="wtTux am PC: Navigator mit Zentralperson, Kindern und vier Generationen Vorfahren" width="100%">
-  <br><b>wtTux am PC</b> – derselbe Stammbaum wie in wtAnd, aufgebaut wie ein klassisches Genealogie-Programm.
-  <br><sub>Historischer Stammbaum der Medici. Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; alle anderen Porträts gemeinfrei (Wikimedia Commons).</sub>
+  <img src="docs/screenshots/windows-navigator.jpg" alt="wtWin unter Windows: Navigator mit Zentralperson, Kindern und vier Generationen Vorfahren" width="100%">
+  <br><b>wtWin unter Windows</b> – derselbe Stammbaum wie in wtAnd, aufgebaut wie ein klassisches Genealogie-Programm.
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/desktop-personenblatt.png" alt="wtTux: Personenblatt von Cosimo I de' Medici mit Ereignissen, Eltern, Partnerinnen und Kindern" width="100%">
-  <br><b>Personenblatt</b> – Ereignisse als Tabelle, die Familie daneben, Blättern, Drucken und PDF unten.
-</p>
+| <img src="docs/screenshots/windows-personenblatt.jpg" alt="wtWin: Personenblatt von Cosimo I de' Medici" width="100%"> | <img src="docs/screenshots/desktop-navigator.png" alt="wtTux unter Linux: Navigator" width="100%"> |
+| :-: | :-: |
+| **Personenblatt** – Ereignisse als Tabelle, die Familie daneben, Drucken und PDF | **wtTux unter Linux** – dasselbe Programm |
+
+<p align="center"><sub>Historischer Stammbaum der Medici. Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; alle anderen Porträts gemeinfrei (Wikimedia Commons).</sub></p>
 
 **Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
 **Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren. Windows (wtWin) folgt.
