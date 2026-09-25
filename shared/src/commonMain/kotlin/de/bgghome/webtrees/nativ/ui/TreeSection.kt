@@ -161,7 +161,9 @@ internal fun GenerationsChip(state: UiState, viewModel: AppViewModel) {
 
     Box {
         TextButton(onClick = { open = true }) {
-            Text(stringResource(Res.string.tree_generations, state.ancestorGenerations))
+            // Einzeilig: bei Platzmangel (wtWin mit 125 % Skalierung) brach der Text sonst nach jedem Buchstaben um
+            // und machte die Symbolleiste ein Drittel des Fensters hoch (Rueckmeldung wtwin5/6, 25.09.2026).
+            Text(stringResource(Res.string.tree_generations, state.ancestorGenerations), maxLines = 1, softWrap = false)
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {

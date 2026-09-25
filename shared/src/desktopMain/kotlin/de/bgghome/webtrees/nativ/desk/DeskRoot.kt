@@ -441,7 +441,7 @@ private fun ClassicToolbar(
                 GenerationsChip(state, viewModel)
                 ToolSeparator()
                 ZoomKnopf("−") { onZoom((zoom - 0.1f).coerceAtLeast(0.6f)) }
-                Text("${(zoom * 100).toInt()} %", Modifier.clickable { onZoom(1f) }.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelLarge)
+                Text("${(zoom * 100).toInt()} %", Modifier.clickable { onZoom(1f) }.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false)
                 ZoomKnopf("+") { onZoom((zoom + 0.1f).coerceAtMost(1.6f)) }
             }
         }
