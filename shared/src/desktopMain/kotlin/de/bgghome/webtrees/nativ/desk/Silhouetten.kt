@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import de.bgghome.webtrees.nativ.api.Person
@@ -45,11 +46,39 @@ fun Portrait(person: Person, modifier: Modifier = Modifier) {
 @Composable
 fun Silhouette(sex: String, jh: Int?, modifier: Modifier = Modifier) {
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    val grund = when (sex) { "M" -> if (dark) Color(0xFF2F4B66) else Color(0xFFDCE7F2); "F" -> if (dark) Color(0xFF5A3540) else Color(0xFFF6DEDF); else -> if (dark) Color(0xFF3A4242) else Color(0xFFE6EAEA) }
-    val koerper = when (sex) { "M" -> Color(0xFF5B7796); "F" -> Color(0xFFA6697B); else -> Color(0xFF8A9493) }
-    val hell = if (dark) Color(0xFFE8EEF3) else Color(0xFFFFFFFF)
-    Box(modifier.background(grund)) {
-        Canvas(Modifier.fillMaxSize()) {
+    val farben = silhouettenFarben(sex, dark)
+    Box(modifier.background(farben.grund)) {
+        Canvas(Modifier.fillMaxSize()) { silhouetteMalen(sex, jh, farben) }
+    }
+}
+
+/** Farben einer Silhouette: Grund, Koerper und helle Einzelheiten (Kragen, Perlen). */
+class SilhouettenFarben(val grund: Color, val koerper: Color, val hell: Color)
+
+fun silhouettenFarben(sex: String, dark: Boolean = false) = SilhouettenFarben(
+    grund = when (sex) { "M" -> if (dark) Color(0xFF2F4B66) else Color(0xFFDCE7F2); "F" -> if (dark) Color(0xFF5A3540) else Color(0xFFF6DEDF); else -> if (dark) Color(0xFF3A4242) else Color(0xFFE6EAEA) },
+    koerper = when (sex) { "M" -> Color(0xFF5B7796); "F" -> Color(0xFFA6697B); else -> Color(0xFF8A9493) },
+    hell = if (dark) Color(0xFFE8EEF3) else Color(0xFFFFFFFF),
+)
+
+/** Silhouette als Bild fuer Druck und PDF (Stammtafel): dieselbe Zeichnung wie am Bildschirm, [px] Pixel im Quadrat. */
+fun silhouetteBild(sex: String, jh: Int?, px: Int, farben: SilhouettenFarben = silhouettenFarben(sex)): java.awt.image.BufferedImage {
+    val bild = androidx.compose.ui.graphics.ImageBitmap(px, px)
+    val leinwand = androidx.compose.ui.graphics.Canvas(bild)
+    androidx.compose.ui.graphics.drawscope.CanvasDrawScope().draw(
+        androidx.compose.ui.unit.Density(1f), androidx.compose.ui.unit.LayoutDirection.Ltr, leinwand, Size(px.toFloat(), px.toFloat()),
+    ) {
+        drawRect(farben.grund)
+        silhouetteMalen(sex, jh, farben)
+    }
+    return bild.toAwtImage()
+}
+
+/** Die eigentliche Zeichnung im 100x100-Raster, mittig in der Flaeche des DrawScope. */
+fun DrawScope.silhouetteMalen(sex: String, jh: Int?, farben: SilhouettenFarben) {
+    val koerper = farben.koerper
+    val hell = farben.hell
+    run {
             val s = size.minDimension / 100f
             // Alles im 100x100-Raster, mittig; Rumpf unten, Kopf oben
             val dx = (size.width - 100f * s) / 2f; val dy = (size.height - 100f * s) / 2f
@@ -78,6 +107,5 @@ fun Silhouette(sex: String, jh: Int?, modifier: Modifier = Modifier) {
                       else { oval(50f, 42f, 16f, 18f); pfad { moveTo(p(34f, 40f).x, p(34f, 40f).y); cubicTo(p(34f, 20f).x, p(34f, 20f).y, p(66f, 20f).x, p(66f, 20f).y, p(66f, 40f).x, p(66f, 40f).y); lineTo(p(60f, 38f).x, p(60f, 38f).y); cubicTo(p(58f, 28f).x, p(58f, 28f).y, p(42f, 28f).x, p(42f, 28f).y, p(40f, 38f).x, p(40f, 38f).y); close() }; pfad(hell) { moveTo(p(44f, 74f).x, p(44f, 74f).y); lineTo(p(56f, 74f).x, p(56f, 74f).y); lineTo(p(50f, 96f).x, p(50f, 96f).y); close() } }  // kurzes Haar, Krawatte
                 else -> { oval(50f, 40f, 16f, 18f); if (f) pfad { moveTo(p(30f, 62f).x, p(30f, 62f).y); cubicTo(p(28f, 20f).x, p(28f, 20f).y, p(72f, 20f).x, p(72f, 20f).y, p(70f, 62f).x, p(70f, 62f).y); lineTo(p(64f, 62f).x, p(64f, 62f).y); cubicTo(p(66f, 28f).x, p(66f, 28f).y, p(34f, 28f).x, p(34f, 28f).y, p(36f, 62f).x, p(36f, 62f).y); close() } }  // ohne Jahr: schlicht
             }
-        }
     }
 }

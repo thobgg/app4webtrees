@@ -362,7 +362,7 @@
 
 Person window: Page Up/Page Down move through the list, Esc closes, double-click a row to edit it.
 
-Keys: Ctrl+F go to · Ctrl+E edit person · Ctrl+N add relative · Ctrl+P print person sheet · Alt+Left back · Alt+Right forward · Alt+Home start person · Ctrl+Shift+C copy person text · F5 reload · F1 help.
+Keys: Ctrl+F go to · Ctrl+E edit person · Ctrl+N add relative · Ctrl+P print person sheet · Ctrl+T descendant chart · Alt+Left back · Alt+Right forward · Alt+Home start person · Ctrl+Shift+C copy person text · F5 reload · F1 help.
 
 GEDCOM, merging, places and sources are managed by webtrees itself – the webtrees menu opens those pages in the browser.</string>
     <string name="desk_appearance">Appearance</string>
@@ -383,4 +383,27 @@ GEDCOM, merging, places and sources are managed by webtrees itself – the webtr
     <string name="desk_unknown_partner">Partner unknown</string>
     <string name="desk_toolbar_labels">Toolbar labels</string>
     <string name="desk_more">More</string>
+    <string name="desk_chart_window">Create chart</string>
+    <string name="desk_chart_group_descendants">Descendants</string>
+    <string name="desk_chart_descendants">Descendant chart</string>
+    <string name="desk_chart_descendants_hint">All descendants of a person on one sheet, the starting person at the top, one row per generation.</string>
+    <string name="desk_chart_open">Descendant chart…</string>
+    <string name="desk_chart_person">Starting person</string>
+    <string name="desk_chart_generations">Generations</string>
+    <string name="desk_chart_style">Design</string>
+    <string name="desk_style_parchment">Parchment</string>
+    <string name="desk_style_classic">Classic</string>
+    <string name="desk_style_colour">Colour</string>
+    <string name="desk_style_bw">Black and white</string>
+    <string name="desk_chart_box_width">Width of person boxes</string>
+    <string name="desk_chart_photos">Show pictures</string>
+    <string name="desk_chart_heading">Heading</string>
+    <string name="desk_chart_title_default">Descendants of %1$s</string>
+    <string name="desk_chart_size">%1$d persons · sheet %2$d × %3$d cm</string>
+    <string name="desk_chart_print_one">Print on one page</string>
+    <string name="desk_chart_print_tiles">Print full size (A4 pages)</string>
+    <string name="desk_chart_pdf_poster">Save as PDF (poster)</string>
+    <string name="desk_chart_pdf_tiles">Save as PDF (A4 pages)</string>
+    <string name="desk_chart_loading">Loading descendants…</string>
+    <string name="desk_chart_zoom_hint">Click the preview to enlarge it or to see the whole sheet.</string>
 </resources>

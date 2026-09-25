@@ -357,7 +357,7 @@
 
 Personenfenster: Bild-auf/Bild-ab blättert durch die Liste, Esc schließt, ein Doppelklick auf eine Zeile bearbeitet sie.
 
-Tasten: Strg+F Gehe zu · Strg+E Person bearbeiten · Strg+N Verwandte hinzufügen · Strg+P Personenblatt drucken · Alt+Links zurück · Alt+Rechts vor · Alt+Pos1 Startperson · Strg+Umschalt+C Personentext kopieren · F5 neu laden · F1 Hilfe.
+Tasten: Strg+F Gehe zu · Strg+E Person bearbeiten · Strg+N Verwandte hinzufügen · Strg+P Personenblatt drucken · Strg+T Stammtafel · Alt+Links zurück · Alt+Rechts vor · Alt+Pos1 Startperson · Strg+Umschalt+C Personentext kopieren · F5 neu laden · F1 Hilfe.
 
 GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Menü webtrees öffnet diese Seiten im Browser.</string>
     <string name="desk_appearance">Erscheinungsbild</string>
@@ -378,4 +378,27 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_unknown_partner">Partner unbekannt</string>
     <string name="desk_toolbar_labels">Symboltexte</string>
     <string name="desk_more">Mehr</string>
+    <string name="desk_chart_window">Tafel erstellen</string>
+    <string name="desk_chart_group_descendants">Nachfahren</string>
+    <string name="desk_chart_descendants">Stammtafel</string>
+    <string name="desk_chart_descendants_hint">Alle Nachfahren einer Person auf einem Blatt, die Ausgangsperson oben, jede Generation eine Reihe.</string>
+    <string name="desk_chart_open">Stammtafel …</string>
+    <string name="desk_chart_person">Ausgangsperson</string>
+    <string name="desk_chart_generations">Generationen</string>
+    <string name="desk_chart_style">Gestaltung</string>
+    <string name="desk_style_parchment">Pergament</string>
+    <string name="desk_style_classic">Klassisch</string>
+    <string name="desk_style_colour">Farbig</string>
+    <string name="desk_style_bw">Schwarzweiß</string>
+    <string name="desk_chart_box_width">Breite der Personenrahmen</string>
+    <string name="desk_chart_photos">Bilder zeigen</string>
+    <string name="desk_chart_heading">Überschrift</string>
+    <string name="desk_chart_title_default">Stammtafel %1$s</string>
+    <string name="desk_chart_size">%1$d Personen · Blatt %2$d × %3$d cm</string>
+    <string name="desk_chart_print_one">Drucken auf ein Blatt</string>
+    <string name="desk_chart_print_tiles">Drucken in Originalgröße (A4-Blätter)</string>
+    <string name="desk_chart_pdf_poster">Als PDF speichern (Poster)</string>
+    <string name="desk_chart_pdf_tiles">Als PDF speichern (A4-Blätter)</string>
+    <string name="desk_chart_loading">Nachfahren werden geladen …</string>
+    <string name="desk_chart_zoom_hint">Klick auf die Vorschau vergrößert sie oder zeigt wieder das ganze Blatt.</string>
 </resources>

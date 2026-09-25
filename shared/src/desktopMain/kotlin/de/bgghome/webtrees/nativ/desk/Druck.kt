@@ -32,7 +32,8 @@ import java.time.format.FormatStyle
 data class Zeile(val text: String, val einzug: Int = 0, val fett: Boolean = false, val gross: Boolean = false)
 
 /** Schriften: eine Systemschrift mit Umlauten und Akzenten, sonst Helvetica (dann ohne Sonderzeichen ausserhalb Latin-1). */
-private class Schriften(private val doc: PDDocument) {
+internal class Schriften(private val doc: PDDocument) {
+    internal fun ladenAus(namen: List<String>): PDFont? = laden(namen)
     private fun laden(namen: List<String>): PDFont? = namen.map(::File).firstOrNull { it.isFile }?.let { f -> runCatching { PDType0Font.load(doc, f) }.getOrNull() }
     val normal: PDFont = laden(listOf(
         "C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/arial.ttf",
@@ -47,11 +48,11 @@ private class Schriften(private val doc: PDDocument) {
 }
 
 /** Text, den die Schrift auch darstellen kann - unbekannte Zeichen werden zu "?". */
-private fun PDFont.sicher(text: String): String = buildString {
+internal fun PDFont.sicher(text: String): String = buildString {
     text.forEach { c -> append(if (runCatching { encode(c.toString()) }.isSuccess) c else '?') }
 }
 
-private fun PDFont.breite(text: String, groesse: Float) = getStringWidth(sicher(text)) / 1000f * groesse
+internal fun PDFont.breite(text: String, groesse: Float) = getStringWidth(sicher(text)) / 1000f * groesse
 
 /**
  * Fliesstext-Seiten im Hochformat: Titel, Zeilen mit Einzug, automatischer Umbruch und Seitenwechsel,
@@ -103,7 +104,7 @@ private class Textseiten(val doc: PDDocument, val fuss: String) {
 }
 
 /** Fusszeile: "Erstellt mit wtWin am 23.09.2026 · Die Medici". */
-private fun fusszeile(appName: String, baum: String): String =
+internal fun fusszeile(appName: String, baum: String): String =
     Texte.t(Res.string.desk_created, appName, LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)), baum)
 
 /** Liste als PDF-Dokument. */
