@@ -3,6 +3,8 @@
 package de.bgghome.webtrees.nativ.desk
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Place
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import de.bgghome.webtrees.nativ.Texte
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.produceState
@@ -143,6 +146,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     }
     val drucke = DeskDruck(state, viewModel, LocalAppName.current)
     var zoom by remember { mutableStateOf(DeskLayout.prefs.getString("zoom", null)?.toFloatOrNull() ?: 1f) }
+    // Texte unter den Symbolen (Ansicht -> Symboltexte, wie beim Vorbild); bei Platzmangel fallen sie ohnehin weg.
+    var symboltexte by remember { mutableStateOf(DeskLayout.prefs.getBoolean("symboltexte", true)) }
 
     DeskMenuBar(
         state, viewModel, openWeb, layout = layout, onLayout = { layout = it; DeskLayout.save(it) },
@@ -151,6 +156,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         onAbout = { about = true }, onQuit = onQuit,
         nav = nav, drucke = drucke, onListe = { liste = it }, onHilfe = { hilfe = true },
         farbkodierung = farbkodierung, onFarbkodierung = { farbkodierung = it; DeskLayout.prefs.putBoolean("farbkodierung", it) },
+        symboltexte = symboltexte, onSymboltexte = { symboltexte = it; DeskLayout.prefs.putBoolean("symboltexte", it) },
         onMerkliste = { merkliste = true },
     )
 
@@ -175,8 +181,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         Column(Modifier.fillMaxSize()) {
             if (layout == DeskLayout.Navigator) {
                 ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true }, onSheet = { (state.root)?.let(openSheet) }, onAbout = { hilfe = true }, nav = nav, drucke = drucke,
-                    zoom = zoom, onZoom = { zoom = it; DeskLayout.prefs.putString("zoom", it.toString()) },
-                    onMerkliste = { merkliste = true }, onListe = { liste = it }, onQuit = onQuit)
+                    symboltexte = symboltexte, onMerkliste = { merkliste = true }, onListe = { liste = it }, onQuit = onQuit)
             } else {
                 WorkspaceBar(state, viewModel)
             }
@@ -188,7 +193,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
                 when (state.section) {
                     Section.Home -> HomeSection(state, viewModel, openWeb)
                     Section.Photos -> PhotosSection(state, viewModel, openWeb)
-                    else -> Navigator(state, viewModel, openSheet, openWeb, farben, zoom)
+                    else -> Navigator(state, viewModel, openSheet, openWeb, farben, zoom, onZoom = { zoom = it; DeskLayout.prefs.putString("zoom", it.toString()) })
                 }
             } else Row(Modifier.weight(1f).fillMaxWidth()) {
                 PersonIndex(state, viewModel, openWeb, search, Modifier.width(280.dp).fillMaxHeight())
@@ -276,6 +281,7 @@ private fun FrameWindowScope.DeskMenuBar(
     onSearch: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, onQuit: () -> Unit,
     nav: DeskNav, drucke: DeskDruck, onListe: (ListenArt) -> Unit, onHilfe: () -> Unit,
     farbkodierung: Boolean, onFarbkodierung: (Boolean) -> Unit,
+    symboltexte: Boolean, onSymboltexte: (Boolean) -> Unit,
     onMerkliste: () -> Unit,
 ) {
     val main = state.screen == Screen.Main
@@ -353,6 +359,7 @@ private fun FrameWindowScope.DeskMenuBar(
                 RadioButtonItem(stringResource(Res.string.desk_layout_navigator), selected = layout == DeskLayout.Navigator, onClick = { onLayout(DeskLayout.Navigator) })
                 RadioButtonItem(stringResource(Res.string.desk_layout_tree), selected = layout == DeskLayout.TreeCentre, onClick = { onLayout(DeskLayout.TreeCentre) })
             }
+            CheckboxItem(stringResource(Res.string.desk_toolbar_labels), checked = symboltexte, enabled = layout == DeskLayout.Navigator, onCheckedChange = onSymboltexte)
             Separator()
             Item(stringResource(Res.string.nav_home), shortcut = KeyShortcut(Key.One, ctrl = true), onClick = { viewModel.setSection(Section.Home) })
             Item(stringResource(Res.string.nav_tree), shortcut = KeyShortcut(Key.Two, ctrl = true), onClick = { viewModel.setSection(Section.Tree) })
@@ -389,72 +396,150 @@ enum class DeskLayout {
 
 // ── Klassische Symbolleiste (Aufbau Navigator) ───────────────────────
 
+/** Ein Eintrag der Symbolleiste: Knopf (mit oder ohne Aufklappmenue) oder Trennstrich. */
+private sealed interface LeistenEintrag
+private object Trenner : LeistenEintrag
+private class Knopf(
+    val icon: ImageVector, val label: String, val enabled: Boolean = true, val active: Boolean = false,
+    val menu: (@Composable (close: () -> Unit) -> Unit)? = null, val onClick: () -> Unit = {},
+) : LeistenEintrag
+
+// Breiten in dp, wie ToolItem und ToolSeparator sie zeichnen - die Leiste rechnet damit vor dem Zeichnen.
+private const val KNOPF_TEXT = 62f
+private const val KNOPF_SYMBOL = 36f
+private const val TRENNER = 9f
+
+/*
+ * Symbolleiste, die Platzmangel vertraegt (Rueckmeldung wtwin5/6, 25.09.2026 - unter Windows mit 125 % Skalierung
+ * reichte die Breite nicht): passt sie mit Texten nicht, zeigt sie nur Symbole (Name beim Ueberfahren); passt sie
+ * auch so nicht, wandert der Rest in das Menue "Mehr" am rechten Ende. Die Texte lassen sich unter Ansicht
+ * ganz abschalten (wie beim Vorbild). Generationen und Zoom stehen im Navigator selbst.
+ */
 @Composable
 private fun ClassicToolbar(
     state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onGoTo: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit,
-    nav: DeskNav, drucke: DeskDruck, zoom: Float, onZoom: (Float) -> Unit,
+    nav: DeskNav, drucke: DeskDruck, symboltexte: Boolean,
     onMerkliste: () -> Unit, onListe: (ListenArt) -> Unit, onQuit: () -> Unit,
 ) {
     val canEdit = state.tree?.canEdit == true
     val manager = state.tree?.role == "manager"
     val t = state.tree?.name.orEmpty()
     fun web(route: String) = runCatching { viewModel.client.url(route, emptyMap()).toString() }.getOrNull()?.let(openWeb)
+    val eintraege: List<LeistenEintrag> = buildList {
+        add(Knopf(Icons.Default.Search, stringResource(Res.string.desk_goto), onClick = onGoTo))
+        add(Knopf(Icons.Default.Edit, stringResource(Res.string.action_edit), enabled = state.root != null, onClick = onSheet))
+        add(Knopf(Icons.Default.Add, stringResource(Res.string.action_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) })
+        if (viewModel.bookmarksSupported) add(Knopf(Icons.Default.Star, stringResource(Res.string.desk_bookmarks), onClick = onMerkliste))
+        add(Trenner)
+        add(Knopf(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.action_back), enabled = nav.kannZurueck, onClick = nav.zurueck))
+        add(Knopf(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.desk_forward), enabled = nav.kannVor, onClick = nav.vor))
+        add(Knopf(Icons.Default.DateRange, stringResource(Res.string.desk_history), enabled = state.recent.isNotEmpty(), menu = { close ->
+            state.recent.forEach { p ->
+                DropdownMenuItem(text = { Text(p.name + if (p.lifespan.isNotBlank()) "  (${p.lifespan})" else "") }, onClick = { close(); viewModel.setRoot(p.xref) })
+            }
+        }))
+        add(Knopf(Icons.Default.Person, stringResource(Res.string.home_start_person), enabled = state.home != null) { state.home?.let(viewModel::setRoot) })
+        add(Trenner)
+        add(Knopf(Icons.AutoMirrored.Filled.List, stringResource(Res.string.desk_list), enabled = state.root != null, menu = { close ->
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_ancestors)) }, onClick = { close(); onListe(ListenArt.Ahnen) })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_descendants)) }, onClick = { close(); onListe(ListenArt.Stamm) })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_events)) }, onClick = { close(); onListe(ListenArt.Ereignisse) })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_title_sheet, state.detail?.person?.name ?: "…")) }, onClick = { close(); onListe(ListenArt.Personenblatt) })
+        }))
+        add(Knopf(TreeIcon, stringResource(Res.string.desk_chart), enabled = state.pedigree != null, menu = { close ->
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_print_chart)) }, onClick = { close(); drucke.ahnentafel() })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.desk_pdf_chart)) }, onClick = { close(); drucke.ahnentafelPdf() })
+        }))
+        add(Knopf(DruckerIcon, stringResource(Res.string.desk_print), enabled = state.root != null, onClick = drucke::personenblatt))
+        add(Trenner)
+        add(Knopf(Icons.Default.Home, stringResource(Res.string.nav_home), active = state.section == Section.Home) { viewModel.setSection(Section.Home) })
+        add(Knopf(TreeIcon, stringResource(Res.string.desk_layout_navigator), active = state.section == Section.Tree || state.section == Section.Search) { viewModel.setSection(Section.Tree) })
+        add(Knopf(PhotoIcon, stringResource(Res.string.nav_photos), active = state.section == Section.Photos) { viewModel.setSection(Section.Photos) })
+        add(Trenner)
+        add(Knopf(Icons.Default.Check, stringResource(Res.string.desk_check), enabled = manager) { web("/tree/$t/check") })
+        add(Knopf(Icons.Default.Place, stringResource(Res.string.desk_web_places), enabled = state.tree != null) { web("/tree/$t/place-list") })
+        add(Knopf(Icons.Default.Info, stringResource(Res.string.desk_web_sources), enabled = state.tree != null) { web("/tree/$t/source-list") })
+        add(Knopf(Icons.AutoMirrored.Filled.ExitToApp, "webtrees") { openWeb(state.detail?.person?.url ?: state.baseUrl) })
+        add(Trenner)
+        add(Knopf(Icons.Default.Info, stringResource(Res.string.desk_help), onClick = onAbout))
+        add(Knopf(Icons.Default.Close, stringResource(Res.string.desk_quit), onClick = onQuit))
+    }
     Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
             TreePicker(state, viewModel)
             ToolSeparator()
-            ToolItem(Icons.Default.Search, stringResource(Res.string.desk_goto), onClick = onGoTo)
-            ToolItem(Icons.Default.Edit, stringResource(Res.string.action_edit), enabled = state.root != null, onClick = onSheet)
-            ToolItem(Icons.Default.Add, stringResource(Res.string.action_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) }
-            if (viewModel.bookmarksSupported) ToolItem(Icons.Default.Star, stringResource(Res.string.desk_bookmarks), onClick = onMerkliste)
-            ToolSeparator()
-            ToolItem(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.action_back), enabled = nav.kannZurueck, onClick = nav.zurueck)
-            ToolItem(Icons.AutoMirrored.Filled.ArrowForward, stringResource(Res.string.desk_forward), enabled = nav.kannVor, onClick = nav.vor)
-            HistoryItem(state, viewModel)
-            ToolItem(Icons.Default.Person, stringResource(Res.string.home_start_person), enabled = state.home != null) { state.home?.let(viewModel::setRoot) }
-            ToolSeparator()
-            MenuItem(Icons.AutoMirrored.Filled.List, stringResource(Res.string.desk_list), enabled = state.root != null) { close ->
-                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_ancestors)) }, onClick = { close(); onListe(ListenArt.Ahnen) })
-                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_descendants)) }, onClick = { close(); onListe(ListenArt.Stamm) })
-                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_list_events)) }, onClick = { close(); onListe(ListenArt.Ereignisse) })
-                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_title_sheet, state.detail?.person?.name ?: "…")) }, onClick = { close(); onListe(ListenArt.Personenblatt) })
-            }
-            MenuItem(TreeIcon, stringResource(Res.string.desk_chart), enabled = state.pedigree != null) { close ->
-                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_print_chart)) }, onClick = { close(); drucke.ahnentafel() })
-                DropdownMenuItem(text = { Text(stringResource(Res.string.desk_pdf_chart)) }, onClick = { close(); drucke.ahnentafelPdf() })
-            }
-            ToolItem(DruckerIcon, stringResource(Res.string.desk_print), enabled = state.root != null, onClick = drucke::personenblatt)
-            ToolSeparator()
-            ToolItem(Icons.Default.Home, stringResource(Res.string.nav_home), active = state.section == Section.Home) { viewModel.setSection(Section.Home) }
-            ToolItem(TreeIcon, stringResource(Res.string.desk_layout_navigator), active = state.section == Section.Tree || state.section == Section.Search) { viewModel.setSection(Section.Tree) }
-            ToolItem(PhotoIcon, stringResource(Res.string.nav_photos), active = state.section == Section.Photos) { viewModel.setSection(Section.Photos) }
-            ToolSeparator()
-            ToolItem(Icons.Default.Check, stringResource(Res.string.desk_check), enabled = manager) { web("/tree/$t/check") }
-            ToolItem(Icons.Default.Place, stringResource(Res.string.desk_web_places), enabled = state.tree != null) { web("/tree/$t/place-list") }
-            ToolItem(Icons.Default.Info, stringResource(Res.string.desk_web_sources), enabled = state.tree != null) { web("/tree/$t/source-list") }
-            ToolItem(Icons.AutoMirrored.Filled.ExitToApp, "webtrees") { openWeb(state.detail?.person?.url ?: state.baseUrl) }
-            ToolSeparator()
-            ToolItem(Icons.Default.Info, stringResource(Res.string.desk_help), onClick = onAbout)
-            ToolItem(Icons.Default.Close, stringResource(Res.string.desk_quit), onClick = onQuit)
-            Spacer(Modifier.weight(1f))
-            if (state.section == Section.Tree || state.section == Section.Search) {
-                GenerationsChip(state, viewModel)
-                ToolSeparator()
-                ZoomKnopf("−") { onZoom((zoom - 0.1f).coerceAtLeast(0.6f)) }
-                Text("${(zoom * 100).toInt()} %", Modifier.clickable { onZoom(1f) }.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false)
-                ZoomKnopf("+") { onZoom((zoom + 0.1f).coerceAtMost(1.6f)) }
+            BoxWithConstraints(Modifier.weight(1f)) {
+                val platz = maxWidth.value
+                fun breite(e: LeistenEintrag, text: Boolean) = if (e is Knopf) (if (text) KNOPF_TEXT else KNOPF_SYMBOL) else TRENNER
+                val mitText = symboltexte && eintraege.sumOf { breite(it, true).toDouble() } <= platz
+                // Passt es auch ohne Texte nicht, bleibt vorne, was neben "Mehr" Platz hat; der Rest geht ins Menue.
+                var sichtbar = eintraege
+                var rest = emptyList<Knopf>()
+                if (!mitText && eintraege.sumOf { breite(it, false).toDouble() } > platz) {
+                    var summe = KNOPF_SYMBOL
+                    val n = eintraege.indexOfFirst { e -> summe += breite(e, false); summe > platz }.let { if (it < 0) eintraege.size else it }
+                    sichtbar = eintraege.take(n).dropLastWhile { it is Trenner }
+                    rest = eintraege.drop(n).filterIsInstance<Knopf>()
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    sichtbar.forEach { e ->
+                        when (e) {
+                            is Trenner -> ToolSeparator()
+                            is Knopf -> LeistenKnopf(e, mitText)
+                        }
+                    }
+                    if (rest.isNotEmpty()) MehrKnopf(rest)
+                }
             }
         }
     }
 }
 
-/** Leistenknopf mit Aufklappmenue. */
+/** Ein Knopf der Symbolleiste, bei Bedarf mit Aufklappmenue; ohne Text zeigt er seinen Namen beim Ueberfahren. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MenuItem(icon: ImageVector, label: String, enabled: Boolean = true, inhalt: @Composable (close: () -> Unit) -> Unit) {
+private fun LeistenKnopf(k: Knopf, mitText: Boolean) {
     var open by remember { mutableStateOf(false) }
-    Box {
-        ToolItem(icon, label, enabled = enabled) { open = true }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) { inhalt { open = false } }
+    val knopf = @Composable {
+        Box {
+            ToolItem(k.icon, k.label, enabled = k.enabled, active = k.active, mitText = mitText) { if (k.menu != null) open = true else k.onClick() }
+            k.menu?.let { inhalt -> DropdownMenu(expanded = open, onDismissRequest = { open = false }) { inhalt { open = false } } }
+        }
+    }
+    if (mitText) knopf() else TooltipArea(tooltip = { Hinweis(k.label) }, delayMillis = 400) { knopf() }
+}
+
+/** "Mehr" am rechten Ende: was nicht in die Leiste passt. Knoepfe mit eigenem Menue zeigen es an derselben Stelle. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun MehrKnopf(rest: List<Knopf>) {
+    var open by remember { mutableStateOf(false) }
+    var unter by remember { mutableStateOf<Knopf?>(null) }
+    val schliessen = { open = false; unter = null }
+    val label = stringResource(Res.string.desk_more)
+    TooltipArea(tooltip = { Hinweis(label) }, delayMillis = 400) {
+        Box {
+            ToolItem(Icons.Default.MoreVert, label, mitText = false) { open = true }
+            DropdownMenu(expanded = open, onDismissRequest = schliessen) {
+                val u = unter
+                if (u?.menu != null) u.menu.invoke(schliessen)
+                else rest.forEach { k ->
+                    DropdownMenuItem(
+                        text = { Text(if (k.menu != null) "${k.label}  ▸" else k.label) },
+                        leadingIcon = { Icon(k.icon, contentDescription = null, Modifier.size(18.dp)) },
+                        enabled = k.enabled,
+                        onClick = { if (k.menu != null) unter = k else { schliessen(); k.onClick() } },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Hinweis(text: String) {
+    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, shadowElevation = 2.dp) {
+        Text(text, Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.inverseOnSurface)
     }
 }
 
@@ -500,30 +585,21 @@ private fun MerklisteFenster(state: UiState, viewModel: AppViewModel, openSheet:
 }
 
 @Composable
-private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, active: Boolean = false, onClick: () -> Unit) {
+private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, active: Boolean = false, mitText: Boolean = true, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val tint = if (!enabled) colors.onSurfaceVariant.copy(alpha = 0.4f) else if (active) colors.primary else colors.onSurface
     Column(
         Modifier
             .background(if (active) colors.surface else colors.surfaceVariant, MaterialTheme.shapes.extraSmall)
             .fokusRahmen()
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(enabled = enabled, onClickLabel = label, onClick = onClick)
             .padding(horizontal = 4.dp, vertical = 4.dp)
-            .width(54.dp),
+            .width(if (mitText) 54.dp else 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(icon, contentDescription = null, Modifier.size(22.dp), tint = tint)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Icon(icon, contentDescription = if (mitText) null else label, Modifier.size(22.dp), tint = tint)
+        if (mitText) Text(label, style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
     }
-}
-
-@Composable
-private fun ZoomKnopf(zeichen: String, onClick: () -> Unit) {
-    Box(
-        Modifier.size(26.dp).background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.extraSmall)
-            .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.extraSmall).clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) { Text(zeichen, style = MaterialTheme.typography.titleMedium) }
 }
 
 @Composable
@@ -551,20 +627,6 @@ private fun GoToDialog(state: UiState, viewModel: AppViewModel, openWeb: (String
 
 /** Zurueck und Vor zwischen Zentralpersonen. */
 class DeskNav(val kannZurueck: Boolean, val kannVor: Boolean, val zurueck: () -> Unit, val vor: () -> Unit)
-
-/** Verlauf: die zuletzt angesehenen Personen, eine davon wird Zentralperson. */
-@Composable
-private fun HistoryItem(state: UiState, viewModel: AppViewModel) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        ToolItem(Icons.Default.DateRange, stringResource(Res.string.desk_history), enabled = state.recent.isNotEmpty()) { open = true }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            state.recent.forEach { p ->
-                DropdownMenuItem(text = { Text(p.name + if (p.lifespan.isNotBlank()) "  (${p.lifespan})" else "") }, onClick = { open = false; viewModel.setRoot(p.xref) })
-            }
-        }
-    }
-}
 
 /** Druck und PDF fuer die Zentralperson: Personenblatt und Ahnentafel. */
 class DeskDruck(private val state: UiState, private val viewModel: AppViewModel, private val appName: String) {

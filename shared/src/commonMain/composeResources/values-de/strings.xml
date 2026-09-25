@@ -373,4 +373,9 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_check">Prüfung</string>
     <string name="desk_remove">Entfernen</string>
     <string name="err_not_logged_in">Dafür bitte anmelden.</string>
+    <string name="desk_unknown_mother">Mutter unbekannt</string>
+    <string name="desk_unknown_father">Vater unbekannt</string>
+    <string name="desk_unknown_partner">Partner unbekannt</string>
+    <string name="desk_toolbar_labels">Symboltexte</string>
+    <string name="desk_more">Mehr</string>
 </resources>

@@ -26,7 +26,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import kotlin.math.roundToInt
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
@@ -118,7 +122,7 @@ private fun gen(n: Int) = 31 - Integer.numberOfLeadingZeros(n)
 @Composable
 fun Navigator(
     state: UiState, viewModel: AppViewModel, onOpenSheet: (String) -> Unit, openWeb: (String) -> Unit,
-    farben: Map<String, Color> = emptyMap(), zoom: Float = 1f,
+    farben: Map<String, Color> = emptyMap(), zoom: Float = 1f, onZoom: (Float) -> Unit = {},
 ) {
     LaunchedEffect(state.root, state.pedigree == null || state.descendants == null) {
         if (state.root != null && (state.pedigree == null || state.descendants == null)) viewModel.loadChart()
@@ -142,8 +146,12 @@ fun Navigator(
     val basis = LocalDensity.current
     val g = state.ancestorGenerations.coerceIn(2, 7)
     val eng = chartMasse(g, familie, familien.isNotEmpty(), COL)
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // Generationen und Zoom ueber der Tafel, rechts - wie beim Vorbild im Navigator statt in der Symbolleiste
+    // (Rueckmeldung wtwin5/6, 25.09.2026: dort fehlte bei 125 % Skalierung der Platz).
+    TafelRegler(state.ancestorGenerations, viewModel::setAncestorGenerations, zoom, onZoom)
     // Einpassen wie beim Vorbild: die Tafel fuellt das Fenster, der Zoom vergroessert oder verkleinert davon ausgehend.
-    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
         val rand = 24.dp
         // Massgeblich sind Vorfahren und Infokasten; eine lange Kinderspalte rollt, statt alles zu verkleinern. Nie unter 70 Prozent.
         // Bei wenigen Generationen darf die Tafel wachsen (bis 150 Prozent), bei vielen nie unter 70 Prozent schrumpfen.
@@ -164,7 +172,54 @@ fun Navigator(
             }
         }
     }
+    }
 }
+
+/** Die Regler ueber der Tafel: Generationen (2 bis 7) und Zoom (60 bis 160 Prozent, Klick auf die Zahl: 100). */
+@Composable
+private fun TafelRegler(generationen: Int, onGenerationen: (Int) -> Unit, zoom: Float, onZoom: (Float) -> Unit) {
+    Row(Modifier.fillMaxWidth().height(30.dp).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+        var open by remember { mutableStateOf(false) }
+        Box {
+            Row(Modifier.clickable { open = true }.padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(Res.string.tree_generations, generationen), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, softWrap = false)
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                (2..7).forEach { n ->
+                    DropdownMenuItem(text = { Text(stringResource(Res.string.tree_generations, n), fontWeight = if (n == generationen) FontWeight.SemiBold else FontWeight.Normal) },
+                        onClick = { open = false; onGenerationen(n) })
+                }
+            }
+        }
+        Spacer(Modifier.width(16.dp))
+        TextKnopf("−", stringResource(Res.string.tree_zoom_out)) { onZoom((zoom - 0.1f).coerceAtLeast(0.6f)) }
+        Text("${(zoom * 100).roundToInt()} %", Modifier.clickable { onZoom(1f) }.padding(horizontal = 6.dp).width(44.dp), style = MaterialTheme.typography.labelLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 1, softWrap = false)
+        TextKnopf("+", stringResource(Res.string.tree_zoom_in)) { onZoom((zoom + 0.1f).coerceAtMost(1.6f)) }
+    }
+}
+
+@Composable
+private fun TextKnopf(zeichen: String, beschreibung: String, onClick: () -> Unit) {
+    Box(
+        Modifier.size(24.dp).background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.extraSmall)
+            .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.extraSmall).clickable(onClickLabel = beschreibung, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { Text(zeichen, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface) }
+}
+
+/** Anstelle eines fehlenden Partners: "Mutter unbekannt" bei einem Mann, "Vater unbekannt" bei einer Frau. */
+@Composable
+internal fun unbekannterPartner(sex: String): String = stringResource(when (sex) {
+    "M" -> Res.string.desk_unknown_mother
+    "F" -> Res.string.desk_unknown_father
+    else -> Res.string.desk_unknown_partner
+})
+
+/** Name in natuerlicher Folge ohne die Platzhalter von webtrees ("Henry II …" wird "Henry II"). */
+internal fun klarName(p: Person): String =
+    listOf(p.given, p.surname).filter(String::isNotBlank).joinToString(" ").ifBlank { p.name.replace("…", "").replace("@N.N.", "").trim() }.ifBlank { p.name }
 
 /** Die Masse der Tafel in dp vor dem Zeichnen - fuer das Einpassen. */
 private class ChartMasse(val slots: Int, val slotH: Dp, val ancH: Dp, val kinder: Int, val partner: Int, val xZentral: Dp, val centerY: Dp, val kinderTop: Dp, val breite: Dp, val hoehe: Dp, val hoeheFit: Dp)
@@ -271,7 +326,7 @@ private fun Chart(
         if (familie != null) {
             val p = familie.spouse
             if (p != null) PersonBox(p, Art.Partner, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral + 40.dp, partnerY))
-            else LeerBox(if (zentral.sex == "F") "M" else "F", Modifier.offset(xZentral + 40.dp, partnerY), onClick = if (canEdit) ({ viewModel.requestAddRelative(zentral.xref) }) else null, text = "…")
+            else LeerBox(if (zentral.sex == "F") "M" else "F", Modifier.offset(xZentral + 40.dp, partnerY), onClick = if (canEdit) ({ viewModel.requestAddRelative(zentral.xref) }) else null, text = unbekannterPartner(zentral.sex))
             // Mehrere Partnerschaften: Pfeil wechselt zur naechsten, mit Zaehler
             if (anzahlFamilien > 1) {
                 Row(Modifier.offset(xZentral + 40.dp, partnerY + BOX_H + 4.dp).clickable(onClick = onNaechste).padding(2.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -314,9 +369,16 @@ private fun InfoBox(detail: IndividualDetail, gewaehlt: Int, modifier: Modifier,
             if (geburt.isNotBlank()) Text("*  $geburt", fontSize = 14.sp)
             detail.spouseFamilies.forEachIndexed { i, fam ->
                 val wann = ort(fam.facts.firstOrNull { it.tag == "MARR" })
-                val wer = fam.spouse?.name ?: "…"
-                Text("⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  $wer" + (if (wann.isNotBlank()) "  ($wann)" else ""), fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    fontWeight = if (i == gewaehlt) FontWeight.SemiBold else FontWeight.Normal)
+                val sp = fam.spouse
+                val nummer = "⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  "
+                val zusatz = if (wann.isNotBlank()) "  ($wann)" else ""
+                val gewicht = if (i == gewaehlt) FontWeight.SemiBold else FontWeight.Normal
+                if (sp != null) Text(nummer + klarName(sp) + zusatz, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = gewicht)
+                else Text(androidx.compose.ui.text.buildAnnotatedString {
+                    append(nummer)
+                    pushStyle(androidx.compose.ui.text.SpanStyle(color = colors.onSurfaceVariant, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic))
+                    append(unbekannterPartner(p.sex)); pop(); append(zusatz)
+                }, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = gewicht)
             }
             if (tod.isNotBlank()) Text("†  $tod", fontSize = 14.sp)
         }

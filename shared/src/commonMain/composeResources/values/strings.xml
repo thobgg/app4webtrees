@@ -378,4 +378,9 @@ GEDCOM, merging, places and sources are managed by webtrees itself – the webtr
     <string name="desk_check">Check</string>
     <string name="desk_remove">Remove</string>
     <string name="err_not_logged_in">Please sign in for this.</string>
+    <string name="desk_unknown_mother">Mother unknown</string>
+    <string name="desk_unknown_father">Father unknown</string>
+    <string name="desk_unknown_partner">Partner unknown</string>
+    <string name="desk_toolbar_labels">Toolbar labels</string>
+    <string name="desk_more">More</string>
 </resources>

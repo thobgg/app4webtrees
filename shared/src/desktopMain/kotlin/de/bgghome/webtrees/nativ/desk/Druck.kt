@@ -140,7 +140,8 @@ fun personenblattZeilen(d: IndividualDetail): List<Zeile> = buildList {
         add(Zeile("")); add(Zeile(Texte.t(Res.string.desk_tab_partners), fett = true))
         d.spouseFamilies.forEach { fam ->
             val heirat = fam.marriage?.let { m -> listOfNotNull(m.date?.text?.takeIf(String::isNotBlank), m.place?.name?.takeIf(String::isNotBlank)).joinToString(", ") }.orEmpty()
-            add(Zeile(listOfNotNull(fam.spouse?.let(::kurz), heirat.takeIf(String::isNotBlank)?.let { "⚭ $it" }).joinToString("  ").ifBlank { "?" }, 1, fett = true))
+            val wer = fam.spouse?.let(::kurz) ?: Texte.t(when (p.sex) { "M" -> Res.string.desk_unknown_mother; "F" -> Res.string.desk_unknown_father; else -> Res.string.desk_unknown_partner })
+            add(Zeile(listOfNotNull(wer, heirat.takeIf(String::isNotBlank)?.let { "⚭ $it" }).joinToString("  "), 1, fett = true))
             fam.children.forEach { add(Zeile(kurz(it), 2)) }
         }
     }

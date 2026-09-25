@@ -241,7 +241,7 @@ private fun PartnersTab(detail: IndividualDetail, viewModel: AppViewModel, onFam
         LazyColumn(Modifier.fillMaxSize(), state = list) {
             detail.spouseFamilies.forEach { fam ->
                 item { Heading(stringResource(Res.string.rel_partner)) }
-                item { fam.spouse?.let { PersonLine(it, viewModel) } ?: Text("–", Modifier.padding(12.dp, 4.dp)) }
+                item { fam.spouse?.let { PersonLine(it, viewModel) } ?: Text(unbekannterPartner(detail.person.sex), Modifier.padding(12.dp, 4.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic) }
                 item {
                     val heirat = fam.marriage?.let { m -> listOfNotNull(m.date?.text?.takeIf(String::isNotBlank), m.place?.name?.takeIf(String::isNotBlank)).joinToString(", ") }.orEmpty()
                     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
