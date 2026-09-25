@@ -26,13 +26,18 @@ dependencies {
     implementation(compose.desktop.currentOs)
 }
 
-// wtAnd zaehlt zweistellig (1.16); Windows-Installer verlangen x.y.z. Die dritte Stelle ist der
-// Desktop-Zaehler (gradle.properties, +1 je Paket): 1.16.1, 1.16.2 ... Frueher stand dort fest 0 -
-// dann trug jede neue exe dieselbe Nummer wie die installierte, und Windows Installer hielt sie fuer
-// schon installiert: Doppelklick, nichts passiert (24.09.2026).
+// wtAnd zaehlt zweistellig (1.18); Windows-Installer verlangen x.y.z. Die dritte Stelle zaehlt jetzt von selbst:
+// die Zahl der Commits auf dem Stand, der gebaut wird. Windows Installer ersetzt eine installierte Fassung nur
+// durch eine mit hoeherer Nummer - bei gleicher Nummer passiert auf Doppelklick schlicht nichts (24./25.09.2026,
+// erst mit fester 0, dann mit dem Handzaehler desktopBuild, den vor dem Bauen niemand erhoeht hat). Ohne Git
+// (z. B. Quelltext-Archiv) bleibt es beim Handzaehler.
 val versionName = property("wtand.versionName") as String
 val desktopBuild = property("wtand.desktopBuild") as String
-val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.$desktopBuild" else versionName
+val commitZahl: String = runCatching {
+    providers.exec { commandLine("git", "rev-list", "--count", "HEAD"); isIgnoreExitValue = true }
+        .standardOutput.asText.get().trim().takeIf { it.toIntOrNull() != null }
+}.getOrNull() ?: desktopBuild
+val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.$commitZahl" else versionName
 
 // Ein Code, zwei Namen (Thomas, 23.09.2026): wtWin unter Windows, wtTux unter Linux. Jedes Paket wird auf
 // seinem eigenen System gebaut, darum entscheidet das System, auf dem Gradle laeuft.
