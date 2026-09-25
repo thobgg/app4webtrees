@@ -9,6 +9,7 @@
 <p align="center">
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Android-wtAnd%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android: wtAnd (APK)"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
+  <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Windows-wtWin%20.exe-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows: wtWin (.exe)"></a>
 </p>
 
 <p align="center">
@@ -23,7 +24,8 @@
 <p align="center"><sub>Historischer Stammbaum der Medici. Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; alle anderen Porträts gemeinfrei (Wikimedia Commons).</sub></p>
 
 **Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
-**Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren. Windows (wtWin) folgt.
+**Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren.  
+**Windows:** `wtWin-….exe` starten, installiert pro Benutzer ohne Adminrechte. Die Datei ist nicht signiert, darum warnt Windows beim ersten Start vor einem unbekannten Herausgeber: „Weitere Informationen" und dann „Trotzdem ausführen".
 
 Auf dem webtrees-Server muss das Modul [api4webtrees](https://github.com/thobgg/api4webtrees) installiert sein.
 

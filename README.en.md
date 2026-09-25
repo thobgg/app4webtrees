@@ -9,6 +9,7 @@
 <p align="center">
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Android-wtAnd%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android: wtAnd (APK)"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
+  <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Windows-wtWin%20.exe-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows: wtWin (.exe)"></a>
 </p>
 
 <p align="center">
@@ -23,7 +24,8 @@
 <p align="center"><sub>Historical tree of the Medici. Portrait of Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; all other portraits public domain (Wikimedia Commons).</sub></p>
 
 **Android:** the APK is signed. To install outside the Play Store, Android asks once to allow your browser to install apps.  
-**Linux:** install the package with `sudo apt install ./wttux_…_amd64.deb`. Windows (wtWin) will follow.
+**Linux:** install the package with `sudo apt install ./wttux_…_amd64.deb`.  
+**Windows:** run `wtWin-….exe`; it installs for the current user without admin rights. The file is not signed, so Windows warns about an unknown publisher on first start: choose "More info", then "Run anyway".
 
 Your webtrees server needs the [api4webtrees](https://github.com/thobgg/api4webtrees) module.
 
