@@ -202,7 +202,7 @@ private fun PersonLine(p: Person, viewModel: AppViewModel, einzug: Int = 0) {
     val priv = stringResource(Res.string.person_private)
     val none = stringResource(Res.string.person_no_name)
     Text(
-        registerName(p, priv, none) + (if (p.lifespan.isNotBlank()) "   ${p.lifespan}" else ""),
+        registerName(p, priv, none) + jahre(p).let { if (it.isNotEmpty()) "   $it" else "" },
         Modifier.fillMaxWidth().fokusRahmen().clickable(enabled = !p.isPrivate) { viewModel.select(p.xref) }.padding(start = (12 + einzug * 18).dp, end = 12.dp, top = 5.dp, bottom = 5.dp),
         style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
     )
@@ -364,7 +364,6 @@ private fun RelativesColumn(detail: IndividualDetail, viewModel: AppViewModel, m
     val self = detail.person.xref
     val parents = detail.parentFamilies.firstOrNull()
     val siblings = detail.parentFamilies.flatMap { it.children }.filter { it.xref != self }.distinctBy { it.xref }
-    val partners = detail.spouseFamilies.mapNotNull { it.spouse }
     val children = detail.spouseFamilies.flatMap { it.children }
     Column(modifier.background(MaterialTheme.colorScheme.surface)) {
         val list = rememberLazyListState()
@@ -373,7 +372,17 @@ private fun RelativesColumn(detail: IndividualDetail, viewModel: AppViewModel, m
             item { Group(stringResource(Res.string.rel_father), listOfNotNull(parents?.husband), viewModel) }
             item { Group(stringResource(Res.string.rel_mother), listOfNotNull(parents?.wife), viewModel) }
             item { Group(stringResource(Res.string.desk_siblings), siblings, viewModel) }
-            item { Group(stringResource(Res.string.rel_partner), partners, viewModel) }
+            item {
+                // Alle Partnerschaften in ihrer Reihenfolge, auch ohne eingetragene Partnerin (wie im Infokasten).
+                Group(stringResource(Res.string.rel_partner), emptyList(), viewModel, leerStrich = detail.spouseFamilies.isEmpty())
+                val unbekannt = unbekannterPartner(detail.person.sex)
+                detail.spouseFamilies.forEach { fam ->
+                    val sp = fam.spouse
+                    if (sp != null) VerwandtenZeile(sp, viewModel)
+                    else Text(unbekannt, Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                }
+            }
             item { Group(stringResource(Res.string.desk_children), children, viewModel) }
         }
         ListenLeiste(list)
@@ -387,19 +396,20 @@ private fun RelativesColumn(detail: IndividualDetail, viewModel: AppViewModel, m
 }
 
 @Composable
-private fun Group(title: String, people: List<Person>, viewModel: AppViewModel) {
+private fun Group(title: String, people: List<Person>, viewModel: AppViewModel, leerStrich: Boolean = true) {
     val colors = MaterialTheme.colorScheme
     Text(title, Modifier.fillMaxWidth().background(colors.primary).padding(horizontal = 8.dp, vertical = 3.dp), color = colors.onPrimary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-    val priv = stringResource(Res.string.person_private)
-    val none = stringResource(Res.string.person_no_name)
-    people.forEach { p ->
-        Text(
-            registerName(p, priv, none) + (if (p.lifespan.isNotBlank()) "  ${p.lifespan}" else ""),
-            Modifier.fillMaxWidth().clickable(enabled = !p.isPrivate) { viewModel.select(p.xref) }.padding(horizontal = 10.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
-        )
-    }
-    if (people.isEmpty()) Text("–", Modifier.padding(horizontal = 10.dp, vertical = 3.dp), color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+    people.forEach { p -> VerwandtenZeile(p, viewModel) }
+    if (people.isEmpty() && leerStrich) Text("–", Modifier.padding(horizontal = 10.dp, vertical = 3.dp), color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+}
+
+@Composable
+private fun VerwandtenZeile(p: Person, viewModel: AppViewModel) {
+    Text(
+        registerName(p, stringResource(Res.string.person_private), stringResource(Res.string.person_no_name)) + jahre(p).let { if (it.isNotEmpty()) "  $it" else "" },
+        Modifier.fillMaxWidth().clickable(enabled = !p.isPrivate) { viewModel.select(p.xref) }.padding(horizontal = 10.dp, vertical = 4.dp),
+        style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable

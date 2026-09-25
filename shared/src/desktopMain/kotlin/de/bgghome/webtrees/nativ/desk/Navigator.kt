@@ -217,6 +217,9 @@ internal fun unbekannterPartner(sex: String): String = stringResource(when (sex)
     else -> Res.string.desk_unknown_partner
 })
 
+/** Lebensjahre ohne den Platzhalter von webtrees ("…–…" bei fehlenden Daten wird leer). */
+internal fun jahre(p: Person): String = p.lifespan.takeIf { l -> l.any(Char::isDigit) }.orEmpty()
+
 /** Name in natuerlicher Folge ohne die Platzhalter von webtrees ("Henry II …" wird "Henry II"). */
 internal fun klarName(p: Person): String =
     listOf(p.given, p.surname).filter(String::isNotBlank).joinToString(" ").ifBlank { p.name.replace("…", "").replace("@N.N.", "").trim() }.ifBlank { p.name }
@@ -420,7 +423,7 @@ private fun PersonBox(
             Portrait(person, Modifier.padding(1.dp).size(BOX_H - 2.dp))
             Column(Modifier.weight(1f).padding(start = 6.dp, end = 4.dp)) {
                 Text(name, fontSize = 15.sp, fontWeight = if (art == Art.Zentral) FontWeight.Bold else FontWeight.SemiBold, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = onSurface)
-                Text(person.lifespan.ifBlank { " " }, fontSize = 12.sp, lineHeight = 15.sp, color = onSurface.copy(alpha = 0.75f), maxLines = 1)
+                Text(jahre(person).ifBlank { " " }, fontSize = 12.sp, lineHeight = 15.sp, color = onSurface.copy(alpha = 0.75f), maxLines = 1)
             }
             LocalFarben.current[person.xref]?.let { farbe -> Box(Modifier.width(6.dp).fillMaxHeight().background(farbe)) }
             if (pfeilRechts) Text("▶", fontSize = 11.sp, color = onSurface, modifier = Modifier.padding(end = 2.dp))

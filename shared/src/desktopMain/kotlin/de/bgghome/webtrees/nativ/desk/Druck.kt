@@ -120,7 +120,7 @@ private fun ereignis(f: FactJson?): String = f?.let {
         .joinToString(", ")
 }.orEmpty()
 
-private fun kurz(p: Person) = p.name.ifBlank { "?" } + if (p.lifespan.isNotBlank()) " (${p.lifespan})" else ""
+private fun kurz(p: Person) = p.name.ifBlank { "?" } + jahre(p).let { if (it.isNotEmpty()) " ($it)" else "" }
 
 /** Personenblatt: alle Daten einer Person auf einer (oder mehr) Seiten. */
 fun personenblattZeilen(d: IndividualDetail): List<Zeile> = buildList {
