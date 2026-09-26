@@ -83,6 +83,11 @@ data class Person(
     val url: String = "",
     /** Nur bei Kindern in den Partnerfamilien (ab API-Stufe 10): ihre Heiraten, fuer die Lebenslinie der Eltern. */
     val marriages: List<MarriageJson> = emptyList(),
+    /** Ab API-Stufe 14 (sonst leer/null): Rufname, Taufe (CHR, sonst BAPM), Begraebnis (BURI, sonst CREM), erster Beruf. */
+    val call: String = "",
+    val chr: EventJson? = null,
+    val buri: EventJson? = null,
+    val occupation: String? = null,
 )
 
 /** Eine Heirat eines Kindes: Partner (leer, wenn privat), Datum und Ort (beides kann fehlen). */
@@ -185,7 +190,13 @@ data class PersonPage(
 )
 
 @Serializable
-data class Ancestor(val n: Int, val person: Person, val hasParents: Boolean = false)
+data class Ancestor(
+    val n: Int,
+    val person: Person,
+    val hasParents: Boolean = false,
+    /** Nur mit siblings=1 ab API-Stufe 15: die anderen Kinder der Elternfamilie (ohne Halbgeschwister); sonst null. */
+    val siblings: List<Person>? = null,
+)
 
 @Serializable
 data class Pedigree(

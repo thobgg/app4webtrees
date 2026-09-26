@@ -13,12 +13,12 @@ import java.awt.image.BufferedImage
 
 /*
  * Daten der Tafeln (26.09.2026): laden, was eine Tafelart braucht, und daraus den Baum der Tafel bauen.
- * api4webtrees liefert Vorfahren bis 7 Generationen am Stueck; tiefer geht es, indem die Tafel von der obersten
- * Reihe aus nachlaedt (hasParents sagt, bei wem sich das lohnt).
+ * api4webtrees liefert Vorfahren bis 12 Generationen am Stueck (vor 1.9.0: 7); tiefer geht es, indem die Tafel von
+ * der obersten Reihe aus nachlaedt (hasParents sagt, bei wem sich das lohnt).
  */
 
 /** Ein Vorfahr mit Kekule-Nummer (Long: Linien reichen bis 30 Generationen). */
-class AhnenEintrag(val person: Person, val hatEltern: Boolean)
+class AhnenEintrag(val person: Person, val hatEltern: Boolean, val geschwister: List<Person>? = null)
 
 /** Generation einer Kekule-Nummer: 1 = 0, 2..3 = 1, 4..7 = 2 ... */
 fun reihe(n: Long): Int = 63 - java.lang.Long.numberOfLeadingZeros(n)
@@ -26,19 +26,20 @@ fun reihe(n: Long): Int = 63 - java.lang.Long.numberOfLeadingZeros(n)
 /**
  * Vorfahren bis [generationen] tief. Wer in der obersten gelieferten Reihe steht und Eltern hat, bekommt eine
  * eigene Anfrage - aber nur, wenn [weiter] fuer seine Nummer zustimmt (bei Linien nur die Linie selbst).
+ * [geschwister]: die Geschwister gleich mitliefern lassen (ab Stufe 15; aeltere Module lassen sie weg, dann null).
  */
-suspend fun ahnenLaden(client: WtClient, tree: String, xref: String, generationen: Int, weiter: (Long) -> Boolean = { true }): Map<Long, AhnenEintrag> {
+suspend fun ahnenLaden(client: WtClient, tree: String, xref: String, generationen: Int, geschwister: Boolean = false, weiter: (Long) -> Boolean = { true }): Map<Long, AhnenEintrag> {
     val alle = HashMap<Long, AhnenEintrag>()
     suspend fun holen(wurzel: Long, x: String, gen0: Int): List<Long> {
-        val tiefe = minOf(7, generationen - gen0)
+        val tiefe = minOf(12, generationen - gen0)
         if (tiefe < 1) return emptyList()
-        val r = client.pedigree(tree, x, tiefe)
+        val r = client.pedigree(tree, x, tiefe, geschwister)
         val g = r.generations.coerceAtLeast(1)
         val neu = ArrayList<Long>()
         r.ancestors.forEach { a ->
             val k = a.n.toLong(); val gk = reihe(k)
             val n = (wurzel shl gk) + (k - (1L shl gk))
-            if (n !in alle) alle[n] = AhnenEintrag(a.person, a.hasParents)
+            if (n !in alle) alle[n] = AhnenEintrag(a.person, a.hasParents, a.siblings)
             // Rand dieser Antwort: dort geht es mit einer neuen Anfrage weiter
             if (gk == g - 1 && a.hasParents && gen0 + gk + 1 < generationen && gk > 0) neu += n
         }
@@ -140,8 +141,8 @@ fun linienBaum(art: TafelArt, ahnen: Map<Long, AhnenEintrag>, generationen: Int,
 class TafelDaten(val ahnen: Map<Long, AhnenEintrag>, val nachfahren: DescendantNode?, val geschwister: Map<Long, List<Person>> = emptyMap())
 
 /**
- * Geschwister der Vorfahren (volle Geschwister aus der ersten Elternfamilie, nach Geburt), je Person ein Abruf -
- * darum hoechstens bis zur 6. Generation. [nurProband]: nur Nr. 1.
+ * Geschwister der Vorfahren (volle Geschwister aus der ersten Elternfamilie, nach Geburt) - hoechstens bis zur
+ * 6. Generation. [nurProband]: nur Nr. 1. Ab Stufe 15 kamen sie mit der Ahnentafel; aeltere Module: je Person ein Abruf.
  */
 suspend fun geschwisterLaden(client: WtClient, tree: String, ahnen: Map<Long, AhnenEintrag>, generationen: Int, nurProband: Boolean): Map<Long, List<Person>> =
     coroutineScope {
@@ -149,9 +150,9 @@ suspend fun geschwisterLaden(client: WtClient, tree: String, ahnen: Map<Long, Ah
             .entries.chunked(8).flatMap { gruppe ->
                 gruppe.map { (n, a) ->
                     async {
-                        val d = runCatching { client.individual(tree, a.person.xref) }.getOrNull()
-                        n to d?.parentFamilies?.firstOrNull()?.children.orEmpty().filter { it.xref != a.person.xref }
-                            .sortedBy { it.birth?.date?.jd?.takeIf { j -> j > 0 } ?: Int.MAX_VALUE }
+                        val liste = a.geschwister ?: runCatching { client.individual(tree, a.person.xref) }.getOrNull()
+                            ?.parentFamilies?.firstOrNull()?.children.orEmpty().filter { it.xref != a.person.xref }
+                        n to liste.sortedBy { it.birth?.date?.jd?.takeIf { j -> j > 0 } ?: Int.MAX_VALUE }
                     }
                 }.awaitAll()
             }.filter { it.second.isNotEmpty() }.toMap()
@@ -172,7 +173,7 @@ suspend fun tafelDatenLaden(client: WtClient, tree: String, xref: String, art: T
     TafelArt.Sanduhr -> TafelDaten(ahnenLaden(client, tree, xref, generationen), nachfahrenLaden(client, tree, xref, 10))
     TafelArt.Stammlinie -> TafelDaten(ahnenLaden(client, tree, xref, generationen) { n -> n and (n - 1) == 0L }, null)
     TafelArt.Mutterstamm -> TafelDaten(ahnenLaden(client, tree, xref, generationen) { n -> (n + 1) and n == 0L }, null)
-    TafelArt.Ahnen -> ahnenLaden(client, tree, xref, generationen).let { a ->
+    TafelArt.Ahnen -> ahnenLaden(client, tree, xref, generationen, geschwister = geschwister > 0).let { a ->
         TafelDaten(a, null, if (geschwister > 0) geschwisterLaden(client, tree, a, generationen, geschwister == 1) else emptyMap())
     }
     TafelArt.AhnenSeiten, TafelArt.Aeltester, TafelArt.Faecher, TafelArt.Kreis -> TafelDaten(ahnenLaden(client, tree, xref, generationen), null)

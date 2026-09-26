@@ -216,8 +216,9 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         return postRoute("/tree/$tree/archiv/api/exif", form, ExifWriteResult.serializer())
     }
 
-    suspend fun pedigree(tree: String, xref: String, generations: Int): Pedigree =
-        get("Pedigree", tree, mapOf("xref" to xref, "generations" to generations.toString()), Pedigree.serializer())
+    /** Aeltere Module kappen generations selbst (bis 1.8: 7, ab 1.9: 12) und nennen die gelieferte Tiefe; siblings ab Stufe 15. */
+    suspend fun pedigree(tree: String, xref: String, generations: Int, siblings: Boolean = false): Pedigree =
+        get("Pedigree", tree, mapOf("xref" to xref, "generations" to generations.toString()) + (if (siblings) mapOf("siblings" to "1") else emptyMap()), Pedigree.serializer())
 
     suspend fun descendants(tree: String, xref: String, generations: Int): Descendants =
         get("Descendants", tree, mapOf("xref" to xref, "generations" to generations.toString()), Descendants.serializer())
