@@ -1,6 +1,8 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.api.Person
+import de.bgghome.webtrees.nativ.res.*
 import org.apache.pdfbox.cos.COSArray
 import org.apache.pdfbox.cos.COSBoolean
 import org.apache.pdfbox.cos.COSDictionary
@@ -79,6 +81,11 @@ data class TafelOptionen(
     val waagerecht: Boolean = false,
     /** Nur Ahnentafel: 0 keine Geschwister, 1 die des Probanden, 2 die aller Vorfahren. */
     val geschwister: Int = 0,
+    /** Grosse Tafeln lesbar machen: Gitter am Rand (Spalten A, B ... / Generationen I, II ...), Personenverzeichnis
+     * mit Gitterposition auf eigenen A4-Seiten, doppelte Personen mit farbiger Kurve verbinden. */
+    val gitter: Boolean = false,
+    val verzeichnis: Boolean = false,
+    val kurven: Boolean = false,
 )
 
 /** Was eine Tafel zeichnet: Vorfahren nach oben, Nachfahren nach unten (je nach Art einer oder beide Teile). */
@@ -336,6 +343,22 @@ fun tafelPdf(
         t.layout.plaetze.filter { !(teile.size == 2 && t.aufwaerts && it.ebene == 0) }.flatMap { pl -> listOf(t to pl) + geschwisterVon[pl].orEmpty().map { t to it } }
     }
     val nummern = doppelteNummern(gezeichnet.map { it.second })
+    // Gitter: Spalten zu drei Kaestenbreiten entlang der Geschwister, Zeilen = Generationen vom Probanden aus
+    // (Sanduhr: von oben durchgezaehlt, weil Vor- und Nachfahren sonst dieselbe Nummer haetten)
+    val mitGitter = o.gitter || o.verzeichnis
+    val zelle = masse.slot * 3
+    val zeilenZahl = oben + unten + 1
+    fun spalteName(i: Int): String = if (i < 26) "${'A' + i}" else spalteName(i / 26 - 1) + ('A' + i % 26)
+    fun roemisch(n: Int): String {
+        val werte = listOf(1000 to "M", 900 to "CM", 500 to "D", 400 to "CD", 100 to "C", 90 to "XC", 50 to "L", 40 to "XL", 10 to "X", 9 to "IX", 5 to "V", 4 to "IV", 1 to "I")
+        var r = n; val sb = StringBuilder()
+        werte.forEach { (v, z) -> while (r >= v) { sb.append(z); r -= v } }
+        return sb.toString()
+    }
+    val zeilenName = HashMap<Int, String>()
+    gezeichnet.forEach { (t, pl) -> zeilenName.putIfAbsent(t.reihe(pl), roemisch(if (teile.size == 2) t.reihe(pl) + 1 else pl.ebene + 1)) }
+    fun position(t: Teil, pl: TafelPlatz) = "${spalteName((t.x(pl) / zelle).toInt())} ${zeilenName[t.reihe(pl)].orEmpty()}"
+    val positionen = gezeichnet.filter { it.second.knoten.person.xref.isNotEmpty() }.groupBy({ it.second.knoten.person.xref }, { position(it.first, it.second) })
     val doc = PDDocument()
     val f = farben(o.stil)
     val s = TafelSchriften(doc, o.stil)
@@ -347,12 +370,13 @@ fun tafelPdf(
     val titelBreite = if (o.titel.isBlank()) 0f else s.titel.breite(o.titel, titelGroesse)
     val titelH = if (o.titel.isBlank()) 0f else titelGroesse * 1.9f
     val fussH = 18f
+    val gitterRand = if (mitGitter) maxOf(18f, masse.rahmen * 0.2f) else 0f
     // Auf dem Blatt: senkrecht liegen die Geschwister nebeneinander, waagerecht die Generationen
     val blattB = if (w) layoutHoehe else layoutBreite
     val blattH = if (w) layoutBreite else layoutHoehe
     val inhaltB = maxOf(blattB, titelBreite)
-    val b = inhaltB + 2 * rand
-    val h = rand + titelH + blattH + fussH + rand
+    val b = inhaltB + 2 * rand + 2 * gitterRand
+    val h = rand + titelH + blattH + fussH + rand + 2 * gitterRand
     val skala = minOf(1f, PDF_MAX / b, PDF_MAX / h)
     val page = PDPage(PDRectangle(b * skala, h * skala))
     doc.addPage(page)
@@ -375,8 +399,8 @@ fun tafelPdf(
         if (skala < 1f) cs.transform(Matrix.getScaleInstance(skala, skala))
         if (f.hintergrundOben != f.hintergrundUnten) cs.verlauf(b, h, f.hintergrundOben, f.hintergrundUnten)
         // Oben links des Inhalts in PDF-Koordinaten; y waechst nach unten, darum: pdfY = h - y
-        val x0 = rand + (inhaltB - blattB) / 2
-        val y0 = rand + titelH
+        val x0 = rand + gitterRand + (inhaltB - blattB) / 2
+        val y0 = rand + titelH + gitterRand
         fun py(y: Float) = h - y
         // Punkt aus Generations- und Geschwisterachse in Blattkoordinaten (x, y von oben)
         fun px(g: Float, q: Float) = x0 + if (w) g else q
@@ -386,6 +410,58 @@ fun tafelPdf(
             cs.setNonStrokingColor(f.titel)
             cs.beginText(); cs.setFont(s.titel, titelGroesse)
             cs.newLineAtOffset((b - titelBreite) / 2, py(rand + titelGroesse * 1.05f)); cs.showText(s.titel.sicher(o.titel)); cs.endText()
+        }
+
+        // Gitter am Rand: Buchstaben fuer die Spalten, roemische Zahlen fuer die Generationen, dazwischen kleine Striche
+        if (mitGitter) {
+            val g = maxOf(8f, masse.rahmen * 0.09f)
+            cs.setNonStrokingColor(f.linie); cs.setStrokingColor(f.linie); cs.setLineWidth(0.5f)
+            fun beschriftung(t: String, x: Float, yVonOben: Float) {
+                cs.beginText(); cs.setFont(s.normal, g); cs.newLineAtOffset(x - s.normal.breite(t, g) / 2, py(yVonOben + g * 0.35f)); cs.showText(s.normal.sicher(t)); cs.endText()
+            }
+            val zellen = Math.ceil((layoutBreite / zelle).toDouble()).toInt().coerceAtLeast(1)
+            for (i in 0 until zellen) {
+                val q = i * zelle + zelle / 2
+                val name = spalteName(i)
+                if (!w) { beschriftung(name, x0 + q, y0 - gitterRand / 2); beschriftung(name, x0 + q, y0 + blattH + gitterRand / 2) }
+                else { beschriftung(name, x0 - gitterRand / 2, y0 + q); beschriftung(name, x0 + blattB + gitterRand / 2, y0 + q) }
+                if (i > 0) {
+                    val grenze = i * zelle
+                    if (!w) listOf(y0 - gitterRand * 0.8f to y0 - gitterRand * 0.2f, y0 + blattH + gitterRand * 0.2f to y0 + blattH + gitterRand * 0.8f)
+                        .forEach { (a, e) -> cs.moveTo(x0 + grenze, py(a)); cs.lineTo(x0 + grenze, py(e)) }
+                    else listOf(x0 - gitterRand * 0.8f to x0 - gitterRand * 0.2f, x0 + blattB + gitterRand * 0.2f to x0 + blattB + gitterRand * 0.8f)
+                        .forEach { (a, e) -> cs.moveTo(a, py(y0 + grenze)); cs.lineTo(e, py(y0 + grenze)) }
+                }
+            }
+            cs.stroke()
+            for (r in 0 until zeilenZahl) {
+                val name = zeilenName[r] ?: continue
+                val gm = r * masse.ebeneH + masse.laengeG / 2
+                if (!w) { beschriftung(name, x0 - gitterRand / 2, y0 + gm); beschriftung(name, x0 + blattB + gitterRand / 2, y0 + gm) }
+                else { beschriftung(name, x0 + gm, y0 - gitterRand / 2); beschriftung(name, x0 + gm, y0 + blattH + gitterRand / 2) }
+            }
+        }
+
+        // Doppelte Personen: farbige Kurven zwischen den Vorkommen, halbtransparent unter allem anderen
+        if (o.kurven) {
+            val palette = listOf(Color(0xD9, 0x4F, 0x4F), Color(0x3F, 0x7F, 0xD0), Color(0x4C, 0xA6, 0x4C), Color(0xE0, 0x9A, 0x2B), Color(0x8E, 0x5C, 0xC4), Color(0x2B, 0xA3, 0xA3))
+            val dunst = org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState().apply { strokingAlphaConstant = 0.45f }
+            cs.saveGraphicsState(); cs.setGraphicsStateParameters(dunst)
+            cs.setLineWidth(maxOf(2.5f, masse.rahmen * 0.03f))
+            gezeichnet.filter { it.second.knoten.person.xref.isNotEmpty() }.groupBy { it.second.knoten.person.xref }.values.filter { it.size > 1 }
+                .forEachIndexed { i, vorkommen ->
+                    cs.setStrokingColor(palette[i % palette.size])
+                    val punkte = vorkommen.map { (t, pl) -> val gm = t.oberkante(pl) + masse.laengeG / 2; px(gm, t.x(pl)) to pyv(gm, t.x(pl)) }.sortedBy { it.first }
+                    punkte.zipWithNext().forEach { (a, e) ->
+                        val d = Math.hypot((e.first - a.first).toDouble(), (e.second - a.second).toDouble()).toFloat()
+                        if (d < masse.slot * 2) return@forEach
+                        val bogen = d * 0.3f
+                        cs.moveTo(a.first, a.second)
+                        cs.curveTo(a.first, a.second + bogen, e.first, e.second + bogen, e.first, e.second)
+                    }
+                    cs.stroke()
+                }
+            cs.restoreGraphicsState()
         }
 
         // Verbindungen: von der Unterkante der Eltern senkrecht auf halbe Hoehe, waagerecht ueber alle Kinder,
@@ -446,6 +522,17 @@ fun tafelPdf(
                 cs.setNonStrokingColor(f.linie); cs.beginText(); cs.setFont(s.fett, g)
                 cs.newLineAtOffset(hx, py(hy)); cs.showText(s.fett.sicher(hw)); cs.endText()
             }
+            // Mit Gitter: unter der Karte (waagerecht rechts daneben), wo die Person noch steht
+            if (mitGitter) positionen[p.xref]?.takeIf { it.size > 1 }?.let { alle ->
+                val andere = alle - position(t, platz)
+                if (andere.isNotEmpty()) {
+                    val hw = "= " + andere.distinct().joinToString(", ")
+                    val g = masse.schriftKlein * 0.9f
+                    val (hx, hy) = if (!w) (karteL + masse.karteB / 2 + g * 0.4f) to (karteO + masse.karteH + g * 1.2f)
+                        else (karteL + masse.karteB + g * 0.4f) to (karteO + masse.karteH - g * 0.2f)
+                    cs.setNonStrokingColor(f.linie); cs.beginText(); cs.setFont(s.normal, g); cs.newLineAtOffset(hx, py(hy)); cs.showText(s.normal.sicher(hw)); cs.endText()
+                }
+            }
             val schildText = k.verweis?.let { "= $it" } ?: nummern[p.xref]?.toString()
             // Bild mit feinem Rand
             bildFuer(p)?.let { img ->
@@ -499,8 +586,76 @@ fun tafelPdf(
         cs.setNonStrokingColor(Color(0x66, 0x66, 0x66))
         cs.beginText(); cs.setFont(s.normal, 7f); cs.newLineAtOffset(rand, rand * 0.6f); cs.showText(s.normal.sicher(fuss)); cs.endText()
     }
+    // Personenverzeichnis: eigene A4-Seiten hinter der Tafel, jede Zeile ein Link auf den Kasten
+    if (o.verzeichnis) {
+        val x0 = rand + gitterRand + (inhaltB - blattB) / 2
+        val y0 = rand + titelH + gitterRand
+        val eintraege = gezeichnet.filter { it.second.knoten.person.xref.isNotEmpty() && !it.second.knoten.person.isPrivate }
+            .groupBy { it.second.knoten.person.xref }.map { (_, v) ->
+                val (t, pl) = v.first()
+                val gm = t.oberkante(pl); val q = t.x(pl)
+                // Ziel im Blatt (PDF-Koordinaten, schon mit der Verkleinerung)
+                val zx = (x0 + if (w) gm else q - masse.karteB / 2) * skala
+                val zy = (h - (y0 + if (w) q - masse.karteH / 2 else gm)) * skala
+                Triple(pl.knoten.person, v.map { (tt, p2) -> position(tt, p2) }.distinct(), zx to zy)
+            }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { registerName(it.first) })
+        tafelVerzeichnis(doc, o.titel, eintraege)
+    }
     val info = TafelInfo(gezeichnet.map { it.second.knoten.person.xref }.distinct().size, (b * skala / 72f * 2.54f).toInt(), (h * skala / 72f * 2.54f).toInt())
     return doc to info
+}
+
+/** Personenverzeichnis zur Tafel: zweispaltig auf A4, "Name (Lebensdaten) ..... C III", Links auf die erste Seite. */
+private fun tafelVerzeichnis(doc: PDDocument, titel: String, eintraege: List<Triple<Person, List<String>, Pair<Float, Float>>>) {
+    val schrift = Schriften(doc)
+    val a4 = PDRectangle.A4
+    val rand = 50f; val abstand = 20f
+    val sw = (a4.width - 2 * rand - abstand) / 2
+    val g = 8.5f; val zh = g * 1.4f
+    val ziel = doc.getPage(0)
+    var cs: PDPageContentStream? = null
+    var seite: PDPage? = null
+    var y = 0f; var spalte = 2
+    fun neueSpalte() {
+        spalte++
+        if (spalte >= 2) {
+            cs?.close()
+            seite = PDPage(a4).also { doc.addPage(it) }
+            cs = PDPageContentStream(doc, seite)
+            val kopf = Texte.t(Res.string.desk_chart_index_title) + if (titel.isNotBlank()) " – $titel" else ""
+            cs!!.beginText(); cs!!.setFont(schrift.fett, 12f); cs!!.newLineAtOffset(rand, a4.height - rand); cs!!.showText(schrift.fett.sicher(kopf)); cs!!.endText()
+            spalte = 0
+        }
+        y = a4.height - rand - 26f
+    }
+    neueSpalte()
+    eintraege.forEach { (p, pos, zielPunkt) ->
+        if (y < rand) neueSpalte()
+        val x = rand + spalte * (sw + abstand)
+        val name = registerName(p) + p.lifespan.takeIf(String::isNotBlank)?.let { " ($it)" }.orEmpty()
+        val rechts = pos.joinToString(", ")
+        val rb = schrift.normal.breite(rechts, g)
+        val (nt, ng) = passend(schrift.normal, name, g, sw - rb - 10f)
+        val c = cs!!
+        c.beginText(); c.setFont(schrift.normal, ng); c.newLineAtOffset(x, y); c.showText(schrift.normal.sicher(nt)); c.endText()
+        val nb = schrift.normal.breite(nt, ng)
+        val punkt = schrift.normal.breite(".", g)
+        val sb = StringBuilder(); var px = x + nb + 3f
+        while (px + punkt < x + sw - rb - 3f) { sb.append('.'); px += punkt }
+        c.beginText(); c.setFont(schrift.normal, g); c.newLineAtOffset(x + nb + 3f, y); c.showText(sb.toString()); c.endText()
+        c.beginText(); c.setFont(schrift.normal, g); c.newLineAtOffset(x + sw - rb, y); c.showText(schrift.normal.sicher(rechts)); c.endText()
+        seite!!.annotations.add(org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink().apply {
+            rectangle = PDRectangle(x, y - g * 0.3f, sw, zh)
+            borderStyle = org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary().apply { width = 0f }
+            action = org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo().apply {
+                destination = org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageXYZDestination().apply {
+                    page = ziel; left = zielPunkt.first.toInt(); top = zielPunkt.second.toInt()
+                }
+            }
+        })
+        y -= zh
+    }
+    cs?.close()
 }
 
 /**
@@ -517,6 +672,15 @@ fun aufEinBlatt(poster: PDDocument): PDDocument = PDDocument().also { aufEinBlat
 /** Wie [aufEinBlatt], haengt die Seite aber an [ziel] an (fuer mehrseitige Tafeln). */
 fun aufEinBlatt(original: PDDocument, ziel: PDDocument, querErzwingen: Boolean = false) {
     val poster = eingebettet(original)
+    try { aufEinBlattSeite(poster, ziel, querErzwingen) } finally { anhangSeiten(poster, ziel) }
+}
+
+/** Seiten hinter dem Blatt (Personenverzeichnis) unveraendert anhaengen, ohne Links auf das Poster. */
+private fun anhangSeiten(poster: PDDocument, ziel: PDDocument) {
+    for (i in 1 until poster.numberOfPages) ziel.importPage(poster.getPage(i)).annotations = emptyList()
+}
+
+private fun aufEinBlattSeite(poster: PDDocument, ziel: PDDocument, querErzwingen: Boolean) {
     val quelle = poster.getPage(0).mediaBox
     val a4 = PDRectangle.A4
     val quer = querErzwingen || quelle.width > quelle.height
@@ -577,5 +741,6 @@ fun aufA4Blaetter(original: PDDocument): PDDocument {
             cs.showText(schrift.sicher("${z + 1}/${sp + 1}  ·  ${zeilen}×${spalten}")); cs.endText()
         }
     }
+    anhangSeiten(poster, doc)
     return doc
 }

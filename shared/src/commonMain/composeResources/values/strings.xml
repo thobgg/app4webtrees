@@ -583,6 +583,10 @@ GEDCOM, merging, places and sources are managed by webtrees itself – the webtr
     <string name="desk_chart_page_title">%1$s · no. %2$s · continued from p. %3$d</string>
     <string name="desk_chart_page_ref">→ p. %1$d</string>
     <string name="desk_chart_root_top">Starting person at the top</string>
+    <string name="desk_chart_grid">Grid at the margin (columns and generations)</string>
+    <string name="desk_chart_index">Index of persons (separate page)</string>
+    <string name="desk_chart_curves">Connect duplicate persons with a line</string>
+    <string name="desk_chart_index_title">Index of persons</string>
     <string name="desk_chart_siblings">Siblings</string>
     <string name="desk_chart_siblings_none">none</string>
     <string name="desk_chart_siblings_root">of the root person</string>

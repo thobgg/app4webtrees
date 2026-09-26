@@ -578,6 +578,10 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_chart_page_title">%1$s · Nr. %2$s · Fortsetzung von S. %3$d</string>
     <string name="desk_chart_page_ref">→ S. %1$d</string>
     <string name="desk_chart_root_top">Proband oben</string>
+    <string name="desk_chart_grid">Gitter am Rand (Spalten und Generationen)</string>
+    <string name="desk_chart_index">Personenverzeichnis (eigene Seite)</string>
+    <string name="desk_chart_curves">Doppelte Personen mit Linie verbinden</string>
+    <string name="desk_chart_index_title">Personenverzeichnis</string>
     <string name="desk_chart_siblings">Geschwister</string>
     <string name="desk_chart_siblings_none">keine</string>
     <string name="desk_chart_siblings_root">des Probanden</string>

@@ -119,6 +119,9 @@ private val linien = setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.A
 /** Faechertafel und Ahnenkreis: ohne Orte und volle Daten (dafuer ist in den Ringen kein Platz). */
 private val kreise = setOf(TafelArt.Faecher, TafelArt.Kreis)
 
+/** Tafeln mit Gitter, Personenverzeichnis und Kurven fuer Doppelte (nicht Kreise und die seitenweise Ahnentafel). */
+private val mitGitterArten = setOf(TafelArt.Ahnen, TafelArt.Stamm, TafelArt.Sanduhr, TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester)
+
 /** Tafeln, die auch waagerecht gehen (Linien bleiben senkrecht). */
 private val waagerechtMoeglich = setOf(TafelArt.Ahnen, TafelArt.AhnenSeiten, TafelArt.Stamm, TafelArt.Sanduhr)
 
@@ -148,6 +151,7 @@ private object TafelWahl {
         volleDaten = prefs.getBoolean(k(art, "voll"), false),
         waagerecht = art in waagerechtMoeglich && prefs.getBoolean(k(art, "waagerecht"), art == TafelArt.Sanduhr),
         geschwister = (prefs.getString(k(art, "geschw"), null)?.toIntOrNull() ?: 0).coerceIn(0, 2),
+        gitter = prefs.getBoolean(k(art, "gitter"), false), verzeichnis = prefs.getBoolean(k(art, "verz"), false), kurven = prefs.getBoolean(k(art, "kurven"), false),
     )
     fun sichern(art: TafelArt, o: TafelOptionen) {
         prefs.putString("tafel_art", art.name)
@@ -157,6 +161,7 @@ private object TafelWahl {
         prefs.putString(k(art, "nach"), o.nachfahren.toString()); prefs.putBoolean(k(art, "namen"), o.namenstraeger)
         prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
         prefs.putBoolean(k(art, "waagerecht"), o.waagerecht); prefs.putString(k(art, "geschw"), o.geschwister.toString())
+        prefs.putBoolean(k(art, "gitter"), o.gitter); prefs.putBoolean(k(art, "verz"), o.verzeichnis); prefs.putBoolean(k(art, "kurven"), o.kurven)
     }
 }
 
@@ -261,6 +266,11 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
                     }
                     if (art in waagerechtMoeglich) Haken(stringResource(Res.string.desk_chart_horizontal), o.waagerecht) { o = o.copy(waagerecht = it) }
                     Haken(stringResource(Res.string.desk_chart_photos), o.bilder) { o = o.copy(bilder = it) }
+                    if (art in mitGitterArten) {
+                        Haken(stringResource(Res.string.desk_chart_grid), o.gitter) { o = o.copy(gitter = it) }
+                        Haken(stringResource(Res.string.desk_chart_index), o.verzeichnis) { o = o.copy(verzeichnis = it) }
+                        Haken(stringResource(Res.string.desk_chart_curves), o.kurven) { o = o.copy(kurven = it) }
+                    }
                     if (art != TafelArt.Stamm) Haken(stringResource(Res.string.desk_chart_numbers), o.nummern) { o = o.copy(nummern = it) }
                     if (art == TafelArt.Ahnen) Haken(stringResource(if (o.waagerecht) Res.string.desk_chart_root_right else Res.string.desk_chart_root_top), o.ausgangOben) { o = o.copy(ausgangOben = it) }
                     if (art == TafelArt.Ahnen) Einstellung(stringResource(Res.string.desk_chart_siblings)) {

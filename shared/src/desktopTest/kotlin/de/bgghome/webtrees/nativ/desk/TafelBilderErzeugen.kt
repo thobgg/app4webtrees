@@ -61,7 +61,7 @@ class TafelBilderErzeugen {
             val o0 = TafelOptionen(
                 generationen = gen.toInt(), stil = TafelStil.valueOf(stilName), orte = "orte" in schalter, volleDaten = "voll" in schalter,
                 partner = "partner" in schalter || (art in setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester) && "allein" !in schalter),
-                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, bilder = "ohnebild" !in schalter, geschwister = if ("geschwalle" in schalter) 2 else if ("geschw" in schalter) 1 else 0, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
+                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, bilder = "ohnebild" !in schalter, gitter = "gitter" in schalter, verzeichnis = "verz" in schalter, kurven = "kurven" in schalter, geschwister = if ("geschwalle" in schalter) 2 else if ("geschw" in schalter) 1 else 0, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
                 nachfahren = schalter.firstOrNull { it.startsWith("nach") }?.drop(4)?.toInt() ?: 3,
             )
             val daten = runBlocking { tafelDatenLaden(client, baumName, xref, art, if (art == TafelArt.Stamm) maxGen(art) else o0.generationen, o0.geschwister) }
@@ -73,6 +73,8 @@ class TafelBilderErzeugen {
             val bytes = ByteArrayOutputStream().also { out -> doc.use { it.save(out) } }.toByteArray()
             val name = "tafel-${art.name.lowercase()}-$xref-$gen-${stilName.lowercase()}" + (teile.getOrNull(4)?.let { "-" + it.replace(',', '-') } ?: "")
             File(ziel, "$name.pdf").writeBytes(bytes)
+            // Druckweg "auf ein Blatt" (mit angehaengten Verzeichnisseiten) zur Kontrolle
+            if ("blatt" in schalter) ByteArrayOutputStream().also { out -> aufEinBlatt(Loader.loadPDF(bytes)).use { it.save(out) } }.toByteArray().let { File(ziel, "$name-blatt.pdf").writeBytes(it) }
             Loader.loadPDF(bytes).use { d ->
                 val box = d.getPage(0).mediaBox
                 // lange Seite etwa 3000 Pixel; bei Seiten die ersten beiden
