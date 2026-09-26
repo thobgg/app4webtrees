@@ -41,6 +41,8 @@ data class TreeInfo(
     val autoAccept: Boolean = false,
     val userXref: String = "",
     val defaultXref: String = "",
+    /** Nummer der letzten Aenderung im Baum (ab API-Stufe 17), null bei aelteren Modulen. Nur auf Gleichheit vergleichen. */
+    val lastChange: Long? = null,
 )
 
 @Serializable

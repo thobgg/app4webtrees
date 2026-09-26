@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -154,7 +156,13 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     Knopf(stringResource(Res.string.desk_print), b != null) { b?.let { drucken(buchPdf(it), it.titel) } }
                     Text(stringResource(Res.string.desk_book_save_as), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        BuchFormat.entries.forEach { f -> Box(Modifier.weight(1f)) { Knopf(f.name, b != null) { b?.let { buchSpeichern(it, f, it.titel) } } } }
+                        BuchFormat.entries.forEach { f ->
+                            // Fuenf Knoepfe nebeneinander: ohne den ueblichen Innenabstand bricht "DOCX" sonst je Buchstabe um
+                            OutlinedButton(onClick = { b?.let { buchSpeichern(it, f, it.titel) } }, enabled = b != null, shape = MaterialTheme.shapes.small,
+                                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp), modifier = Modifier.weight(1f)) {
+                                Text(f.name, maxLines = 1, softWrap = false)
+                            }
+                        }
                     }
                     Spacer(Modifier.height(4.dp))
                     Knopf(stringResource(Res.string.action_close), true, onClose)

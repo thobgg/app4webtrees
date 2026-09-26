@@ -130,10 +130,12 @@ private fun registerName(p: Person) = listOf(p.surname, p.given).filter(String::
 class BuchDaten(val ahnen: Map<Long, AhnenEintrag>, val details: Map<Long, IndividualDetail>, val bilder: Map<String, BufferedImage>)
 
 suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean): BuchDaten = coroutineScope {
-    val ahnen = ahnenLaden(client, tree, xref, generationen)
+    // Ganzer Baum aus Zwischenspeicher oder Export (ab Stufe 17), wenn sich das lohnt - sonst Person fuer Person
+    val baum = BaumSpeicher.holen(client, tree, (1 shl generationen.coerceAtMost(20)) - 1)
+    val ahnen = if (baum != null) ahnenAusBaum(baum, xref, generationen) else ahnenLaden(client, tree, xref, generationen)
     // Jede Person einmal abrufen (Ahnenschwund: dieselbe Person unter mehreren Nummern)
     val xrefs = ahnen.values.map { it.person.xref }.filter(String::isNotEmpty).distinct()
-    val details = xrefs.chunked(8).flatMap { gruppe ->
+    val details = if (baum != null) xrefs.mapNotNull { x -> baum.detail(x)?.let { x to it } }.toMap() else xrefs.chunked(8).flatMap { gruppe ->
         gruppe.map { x -> async { x to runCatching { client.individual(tree, x) }.getOrNull() } }.awaitAll()
     }.mapNotNull { (x, d) -> d?.let { x to it } }.toMap()
     val fotos = if (!bilder) emptyMap() else ahnen.values.mapNotNull { it.person.thumb }.distinct().chunked(8).flatMap { gruppe ->
@@ -253,7 +255,8 @@ fun vorfahrenbuch(d: BuchDaten, o: BuchOptionen, baum: String, app: String): Buc
         o.vorwort.split(Regex("\\n\\s*\\n")).forEach { bloecke += Absatz(listOf(Lauf(it.trim().replace('\n', ' ')))) }
     }
     nummern.groupBy(::reihe).forEach { (g, liste) ->
-        bloecke += Ueberschrift(generationTitel(g), "g$g", neueSeite = g <= 1 || liste.size > 4)
+        // Proband, Eltern und Grosseltern teilen sich eine Seite; ab den Urgrosseltern beginnt jede Generation neu
+        bloecke += Ueberschrift(generationTitel(g), "g$g", neueSeite = g == 0 || liste.size > 4)
         liste.forEach { bloecke += eintrag(it) }
     }
     fun gruppiertNachBuchstabe(m: Map<String, Set<Long>>) = m.entries.groupBy { it.key.first().uppercaseChar().toString() }

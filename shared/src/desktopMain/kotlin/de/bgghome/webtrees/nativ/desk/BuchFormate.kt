@@ -34,7 +34,7 @@ fun buchHtml(buch: Buch): String = buildString {
     append("""body{font-family:Georgia,'Times New Roman',serif;max-width:46em;margin:2em auto;padding:0 1em;line-height:1.45;color:#1e1e1e;background:#fff}
 h1.titel{text-align:center;font-size:2.4em;margin:1.5em 0 .2em}p.unter{text-align:center;font-weight:bold;font-size:1.2em}p.zeile{text-align:center;color:#555}
 img.titelbild{display:block;margin:2em auto 1em;max-width:12em;border:1px solid #777}h2{margin-top:2.2em;border-bottom:1px solid #999;padding-bottom:.2em}
-p.e{margin:.9em 0 .2em 2.6em;text-indent:-2.6em;overflow:auto}p.e .nr{display:inline-block;width:2.6em;text-indent:0;font-weight:bold}
+p.e{margin:.9em 0 .2em 2.6em;text-indent:-2.6em;clear:both}p.e .nr{display:inline-block;width:2.6em;text-indent:0;font-weight:bold}
 p.z{margin:.1em 0 .1em 2.6em}p.e img{float:right;width:5em;margin:0 0 .4em .8em;border:1px solid #999}p.e.farbe{border-left:4px solid var(--f);padding-left:.4em}
 a{color:#1f3a8a;text-decoration:none}a:hover{text-decoration:underline}nav a{display:block}.reg{columns:2;column-gap:2em}.reg1{columns:1}
 .reg div{break-inside:avoid;display:flex}.reg div span.t{flex:1}.reg b{display:block;margin-top:.6em}footer{margin-top:3em;color:#777;font-size:.85em;text-align:center}
@@ -91,7 +91,8 @@ fun buchText(buch: Buch): String = buildString {
             is Inhaltsverzeichnis -> { append(Texte.t(Res.string.desk_book_contents)).append('\n'); inhaltsZiele(buch).forEach { append("  ").append(it.first).append('\n') }; append('\n') }
             is Ueberschrift -> append("\n").append(b.text).append('\n').append("=".repeat(b.text.length)).append("\n\n")
             is Absatz -> {
-                val einr = "    ".repeat(b.einzug)
+                // Zusaetze (einzug 1) stehen unter dem Text des Eintrags, nicht unter der Nummer
+                val einr = "    ".repeat(if (b.marke == null) maxOf(0, b.einzug - 1) else b.einzug)
                 val t = b.laeufe.joinToString("") { it.text }
                 append(if (b.abstandVor) "\n" else "").append(einr)
                 append(b.marke?.let { it.padEnd(6) } ?: if (b.einzug == 0) "" else "      ")

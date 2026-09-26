@@ -156,6 +156,19 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     suspend fun mediaList(tree: String, page: Int): MediaPage =
         get("MediaList", tree, mapOf("page" to page.toString()), MediaPage.serializer())
 
+    /** Eine Seite des ganzen Baums (ab API-Stufe 17). Die Personen tragen die Kurzfassung und famc/fams/facts/media in einem Objekt. */
+    suspend fun export(tree: String, page: Int): ExportPage {
+        val raw = get("Export", tree, mapOf("page" to page.toString()), ExportPageJson.serializer())
+        return ExportPage(
+            raw.lastChange, raw.page, raw.nextPage, raw.total,
+            raw.individuals.map { e ->
+                val links = json.decodeFromJsonElement(ExportLinks.serializer(), e)
+                ExportIndividual(json.decodeFromJsonElement(Person.serializer(), e), links.famc, links.fams, links.facts, links.media)
+            },
+            raw.families,
+        )
+    }
+
     // ── Archiv: Modul "Sammlungen" (eigene Routen, nicht Teil von api4webtrees) ──
 
     /** Uebersicht des Archivs. Kein JSON (404-Seite von webtrees): das Modul fehlt. JSON-Fehler 403: kein Zugriff. */

@@ -116,12 +116,21 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
     }
 
     fun setzen(): Pair<PDDocument, Map<String, Int>> {
-        buch.bloecke.forEach { b ->
+        buch.bloecke.forEachIndexed { k, b ->
+            if (b !is Absatz || b.marke != null) bildAbschliessen()
             when (b) {
                 is Titelblatt -> titelblatt(b)
                 is Inhaltsverzeichnis -> inhalt()
                 is Ueberschrift -> ueberschrift(b.text, b.id, b.neueSeite)
-                is Absatz -> absatz(b)
+                is Absatz -> {
+                    // Ein Eintrag bleibt mit seinen Zusaetzen (Eltern, Kinder, Notizen) zusammen, wenn er auf eine Seite passt
+                    if (b.marke != null && cs != null) {
+                        val gruppe = listOf(b) + buch.bloecke.drop(k + 1).takeWhile { it is Absatz && it.marke == null && it.einzug > 0 }.map { it as Absatz }
+                        val h = gruppenHoehe(gruppe)
+                        if (y + h > format.height - unten && h <= format.height - unten - oben) neueSeite()
+                    }
+                    absatz(b)
+                }
                 is Verzeichnis -> verzeichnis(b)
             }
         }
@@ -212,15 +221,28 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
         leer = false
     }
 
-    fun absatz(a: Absatz) {
-        if (a.abstandVor) y += 5f
-        val marke = a.marke
-        val einzug = a.einzug * 18f
-        val markeB = if (marke != null) 34f else 0f
-        val x0 = links + einzug + markeB
-        val bildW = if (a.bild != null) 56f else 0f
-        val bildH = a.bild?.let { bildW * it.height / it.width } ?: 0f
-        // Woerter mit Stil
+    val markeB = 34f
+    val bildW = 56f
+
+    /** Linker Rand des Textes: Eintraege nach der Nummer, Zusaetze (einzug 1) buendig darunter, tiefere je 18 pt weiter. */
+    fun textX(a: Absatz) = links + when {
+        a.marke != null -> a.einzug * 18f + markeB
+        a.einzug > 0 -> markeB + (a.einzug - 1) * 18f
+        else -> 0f
+    }
+
+    fun bildHoehe(a: Absatz) = a.bild?.let { bildW * it.height / it.width } ?: 0f
+
+    /** Ende des Portraets (Seite, y): bis dahin laufen auch die Zusaetze schmaler neben dem Bild. */
+    var bildSeite = 0
+    var bildBis = 0f
+
+    fun bildAbschliessen() {
+        if (cs != null && seite == bildSeite && y < bildBis) y = bildBis
+        bildSeite = 0
+    }
+
+    fun woerter(a: Absatz): List<Wort> {
         val woerter = mutableListOf<Wort>()
         var leerOffen = false   // endete das vorige Stueck mit einem Leerzeichen?
         a.laeufe.forEach { l ->
@@ -229,8 +251,50 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
             }
             leerOffen = l.text.endsWith(" ")
         }
-        // Mindestens die erste Zeile (mit Bild: das Bild) muss auf die Seite
-        platz(maxOf(zeilenH * 2, bildH + 4f))
+        return woerter
+    }
+
+    /** Naechste Zeile ab Wort [i] fuer die Breite [maxW]; liefert die Woerter der Zeile. */
+    fun zeile(woerter: List<Wort>, i: Int, maxW: Float): List<Wort> {
+        val zeile = mutableListOf<Wort>()
+        var w = 0f
+        var j = i
+        while (j < woerter.size) {
+            val wo = woerter[j]
+            val lw = s.breite(wo.text, s.fuer(wo.stil), grund) + (if (zeile.isNotEmpty() && wo.leerDavor) s.breite(" ", s.normal, grund) else 0f)
+            if (zeile.isNotEmpty() && w + lw > maxW) break
+            zeile += wo; w += lw; j++
+        }
+        return zeile
+    }
+
+    /** Hoehe eines Eintrags samt Zusaetzen, gesetzt wie in absatz() - fuer den Seitenumbruch vor dem Eintrag. */
+    fun gruppenHoehe(gruppe: List<Absatz>): Float {
+        val bildEnde = bildHoehe(gruppe.first()) + 4f
+        var yy = 0f
+        gruppe.forEach { a ->
+            if (a.abstandVor) yy += 5f
+            val woerter = woerter(a)
+            var i = 0
+            while (i < woerter.size) {
+                val maxW = links + breite - textX(a) - (if (gruppe.first().bild != null && yy < bildEnde) bildW + 10f else 0f)
+                i += zeile(woerter, i, maxW).size
+                yy += zeilenH
+            }
+        }
+        return maxOf(yy, if (gruppe.first().bild != null) bildEnde + 5f else 0f)
+    }
+
+    fun absatz(a: Absatz) {
+        if (a.abstandVor) y += 5f
+        val marke = a.marke
+        val einzug = a.einzug * 18f
+        val x0 = textX(a)
+        val bildH = bildHoehe(a)
+        val woerter = woerter(a)
+        // Mindestens zwei Zeilen (mit Bild: das Bild) muessen auf die Seite - bei Zusaetzen genuegt eine, sonst rutscht
+        // eine einzeilige Zeile "Eltern ..." auf die naechste Seite, obwohl der Eintrag samt ihr gepasst hat
+        platz(maxOf(zeilenH * (if (a.marke == null && a.einzug > 0) 1 else 2), bildH + 4f))
         val start = y; val startSeite = seite
         if (a.anker != null) anker[a.anker] = seite to y
         val c0 = cs!!
@@ -241,6 +305,7 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
         }
         if (marke != null) { c0.setNonStrokingColor(Color.BLACK); text(c0, marke, s.fett, grund, links + einzug, y + grund) }
         val bildEnde = y + bildH + 4f
+        if (a.bild != null) { bildSeite = seite; bildBis = bildEnde }
         var i = 0
         var balkenStart = y
         while (i < woerter.size) {
@@ -248,17 +313,11 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
                 a.farbe?.let { balken(it, balkenStart, y) }
                 neueSeite(); balkenStart = y
             }
-            val maxW = (links + breite) - x0 - (if (seite == startSeite && y < bildEnde) bildW + 10f else 0f) - (if (i > 0) 0f else 0f)
-            // Zeile fuellen
-            val zeile = mutableListOf<Wort>()
-            var w = 0f
-            while (i < woerter.size) {
-                val wo = woerter[i]
-                val lw = s.breite(wo.text, s.fuer(wo.stil), grund) + (if (zeile.isNotEmpty() && wo.leerDavor) s.breite(" ", s.normal, grund) else 0f)
-                if (zeile.isNotEmpty() && w + lw > maxW) break
-                zeile += wo; w += lw; i++
-            }
-            var x = x0 + (if (y != start || seite != startSeite) 0f else 0f)
+            // Neben dem Portraet (auch dem des vorigen Eintrags, bei Zusaetzen) schmaler
+            val maxW = (links + breite) - x0 - (if (seite == bildSeite && y < bildBis) bildW + 10f else 0f)
+            val zeile = zeile(woerter, i, maxW)
+            i += zeile.size
+            var x = x0
             val c = cs!!
             zeile.forEachIndexed { k, wo ->
                 if (k > 0 && wo.leerDavor) x += s.breite(" ", s.normal, grund)
@@ -270,8 +329,8 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
             }
             y += zeilenH
         }
-        if (seite == startSeite && y < bildEnde) y = bildEnde
-        a.farbe?.let { balken(it, balkenStart, y) }
+        // Der Farbbalken reicht bis unter das Bild; die Zusaetze fliessen daneben weiter (bildAbschliessen)
+        a.farbe?.let { balken(it, balkenStart, if (seite == startSeite && a.bild != null) maxOf(y, bildEnde) else y) }
         cs!!.setNonStrokingColor(Color.BLACK)
         leer = false
     }
