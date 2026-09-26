@@ -167,8 +167,8 @@
     <string name="tree_fit">Alles zeigen</string>
     <string name="tree_zoom_in">Vergrößern</string>
     <string name="tree_zoom_out">Verkleinern</string>
-    <string name="tree_center">Zur Mittelperson</string>
-    <string name="action_make_root">Als Mittelperson</string>
+    <string name="tree_center">Zum Probanden</string>
+    <string name="action_make_root">Als Proband</string>
     <string name="action_profile">Profil</string>
     <string name="action_add">Hinzufügen</string>
     <string name="action_add_relative">Verwandte hinzufügen</string>
@@ -315,7 +315,7 @@
     <string name="desk_layout_navigator">Navigator</string>
     <string name="desk_layout_tree">Baum im Mittelpunkt</string>
     <string name="desk_sheet">Person bearbeiten</string>
-    <string name="desk_as_centre">Als Zentralperson zeigen</string>
+    <string name="desk_as_centre">Als Proband zeigen</string>
     <string name="desk_people_count">%1$d Personen</string>
     <string name="desk_partners">Partner und Kinder</string>
     <string name="desk_print">Drucken</string>
@@ -358,7 +358,7 @@
     <string name="desk_death">Tod</string>
     <string name="desk_marriage">Heirat</string>
     <string name="desk_help">Hilfe</string>
-    <string name="desk_help_text">Navigator: Ein Klick macht eine Person zur Zentralperson, ein Doppelklick öffnet das Personenfenster, die rechte Maustaste zeigt weitere Möglichkeiten.
+    <string name="desk_help_text">Navigator: Ein Klick macht eine Person zum Probanden, ein Doppelklick öffnet das Personenfenster, die rechte Maustaste zeigt weitere Möglichkeiten.
 
 Personenfenster: Bild-auf/Bild-ab blättert durch die Liste, Esc schließt, ein Doppelklick auf eine Zeile bearbeitet sie.
 
@@ -386,9 +386,9 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_chart_window">Tafel erstellen</string>
     <string name="desk_chart_group_descendants">Nachfahren</string>
     <string name="desk_chart_descendants">Stammtafel</string>
-    <string name="desk_chart_descendants_hint">Alle Nachfahren einer Person auf einem Blatt, die Ausgangsperson oben, jede Generation eine Reihe.</string>
+    <string name="desk_chart_descendants_hint">Alle Nachfahren einer Person auf einem Blatt, der Proband oben, jede Generation eine Reihe.</string>
     <string name="desk_chart_open">Stammtafel …</string>
-    <string name="desk_chart_person">Ausgangsperson</string>
+    <string name="desk_chart_person">Proband</string>
     <string name="desk_chart_generations">Generationen</string>
     <string name="desk_chart_style">Gestaltung</string>
     <string name="desk_style_parchment">Pergament</string>
@@ -408,8 +408,46 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_chart_zoom_hint">Klick auf die Vorschau vergrößert sie oder zeigt wieder das ganze Blatt.</string>
     <string name="desk_chart_group_ancestors">Vorfahren</string>
     <string name="desk_chart_ancestors">Ahnentafel</string>
-    <string name="desk_chart_ancestors_hint">Alle Vorfahren einer Person auf einem Blatt, die Ausgangsperson unten, jede Generation eine Reihe darüber.</string>
+    <string name="desk_chart_ancestors_hint">Alle Vorfahren einer Person auf einem Blatt, der Proband unten, jede Generation eine Reihe darüber.</string>
     <string name="desk_chart_ancestors_open">Ahnentafel …</string>
     <string name="desk_chart_title_ancestors">Ahnentafel %1$s</string>
     <string name="desk_chart_numbers">Kekule-Nummern zeigen</string>
+    <string name="desk_chart_group_both">Vor- und Nachfahren</string>
+    <string name="desk_chart_hourglass">Sanduhr</string>
+    <string name="desk_chart_hourglass_hint">Vorfahren über und Nachfahren unter dem Probanden, auf einem Blatt.</string>
+    <string name="desk_chart_title_hourglass">Sanduhr %1$s</string>
+    <string name="desk_chart_ancestors_pages">Ahnentafel (seitenweise)</string>
+    <string name="desk_chart_ancestors_pages_hint">Vier Generationen je A4-Seite quer. Über jeder Person der obersten Reihe steht, auf welcher Seite ihre Vorfahren weitergehen – zum Abheften oder Binden.</string>
+    <string name="desk_chart_paternal">Stammlinie</string>
+    <string name="desk_chart_paternal_hint">Die Vaterlinie: Vater, dessen Vater und so fort, jede Generation eine Reihe.</string>
+    <string name="desk_chart_title_paternal">Stammlinie %1$s</string>
+    <string name="desk_chart_maternal">Mutterstamm</string>
+    <string name="desk_chart_maternal_hint">Die Mutterlinie: Mutter, deren Mutter und so fort, jede Generation eine Reihe.</string>
+    <string name="desk_chart_title_maternal">Mutterstamm %1$s</string>
+    <string name="desk_chart_oldest">Ältester Vorfahr</string>
+    <string name="desk_chart_oldest_hint">Die Linie vom Probanden zum Vorfahren mit der frühesten bekannten Geburt.</string>
+    <string name="desk_chart_title_oldest">%1$s – Linie zum ältesten Vorfahren</string>
+    <string name="desk_chart_page_title">%1$s · Nr. %2$s · Fortsetzung von S. %3$d</string>
+    <string name="desk_chart_page_ref">→ S. %1$d</string>
+    <string name="desk_chart_root_top">Proband oben</string>
+    <string name="desk_chart_fan">Fächertafel</string>
+    <string name="desk_chart_fan_hint">Der Proband in der Mitte, jede Generation der Vorfahren ein Ring darum, als Halbkreis.</string>
+    <string name="desk_chart_title_fan">Fächertafel %1$s</string>
+    <string name="desk_chart_circle">Ahnenkreis</string>
+    <string name="desk_chart_circle_hint">Wie die Fächertafel, als Vollkreis.</string>
+    <string name="desk_chart_title_circle">Ahnenkreis %1$s</string>
+    <string name="desk_chart_horizontal">Waagerecht (Generationen als Spalten)</string>
+    <string name="desk_chart_root_right">Proband rechts</string>
+    <string name="desk_chart_generations_anc">Generationen Vorfahren</string>
+    <string name="desk_chart_generations_desc">Generationen Nachfahren</string>
+    <string name="desk_chart_name_bearers">Nur Namensträger (Kinder der Söhne)</string>
+    <string name="desk_chart_spouses">Ehepartner zeigen</string>
+    <string name="desk_chart_both_parents">Beide Eltern zeigen</string>
+    <string name="desk_chart_places">Orte zeigen</string>
+    <string name="desk_chart_full_dates">Vollständige Daten</string>
+    <string name="desk_chart_size_pages">%1$d Personen · %2$d A4-Seiten</string>
+    <string name="desk_chart_print_pages">Drucken</string>
+    <string name="desk_chart_pdf_pages">Als PDF speichern</string>
+    <string name="desk_chart_loading_any">Wird geladen …</string>
+    <string name="desk_chart_empty">Keine Vorfahren bekannt.</string>
 </resources>

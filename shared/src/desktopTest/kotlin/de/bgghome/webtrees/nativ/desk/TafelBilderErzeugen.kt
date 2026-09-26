@@ -17,7 +17,7 @@ import kotlin.test.Test
  * Kein Test, sondern ein Werkzeug fuer die README-Bilder: erzeugt Tafeln vom lokalen Testserver (testsite/README.md)
  * als PDF und PNG. Laeuft nur mit gesetztem WT_TAFELBILDER (Zielordner), sonst sofort fertig:
  *
- *   WT_TAFELBILDER=/pfad WT_TAFELN="Ahnen:I60:5:Pergament Stamm:I3:5:Farbig" ./gradlew :shared:desktopTest --tests '*TafelBilderErzeugen*'
+ *   WT_TAFELBILDER=/pfad WT_TAFELN="Ahnen:I60:5:Pergament Stamm:I3:5:Farbig:partner,orte" ./gradlew :shared:desktopTest --tests '*TafelBilderErzeugen*'
  *
  * WT_URL (Vorgabe http://127.0.0.1:8377) und WT_BAUM (Vorgabe medici) waehlen Server und Baum, WT_USER und WT_PASS
  * melden an (ohne Anmeldung tragen die Portraets das Wasserzeichen fuer Gaeste).
@@ -52,27 +52,36 @@ class TafelBilderErzeugen {
             System.getenv("WT_USER")?.let { client.login(it, System.getenv("WT_PASS").orEmpty()) } ?: client.info()
         }
         val baumTitel = info.trees.first { it.name == baumName }.title
+        // Auftrag: Art:Xref:Generationen:Gestaltung[:Schalter], Schalter z. B. "orte,voll,partner,oben,namen,nach4"
         (System.getenv("WT_TAFELN") ?: "Ahnen:I53:5:Pergament").split(' ').filter(String::isNotBlank).forEach { auftrag ->
-            val (artName, xref, gen, stilName) = auftrag.split(':')
+            val teile = auftrag.split(':')
+            val (artName, xref, gen, stilName) = teile
+            val schalter = teile.getOrNull(4)?.split(',').orEmpty().toSet()
             val art = TafelArt.valueOf(artName)
-            val wurzel = runBlocking {
-                when (art) {
-                    TafelArt.Stamm -> tafelBaum(nachfahrenLaden(client, baumName, xref, gen.toInt()), gen.toInt())
-                    TafelArt.Ahnen -> ahnenBaum(client.pedigree(baumName, xref, gen.toInt()).ancestors.associateBy { it.n }, gen.toInt())!!
-                }
-            }
-            val titel = (if (art == TafelArt.Stamm) "Nachfahren von " else "Vorfahren von ") + wurzel.person.name
-            val o = TafelOptionen(generationen = gen.toInt(), stil = TafelStil.valueOf(stilName), titel = titel)
-            val (doc, groesse) = tafelPdf(wurzel, o, ::bild, "Privat", fusszeile("wtTux", baumTitel), art)
+            val o0 = TafelOptionen(
+                generationen = gen.toInt(), stil = TafelStil.valueOf(stilName), orte = "orte" in schalter, volleDaten = "voll" in schalter,
+                partner = "partner" in schalter || (art in setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester) && "allein" !in schalter),
+                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
+                nachfahren = schalter.firstOrNull { it.startsWith("nach") }?.drop(4)?.toInt() ?: 3,
+            )
+            val daten = runBlocking { tafelDatenLaden(client, baumName, xref, art, if (art == TafelArt.Stamm) maxGen(art) else o0.generationen) }
+            val name0 = daten.ahnen[1L]?.person?.name ?: daten.nachfahren?.person?.name.orEmpty()
+            val o = o0.copy(titel = tafelTitel(art, name0))
+            val (doc, groesse) = tafelErzeugen(art, daten, o, ::bild, "Privat", fusszeile("wtTux", baumTitel))!!
+            // Schalter "blatt": zusaetzlich der Druckweg "auf ein Blatt" (A4), um die Uebernahme der Schriften zu pruefen
+            val blatt = if ("blatt" in schalter) ByteArrayOutputStream().also { out -> aufEinBlatt(doc).use { it.save(out) } }.toByteArray() else null
             val bytes = ByteArrayOutputStream().also { out -> doc.use { it.save(out) } }.toByteArray()
-            val name = "tafel-${art.name.lowercase()}-$xref-$gen-${stilName.lowercase()}"
+            val name = "tafel-${art.name.lowercase()}-$xref-$gen-${stilName.lowercase()}" + (teile.getOrNull(4)?.let { "-" + it.replace(',', '-') } ?: "")
             File(ziel, "$name.pdf").writeBytes(bytes)
             Loader.loadPDF(bytes).use { d ->
                 val box = d.getPage(0).mediaBox
-                // lange Seite etwa 3000 Pixel
-                ImageIO.write(PDFRenderer(d).renderImage(0, 3000f / maxOf(box.width, box.height)), "png", File(ziel, "$name.png"))
+                // lange Seite etwa 3000 Pixel; bei Seiten die ersten beiden
+                (0 until minOf(2, d.numberOfPages)).forEach { i ->
+                    ImageIO.write(PDFRenderer(d).renderImage(i, 3000f / maxOf(box.width, box.height)), "png", File(ziel, if (i == 0) "$name.png" else "$name-s${i + 1}.png"))
+                }
             }
-            println("$name: ${groesse.personen} Personen, ${groesse.breiteCm} x ${groesse.hoeheCm} cm")
+            blatt?.let { b -> Loader.loadPDF(b).use { d -> ImageIO.write(PDFRenderer(d).renderImage(0, 2f), "png", File(ziel, "$name-a4.png")) } }
+            println("$name: ${groesse.personen} Personen, ${groesse.breiteCm} x ${groesse.hoeheCm} cm, ${groesse.seiten} Seiten")
         }
     }
 }

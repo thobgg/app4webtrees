@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/windows-navigator.jpg" alt="wtWin unter Windows: Navigator mit Zentralperson, Kindern und vier Generationen Vorfahren" width="100%">
+  <img src="docs/screenshots/windows-navigator.jpg" alt="wtWin unter Windows: Navigator mit Proband, Kindern und vier Generationen Vorfahren" width="100%">
   <br><b>wtWin unter Windows</b> – derselbe Stammbaum wie in wtAnd, aufgebaut wie ein klassisches Genealogie-Programm.
 </p>
 
@@ -28,7 +28,7 @@
 
 | <img src="docs/screenshots/tafel-stammtafel.jpg" alt="Stammtafel der Nachfahren von Cosimo de' Medici" width="100%"> | <img src="docs/screenshots/tafel-ahnentafel.jpg" alt="Ahnentafel von Cosimo I de' Medici mit Kekule-Nummern" width="100%"> |
 | :-: | :-: |
-| **Stammtafel** – alle Nachfahren auf einem Blatt | **Ahnentafel** – Ausgangsperson unten, Kekule-Nummern |
+| **Stammtafel** – alle Nachfahren auf einem Blatt | **Ahnentafel** – Proband unten, Kekule-Nummern |
 
 <p align="center"><sub>Historischer Stammbaum der Medici. Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; alle anderen Porträts gemeinfrei (Wikimedia Commons).</sub></p>
 
@@ -64,9 +64,9 @@ App kommt, landet als ausstehende Änderung in derselben webtrees-Installation, 
 ## Was die App kann
 
 - **Baum als Mittelpunkt:** Sanduhr-Ansicht mit Ahnen, Partnern, Kindern und Enkeln – dazu, wie in einer
-  Familienansicht üblich, die Geschwister der Mittelperson und ihrer Ahnen samt Partnern sowie die Cousins
+  Familienansicht üblich, die Geschwister des Probanden und seiner Ahnen samt Partnern sowie die Cousins
   (beides abschaltbar);
-  frei verschieben und zoomen, Zweige nach oben aufklappen, jede Person zur Mittelperson machen. Beim Herauszoomen
+  frei verschieben und zoomen, Zweige nach oben aufklappen, jede Person zum Probanden machen. Beim Herauszoomen
   zeigt eine Karte weniger statt kleiner: erst ohne Porträt und Jahre, dann nur der Rufname, zuletzt ein Kasten in der
   Geschlechtsfarbe, die Schrift bleibt lesbar
 - **Profil:** Lebenslauf als Zeitleiste (mit Heirat und Geburten der Kinder), Verwandtschaft zur eigenen Person
@@ -116,7 +116,7 @@ zusätzlich das Archiv. Fehlt es, fehlt nur der Reiter.
 
 ## Bilder
 
-**Baum.** Sanduhr um die Mittelperson, Geschwister und Cousins dazu. Beim Herauszoomen zeigt eine Karte weniger statt
+**Baum.** Sanduhr um den Probanden, Geschwister und Cousins dazu. Beim Herauszoomen zeigt eine Karte weniger statt
 kleiner, die Schrift bleibt lesbar.
 
 | nah | Namen | Rufnamen | Übersicht |

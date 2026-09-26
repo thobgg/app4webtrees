@@ -36,38 +36,74 @@ import java.awt.color.ColorSpace
 /**
  * Eine Person der Tafel mit den Personen der naechsten Reihe: bei der Stammtafel ihre Kinder (aller
  * Partnerschaften, in Familienfolge), bei der Ahnentafel Vater und Mutter. [nummer]: Kekule-Nummer (Ahnentafel).
+ * [partner]: Ehepartner, im Kasten genannt. [verweis]: Ahnenschwund - die Person steht schon unter dieser Nummer,
+ * ihre Vorfahren dort. [hinweis]: kleiner Text ueber dem Kasten ("→ S. 3"). [aufLinie]: gehoert zur Linie
+ * (Stammlinie, Mutterstamm, aeltester Vorfahr).
  */
-class TafelPerson(val person: Person, val kinder: List<TafelPerson>, val nummer: Int? = null)
+class TafelPerson(
+    val person: Person, val kinder: List<TafelPerson>, val nummer: Long? = null,
+    val partner: List<Person> = emptyList(), val verweis: Long? = null, val hinweis: String? = null, val aufLinie: Boolean = false,
+)
 
-/** Stammtafel: Ausgangsperson oben, Nachfahren darunter. Ahnentafel: Ausgangsperson unten, Vorfahren darueber. */
-enum class TafelArt { Stamm, Ahnen }
+/**
+ * Stammtafel: Ausgangsperson oben, Nachfahren darunter. Ahnentafel: Ausgangsperson unten, Vorfahren darueber.
+ * Sanduhr: beides. Linien (Stammlinie, Mutterstamm, aeltester Vorfahr): eine Folge von Elternpaaren.
+ * AhnenSeiten: die Ahnentafel in Stuecken zu vier Generationen je A4-Seite. Faecher und Kreis: Ringe um den
+ * Probanden (Faechertafel.kt).
+ */
+enum class TafelArt { Ahnen, AhnenSeiten, Faecher, Kreis, Stammlinie, Mutterstamm, Aeltester, Stamm, Sanduhr }
 
 enum class TafelStil { Pergament, Klassisch, Farbig, Schwarzweiss }
 
 data class TafelOptionen(
     val generationen: Int = 6,
-    /** Nur Ahnentafel: Kekule-Nummern an den Kaesten. */
+    /** Kekule-Nummern an den Kaesten (Tafeln mit Vorfahren). */
     val nummern: Boolean = true,
     val stil: TafelStil = TafelStil.Pergament,
     val rahmenMm: Int = 30,
     val bilder: Boolean = true,
     val titel: String = "",
+    /** Nur Ahnentafel: Ausgangsperson oben, die Vorfahren darunter. */
+    val ausgangOben: Boolean = false,
+    /** Nur Sanduhr: Generationen der Nachfahren ([generationen] zaehlt dort die Vorfahren). */
+    val nachfahren: Int = 3,
+    /** Stammtafel, Sanduhr: nur die Kinder der Soehne weiterverfolgen. */
+    val namenstraeger: Boolean = false,
+    /** Stammtafel, Sanduhr: Ehepartner im Kasten. Linien: beide Eltern statt nur der Linie. */
+    val partner: Boolean = true,
+    val orte: Boolean = false,
+    val volleDaten: Boolean = false,
+    /** Generationen als Spalten von links nach rechts statt als Reihen. */
+    val waagerecht: Boolean = false,
 )
+
+/** Was eine Tafel zeichnet: Vorfahren nach oben, Nachfahren nach unten (je nach Art einer oder beide Teile). */
+class TafelInhalt(val vorfahren: TafelPerson? = null, val nachfahren: TafelPerson? = null, val linie: Boolean = false)
 
 /** Ein platzierter Kasten: Mitte waagerecht, Oberkante des Bildes, Ebene (0 = Ausgangsperson). */
 class TafelPlatz(val knoten: TafelPerson, val mitteX: Float, val obenY: Float, val ebene: Int, val eltern: TafelPlatz?)
 
-/** Masse eines Kastens in Punkt, alle aus der Rahmenbreite abgeleitet. */
-class TafelMasse(val rahmen: Float, val bilder: Boolean) {
+/**
+ * Masse eines Kastens in Punkt, alle aus der Rahmenbreite abgeleitet. [zusatz]: Zeilen fuer Orte und Partner.
+ * Das Layout rechnet in zwei Achsen: Generation (Reihe) und Geschwister (nebeneinander). [waagerecht]: die
+ * Generationen liegen als Spalten nebeneinander, das Bild steht links neben dem Text statt darueber.
+ */
+class TafelMasse(val rahmen: Float, val bilder: Boolean, zusatz: Int = 0, val waagerecht: Boolean = false) {
     val bild = if (bilder) rahmen * 0.78f else 0f
     val bildAbstand = if (bilder) rahmen * 0.06f else 0f
     val schriftKlein = rahmen * 0.085f
     val schriftName = rahmen * 0.12f
-    val kastenH = schriftKlein * 3 * 1.3f + schriftName * 1.3f + rahmen * 0.12f
+    val kastenH = schriftKlein * (3 + zusatz) * 1.3f + schriftName * 1.3f + rahmen * 0.12f
     val spalt = maxOf(rahmen * 0.12f, 6f)
     val verbinder = maxOf(rahmen * 0.36f, 18f)
-    val ebeneH = bild + bildAbstand + kastenH + verbinder
-    val slot = rahmen + spalt
+    /** Eine Karte (Bild und Kasten) in Blattrichtung. */
+    val karteB = if (waagerecht) bild + bildAbstand + rahmen else rahmen
+    val karteH = if (waagerecht) maxOf(bild, kastenH) else bild + bildAbstand + kastenH
+    /** Laenge der Karte entlang der Generationen und entlang der Geschwister. */
+    val laengeG = if (waagerecht) karteB else karteH
+    val laengeQ = if (waagerecht) karteH else karteB
+    val ebeneH = laengeG + verbinder
+    val slot = laengeQ + spalt
 }
 
 class TafelLayout(val plaetze: List<TafelPlatz>, val breite: Float, val hoehe: Float, val masse: TafelMasse)
@@ -120,17 +156,43 @@ fun stammtafelLayout(wurzel: TafelPerson, masse: TafelMasse): TafelLayout {
     return TafelLayout(plaetze, breite, hoehe, masse)
 }
 
+/**
+ * Linie (Stammlinie, Mutterstamm, aeltester Vorfahr): die Personen der Linie senkrecht uebereinander, der andere
+ * Elternteil daneben - der Vater links, die Mutter rechts. Kein Schraegwandern wie bei zentrierten Paaren.
+ */
+fun linienLayout(wurzel: TafelPerson, masse: TafelMasse): TafelLayout {
+    class Roh(val k: TafelPerson, val x: Float, val ebene: Int, val eltern: Int?)
+    val roh = mutableListOf<Roh>()
+    var k: TafelPerson? = wurzel; var ebene = 0; var eltern: Int? = null
+    while (k != null) {
+        roh += Roh(k, 0f, ebene, eltern)
+        val hier = roh.size - 1
+        val linie = k.kinder.firstOrNull { it.aufLinie }
+        k.kinder.forEachIndexed { i, andere ->
+            if (andere === linie) return@forEachIndexed
+            val links = if (linie != null) i < k.kinder.indexOf(linie) else andere.person.sex == "M"
+            roh += Roh(andere, if (links) -masse.slot else masse.slot, ebene + 1, hier)
+        }
+        k = linie; ebene++; eltern = hier
+    }
+    val links = roh.minOf { it.x }
+    val plaetze = ArrayList<TafelPlatz>()
+    roh.forEach { r -> plaetze += TafelPlatz(r.k, r.x - links + masse.slot / 2, r.ebene * masse.ebeneH, r.ebene, r.eltern?.let { plaetze[it] }) }
+    val breite = roh.maxOf { it.x } - links + masse.slot
+    return TafelLayout(plaetze, breite, (roh.maxOf { it.ebene } + 1) * masse.ebeneH - masse.verbinder, masse)
+}
+
 /** Wer mehrfach vorkommt (Nachfahren, die untereinander geheiratet haben), bekommt auf der Tafel eine Nummer. */
 fun doppelteNummern(plaetze: List<TafelPlatz>): Map<String, Int> =
-    plaetze.groupBy { it.knoten.person.xref }.filter { it.value.size > 1 && it.key.isNotEmpty() }.keys.withIndex().associate { (i, x) -> x to i + 1 }
+    plaetze.filter { it.knoten.verweis == null }.groupBy { it.knoten.person.xref }.filter { it.value.size > 1 && it.key.isNotEmpty() }.keys.withIndex().associate { (i, x) -> x to i + 1 }
 
-private class StilFarben(
+internal class StilFarben(
     val hintergrundOben: Color, val hintergrundUnten: Color, val titel: Color, val linie: Color, val text: Color,
     val rahmenBreite: Float, val rund: Boolean, val grau: Boolean,
     val fuellung: (String) -> Color, val rahmen: (String) -> Color,
 )
 
-private fun farben(stil: TafelStil): StilFarben = when (stil) {
+internal fun farben(stil: TafelStil): StilFarben = when (stil) {
     TafelStil.Pergament -> StilFarben(Color(0xFF, 0xFF, 0xFF), Color(0xFD, 0xEE, 0xBE), Color(0x1E, 0x14, 0x0A), Color(0x3A, 0x2E, 0x22), Color(0x1E, 0x14, 0x0A),
         2.2f, true, false, { Color.WHITE }, { Color(0x1E, 0x14, 0x0A) })
     TafelStil.Klassisch -> StilFarben(Color.WHITE, Color.WHITE, Color.BLACK, Color(0x44, 0x44, 0x44), Color.BLACK,
@@ -144,7 +206,7 @@ private fun farben(stil: TafelStil): StilFarben = when (stil) {
 }
 
 /** Schriften der Tafel: Serifenschrift fuer Pergament und Klassisch, Titel in Schreibschrift (Great Vibes, OFL). */
-private class TafelSchriften(doc: PDDocument, stil: TafelStil) {
+internal class TafelSchriften(doc: PDDocument, stil: TafelStil) {
     private val basis = Schriften(doc)
     private val serif = stil == TafelStil.Pergament || stil == TafelStil.Klassisch
     val normal: PDFont = (if (serif) basis.ladenAus(listOf(
@@ -163,7 +225,7 @@ private class TafelSchriften(doc: PDDocument, stil: TafelStil) {
 private fun COSArray.zahlen(vararg z: Float) = apply { z.forEach { add(COSFloat(it)) } }
 
 /** Senkrechter Farbverlauf ueber das ganze Blatt (Pergament). */
-private fun PDPageContentStream.verlauf(b: Float, h: Float, oben: Color, unten: Color) {
+internal fun PDPageContentStream.verlauf(b: Float, h: Float, oben: Color, unten: Color) {
     val fn = COSDictionary().apply {
         setInt(COSName.FUNCTION_TYPE, 2)
         setItem(COSName.DOMAIN, COSArray().zahlen(0f, 1f))
@@ -190,10 +252,10 @@ private fun PDPageContentStream.rechteck(x: Float, y: Float, w: Float, h: Float,
     lineTo(x, y + r); curveTo(x, y + r - k, x + r - k, y, x + r, y); closePath()
 }
 
-private fun grau(b: BufferedImage): BufferedImage = ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null).filter(b, null)
+internal fun grau(b: BufferedImage): BufferedImage = ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null).filter(b, null)
 
 /** Text in eine Breite zwingen: erst kleiner (bis 70 %), dann kuerzen. */
-private fun passend(schrift: PDFont, text: String, groesse: Float, breite: Float): Pair<String, Float> {
+internal fun passend(schrift: PDFont, text: String, groesse: Float, breite: Float): Pair<String, Float> {
     var g = groesse
     while (schrift.breite(text, g) > breite && g > groesse * 0.7f) g -= groesse * 0.05f
     var t = text
@@ -202,38 +264,75 @@ private fun passend(schrift: PDFont, text: String, groesse: Float, breite: Float
 }
 
 /** Groesste Seitenlaenge eines PDF-Blatts (200 Zoll); groessere Tafeln werden verkleinert. */
-private const val PDF_MAX = 14400f
+internal const val PDF_MAX = 14400f
 
-/** Masse des Blatts in Zentimetern und die Personenzahl, fuer die Anzeige im Fenster. */
-class TafelInfo(val personen: Int, val breiteCm: Int, val hoeheCm: Int)
+/** Masse des Blatts in Zentimetern und die Personenzahl, fuer die Anzeige im Fenster. [seiten] > 0: A4-Seiten. */
+class TafelInfo(val personen: Int, val breiteCm: Int, val hoeheCm: Int, val seiten: Int = 0)
+
+/** Eine Zeile im Kasten. */
+private class KastenZeile(val text: String, val schrift: PDFont, val groesse: Float)
+
+/** Ort gekuerzt auf den ersten Teil ("Celle, Niedersachsen, Deutschland" -> "Celle"). */
+private fun ort(e: de.bgghome.webtrees.nativ.api.EventJson?): String =
+    e?.place?.name?.substringBefore(',')?.trim().orEmpty()
+
+private fun datum(e: de.bgghome.webtrees.nativ.api.EventJson?, voll: Boolean): String =
+    e?.date?.let { d -> if (voll) d.text.ifBlank { d.year.takeIf { it > 0 }?.toString().orEmpty() } else d.year.takeIf { it > 0 }?.toString().orEmpty() }.orEmpty()
+
+/** Zusatzzeilen, die die Kaesten dieser Tafel brauchen: je ein Ort unter Geburt und Tod, bis zu zwei Partner. */
+private fun zusatzZeilen(knoten: List<TafelPerson>, o: TafelOptionen): Int =
+    (if (o.orte) 2 else 0) + knoten.maxOf { it.partner.size }.coerceAtMost(2)
+
+private fun alleKnoten(k: TafelPerson): List<TafelPerson> = listOf(k) + k.kinder.flatMap(::alleKnoten)
 
 /**
  * Eine Tafel als PDF mit einem Blatt. [bilder] liefert je Person ihr Portraet (null = Silhouette); [privat] ist
- * der Text fuer Personen, die der Server nicht zeigt. Bei der Ahnentafel ([art] Ahnen) waechst der Baum nach oben.
+ * der Text fuer Personen, die der Server nicht zeigt. Vorfahren wachsen nach oben, Nachfahren nach unten; hat die
+ * Tafel beides (Sanduhr), steht die Ausgangsperson einmal in der Mitte.
  */
 fun tafelPdf(
-    wurzel: TafelPerson, o: TafelOptionen, bilder: (Person) -> BufferedImage?, privat: String, fuss: String, art: TafelArt = TafelArt.Stamm,
+    inhalt: TafelInhalt, o: TafelOptionen, bilder: (Person) -> BufferedImage?, privat: String, fuss: String,
 ): Pair<PDDocument, TafelInfo> {
-    val masse = TafelMasse(o.rahmenMm * 72f / 25.4f, o.bilder)
-    val layout = stammtafelLayout(wurzel, masse)
-    val aufwaerts = art == TafelArt.Ahnen
-    val tiefste = layout.plaetze.maxOf { it.ebene }
-    // Oberkante (Bild) einer Person auf dem Blatt: bei der Ahnentafel steht die Ausgangsperson in der untersten Reihe
-    fun oberkante(pl: TafelPlatz) = if (aufwaerts) (tiefste - pl.ebene) * masse.ebeneH else pl.obenY
-    val kastenUnten = masse.bild + masse.bildAbstand + masse.kastenH
-    val nummern = doppelteNummern(layout.plaetze)
+    val knoten = listOfNotNull(inhalt.vorfahren, inhalt.nachfahren).flatMap(::alleKnoten)
+    val masse = TafelMasse(o.rahmenMm * 72f / 25.4f, o.bilder, zusatzZeilen(knoten, o), o.waagerecht)
+    val w = o.waagerecht
+    // Teile: Layout, Richtung, waagerechter Versatz, Reihe der Ausgangsperson
+    class Teil(val layout: TafelLayout, val aufwaerts: Boolean, var dx: Float = 0f)
+    val teile = buildList {
+        inhalt.vorfahren?.let { add(Teil(if (inhalt.linie) linienLayout(it, masse) else stammtafelLayout(it, masse), true)) }
+        inhalt.nachfahren?.let { add(Teil(stammtafelLayout(it, masse), false)) }
+    }
+    // Ausgangspersonen uebereinander, dann alles an den linken Rand
+    if (teile.size == 2) teile[0].dx = teile[1].layout.plaetze.first().mitteX - teile[0].layout.plaetze.first().mitteX
+    val minX = teile.minOf { t -> t.layout.plaetze.minOf { it.mitteX } + t.dx } - masse.slot / 2
+    teile.forEach { it.dx -= minX }
+    val layoutBreite = teile.maxOf { t -> t.layout.plaetze.maxOf { it.mitteX } + t.dx } + masse.slot / 2
+    val oben = teile.firstOrNull { it.aufwaerts }?.layout?.plaetze?.maxOf { it.ebene } ?: 0
+    val unten = teile.firstOrNull { !it.aufwaerts }?.layout?.plaetze?.maxOf { it.ebene } ?: 0
+    val layoutHoehe = (oben + unten + 1) * masse.ebeneH - masse.verbinder
+    fun Teil.reihe(pl: TafelPlatz) = if (aufwaerts) oben - pl.ebene else oben + pl.ebene
+    fun Teil.oberkante(pl: TafelPlatz) = reihe(pl) * masse.ebeneH
+    fun Teil.x(pl: TafelPlatz) = pl.mitteX + dx
+    // Jeder Platz einmal: bei der Sanduhr steht die Ausgangsperson nur im unteren Teil
+    val gezeichnet = teile.flatMap { t -> t.layout.plaetze.filter { !(teile.size == 2 && t.aufwaerts && it.ebene == 0) }.map { t to it } }
+    val nummern = doppelteNummern(gezeichnet.map { it.second })
     val doc = PDDocument()
     val f = farben(o.stil)
     val s = TafelSchriften(doc, o.stil)
+    // Heiratszeichen: nicht jede Schrift hat ⚭ - dann das uebliche "oo"
+    val heirat = if (runCatching { s.normal.encode("⚭") }.isSuccess) "⚭" else "oo"
 
     val rand = maxOf(masse.rahmen * 0.5f, 28f)
     val titelGroesse = (masse.rahmen * 0.55f).coerceIn(22f, 72f)
     val titelBreite = if (o.titel.isBlank()) 0f else s.titel.breite(o.titel, titelGroesse)
     val titelH = if (o.titel.isBlank()) 0f else titelGroesse * 1.9f
     val fussH = 18f
-    val inhaltB = maxOf(layout.breite, titelBreite)
+    // Auf dem Blatt: senkrecht liegen die Geschwister nebeneinander, waagerecht die Generationen
+    val blattB = if (w) layoutHoehe else layoutBreite
+    val blattH = if (w) layoutBreite else layoutHoehe
+    val inhaltB = maxOf(blattB, titelBreite)
     val b = inhaltB + 2 * rand
-    val h = rand + titelH + layout.hoehe + fussH + rand
+    val h = rand + titelH + blattH + fussH + rand
     val skala = minOf(1f, PDF_MAX / b, PDF_MAX / h)
     val page = PDPage(PDRectangle(b * skala, h * skala))
     doc.addPage(page)
@@ -256,9 +355,12 @@ fun tafelPdf(
         if (skala < 1f) cs.transform(Matrix.getScaleInstance(skala, skala))
         if (f.hintergrundOben != f.hintergrundUnten) cs.verlauf(b, h, f.hintergrundOben, f.hintergrundUnten)
         // Oben links des Inhalts in PDF-Koordinaten; y waechst nach unten, darum: pdfY = h - y
-        val x0 = rand + (inhaltB - layout.breite) / 2
+        val x0 = rand + (inhaltB - blattB) / 2
         val y0 = rand + titelH
         fun py(y: Float) = h - y
+        // Punkt aus Generations- und Geschwisterachse in Blattkoordinaten (x, y von oben)
+        fun px(g: Float, q: Float) = x0 + if (w) g else q
+        fun pyv(g: Float, q: Float) = py(y0 + if (w) q else g)
 
         if (o.titel.isNotBlank()) {
             cs.setNonStrokingColor(f.titel)
@@ -267,62 +369,93 @@ fun tafelPdf(
         }
 
         // Verbindungen: von der Unterkante der Eltern senkrecht auf halbe Hoehe, waagerecht ueber alle Kinder,
-        // senkrecht hinunter zu jedem Kind
+        // senkrecht hinunter zu jedem Kind (Vorfahren spiegelbildlich: vom Bild nach oben zu Vater und Mutter)
         cs.setStrokingColor(f.linie); cs.setLineWidth(maxOf(0.6f, masse.rahmen * 0.009f))
-        // (Ahnentafel spiegelbildlich: vom Bild der Person nach oben zu den Unterkanten von Vater und Mutter)
-        layout.plaetze.groupBy { it.eltern }.forEach { (eltern, kinder) ->
-            if (eltern == null) return@forEach
-            val start = if (aufwaerts) oberkante(eltern) else oberkante(eltern) + kastenUnten
-            val mitte = if (aufwaerts) start - masse.verbinder / 2 else start + masse.verbinder / 2
-            cs.moveTo(x0 + eltern.mitteX, py(y0 + start)); cs.lineTo(x0 + eltern.mitteX, py(y0 + mitte))
-            val xs = kinder.map { it.mitteX }
-            cs.moveTo(x0 + minOf(xs.min(), eltern.mitteX), py(y0 + mitte)); cs.lineTo(x0 + maxOf(xs.max(), eltern.mitteX), py(y0 + mitte))
-            kinder.forEach { k ->
-                val ende = if (aufwaerts) oberkante(k) + kastenUnten else oberkante(k)
-                cs.moveTo(x0 + k.mitteX, py(y0 + mitte)); cs.lineTo(x0 + k.mitteX, py(y0 + ende))
+        teile.forEach { t ->
+            t.layout.plaetze.groupBy { it.eltern }.forEach { (eltern, kinder) ->
+                if (eltern == null) return@forEach
+                val start = if (t.aufwaerts) t.oberkante(eltern) else t.oberkante(eltern) + masse.laengeG
+                val mitte = if (t.aufwaerts) start - masse.verbinder / 2 else start + masse.verbinder / 2
+                val ex = t.x(eltern)
+                cs.moveTo(px(start, ex), pyv(start, ex)); cs.lineTo(px(mitte, ex), pyv(mitte, ex))
+                val xs = kinder.map { t.x(it) }
+                val q1 = minOf(xs.min(), ex); val q2 = maxOf(xs.max(), ex)
+                cs.moveTo(px(mitte, q1), pyv(mitte, q1)); cs.lineTo(px(mitte, q2), pyv(mitte, q2))
+                kinder.forEach { k ->
+                    val ende = if (t.aufwaerts) t.oberkante(k) + masse.laengeG else t.oberkante(k)
+                    val q = t.x(k)
+                    cs.moveTo(px(mitte, q), pyv(mitte, q)); cs.lineTo(px(ende, q), pyv(ende, q))
+                }
+                cs.stroke()
             }
-            cs.stroke()
         }
 
-        layout.plaetze.forEach { platz ->
-            val p = platz.knoten.person
-            val links = x0 + platz.mitteX - masse.rahmen / 2
-            val oben = y0 + oberkante(platz)
+        // Kleines Schild an der rechten oberen Bildecke (Nummer fuer Doppelte, "= 8" fuer Ahnenschwund)
+        fun schild(text: String, cx: Float, cy: Float) {
+            val r = masse.rahmen * 0.075f; val g = r * 1.3f
+            val w = maxOf(2 * r, s.fett.breite(text, g) + r)
+            cs.setNonStrokingColor(Color(0xFF, 0xF3, 0x9A)); cs.setStrokingColor(f.linie); cs.setLineWidth(0.5f)
+            cs.rechteck(cx - w / 2, cy - r, w, 2 * r, r); cs.fillAndStroke()
+            cs.setNonStrokingColor(f.text); cs.beginText(); cs.setFont(s.fett, g)
+            cs.newLineAtOffset(cx - s.fett.breite(text, g) / 2, cy - g * 0.35f); cs.showText(s.fett.sicher(text)); cs.endText()
+        }
+
+        gezeichnet.forEach { (t, platz) ->
+            val k = platz.knoten
+            val p = k.person
+            // Karte: linke obere Ecke auf dem Blatt (y von oben)
+            val karteL = if (w) x0 + t.oberkante(platz) else x0 + t.x(platz) - masse.karteB / 2
+            val karteO = if (w) y0 + t.x(platz) - masse.karteH / 2 else y0 + t.oberkante(platz)
+            // Senkrecht: Bild oben mittig, Kasten darunter. Waagerecht: Bild links, Kasten rechts daneben, beide mittig.
+            val bildL = if (w) karteL else karteL + (masse.karteB - masse.bild) / 2
+            val oben = if (w) karteO + (masse.karteH - masse.bild) / 2 else karteO
+            val links = if (w) karteL + masse.bild + masse.bildAbstand else karteL
+            val mx = links + masse.rahmen / 2
+            k.hinweis?.let { hw ->
+                // Auf der Seite, wo die Vorfahren weitergehen
+                val g = masse.schriftKlein
+                val tb = s.fett.breite(hw, g)
+                val (hx, hy) = when {
+                    !w -> (karteL + masse.karteB / 2 - tb / 2) to (if (t.aufwaerts) karteO - g * 0.6f else karteO + masse.karteH + g * 1.3f)
+                    t.aufwaerts -> (karteL - tb - g * 0.5f) to (karteO + masse.karteH / 2 + g * 0.35f)
+                    else -> (karteL + masse.karteB + g * 0.5f) to (karteO + masse.karteH / 2 + g * 0.35f)
+                }
+                cs.setNonStrokingColor(f.linie); cs.beginText(); cs.setFont(s.fett, g)
+                cs.newLineAtOffset(hx, py(hy)); cs.showText(s.fett.sicher(hw)); cs.endText()
+            }
+            val schildText = k.verweis?.let { "= $it" } ?: nummern[p.xref]?.toString()
             // Bild mit feinem Rand
             bildFuer(p)?.let { img ->
-                val bx = x0 + platz.mitteX - masse.bild / 2
+                val bx = bildL
                 cs.drawImage(img, bx, py(oben + masse.bild), masse.bild, masse.bild)
                 cs.setStrokingColor(f.linie); cs.setLineWidth(0.5f); cs.addRect(bx, py(oben + masse.bild), masse.bild, masse.bild); cs.stroke()
-                nummern[p.xref]?.let { n ->
-                    val r = masse.rahmen * 0.075f
-                    val cx = bx + masse.bild; val cy = py(oben)
-                    cs.setNonStrokingColor(Color(0xFF, 0xF3, 0x9A)); cs.setStrokingColor(f.linie); cs.setLineWidth(0.5f)
-                    cs.rechteck(cx - r, cy - r, 2 * r, 2 * r, r); cs.fillAndStroke()
-                    val t = n.toString(); val g = r * 1.3f
-                    cs.setNonStrokingColor(f.text); cs.beginText(); cs.setFont(s.fett, g)
-                    cs.newLineAtOffset(cx - s.fett.breite(t, g) / 2, cy - g * 0.35f); cs.showText(t); cs.endText()
-                }
+                schildText?.let { schild(it, bx + masse.bild, py(oben)) }
             }
             // Kasten
-            val ky = oben + masse.bild + masse.bildAbstand
+            val ky = if (w) karteO + (masse.karteH - masse.kastenH) / 2 else oben + masse.bild + masse.bildAbstand
             val kx = links + f.rahmenBreite / 2; val kw = masse.rahmen - f.rahmenBreite
             cs.setNonStrokingColor(f.fuellung(p.sex)); cs.setStrokingColor(f.rahmen(p.sex)); cs.setLineWidth(f.rahmenBreite)
             cs.rechteck(kx, py(ky + masse.kastenH), kw, masse.kastenH, if (f.rund) masse.rahmen * 0.05f else 0f); cs.fillAndStroke()
-            // Zeilen: Vorname klein, Nachname fett, Geburt, Tod
+            if (!o.bilder) schildText?.let { schild(it, links + masse.rahmen, py(ky)) }
+            // Zeilen: Vorname klein, Nachname fett, Geburt (und Ort), Tod (und Ort), Partner
             val zeilen = buildList {
-                if (p.isPrivate) add(Triple(privat, s.normal, masse.schriftKlein))
+                if (p.isPrivate) add(KastenZeile(privat, s.normal, masse.schriftKlein))
                 else {
                     val vor = p.given.ifBlank { if (p.surname.isBlank()) p.name else "" }
-                    add(Triple(vor, s.fett, masse.schriftKlein))
-                    add(Triple(p.surname, s.fett, masse.schriftName))
-                    p.birth?.date?.year?.takeIf { it > 0 }?.let { add(Triple("* $it", s.normal, masse.schriftKlein)) }
-                    p.death?.date?.year?.takeIf { it > 0 }?.let { add(Triple("† $it", s.normal, masse.schriftKlein)) }
+                    add(KastenZeile(vor, s.fett, masse.schriftKlein))
+                    add(KastenZeile(p.surname, s.fett, masse.schriftName))
+                    listOf("*" to p.birth, "†" to p.death).forEach { (zeichen, e) ->
+                        val d = datum(e, o.volleDaten)
+                        if (d.isNotBlank()) add(KastenZeile("$zeichen $d", s.normal, masse.schriftKlein))
+                        if (o.orte) ort(e).takeIf(String::isNotBlank)?.let { add(KastenZeile(it, s.normal, masse.schriftKlein * 0.92f)) }
+                    }
+                    k.partner.take(2).forEach { add(KastenZeile("$heirat ${it.name.ifBlank { "?" }}", s.normal, masse.schriftKlein * 0.92f)) }
                 }
             }
             val innen = masse.rahmen * 0.84f
             var y = ky + masse.rahmen * 0.06f
             // Kekule-Nummer klein oben links im Kasten; die erste Zeile weicht ihr beidseitig aus
-            val nummer = platz.knoten.nummer?.takeIf { art == TafelArt.Ahnen && o.nummern }?.toString()
+            val nummer = k.nummer?.takeIf { o.nummern }?.toString()
             val nummerG = masse.schriftKlein * 0.85f
             val nummerB = nummer?.let { s.normal.breite(it, nummerG) + masse.rahmen * 0.04f } ?: 0f
             if (nummer != null) {
@@ -330,12 +463,12 @@ fun tafelPdf(
                 cs.beginText(); cs.setFont(s.normal, nummerG); cs.newLineAtOffset(links + masse.rahmen * 0.05f, py(ky + nummerG * 1.25f)); cs.showText(nummer); cs.endText()
             }
             cs.setNonStrokingColor(f.text)
-            zeilen.forEachIndexed { i, (text, schrift, groesse) ->
-                y += groesse * 1.3f
-                if (text.isNotBlank()) {
-                    val (t, g) = passend(schrift, text, groesse, if (i == 0) innen - 2 * nummerB else innen)
-                    cs.beginText(); cs.setFont(schrift, g)
-                    cs.newLineAtOffset(x0 + platz.mitteX - schrift.breite(t, g) / 2, py(y - groesse * 0.25f)); cs.showText(schrift.sicher(t)); cs.endText()
+            zeilen.forEachIndexed { i, z ->
+                y += z.groesse * 1.3f
+                if (z.text.isNotBlank()) {
+                    val (tx, g) = passend(z.schrift, z.text, z.groesse, if (i == 0) innen - 2 * nummerB else innen)
+                    cs.beginText(); cs.setFont(z.schrift, g)
+                    cs.newLineAtOffset(mx - z.schrift.breite(tx, g) / 2, py(y - z.groesse * 0.25f)); cs.showText(z.schrift.sicher(tx)); cs.endText()
                 }
             }
         }
@@ -343,35 +476,46 @@ fun tafelPdf(
         cs.setNonStrokingColor(Color(0x66, 0x66, 0x66))
         cs.beginText(); cs.setFont(s.normal, 7f); cs.newLineAtOffset(rand, rand * 0.6f); cs.showText(s.normal.sicher(fuss)); cs.endText()
     }
-    val info = TafelInfo(layout.plaetze.size, (b * skala / 72f * 2.54f).toInt(), (h * skala / 72f * 2.54f).toInt())
+    val info = TafelInfo(gezeichnet.map { it.second.knoten.person.xref }.distinct().size, (b * skala / 72f * 2.54f).toInt(), (h * skala / 72f * 2.54f).toInt())
     return doc to info
 }
 
+/**
+ * Das Blatt einmal gespeichert und neu geladen: PDFBox bettet die Schriften (Teilmengen) erst beim Speichern ein.
+ * Wer die Seite vorher in ein anderes Dokument uebernimmt, bekommt leere Schriften - der Titel in Great Vibes
+ * wurde dort zu Zeichensalat (26.09.2026). Das Original bleibt unveraendert nutzbar.
+ */
+private fun eingebettet(poster: PDDocument): PDDocument =
+    org.apache.pdfbox.Loader.loadPDF(java.io.ByteArrayOutputStream().also { poster.save(it) }.toByteArray())
+
 /** Das Blatt verkleinert auf eine A4-Seite (hoch oder quer, was besser passt). */
-fun aufEinBlatt(poster: PDDocument): PDDocument {
+fun aufEinBlatt(poster: PDDocument): PDDocument = PDDocument().also { aufEinBlatt(poster, it) }
+
+/** Wie [aufEinBlatt], haengt die Seite aber an [ziel] an (fuer mehrseitige Tafeln). */
+fun aufEinBlatt(original: PDDocument, ziel: PDDocument, querErzwingen: Boolean = false) {
+    val poster = eingebettet(original)
     val quelle = poster.getPage(0).mediaBox
     val a4 = PDRectangle.A4
-    val quer = quelle.width > quelle.height
+    val quer = querErzwingen || quelle.width > quelle.height
     val format = if (quer) PDRectangle(a4.height, a4.width) else a4
     val rand = 28f
-    val doc = PDDocument()
-    val form = LayerUtility(doc).importPageAsForm(poster, 0)
-    val page = PDPage(format); doc.addPage(page)
+    val form = LayerUtility(ziel).importPageAsForm(poster, 0)
+    val page = PDPage(format); ziel.addPage(page)
     val f = minOf((format.width - 2 * rand) / quelle.width, (format.height - 2 * rand) / quelle.height, 1f)
-    PDPageContentStream(doc, page).use { cs ->
+    PDPageContentStream(ziel, page).use { cs ->
         cs.saveGraphicsState()
         cs.transform(Matrix.getTranslateInstance((format.width - quelle.width * f) / 2, (format.height - quelle.height * f) / 2))
         cs.transform(Matrix.getScaleInstance(f, f))
         cs.drawForm(form); cs.restoreGraphicsState()
     }
-    return doc
 }
 
 /**
  * Das Blatt in Originalgroesse auf A4-Seiten zum Zusammenkleben: 10 mm Rand, 10 mm Ueberlappung, jede Seite
  * mit Zeile/Spalte und Schnittmarken. Hoch- oder Querformat - was weniger Seiten braucht.
  */
-fun aufA4Blaetter(poster: PDDocument): PDDocument {
+fun aufA4Blaetter(original: PDDocument): PDDocument {
+    val poster = eingebettet(original)
     val quelle = poster.getPage(0).mediaBox
     val mm = 72f / 25.4f
     val rand = 10 * mm; val ueber = 10 * mm
