@@ -63,7 +63,7 @@ import org.jetbrains.compose.resources.stringResource
  * nach Saragossa, d'Aboville, Henry oder fortlaufend), Nachfahren je Generation. Dazu Ereignisliste und Personenblatt.
  */
 
-enum class ListenArt { Ahnen, Spitzenahnen, Stammlinie, Mutterstamm, Ahnenwertung, Stamm, Nachfahrenzahl, Ereignisse, Personenblatt }
+enum class ListenArt { Ahnen, Spitzenahnen, Stammlinie, Mutterstamm, Ahnenwertung, Stamm, Nachfahrenzahl, Ereignisse, Namen, Orte, Familien, Fakten, Taufpaten, Personenblatt }
 
 enum class Nummerierung { Saragossa, Aboville, Henry, Fortlaufend }
 
@@ -76,6 +76,12 @@ data class ListenOptionen(
     /** Stammliste: die Kinder von Toechtern nicht weiterverfolgen. */
     val namenstraeger: Boolean = false,
     val nummerierung: Nummerierung = Nummerierung.Saragossa,
+    /** Listen ueber den ganzen Baum: Ereignisarten (GEDCOM-Tags), Jahrestagskalender, Ortsfilter, Fakt, Sortierung. */
+    val ereignisse: Set<String> = setOf("BIRT", "MARR", "DEAT"),
+    val kalender: Boolean = false,
+    val ortFilter: String = "",
+    val fakt: String = "OCCU",
+    val chronologisch: Boolean = false,
 )
 
 private val vorfahrenArten = setOf(ListenArt.Ahnen, ListenArt.Spitzenahnen, ListenArt.Stammlinie, ListenArt.Mutterstamm, ListenArt.Ahnenwertung)
@@ -284,7 +290,13 @@ suspend fun listenZeilen(art: ListenArt, client: WtClient, tree: String, treeTit
     ListenArt.Mutterstamm -> linienliste(art, ahnenLaden(client, tree, root, o.generationen) { n -> (n + 1) and n == 0L }, o)
     ListenArt.Stamm -> stammliste(nachfahrenLaden(client, tree, root, o.generationen), o)
     ListenArt.Nachfahrenzahl -> nachfahrenzahl(nachfahrenLaden(client, tree, root, o.generationen), o)
-    ListenArt.Ereignisse -> ereignisliste(client, tree, treeTitle)
+    // Mit Export (Stufe 17) alle Ereignisse und Filter, sonst wie bisher Geburten und Todesfaelle aus der Personenliste
+    ListenArt.Ereignisse -> BaumSpeicher.holen(client, tree, Int.MAX_VALUE / 64)?.let { ereignislisteBaum(it, treeTitle, o) } ?: ereignisliste(client, tree, treeTitle)
+    ListenArt.Namen -> namensliste(ganzerBaum(client, tree), treeTitle)
+    ListenArt.Orte -> ortsliste(ganzerBaum(client, tree), treeTitle, o)
+    ListenArt.Familien -> familienliste(ganzerBaum(client, tree), treeTitle, o)
+    ListenArt.Fakten -> faktenliste(ganzerBaum(client, tree), treeTitle, o)
+    ListenArt.Taufpaten -> taufpaten(ganzerBaum(client, tree), treeTitle, o)
     ListenArt.Personenblatt -> personenblattZeilen(client.individual(tree, root))
 }
 
@@ -299,6 +311,11 @@ private val listenTexte: Map<ListenArt, Pair<StringResource, StringResource>> = 
     ListenArt.Stamm to (Res.string.desk_list_descendants to Res.string.desk_list_descendants_hint),
     ListenArt.Nachfahrenzahl to (Res.string.desk_list_desc_summary to Res.string.desk_list_desc_summary_hint),
     ListenArt.Ereignisse to (Res.string.desk_list_events to Res.string.desk_list_events_hint),
+    ListenArt.Namen to (Res.string.desk_list_names to Res.string.desk_list_names_hint),
+    ListenArt.Orte to (Res.string.desk_list_places to Res.string.desk_list_places_hint),
+    ListenArt.Familien to (Res.string.desk_list_families to Res.string.desk_list_families_hint),
+    ListenArt.Fakten to (Res.string.desk_list_facts to Res.string.desk_list_facts_hint),
+    ListenArt.Taufpaten to (Res.string.desk_list_godparents to Res.string.desk_list_godparents_hint),
     ListenArt.Personenblatt to (Res.string.desk_list_sheet to Res.string.desk_list_sheet_hint),
 )
 
@@ -316,10 +333,15 @@ private object ListenWahl {
         orte = prefs.getBoolean(k(art, "orte"), true), volleDaten = prefs.getBoolean(k(art, "voll"), true),
         partner = prefs.getBoolean(k(art, "partner"), true), namenstraeger = prefs.getBoolean(k(art, "namen"), false),
         nummerierung = Nummerierung.entries.firstOrNull { it.name == prefs.getString(k(art, "nr"), null) } ?: Nummerierung.Saragossa,
+        ereignisse = prefs.getString(k(art, "ev"), null)?.split(',')?.filter(String::isNotBlank)?.toSet() ?: setOf("BIRT", "MARR", "DEAT"),
+        kalender = prefs.getBoolean(k(art, "kal"), false), ortFilter = prefs.getString(k(art, "ort"), null).orEmpty(),
+        fakt = prefs.getString(k(art, "fakt"), null) ?: "OCCU", chronologisch = prefs.getBoolean(k(art, "chrono"), false),
     )
     fun sichern(art: ListenArt, o: ListenOptionen) {
         prefs.putString(k(art, "gen"), o.generationen.toString()); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
         prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "namen"), o.namenstraeger); prefs.putString(k(art, "nr"), o.nummerierung.name)
+        prefs.putString(k(art, "ev"), o.ereignisse.joinToString(",")); prefs.putBoolean(k(art, "kal"), o.kalender); prefs.putString(k(art, "ort"), o.ortFilter)
+        prefs.putString(k(art, "fakt"), o.fakt); prefs.putBoolean(k(art, "chrono"), o.chronologisch)
     }
 }
 
@@ -365,7 +387,7 @@ fun ListenFenster(start: ListenArt, state: UiState, viewModel: AppViewModel, onC
                     listOf(
                         Res.string.desk_chart_group_ancestors to listOf(ListenArt.Ahnen, ListenArt.Spitzenahnen, ListenArt.Stammlinie, ListenArt.Mutterstamm, ListenArt.Ahnenwertung),
                         Res.string.desk_chart_group_descendants to listOf(ListenArt.Stamm, ListenArt.Nachfahrenzahl),
-                        Res.string.desk_list_group_tree to listOf(ListenArt.Ereignisse, ListenArt.Personenblatt),
+                        Res.string.desk_list_group_tree to listOf(ListenArt.Ereignisse, ListenArt.Namen, ListenArt.Orte, ListenArt.Familien, ListenArt.Fakten, ListenArt.Taufpaten, ListenArt.Personenblatt),
                     ).forEachIndexed { i, (gruppe, arten) ->
                         if (i > 0) Spacer(Modifier.height(8.dp))
                         ArtGruppe(stringResource(gruppe))
@@ -392,7 +414,24 @@ fun ListenFenster(start: ListenArt, state: UiState, viewModel: AppViewModel, onC
                         Haken(stringResource(Res.string.desk_chart_spouses), o.partner) { o = o.copy(partner = it) }
                         Haken(stringResource(Res.string.desk_chart_name_bearers), o.namenstraeger) { o = o.copy(namenstraeger = it) }
                     }
-                    if (art !in setOf(ListenArt.Ahnenwertung, ListenArt.Nachfahrenzahl, ListenArt.Ereignisse, ListenArt.Personenblatt)) {
+                    if (art == ListenArt.Ereignisse) {
+                        listOf("BIRT" to Res.string.desk_ev_birth, "CHR" to Res.string.desk_ev_baptism, "MARR" to Res.string.desk_ev_marriage,
+                            "DEAT" to Res.string.desk_ev_death, "BURI" to Res.string.desk_ev_burial).forEach { (tag, name) ->
+                            Haken(stringResource(name), tag in o.ereignisse) { an -> o = o.copy(ereignisse = if (an) o.ereignisse + tag else o.ereignisse - tag) }
+                        }
+                        Haken(stringResource(Res.string.desk_list_calendar), o.kalender) { o = o.copy(kalender = it) }
+                    }
+                    if (art == ListenArt.Familien) Haken(stringResource(Res.string.desk_book_sort_chrono), o.chronologisch) { o = o.copy(chronologisch = it) }
+                    if (art == ListenArt.Fakten) Einstellung(stringResource(Res.string.desk_list_fact)) {
+                        val werte = listOf("OCCU" to stringResource(Res.string.desk_list_fact_occupation), "RELI" to stringResource(Res.string.desk_list_fact_religion))
+                        Auswahl(werte.first { it.first == o.fakt }.second, werte.map { it.second }) { w -> o = o.copy(fakt = werte.first { it.second == w }.first) }
+                    }
+                    if (art in setOf(ListenArt.Ereignisse, ListenArt.Orte, ListenArt.Familien, ListenArt.Taufpaten)) {
+                        androidx.compose.material3.OutlinedTextField(o.ortFilter, { o = o.copy(ortFilter = it) }, label = { Text(stringResource(Res.string.desk_list_place_filter)) },
+                            singleLine = true, modifier = Modifier.fillMaxWidth())
+                    }
+                    if (art !in setOf(ListenArt.Ahnenwertung, ListenArt.Nachfahrenzahl, ListenArt.Ereignisse, ListenArt.Personenblatt, ListenArt.Namen, ListenArt.Orte,
+                            ListenArt.Familien, ListenArt.Fakten, ListenArt.Taufpaten)) {
                         Haken(stringResource(Res.string.desk_chart_places), o.orte) { o = o.copy(orte = it) }
                         Haken(stringResource(Res.string.desk_chart_full_dates), o.volleDaten) { o = o.copy(volleDaten = it) }
                     }
