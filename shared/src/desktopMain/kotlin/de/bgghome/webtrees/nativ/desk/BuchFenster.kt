@@ -69,12 +69,16 @@ private object BuchWahl {
         namen = prefs.getBoolean("buch_reg_namen", true), orte = prefs.getBoolean("buch_reg_orte", true),
         berufe = prefs.getBoolean("buch_reg_berufe", true), quellenVerzeichnis = prefs.getBoolean("buch_reg_quellen", true),
         vorwort = prefs.getString("buch_vorwort", null).orEmpty(),
+        nummerierung = Nummerierung.entries.firstOrNull { it.name == prefs.getString("buch_nr", null) } ?: Nummerierung.Saragossa,
+        partner = prefs.getBoolean("buch_partner", true), namenstraeger = prefs.getBoolean("buch_namen", false),
     )
+    fun art(): Boolean = prefs.getBoolean("buch_nachfahren", false)
     fun sichern(o: BuchOptionen) {
         prefs.putString("buch_gen", o.generationen.toString()); prefs.putBoolean("buch_bilder", o.bilder); prefs.putBoolean("buch_farbe", o.farbkodierung)
         prefs.putBoolean("buch_notizen", o.notizen); prefs.putBoolean("buch_quellen", o.quellen); prefs.putBoolean("buch_orte_kurz", o.orteKuerzen)
         prefs.putBoolean("buch_doppelt", o.doppelteZeigen); prefs.putBoolean("buch_reg_namen", o.namen); prefs.putBoolean("buch_reg_orte", o.orte)
         prefs.putBoolean("buch_reg_berufe", o.berufe); prefs.putBoolean("buch_reg_quellen", o.quellenVerzeichnis); prefs.putString("buch_vorwort", o.vorwort)
+        prefs.putString("buch_nr", o.nummerierung.name); prefs.putBoolean("buch_partner", o.partner); prefs.putBoolean("buch_namen", o.namenstraeger)
     }
 }
 
@@ -83,16 +87,28 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     val appName = LocalAppName.current
     val baum = state.tree?.title.orEmpty()
     var o by remember { mutableStateOf(BuchWahl.laden()) }
-    LaunchedEffect(o) { BuchWahl.sichern(o) }
-    // Daten: Vorfahren mit allen Angaben und Bildern - neu nur, wenn sich Tiefe oder Bilder aendern
-    val daten by produceState<Result<BuchDaten>?>(null, state.tree?.name, state.root, o.generationen, o.bilder) {
+    var nachfahren by remember { mutableStateOf(BuchWahl.art()) }
+    LaunchedEffect(o, nachfahren) { BuchWahl.sichern(o); DeskLayout.prefs.putBoolean("buch_nachfahren", nachfahren) }
+    var fortschritt by remember { mutableStateOf("") }
+    // Daten: alle Angaben und Bilder - neu nur, wenn sich Buchart, Tiefe oder Bilder aendern
+    val daten by produceState<Result<Any>?>(null, state.tree?.name, state.root, o.generationen, o.bilder, nachfahren) {
         value = null
+        fortschritt = ""
         val tree = state.tree; val root = state.root
         value = if (tree == null || root == null) null else withContext(Dispatchers.IO) {
-            runCatching { vorfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) }
+            runCatching {
+                if (nachfahren) nachfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
+                else vorfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
+            }
         }
     }
-    val buch = remember(daten, o) { daten?.getOrNull()?.let { vorfahrenbuch(it, o, baum, appName) } }
+    val buch = remember(daten, o) {
+        when (val d = daten?.getOrNull()) {
+            is NachfahrenDaten -> nachfahrenbuch(d, o, baum, appName)
+            is BuchDaten -> vorfahrenbuch(d, o, baum, appName)
+            else -> null
+        }
+    }
     var breitePx by remember { mutableStateOf(800) }
     val seiten by produceState<Pair<List<ImageBitmap>, Int>?>(null, buch, breitePx) {
         val b = buch ?: run { value = null; return@produceState }
@@ -118,32 +134,41 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
             Row(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 Column(Modifier.width(200.dp).fillMaxHeight().background(MaterialTheme.colorScheme.surface).padding(vertical = 8.dp)) {
                     ArtGruppe(stringResource(Res.string.desk_book_group_standard))
-                    ArtEintrag(stringResource(Res.string.desk_book_ancestor_book), true) {}
-                    ArtEintrag(stringResource(Res.string.desk_book_descendant_book) + " …", false) {}
+                    ArtEintrag(stringResource(Res.string.desk_book_ancestor_book), !nachfahren) { nachfahren = false; o = o.copy(generationen = o.generationen.coerceAtMost(12)) }
+                    ArtEintrag(stringResource(Res.string.desk_book_descendant_book), nachfahren) { nachfahren = true; o = o.copy(generationen = o.generationen.coerceAtMost(10)) }
                     Spacer(Modifier.height(8.dp))
                     ArtGruppe(stringResource(Res.string.desk_book_group_complete))
                     ArtEintrag(stringResource(Res.string.desk_book_family_book) + " …", false) {}
-                    Text(stringResource(Res.string.desk_book_coming), Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(Res.string.desk_book_coming_family), Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Column(Modifier.width(340.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(stringResource(Res.string.desk_book_ancestor_book), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(Res.string.desk_book_ancestor_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(if (nachfahren) Res.string.desk_book_descendant_book else Res.string.desk_book_ancestor_book), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(if (nachfahren) Res.string.desk_book_descendant_hint else Res.string.desk_book_ancestor_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     val wer = state.detail?.takeIf { it.person.xref == state.root }?.person?.name ?: state.people.firstOrNull { it.xref == state.root }?.name.orEmpty()
                     Einstellung(stringResource(Res.string.desk_chart_person)) { Text(wer, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold) }
                     Einstellung(stringResource(Res.string.desk_chart_generations)) {
-                        Auswahl(o.generationen.toString(), (2..12).map { it.toString() }) { o = o.copy(generationen = it.toInt()) }
+                        Auswahl(o.generationen.toString(), (2..(if (nachfahren) 10 else 12)).map { it.toString() }) { o = o.copy(generationen = it.toInt()) }
+                    }
+                    if (nachfahren) {
+                        Einstellung(stringResource(Res.string.desk_list_numbering)) {
+                            val namen = mapOf(Nummerierung.Saragossa to "1.2.3", Nummerierung.Aboville to "d'Aboville (C1.2.3)", Nummerierung.Henry to "Henry (123)",
+                                Nummerierung.Fortlaufend to stringResource(Res.string.desk_list_numbering_serial))
+                            Auswahl(namen.getValue(o.nummerierung), namen.values.toList()) { w -> o = o.copy(nummerierung = namen.entries.first { it.value == w }.key) }
+                        }
+                        Haken(stringResource(Res.string.desk_chart_spouses), o.partner) { o = o.copy(partner = it) }
+                        Haken(stringResource(Res.string.desk_chart_name_bearers), o.namenstraeger) { o = o.copy(namenstraeger = it) }
                     }
                     OutlinedTextField(o.titel, { o = o.copy(titel = it) }, label = { Text(stringResource(Res.string.desk_chart_heading)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     Text(stringResource(Res.string.desk_book_section_data), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_book_notes), o.notizen) { o = o.copy(notizen = it) }
                     Haken(stringResource(Res.string.desk_book_sources), o.quellen) { o = o.copy(quellen = it) }
                     Haken(stringResource(Res.string.desk_book_short_places), o.orteKuerzen) { o = o.copy(orteKuerzen = it) }
-                    Haken(stringResource(Res.string.desk_book_duplicates), o.doppelteZeigen) { o = o.copy(doppelteZeigen = it) }
+                    if (!nachfahren) Haken(stringResource(Res.string.desk_book_duplicates), o.doppelteZeigen) { o = o.copy(doppelteZeigen = it) }
                     Text(stringResource(Res.string.desk_book_section_look), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_chart_photos), o.bilder) { o = o.copy(bilder = it) }
-                    Haken(stringResource(Res.string.desk_book_color), o.farbkodierung) { o = o.copy(farbkodierung = it) }
+                    Haken(stringResource(if (nachfahren) Res.string.desk_book_branch_colors else Res.string.desk_book_color), o.farbkodierung) { o = o.copy(farbkodierung = it) }
                     Text(stringResource(Res.string.desk_book_section_indexes), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_book_index_names), o.namen) { o = o.copy(namen = it) }
                     Haken(stringResource(Res.string.desk_book_index_places), o.orte) { o = o.copy(orte = it) }
@@ -177,7 +202,7 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                         fehler != null -> Text(fehler.message ?: "?", Modifier.padding(24.dp), color = androidx.compose.ui.graphics.Color.White)
                         s == null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White)
-                            Text(stringResource(Res.string.desk_book_loading), Modifier.padding(top = 8.dp), color = androidx.compose.ui.graphics.Color.White)
+                            Text(fortschritt.ifBlank { stringResource(Res.string.desk_book_loading) }, Modifier.padding(top = 8.dp), color = androidx.compose.ui.graphics.Color.White)
                         }
                         else -> Box(Modifier.fillMaxSize()) {
                             val scroll = rememberScrollState()

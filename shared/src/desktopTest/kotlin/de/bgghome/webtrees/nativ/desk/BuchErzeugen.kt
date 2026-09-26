@@ -29,11 +29,16 @@ class BuchErzeugen {
         val client = WtClient(Speicher(), Speicher(), "wtTux/dev (Buch)").apply { baseUrl = System.getenv("WT_URL") ?: "http://127.0.0.1:8377" }
         val info = runBlocking { System.getenv("WT_USER")?.let { client.login(it, System.getenv("WT_PASS").orEmpty()) } ?: client.info() }
         val titel = info.trees.first { it.name == baum }.title
-        val (xref, gen) = (System.getenv("WT_BUCH") ?: "I1:7").split(':').let { it[0] to it[1].toInt() }
-        val o = BuchOptionen(generationen = gen, vorwort = "Dieses Buch stellt die Vorfahren von Jonas Falkenrath zusammen.\n\nAlle Angaben sind erfunden.")
-        val daten = runBlocking { vorfahrenbuchLaden(client, baum, xref, gen, true) }
-        val buch = vorfahrenbuch(daten, o, titel, "wtTux")
-        BuchFormat.entries.forEach { f -> buchSchreiben(buch, f, File(ziel, "vorfahrenbuch.${f.endung}")) }
-        println("Buch: ${buch.bloecke.size} Bloecke, ${daten.details.size} Eintraege, ${daten.bilder.size} Bilder")
+        // WT_BUCH: "I1:7" (Vorfahrenbuch) oder "Nachfahren:I52:5:Henry"
+        val t = (System.getenv("WT_BUCH") ?: "I1:7").split(':')
+        val nach = t[0] == "Nachfahren"
+        val (xref, gen) = if (nach) t[1] to t[2].toInt() else t[0] to t[1].toInt()
+        val o = BuchOptionen(generationen = gen, vorwort = "Alle Angaben dieses Buches sind erfunden.",
+            nummerierung = t.getOrNull(3)?.let { Nummerierung.valueOf(it) } ?: Nummerierung.Saragossa)
+        val name = if (nach) "nachfahrenbuch" else "vorfahrenbuch"
+        val buch = if (nach) nachfahrenbuch(runBlocking { nachfahrenbuchLaden(client, baum, xref, gen, true) { println(it) } }, o, titel, "wtTux")
+            else vorfahrenbuch(runBlocking { vorfahrenbuchLaden(client, baum, xref, gen, true) }, o, titel, "wtTux")
+        BuchFormat.entries.forEach { f -> buchSchreiben(buch, f, File(ziel, "$name.${f.endung}")) }
+        println("Buch: ${buch.bloecke.size} Bloecke")
     }
 }

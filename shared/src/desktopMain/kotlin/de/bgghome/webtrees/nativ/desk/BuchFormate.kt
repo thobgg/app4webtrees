@@ -72,7 +72,7 @@ a{color:#1f3a8a;text-decoration:none}a:hover{text-decoration:underline}nav a{dis
                 b.gruppen.forEach { (kopf, zeilen) ->
                     if (kopf.isNotBlank()) append("<b>${h(kopf)}</b>\n")
                     zeilen.forEach { (t, nr) ->
-                        append("<div><span class=\"t\">${h(t)}</span><span>${nr.distinct().sorted().joinToString(", ") { "<a href=\"#n$it\">$it</a>" }}</span></div>\n")
+                        append("<div><span class=\"t\">${h(t)}</span><span>${nr.distinct().joinToString(", ") { "<a href=\"#n$it\">${h(b.etikett(it))}</a>" }}</span></div>\n")
                     }
                 }
                 append("</div>\n")
@@ -102,7 +102,7 @@ fun buchText(buch: Buch): String = buildString {
                 append("\n").append(b.titel).append('\n').append("=".repeat(b.titel.length)).append("\n")
                 b.gruppen.forEach { (kopf, zeilen) ->
                     if (kopf.isNotBlank()) append('\n').append(kopf).append('\n')
-                    zeilen.forEach { (t, nr) -> append("  ").append(t).append(" .... ").append(nummernText(nr)).append('\n') }
+                    zeilen.forEach { (t, nr) -> append("  ").append(t).append(" .... ").append(b.nummern(nr)).append('\n') }
                 }
             }
         }
@@ -169,7 +169,7 @@ fun buchTex(buch: Buch, bilderOrdner: String, bilder: MutableMap<String, Buffere
                 append("\\small\n")
                 b.gruppen.forEach { (kopf, zeilen) ->
                     if (kopf.isNotBlank()) append("\\par\\medskip\\noindent\\textbf{${tex(kopf)}}\\par\n")
-                    zeilen.forEach { (t, nr) -> append("\\noindent\\hspace*{1em}${tex(t)}\\dotfill ${nr.distinct().sorted().joinToString(", ") { "\\hyperlink{n$it}{$it}" }}\\par\n") }
+                    zeilen.forEach { (t, nr) -> append("\\noindent\\hspace*{1em}${tex(t)}\\dotfill ${nr.distinct().joinToString(", ") { "\\hyperlink{n$it}{${tex(b.etikett(it))}}" }}\\par\n") }
                 }
                 append("\\normalsize\n")
                 if (b.spalten > 1) append("\\end{multicols}\n")
@@ -253,8 +253,9 @@ fun buchDocx(buch: Buch): ByteArray {
                 b.gruppen.forEach { (kopf, zeilen) ->
                     if (kopf.isNotBlank()) absatz("<w:keepNext/><w:spacing w:before=\"120\" w:after=\"0\"/>", lauf(kopf, fett = true))
                     zeilen.forEach { (t, nr) ->
-                        val nummern = nr.distinct().sorted().joinToString("") { n ->
-                            (if (n == nr.distinct().sorted().first()) "" else lauf(", ")) + "<w:hyperlink w:anchor=\"n$n\">${lauf("$n")}</w:hyperlink>"
+                        val liste = nr.distinct()
+                        val nummern = liste.joinToString("") { n ->
+                            (if (n == liste.first()) "" else lauf(", ")) + "<w:hyperlink w:anchor=\"n$n\">${lauf(b.etikett(n))}</w:hyperlink>"
                         }
                         absatz("<w:pStyle w:val=\"Register\"/>", lauf(t) + "<w:r><w:tab/></w:r>" + nummern)
                     }

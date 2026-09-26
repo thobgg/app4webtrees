@@ -48,7 +48,14 @@ data class Absatz(
 data object Inhaltsverzeichnis : Block
 
 /** Verzeichnis: Gruppen (Buchstabe, Ort) mit Zeilen Text -> Eintragsnummern. */
-data class Verzeichnis(val titel: String, val id: String, val gruppen: List<Pair<String, List<Pair<String, List<Long>>>>>, val spalten: Int) : Block
+data class Verzeichnis(
+    val titel: String, val id: String, val gruppen: List<Pair<String, List<Pair<String, List<Long>>>>>, val spalten: Int,
+    /** Angezeigte Nummer je Eintragsschluessel (Nachfahrenbuch: "1.2.3"); null = die Zahl selbst, Folgen als "3–5". */
+    val etiketten: Map<Long, String>? = null,
+) : Block {
+    fun nummern(n: List<Long>): String = etiketten?.let { e -> n.distinct().joinToString(", ") { e[it] ?: "$it" } } ?: nummernText(n)
+    fun etikett(n: Long): String = etiketten?.get(n) ?: "$n"
+}
 
 class Buch(val titel: String, val kopfzeile: String, val bloecke: List<Block>, val fuss: String)
 
@@ -67,6 +74,10 @@ data class BuchOptionen(
     val orte: Boolean = true,
     val berufe: Boolean = true,
     val quellenVerzeichnis: Boolean = true,
+    /** Nachfahrenbuch: Nummerierung, Ehepartner mit Kurzdaten, nur Kinder der Soehne weiterverfolgen. */
+    val nummerierung: Nummerierung = Nummerierung.Saragossa,
+    val partner: Boolean = true,
+    val namenstraeger: Boolean = false,
 )
 
 // ── Formate der Angaben ──
@@ -108,7 +119,7 @@ fun buchDatum(d: DateJson?): String {
     return if (vor != null) "$vor $kern" else kern
 }
 
-private fun ortText(name: String?, kurz: Boolean): String = name?.let { if (kurz) it.substringBefore(',').trim() else it }.orEmpty()
+internal fun ortText(name: String?, kurz: Boolean): String = name?.let { if (kurz) it.substringBefore(',').trim() else it }.orEmpty()
 
 private val EREIGNIS_ZEICHEN = mapOf("BIRT" to "*", "CHR" to "~", "BAPM" to "~", "DEAT" to "†", "BURI" to "▭", "CREM" to "▭")
 
@@ -123,21 +134,94 @@ private fun generationTitel(g: Int): String = Texte.t(Res.string.desk_book_gener
 })
 
 /** Nachname, Vorname - wie in Registern. */
-private fun registerName(p: Person) = listOf(p.surname, p.given).filter(String::isNotBlank).joinToString(", ").ifBlank { p.name.ifBlank { "?" } }
+internal fun registerName(p: Person) = listOf(p.surname, p.given).filter(String::isNotBlank).joinToString(", ").ifBlank { p.name.ifBlank { "?" } }
+
+// ── Gemeinsame Bausteine ──
+
+/** Sammelt die Verzeichnisse: Name, Ort (mit Nachnamen), Beruf, Quelle -> Eintragsschluessel. */
+internal class BuchRegister {
+    val namen = sortedMapOf<String, MutableSet<Long>>(String.CASE_INSENSITIVE_ORDER)
+    val orte = sortedMapOf<String, java.util.SortedMap<String, MutableSet<Long>>>(String.CASE_INSENSITIVE_ORDER)
+    val berufe = sortedMapOf<String, MutableSet<Long>>(String.CASE_INSENSITIVE_ORDER)
+    val quellen = sortedMapOf<String, MutableSet<Long>>(String.CASE_INSENSITIVE_ORDER)
+    fun name(p: Person, n: Long) { namen.getOrPut(p.surname.ifBlank { "?" }) { sortedSetOf() } += n }
+
+    fun bloecke(o: BuchOptionen, etiketten: Map<Long, String>? = null): List<Block> = buildList {
+        fun nachBuchstabe(m: Map<String, Set<Long>>) = m.entries.groupBy { it.key.first().uppercaseChar().toString() }
+            .map { (b, e) -> b to e.map { it.key to it.value.sorted() } }
+        if (o.namen && namen.isNotEmpty()) add(Verzeichnis(Texte.t(Res.string.desk_book_index_names), "reg-namen", nachBuchstabe(namen), 2, etiketten))
+        if (o.orte && orte.isNotEmpty()) add(Verzeichnis(Texte.t(Res.string.desk_book_index_places), "reg-orte",
+            orte.map { (ort, n) -> ort to n.map { (name, s) -> name to s.sorted() } }, 1, etiketten))
+        if (o.berufe && berufe.isNotEmpty()) add(Verzeichnis(Texte.t(Res.string.desk_book_index_occupations), "reg-berufe", nachBuchstabe(berufe), 2, etiketten))
+        if (o.quellen && o.quellenVerzeichnis && quellen.isNotEmpty()) add(Verzeichnis(Texte.t(Res.string.desk_book_index_sources), "reg-quellen",
+            listOf("" to quellen.map { it.key to it.value.sorted() }), 1, etiketten))
+    }
+}
+
+/** Der Text zu einer Person: Name fett, Konfession, Beruf, Ereignisse mit Paten und Quellen; dazu Fakten fuer die Notizen. */
+internal class PersonText(val laeufe: MutableList<Lauf>, val fakten: List<FactJson>, val ereignisse: List<FactJson>)
+
+internal fun personText(p: Person, det: IndividualDetail, o: BuchOptionen, n: Long, reg: BuchRegister): PersonText {
+    val laeufe = mutableListOf(Lauf(registerName(p), Stil.Fett))
+    reg.name(p, n)
+    val fakten = det.facts.filter { it.known }
+    fakten.firstOrNull { it.tag == "RELI" }?.value?.takeIf(String::isNotBlank)?.let { laeufe += Lauf(", $it") }
+    fakten.filter { it.tag == "OCCU" && it.value.isNotBlank() }.forEach { f ->
+        laeufe += Lauf(", ${f.value}")
+        reg.berufe.getOrPut(f.value) { sortedSetOf() } += n
+    }
+    fun quelle(f: FactJson): String = if (!o.quellen || f.sources.isEmpty()) "" else
+        " (${Texte.t(Res.string.desk_book_source)}: ${f.sources.joinToString("; ") { it.title }})".also { f.sources.forEach { s -> reg.quellen.getOrPut(s.title) { sortedSetOf() } += n } }
+    fun ereignis(f: FactJson): String {
+        val ort = ortText(f.place?.name, o.orteKuerzen)
+        if (ort.isNotBlank()) reg.orte.getOrPut(ort) { sortedMapOf(String.CASE_INSENSITIVE_ORDER) }.getOrPut(p.surname.ifBlank { "?" }) { sortedSetOf() } += n
+        val zeichen = EREIGNIS_ZEICHEN[f.tag] ?: "${f.label}:"
+        val wert = if (EREIGNIS_ZEICHEN.containsKey(f.tag)) "" else f.value.takeIf(String::isNotBlank)?.let { " $it" }.orEmpty()
+        val paten = if (f.tag in setOf("CHR", "BAPM")) f.notes.firstOrNull { it.startsWith("Paten") }?.let { " ($it)" }.orEmpty() else ""
+        return listOf("$zeichen$wert", buchDatum(f.date), ort).filter(String::isNotBlank).joinToString(" ") + paten + quelle(f)
+    }
+    // Lebensdaten in fester Reihenfolge, andere Ereignisse (Wohnort, Auswanderung ...) dazwischen
+    val reihenfolge = listOf("BIRT", "CHR", "BAPM")
+    val ende = listOf("DEAT", "BURI", "CREM")
+    val ohne = setOf("NAME", "SEX", "RELI", "OCCU", "NOTE", "FAMS", "FAMC", "OBJE", "SOUR", "CHAN", "_UID", "RIN", "REFN", "ASSO", "_ASSO")
+    val ereignisse = fakten.filter { it.tag in reihenfolge }.sortedBy { reihenfolge.indexOf(it.tag) } +
+        fakten.filter { it.tag !in reihenfolge && it.tag !in ende && it.tag !in ohne && (it.date != null || it.place != null || it.value.isNotBlank()) } +
+        fakten.filter { it.tag in ende }.sortedBy { ende.indexOf(it.tag) }
+    ereignisse.forEach { f -> laeufe += Lauf(", " + ereignis(f)) }
+    return PersonText(laeufe, fakten, ereignisse)
+}
+
+/** Notizen: Leerzeile = neuer Absatz, einfacher Zeilenumbruch = Leerzeichen (api4webtrees ab 1.9.1 liefert beide). */
+internal fun notizBloecke(t: PersonText, o: BuchOptionen): List<Block> = if (!o.notizen) emptyList() else buildList {
+    fun notiz(text: String) = text.split(Regex("\\n\\s*\\n")).map { it.trim().replace(Regex("\\s*\\n\\s*"), " ") }.filter(String::isNotBlank)
+        .forEach { add(Absatz(listOf(Lauf(it, Stil.Kursiv)), einzug = 1)) }
+    t.fakten.filter { it.tag == "NOTE" && it.value.isNotBlank() }.forEach { notiz(it.value) }
+    t.ereignisse.flatMap { f -> f.notes.filter { !it.startsWith("Paten") } }.forEach(::notiz)
+}
+
+/** Kurzdaten fuer Partner und Kinder: "* 1839 Celle, † 1912 Celle". */
+internal fun kurzdaten(p: Person, o: BuchOptionen): String = listOfNotNull(
+    p.birth?.let { e -> listOf(buchDatum(e.date), ortText(e.place?.name, o.orteKuerzen)).filter(String::isNotBlank).joinToString(" ").takeIf(String::isNotBlank)?.let { "* $it" } },
+    p.death?.let { e -> listOf(buchDatum(e.date), ortText(e.place?.name, o.orteKuerzen)).filter(String::isNotBlank).joinToString(" ").takeIf(String::isNotBlank)?.let { "† $it" } },
+).joinToString(", ")
+
+internal fun geschlechtZeichen(p: Person) = when (p.sex) { "M" -> "♂"; "F" -> "♀"; else -> "" }
 
 // ── Vorfahrenbuch ──
 
 class BuchDaten(val ahnen: Map<Long, AhnenEintrag>, val details: Map<Long, IndividualDetail>, val bilder: Map<String, BufferedImage>)
 
-suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean): BuchDaten = coroutineScope {
+suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean, fortschritt: (String) -> Unit = {}): BuchDaten = coroutineScope {
     // Ganzer Baum aus Zwischenspeicher oder Export (ab Stufe 17), wenn sich das lohnt - sonst Person fuer Person
-    val baum = BaumSpeicher.holen(client, tree, (1 shl generationen.coerceAtMost(20)) - 1)
+    val baum = BaumSpeicher.holen(client, tree, (1 shl generationen.coerceAtMost(20)) - 1) { g, t -> fortschritt(Texte.t(Res.string.desk_book_progress_tree, g, t)) }
     val ahnen = if (baum != null) ahnenAusBaum(baum, xref, generationen) else ahnenLaden(client, tree, xref, generationen)
     // Jede Person einmal abrufen (Ahnenschwund: dieselbe Person unter mehreren Nummern)
     val xrefs = ahnen.values.map { it.person.xref }.filter(String::isNotEmpty).distinct()
     val details = if (baum != null) xrefs.mapNotNull { x -> baum.detail(x)?.let { x to it } }.toMap() else xrefs.chunked(8).flatMap { gruppe ->
         gruppe.map { x -> async { x to runCatching { client.individual(tree, x) }.getOrNull() } }.awaitAll()
     }.mapNotNull { (x, d) -> d?.let { x to it } }.toMap()
+    fortschritt(Texte.t(Res.string.desk_book_progress_persons, details.size))
+    if (bilder) fortschritt(Texte.t(Res.string.desk_book_progress_pictures))
     val fotos = if (!bilder) emptyMap() else ahnen.values.mapNotNull { it.person.thumb }.distinct().chunked(8).flatMap { gruppe ->
         gruppe.map { url ->
             async {
@@ -158,11 +242,7 @@ fun vorfahrenbuch(d: BuchDaten, o: BuchOptionen, baum: String, app: String): Buc
     val titel = o.titel.ifBlank { Texte.t(Res.string.desk_book_title_ancestors, proband.name) }
     val erste = HashMap<String, Long>()
     nummern.forEach { n -> d.ahnen.getValue(n).person.xref.takeIf(String::isNotEmpty)?.let { erste.putIfAbsent(it, n) } }
-    // Register sammeln: Name -> Nummern, Ort -> (Name -> Nummern), Beruf -> Nummern, Quelle -> Nummern
-    val regNamen = sortedMapOf<String, MutableSet<Long>>(String.CASE_INSENSITIVE_ORDER)
-    val regOrte = sortedMapOf<String, java.util.SortedMap<String, MutableSet<Long>>>(String.CASE_INSENSITIVE_ORDER)
-    val regBerufe = sortedMapOf<String, MutableSet<Long>>(String.CASE_INSENSITIVE_ORDER)
-    val regQuellen = sortedMapOf<String, MutableSet<Long>>(String.CASE_INSENSITIVE_ORDER)
+    val reg = BuchRegister()
 
     fun eintrag(n: Long): List<Block> {
         val a = d.ahnen.getValue(n)
@@ -174,36 +254,14 @@ fun vorfahrenbuch(d: BuchDaten, o: BuchOptionen, baum: String, app: String): Buc
                 marke = "$n", anker = anker, farbe = if (o.farbkodierung) linienFarbe(n) else null, abstandVor = true))
         }
         val det = d.details[n]
-        val laeufe = mutableListOf(Lauf(registerName(p), Stil.Fett))
-        regNamen.getOrPut(p.surname.ifBlank { "?" }) { sortedSetOf() } += n
         if (p.isPrivate || det == null) {
+            reg.name(p, n)
+            val laeufe = mutableListOf(Lauf(registerName(p), Stil.Fett))
             if (p.isPrivate) laeufe += Lauf(", " + Texte.t(Res.string.person_private))
             return listOf(Absatz(laeufe, marke = "$n", anker = anker, abstandVor = true))
         }
-        val fakten = det.facts.filter { it.known }
-        fakten.firstOrNull { it.tag == "RELI" }?.value?.takeIf(String::isNotBlank)?.let { laeufe += Lauf(", $it") }
-        fakten.filter { it.tag == "OCCU" && it.value.isNotBlank() }.forEach { f ->
-            laeufe += Lauf(", ${f.value}")
-            regBerufe.getOrPut(f.value) { sortedSetOf() } += n
-        }
-        fun quelle(f: FactJson): String = if (!o.quellen || f.sources.isEmpty()) "" else
-            " (${Texte.t(Res.string.desk_book_source)}: ${f.sources.joinToString("; ") { it.title }})".also { f.sources.forEach { s -> regQuellen.getOrPut(s.title) { sortedSetOf() } += n } }
-        fun ereignis(f: FactJson): String {
-            val ort = ortText(f.place?.name, o.orteKuerzen)
-            if (ort.isNotBlank()) regOrte.getOrPut(ort) { sortedMapOf(String.CASE_INSENSITIVE_ORDER) }.getOrPut(p.surname.ifBlank { "?" }) { sortedSetOf() } += n
-            val zeichen = EREIGNIS_ZEICHEN[f.tag] ?: "${f.label}:"
-            val wert = if (EREIGNIS_ZEICHEN.containsKey(f.tag)) "" else f.value.takeIf(String::isNotBlank)?.let { " $it" }.orEmpty()
-            val paten = if (f.tag in setOf("CHR", "BAPM")) f.notes.firstOrNull { it.startsWith("Paten") }?.let { " ($it)" }.orEmpty() else ""
-            return listOf("$zeichen$wert", buchDatum(f.date), ort).filter(String::isNotBlank).joinToString(" ") + paten + quelle(f)
-        }
-        // Lebensdaten in fester Reihenfolge, andere Ereignisse (Wohnort, Auswanderung ...) dazwischen
-        val reihenfolge = listOf("BIRT", "CHR", "BAPM")
-        val ende = listOf("DEAT", "BURI", "CREM")
-        val ohne = setOf("NAME", "SEX", "RELI", "OCCU", "NOTE", "FAMS", "FAMC", "OBJE", "SOUR", "CHAN", "_UID", "RIN", "REFN", "ASSO", "_ASSO")
-        val ereignisse = fakten.filter { it.tag in reihenfolge }.sortedBy { reihenfolge.indexOf(it.tag) } +
-            fakten.filter { it.tag !in reihenfolge && it.tag !in ende && it.tag !in ohne && (it.date != null || it.place != null || it.value.isNotBlank()) } +
-            fakten.filter { it.tag in ende }.sortedBy { ende.indexOf(it.tag) }
-        ereignisse.forEach { f -> laeufe += Lauf(", " + ereignis(f)) }
+        val text = personText(p, det, o, n, reg)
+        val laeufe = text.laeufe
         // Eltern im Buch
         val eltern = listOf(2 * n, 2 * n + 1).filter { it in d.ahnen && reihe(it) < o.generationen }
         val bloecke = mutableListOf<Block>()
@@ -231,20 +289,14 @@ fun vorfahrenbuch(d: BuchDaten, o: BuchOptionen, baum: String, app: String): Buc
                 zusatz += Lauf("; " + Texte.t(Res.string.desk_book_children) + " ")
                 fam.children.forEachIndexed { i, c ->
                     if (i > 0) zusatz += Lauf(", ")
-                    val zeichen = when (c.sex) { "M" -> "♂"; "F" -> "♀"; else -> "" }
+                    val zeichen = geschlechtZeichen(c)
                     zusatz += Lauf("${c.given.ifBlank { c.name }} $zeichen" + (c.birth?.date?.year?.takeIf { it > 0 }?.let { " ($it)" } ?: ""))
                     if (c.xref == linie) { zusatz += Lauf(" → "); zusatz += Lauf("${n / 2}", ziel = "n${n / 2}") }
                 }
             }
         }
         if (zusatz.isNotEmpty()) bloecke += Absatz(zusatz, einzug = 1)
-        if (o.notizen) {
-            // Notizen: Leerzeile = neuer Absatz, einfacher Zeilenumbruch = Leerzeichen (api4webtrees ab 1.9.1 liefert beide)
-            fun notiz(t: String) = t.split(Regex("\\n\\s*\\n")).map { it.trim().replace(Regex("\\s*\\n\\s*"), " ") }.filter(String::isNotBlank)
-                .forEach { bloecke += Absatz(listOf(Lauf(it, Stil.Kursiv)), einzug = 1) }
-            fakten.filter { it.tag == "NOTE" && it.value.isNotBlank() }.forEach { notiz(it.value) }
-            ereignisse.flatMap { f -> f.notes.filter { !it.startsWith("Paten") } }.forEach(::notiz)
-        }
+        bloecke += notizBloecke(text, o)
         return bloecke
     }
 
@@ -262,14 +314,7 @@ fun vorfahrenbuch(d: BuchDaten, o: BuchOptionen, baum: String, app: String): Buc
         bloecke += Ueberschrift(generationTitel(g), "g$g", neueSeite = g == 0 || liste.size > 4)
         liste.forEach { bloecke += eintrag(it) }
     }
-    fun gruppiertNachBuchstabe(m: Map<String, Set<Long>>) = m.entries.groupBy { it.key.first().uppercaseChar().toString() }
-        .map { (b, e) -> b to e.map { it.key to it.value.sorted() } }
-    if (o.namen && regNamen.isNotEmpty()) bloecke += Verzeichnis(Texte.t(Res.string.desk_book_index_names), "reg-namen", gruppiertNachBuchstabe(regNamen), 2)
-    if (o.orte && regOrte.isNotEmpty()) bloecke += Verzeichnis(Texte.t(Res.string.desk_book_index_places), "reg-orte",
-        regOrte.map { (ort, namen) -> ort to namen.map { (n, s) -> n to s.sorted() } }, 1)
-    if (o.berufe && regBerufe.isNotEmpty()) bloecke += Verzeichnis(Texte.t(Res.string.desk_book_index_occupations), "reg-berufe", gruppiertNachBuchstabe(regBerufe), 2)
-    if (o.quellen && o.quellenVerzeichnis && regQuellen.isNotEmpty()) bloecke += Verzeichnis(Texte.t(Res.string.desk_book_index_sources), "reg-quellen",
-        listOf("" to regQuellen.map { it.key to it.value.sorted() }), 1)
+    bloecke += reg.bloecke(o)
     return Buch(titel, titel, bloecke, fusszeile(app, baum))
 }
 

@@ -221,7 +221,8 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
         leer = false
     }
 
-    val markeB = 34f
+    /** Nummernspalte: so breit wie die laengste Nummer des Buchs (Henry: "155411"), mindestens 34 pt. */
+    val markeB = maxOf(34f, buch.bloecke.filterIsInstance<Absatz>().mapNotNull { it.marke }.maxOfOrNull { s.breite(it, s.fett, grund) + 8f } ?: 0f)
     val bildW = 56f
 
     /** Linker Rand des Textes: Eintraege nach der Nummer, Zusaetze (einzug 1) buendig darunter, tiefere je 18 pt weiter. */
@@ -392,7 +393,7 @@ private class BuchSatz(val buch: Buch, val tocSeiten: Map<String, Int>?) {
         }
         v.gruppen.forEach { (kopf, zeilen) ->
             if (kopf.isNotBlank()) { if (y + zh * 3 > format.height - unten) naechste(); y += 3f; zeile(kopf, s.fett, 0f, null) }
-            zeilen.forEach { (t, nummern) -> zeile(t, s.normal, if (kopf.isNotBlank()) 10f else 0f, nummernText(nummern)) }
+            zeilen.forEach { (t, nummern) -> zeile(t, s.normal, if (kopf.isNotBlank()) 10f else 0f, v.nummern(nummern)) }
         }
         y = format.height - unten   // Verzeichnis endet die Seite
         leer = false
