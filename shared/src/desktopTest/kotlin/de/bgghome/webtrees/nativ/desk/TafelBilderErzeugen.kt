@@ -61,7 +61,7 @@ class TafelBilderErzeugen {
             val o0 = TafelOptionen(
                 generationen = gen.toInt(), stil = TafelStil.valueOf(stilName), orte = "orte" in schalter, volleDaten = "voll" in schalter,
                 partner = "partner" in schalter || (art in setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester) && "allein" !in schalter),
-                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
+                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, bilder = "ohnebild" !in schalter, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
                 nachfahren = schalter.firstOrNull { it.startsWith("nach") }?.drop(4)?.toInt() ?: 3,
             )
             val daten = runBlocking { tafelDatenLaden(client, baumName, xref, art, if (art == TafelArt.Stamm) maxGen(art) else o0.generationen) }
