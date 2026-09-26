@@ -30,7 +30,11 @@ import java.time.format.FormatStyle
  */
 
 /** Ein Textabschnitt einer Liste: Einrueckung, fett oder normal, Text. */
-data class Zeile(val text: String, val einzug: Int = 0, val fett: Boolean = false, val gross: Boolean = false)
+data class Zeile(
+    val text: String, val einzug: Int = 0, val fett: Boolean = false, val gross: Boolean = false,
+    /** Tabellenzeile: Spalten mit ihren Anteilen an der Breite (leer = Fliesstext). */
+    val spalten: List<String> = emptyList(), val anteile: List<Float> = emptyList(),
+)
 
 /** Schriften: eine Systemschrift mit Umlauten und Akzenten, sonst Helvetica (dann ohne Sonderzeichen ausserhalb Latin-1). */
 internal class Schriften(private val doc: PDDocument) {
@@ -83,6 +87,21 @@ private class Textseiten(val doc: PDDocument, val fuss: String) {
         val schrift = if (z.fett || z.gross) s.fett else s.normal
         val x = rand + z.einzug * 16f
         val maxBreite = format.width - rand - x
+        if (z.spalten.isNotEmpty()) {
+            // Tabellenzeile: jede Spalte an ihrer festen Position, zu lange Texte gekuerzt
+            val hoehe = groesse * 1.35f
+            if (y - hoehe < rand) neueSeite()
+            y -= hoehe
+            val anteile = z.anteile.takeIf { it.size == z.spalten.size } ?: List(z.spalten.size) { 1f / z.spalten.size }
+            var sx = x
+            z.spalten.forEachIndexed { i, t ->
+                val w = maxBreite * anteile[i]
+                val (tx, g) = passend(schrift, t, groesse, w - 6f)
+                stream!!.apply { beginText(); setFont(schrift, g); newLineAtOffset(sx, y); showText(schrift.sicher(tx)); endText() }
+                sx += w
+            }
+            return
+        }
         // Woerter umbrechen
         val zeilen = mutableListOf<String>()
         var aktuell = ""

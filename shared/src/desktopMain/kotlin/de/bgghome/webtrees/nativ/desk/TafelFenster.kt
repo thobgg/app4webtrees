@@ -334,7 +334,7 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
 }
 
 @Composable
-private fun Haken(text: String, wert: Boolean, onWechsel: (Boolean) -> Unit) {
+internal fun Haken(text: String, wert: Boolean, onWechsel: (Boolean) -> Unit) {
     Row(Modifier.clickable { onWechsel(!wert) }, verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = wert, onCheckedChange = onWechsel, modifier = Modifier.size(32.dp))
         Text(text, Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodyMedium)
@@ -342,19 +342,19 @@ private fun Haken(text: String, wert: Boolean, onWechsel: (Boolean) -> Unit) {
 }
 
 @Composable
-private fun ArtGruppe(text: String) {
+internal fun ArtGruppe(text: String) {
     Text(text, Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable
-private fun ArtEintrag(text: String, aktiv: Boolean, onClick: () -> Unit) {
+internal fun ArtEintrag(text: String, aktiv: Boolean, onClick: () -> Unit) {
     Text(text, Modifier.fillMaxWidth().background(if (aktiv) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent)
         .fokusRahmen().clickable(onClick = onClick).padding(horizontal = 24.dp, vertical = 6.dp),
         style = MaterialTheme.typography.bodyMedium, fontWeight = if (aktiv) FontWeight.SemiBold else FontWeight.Normal)
 }
 
 @Composable
-private fun Einstellung(label: String, inhalt: @Composable () -> Unit) {
+internal fun Einstellung(label: String, inhalt: @Composable () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(label, Modifier.width(150.dp), style = MaterialTheme.typography.bodyMedium)
         Box(Modifier.weight(1f)) { inhalt() }
@@ -362,7 +362,7 @@ private fun Einstellung(label: String, inhalt: @Composable () -> Unit) {
 }
 
 @Composable
-private fun Auswahl(wert: String, werte: List<String>, onWahl: (String) -> Unit) {
+internal fun Auswahl(wert: String, werte: List<String>, onWahl: (String) -> Unit) {
     var offen by remember { mutableStateOf(false) }
     Box {
         OutlinedButton(onClick = { offen = true }, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth()) {
@@ -376,6 +376,6 @@ private fun Auswahl(wert: String, werte: List<String>, onWahl: (String) -> Unit)
 }
 
 @Composable
-private fun Knopf(text: String, enabled: Boolean, onClick: () -> Unit) {
+internal fun Knopf(text: String, enabled: Boolean, onClick: () -> Unit) {
     OutlinedButton(onClick = onClick, enabled = enabled, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth()) { Text(text) }
 }

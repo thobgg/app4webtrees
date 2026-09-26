@@ -104,7 +104,7 @@ fun ahnenBaum(
 }
 
 /** Nummern einer Linie von der Ausgangsperson (1) bis zu ihrem Ende. */
-private fun linie(art: TafelArt, ahnen: Map<Long, AhnenEintrag>): List<Long> = when (art) {
+internal fun linie(art: TafelArt, ahnen: Map<Long, AhnenEintrag>): List<Long> = when (art) {
     TafelArt.Stammlinie -> generateSequence(1L) { it * 2 }.takeWhile { it in ahnen }.toList()
     TafelArt.Mutterstamm -> generateSequence(1L) { it * 2 + 1 }.takeWhile { it in ahnen }.toList()
     else -> {
