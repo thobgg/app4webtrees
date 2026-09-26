@@ -66,6 +66,14 @@
     <string name="rel_brother">Bruder</string>
     <string name="rel_sister">Schwester</string>
     <string name="rel_sibling">Geschwister</string>
+    <string name="rel_half_siblings">Halbgeschwister</string>
+    <string name="half_siblings_paternal">Halbgeschwister väterlicherseits</string>
+    <string name="half_siblings_maternal">Halbgeschwister mütterlicherseits</string>
+    <string name="rel_half_brother">Halbbruder</string>
+    <string name="rel_half_sister">Halbschwester</string>
+    <string name="rel_half_sibling">Halbgeschwister</string>
+    <string name="side_paternal">väterlicherseits</string>
+    <string name="side_maternal">mütterlicherseits</string>
     <string name="rel_partner_m">Partner</string>
     <string name="rel_partner_f">Partnerin</string>
     <string name="rel_partner">Partner/in</string>

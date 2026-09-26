@@ -19,6 +19,8 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.FamilyJson
+import de.bgghome.webtrees.nativ.api.HalfSibling
+import de.bgghome.webtrees.nativ.api.halfSiblings
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
 
@@ -34,6 +36,11 @@ fun Relatives(detail: IndividualDetail, canEdit: Boolean, onSelect: (String) -> 
         detail.parentFamilies.forEach { family ->
             item { SectionTitle(stringResource(Res.string.family_parents_siblings)) }
             item { FamilyMembers(family, self = detail.person, asChild = true, canEdit = canEdit, onSelect = onSelect, onUnlink = onUnlink) }
+        }
+        val half = detail.halfSiblings()
+        if (half.isNotEmpty()) {
+            item { SectionTitle(stringResource(Res.string.rel_half_siblings)) }
+            item { HalfSiblings(half, onSelect) }
         }
         detail.spouseFamilies.forEach { family ->
             item {
@@ -54,6 +61,18 @@ private fun SectionTitle(text: String) {
         text.uppercase(), Modifier.padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 4.dp),
         style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+/** Halbgeschwister mit Seite ("Halbbruder, vaeterlicherseits"). Loesen geht hier nicht: sie haengen an einer fremden Familie. */
+@Composable
+private fun HalfSiblings(half: List<HalfSibling>, onSelect: (String) -> Unit) {
+    Column {
+        half.forEach { h ->
+            val rel = stringResource(when (h.person.sex) { "M" -> Res.string.rel_half_brother; "F" -> Res.string.rel_half_sister; else -> Res.string.rel_half_sibling })
+            val side = stringResource(if (h.paternal) Res.string.side_paternal else Res.string.side_maternal)
+            PersonRow(h.person, label = "$rel, $side", onClick = { onSelect(h.person.xref) })
+        }
+    }
 }
 
 /**

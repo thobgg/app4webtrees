@@ -138,6 +138,8 @@ data class FamilyJson(
     val facts: List<FactJson> = emptyList(),
     val children: List<Person> = emptyList(),
     val media: List<MediaJson> = emptyList(),
+    /** Nur in stepFamilies: der gemeinsame Elternteil (XREF). */
+    val parent: String? = null,
 )
 
 @Serializable
@@ -149,8 +151,24 @@ data class IndividualDetail(
     val facts: List<FactJson> = emptyList(),
     val parentFamilies: List<FamilyJson> = emptyList(),
     val spouseFamilies: List<FamilyJson> = emptyList(),
+    /** Familien der Eltern mit anderen Partnern, ihre Kinder sind die Halbgeschwister (api4webtrees ab 1.8.0, Stufe 12). */
+    val stepFamilies: List<FamilyJson> = emptyList(),
     val media: List<MediaJson> = emptyList(),
 )
+
+/** Ein Halbgeschwister und ob es ueber den Vater verwandt ist (sonst ueber die Mutter). */
+data class HalfSibling(val person: Person, val paternal: Boolean)
+
+/** Halbgeschwister aus stepFamilies, vaeterlicherseits zuerst; leer bei Modulen vor 1.8.0. */
+fun IndividualDetail.halfSiblings(): List<HalfSibling> {
+    val fathers = parentFamilies.mapNotNull { it.husband?.xref }.toSet()
+    val full = parentFamilies.flatMap { it.children }.map { it.xref }.toSet()
+    return stepFamilies
+        .flatMap { family -> family.children.map { HalfSibling(it, family.parent != null && family.parent in fathers) } }
+        .filter { it.person.xref != person.xref && it.person.xref !in full }
+        .distinctBy { it.person.xref }
+        .sortedByDescending { it.paternal }
+}
 
 /** Antwort von Places: Ortsnamen des Baums als Vorschlaege beim Tippen. */
 @Serializable

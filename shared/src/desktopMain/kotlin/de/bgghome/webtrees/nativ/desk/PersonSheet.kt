@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import de.bgghome.webtrees.nativ.api.halfSiblings
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
@@ -228,6 +229,10 @@ private fun ParentsTab(detail: IndividualDetail, viewModel: AppViewModel) {
                 items(fam.children) { c -> if (c.xref == detail.person.xref) Text(registerName(c, "", "") + "   " + c.lifespan, Modifier.padding(12.dp, 5.dp), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium) else PersonLine(c, viewModel) }
             }
             if (detail.parentFamilies.isEmpty()) item { Text("–", Modifier.padding(12.dp)) }
+            detail.halfSiblings().groupBy { it.paternal }.toSortedMap(reverseOrder()).forEach { (paternal, group) ->
+                item { Heading(stringResource(if (paternal) Res.string.half_siblings_paternal else Res.string.half_siblings_maternal)) }
+                items(group) { PersonLine(it.person, viewModel) }
+            }
         }
         ListenLeiste(list)
     }
@@ -372,6 +377,9 @@ private fun RelativesColumn(detail: IndividualDetail, viewModel: AppViewModel, m
             item { Group(stringResource(Res.string.rel_father), listOfNotNull(parents?.husband), viewModel) }
             item { Group(stringResource(Res.string.rel_mother), listOfNotNull(parents?.wife), viewModel) }
             item { Group(stringResource(Res.string.desk_siblings), siblings, viewModel) }
+            // Nur wenn es welche gibt - ein weiterer Strich "–" waere bei den meisten Personen nur Rauschen.
+            val half = detail.halfSiblings().map { it.person }
+            if (half.isNotEmpty()) item { Group(stringResource(Res.string.rel_half_siblings), half, viewModel) }
             item {
                 // Alle Partnerschaften in ihrer Reihenfolge, auch ohne eingetragene Partnerin (wie im Infokasten).
                 Group(stringResource(Res.string.rel_partner), emptyList(), viewModel, leerStrich = detail.spouseFamilies.isEmpty())

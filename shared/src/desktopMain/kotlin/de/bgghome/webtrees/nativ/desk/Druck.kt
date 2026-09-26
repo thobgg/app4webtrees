@@ -1,6 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
 import de.bgghome.webtrees.nativ.Texte
+import de.bgghome.webtrees.nativ.api.halfSiblings
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
@@ -136,6 +137,7 @@ fun personenblattZeilen(d: IndividualDetail): List<Zeile> = buildList {
         fam.husband?.let { add(Zeile("${Texte.t(Res.string.rel_father)}: ${kurz(it)}", 1)) }
         fam.wife?.let { add(Zeile("${Texte.t(Res.string.rel_mother)}: ${kurz(it)}", 1)) }
         d.parentFamilies.flatMap { it.children }.filter { it.xref != p.xref }.distinctBy { it.xref }.forEach { add(Zeile("${Texte.t(Res.string.desk_siblings)}: ${kurz(it)}", 1)) }
+        d.halfSiblings().forEach { add(Zeile("${Texte.t(if (it.paternal) Res.string.half_siblings_paternal else Res.string.half_siblings_maternal)}: ${kurz(it.person)}", 1)) }
     }
     if (d.spouseFamilies.isNotEmpty()) {
         add(Zeile("")); add(Zeile(Texte.t(Res.string.desk_tab_partners), fett = true))
