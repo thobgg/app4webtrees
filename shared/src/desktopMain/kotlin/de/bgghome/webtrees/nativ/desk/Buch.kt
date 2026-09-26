@@ -239,8 +239,11 @@ fun vorfahrenbuch(d: BuchDaten, o: BuchOptionen, baum: String, app: String): Buc
         }
         if (zusatz.isNotEmpty()) bloecke += Absatz(zusatz, einzug = 1)
         if (o.notizen) {
-            fakten.filter { it.tag == "NOTE" && it.value.isNotBlank() }.forEach { bloecke += Absatz(listOf(Lauf(it.value, Stil.Kursiv)), einzug = 1) }
-            ereignisse.flatMap { f -> f.notes.filter { !it.startsWith("Paten") } }.forEach { bloecke += Absatz(listOf(Lauf(it, Stil.Kursiv)), einzug = 1) }
+            // Notizen: Leerzeile = neuer Absatz, einfacher Zeilenumbruch = Leerzeichen (api4webtrees ab 1.9.1 liefert beide)
+            fun notiz(t: String) = t.split(Regex("\\n\\s*\\n")).map { it.trim().replace(Regex("\\s*\\n\\s*"), " ") }.filter(String::isNotBlank)
+                .forEach { bloecke += Absatz(listOf(Lauf(it, Stil.Kursiv)), einzug = 1) }
+            fakten.filter { it.tag == "NOTE" && it.value.isNotBlank() }.forEach { notiz(it.value) }
+            ereignisse.flatMap { f -> f.notes.filter { !it.startsWith("Paten") } }.forEach(::notiz)
         }
         return bloecke
     }
