@@ -17,7 +17,7 @@
   <br><b>wtWin on Windows</b> – the same family tree as in wtAnd, laid out like a classic genealogy program.
 </p>
 
-| <img src="docs/screenshots/windows-personenblatt.jpg" alt="wtWin: person sheet of Cosimo I de' Medici" width="100%"> | <img src="docs/screenshots/desktop-navigator.png" alt="wtTux on Linux: navigator" width="100%"> |
+| <img src="docs/screenshots/windows-personenblatt.jpg" alt="wtWin: person sheet of Cosimo I de' Medici" width="100%"> | <img src="docs/screenshots/desktop-navigator.png" alt="wtTux on Linux: navigator with Frieda Behnke and four generations of ancestors" width="100%"> |
 | :-: | :-: |
 | **Person sheet** – events as a table, the family beside them, print and PDF | **wtTux on Linux** – the same program |
 
@@ -26,13 +26,13 @@
   <br><b>Charts</b> – chart type, generations, style (parchment, classic, colour, black and white), pictures and Kekule numbers; the preview is the finished sheet, ready to print or save as PDF.
 </p>
 
-| <img src="docs/screenshots/tafel-stammtafel.jpg" alt="Descendant chart of Cosimo de' Medici" width="100%"> | <img src="docs/screenshots/tafel-ahnentafel.jpg" alt="Ancestor chart of Cosimo I de' Medici with Kekule numbers" width="100%"> |
+| <img src="docs/screenshots/tafel-stammtafel.jpg" alt="Descendant chart of Johann Heinrich Falkenrath over four generations" width="100%"> | <img src="docs/screenshots/tafel-ahnentafel.jpg" alt="Ancestor chart of Jonas Falkenrath over five generations with Kekule numbers" width="100%"> |
 | :-: | :-: |
 | **Descendant chart** – all descendants on one sheet | **Ancestor chart** – root person at the bottom, Kekule numbers |
 | <img src="docs/screenshots/tafel-ahnenkreis.jpg" alt="Ancestor circle of Jonas Falkenrath over seven generations, coloured by grandparent lines" width="100%"> | <img src="docs/screenshots/tafel-faechertafel.jpg" alt="Fan chart of Jonas Falkenrath over six generations" width="100%"> |
 | **Ancestor circle** – seven generations, the four grandparent lines in colour, pedigree collapse as “= 74” | **Fan chart** – the half circle, here six generations |
 
-<p align="center"><sub>Historical tree of the Medici. Portrait of Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; all other portraits public domain (Wikimedia Commons). Ancestor circle and fan chart: fictitious demo tree <a href="demo-tree/">Familie Falkenrath</a> (CC0).</sub></p>
+<p align="center"><sub>Charts and wtTux navigator: fictitious demo tree <a href="demo-tree/">Familie Falkenrath</a> (CC0), photos of unknown people from the Rijksmuseum Amsterdam (CC0). wtWin navigator and person sheet: historical tree of the Medici; portrait of Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>, all others public domain (Wikimedia Commons).</sub></p>
 
 **Android:** the APK is signed. To install outside the Play Store, Android asks once to allow your browser to install apps.  
 **Linux:** install the package with `sudo apt install ./wttux_…_amd64.deb`.  

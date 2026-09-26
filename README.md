@@ -17,7 +17,7 @@
   <br><b>wtWin unter Windows</b> – derselbe Stammbaum wie in wtAnd, aufgebaut wie ein klassisches Genealogie-Programm.
 </p>
 
-| <img src="docs/screenshots/windows-personenblatt.jpg" alt="wtWin: Personenblatt von Cosimo I de' Medici" width="100%"> | <img src="docs/screenshots/desktop-navigator.png" alt="wtTux unter Linux: Navigator" width="100%"> |
+| <img src="docs/screenshots/windows-personenblatt.jpg" alt="wtWin: Personenblatt von Cosimo I de' Medici" width="100%"> | <img src="docs/screenshots/desktop-navigator.png" alt="wtTux unter Linux: Navigator mit Frieda Behnke und vier Generationen Vorfahren" width="100%"> |
 | :-: | :-: |
 | **Personenblatt** – Ereignisse als Tabelle, die Familie daneben, Drucken und PDF | **wtTux unter Linux** – dasselbe Programm |
 
@@ -26,13 +26,13 @@
   <br><b>Tafel erstellen</b> – Tafelart, Generationen, Gestaltung (Pergament, Klassisch, Farbig, Schwarzweiß), Bilder und Kekule-Nummern; die Vorschau ist das fertige Blatt, zum Drucken oder als PDF.
 </p>
 
-| <img src="docs/screenshots/tafel-stammtafel.jpg" alt="Stammtafel der Nachfahren von Cosimo de' Medici" width="100%"> | <img src="docs/screenshots/tafel-ahnentafel.jpg" alt="Ahnentafel von Cosimo I de' Medici mit Kekule-Nummern" width="100%"> |
+| <img src="docs/screenshots/tafel-stammtafel.jpg" alt="Stammtafel der Nachfahren von Johann Heinrich Falkenrath über vier Generationen" width="100%"> | <img src="docs/screenshots/tafel-ahnentafel.jpg" alt="Ahnentafel von Jonas Falkenrath über fünf Generationen mit Kekule-Nummern" width="100%"> |
 | :-: | :-: |
 | **Stammtafel** – alle Nachfahren auf einem Blatt | **Ahnentafel** – Proband unten, Kekule-Nummern |
 | <img src="docs/screenshots/tafel-ahnenkreis.jpg" alt="Ahnenkreis von Jonas Falkenrath über sieben Generationen, farbig nach Großeltern-Linien" width="100%"> | <img src="docs/screenshots/tafel-faechertafel.jpg" alt="Fächertafel von Jonas Falkenrath über sechs Generationen" width="100%"> |
 | **Ahnenkreis** – sieben Generationen, die vier Großeltern-Linien in Farbe, Ahnenschwund als „= 74“ | **Fächertafel** – der Halbkreis, hier sechs Generationen |
 
-<p align="center"><sub>Historischer Stammbaum der Medici. Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; alle anderen Porträts gemeinfrei (Wikimedia Commons). Ahnenkreis und Fächertafel: frei erfundener Demo-Stammbaum <a href="demo-tree/">Familie Falkenrath</a> (CC0).</sub></p>
+<p align="center"><sub>Tafeln und wtTux-Navigator: frei erfundener Demo-Stammbaum <a href="demo-tree/">Familie Falkenrath</a> (CC0), Fotos unbekannter Personen aus dem Rijksmuseum Amsterdam (CC0). wtWin-Navigator und Personenblatt: historischer Stammbaum der Medici; Porträt Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>, alle anderen gemeinfrei (Wikimedia Commons).</sub></p>
 
 **Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
 **Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren.  
