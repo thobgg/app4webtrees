@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Klartext (http://) fuer nas4webtrees im Heimnetz (26.09.2026). Android kennt keine Adressbereiche, darum hier
+     allgemein erlaubt - die App laesst http:// selbst nur zu privaten Adressen zu (WtClient, Heimnetz), vor jeder
+     Anfrage und jeder Weiterleitung. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

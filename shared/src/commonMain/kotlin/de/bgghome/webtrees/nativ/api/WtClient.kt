@@ -50,6 +50,9 @@ class LoginWallException(val httpStatus: Int, val host: String = "") : Exception
 
 class WriteInterruptedException(cause: IOException) : IOException(cause.message, cause)
 
+/** http:// zu einem Server ausserhalb des Heimnetzes (auch per Weiterleitung) - abgebrochen, bevor etwas gesendet wurde. */
+class KlartextException(val host: String) : IOException("cleartext outside home network: $host")
+
 /**
  * Client fuer das webtrees-Modul "api4webtrees".
  *
@@ -74,6 +77,9 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
 
     val cookieJar = PersistentCookieJar(cookies)
 
+    /** Nur Debug-Builds: http:// zu jedem Server (lokale Testinstanz im Emulator, 10.0.2.2 ist ohnehin privat). */
+    var klartextUeberall: Boolean = false
+
     /** Fuer Lesezugriffe und Bilder. Darf bei Verbindungsproblemen still wiederholen (OkHttp-Standard) - Schreibzugriffe nicht, siehe writeHttp. */
     val http: OkHttpClient = OkHttpClient.Builder()
         .cookieJar(cookieJar)
@@ -86,6 +92,16 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                     .header("Accept-Language", Locale.getDefault().toLanguageTag() + ",en;q=0.5")
                     .build()
             )
+        }
+        // Unverschluesselt nur im Heimnetz - vor JEDER Anfrage, auch nach einer Weiterleitung (Sitzungs-Cookie!) und fuer
+        // Bilder. Geprueft wird der Name und die Adresse, zu der die Verbindung tatsaechlich besteht; gesendet ist noch nichts.
+        .addNetworkInterceptor { chain ->
+            val url = chain.request().url
+            if (!url.isHttps && !klartextUeberall) {
+                val ip = chain.connection()?.route()?.socketAddress?.address
+                if (!Heimnetz.host(url.host) && (ip == null || !Heimnetz.privat(ip))) throw KlartextException(url.host)
+            }
+            chain.proceed(chain.request())
         }
         // webtrees beantwortet fehlende Bilddateien mit einem SVG-Platzhalter ("404") - aber mit Status 200 und
         // einem Jahr Cache-Erlaubnis. Ohne diesen Eingriff merkt sich der Bild-Cache den Platzhalter, auch wenn
@@ -390,7 +406,7 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                 execute(request, writeHttp)
             } catch (e: IOException) {
                 // Verbindung kam gar nicht zustande: nichts gesendet, normaler Fehler. Sonst: Ausgang unbekannt.
-                if (e is ConnectException || e is UnknownHostException) throw e else throw WriteInterruptedException(e)
+                if (e is ConnectException || e is UnknownHostException || e is KlartextException) throw e else throw WriteInterruptedException(e)
             }
 
             return decode(response, deserializer)
@@ -449,12 +465,12 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         /** Modul bis 1.2 (Ordner webtreesand-api) */
         const val LEGACY_MODULE = "_webtreesand-api_"
 
-        /**
-         * Unverschluesselte Adresse (http://)? Android blockiert Klartext ohnehin - die App lehnt sie
-         * schon bei der Eingabe ab, damit der Nutzer einen verstaendlichen Hinweis statt eines
-         * Systemfehlers bekommt.
-         */
+        /** Unverschluesselte Adresse (http://)? Erlaubt nur im Heimnetz, siehe [Heimnetz]. */
         fun isCleartext(input: String): Boolean = input.trim().startsWith("http://", ignoreCase = true)
+
+        /** Unverschluesselt und im Heimnetz (Name, Literal oder privat aufgeloest)? Blockiert (DNS) - nicht auf dem Hauptthread. */
+        fun cleartextHome(input: String): Boolean =
+            isCleartext(input) && normalizeBaseUrl(input).toHttpUrlOrNull()?.host?.let(Heimnetz::hostAufgeloest) == true
 
         /** "example.org/webtrees/" -> "https://example.org/webtrees" */
         fun normalizeBaseUrl(input: String): String {

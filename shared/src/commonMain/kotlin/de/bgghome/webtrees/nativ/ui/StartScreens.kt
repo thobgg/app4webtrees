@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.res.*
 
 @Composable
@@ -101,7 +102,8 @@ fun LoginScreen(state: UiState, onLogin: (String, String) -> Unit, onGuest: () -
 
     StartFrame(
         title = stringResource(Res.string.action_sign_in),
-        subtitle = state.baseUrl + (info?.let { "\n" + stringResource(Res.string.login_server_info, it.webtrees, it.module) } ?: ""),
+        subtitle = state.baseUrl + (info?.let { "\n" + stringResource(Res.string.login_server_info, it.webtrees, it.module) } ?: "") +
+            (if (WtClient.isCleartext(state.baseUrl)) "\n" + stringResource(Res.string.http_home_hint) else ""),
         error = state.error,
     ) {
         OutlinedTextField(
@@ -137,7 +139,7 @@ fun TreesScreen(state: UiState, onChoose: (de.bgghome.webtrees.nativ.api.TreeInf
     val subtitle = when {
         user?.loggedIn == true -> stringResource(Res.string.trees_signed_in_as, user.realName)
         else -> stringResource(Res.string.trees_not_signed_in)
-    }
+    } + (if (WtClient.isCleartext(state.baseUrl)) "\n" + stringResource(Res.string.http_home_hint) else "")
 
     StartFrame(
         title = stringResource(Res.string.trees_title),

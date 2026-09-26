@@ -5,7 +5,9 @@ import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.Info
 import de.bgghome.webtrees.nativ.api.TreeInfo
 import de.bgghome.webtrees.nativ.api.WtClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 
 // Sitzung und Koppeln: Adresse eingeben, anmelden, per Link/QR-Code verbinden, abmelden - und die Wahl des Stammbaums.
@@ -28,19 +30,19 @@ internal fun AppViewModel.start() {
 }
 
 fun AppViewModel.submitUrl(input: String) {
-    if (rejectCleartext(input)) {
-        uiState.update { it.copy(error = text(Res.string.err_http_only)) }
-        return
-    }
-
-    client.baseUrl = input
-    val url = client.baseUrl
+    val url = WtClient.normalizeBaseUrl(input)
 
     if (url.isEmpty()) return
 
-    uiState.update { it.copy(busy = true, error = null, baseUrl = url) }
+    uiState.update { it.copy(busy = true, error = null) }
 
     viewModelScope.launch {
+        if (rejectCleartext(input)) {
+            uiState.update { it.copy(busy = false, error = text(Res.string.err_http_only)) }
+            return@launch
+        }
+        client.baseUrl = input
+        uiState.update { it.copy(baseUrl = url) }
         try {
             val info = client.info()
             settings.baseUrl = url
@@ -79,21 +81,23 @@ fun AppViewModel.login(user: String, password: String) {
 fun AppViewModel.connect(url: String, tree: String, code: String, user: String) {
     if (url.isBlank() || code.isBlank()) return
 
-    if (rejectCleartext(url)) {
-        uiState.update { it.copy(screen = Screen.Setup, busy = false, error = text(Res.string.err_http_only)) }
-        return
+    viewModelScope.launch {
+        if (rejectCleartext(url)) {
+            uiState.update { it.copy(screen = Screen.Setup, busy = false, error = text(Res.string.err_http_only)) }
+            return@launch
+        }
+        uiState.update { it.copy(pendingConnect = ConnectRequest(url = url.trim(), tree = tree, code = code, user = user)) }
     }
-
-    uiState.update { it.copy(pendingConnect = ConnectRequest(url = url.trim(), tree = tree, code = code, user = user)) }
 }
 
 fun AppViewModel.cancelConnect() = uiState.update { it.copy(pendingConnect = null) }
 
 /**
- * http:// wird abgelehnt - ausser im Debug-Build, der Klartext erlaubt (debug/AndroidManifest.xml), damit die
- * lokale Testinstanz (php -S) erreichbar bleibt. Im Release blockiert Android Klartext ohnehin.
+ * http:// nur im Heimnetz (nas4webtrees: NAS ohne Zertifikat) - ausser im Debug-Build, der jeden Server erlaubt.
+ * Die eigentliche Sperre sitzt im Client vor jeder Anfrage; dies hier gibt beim Eingeben eine verstaendliche Meldung.
  */
-internal fun AppViewModel.rejectCleartext(input: String): Boolean = !plattform.isDebug && WtClient.isCleartext(input)
+internal suspend fun AppViewModel.rejectCleartext(input: String): Boolean =
+    !plattform.isDebug && WtClient.isCleartext(input) && !withContext(Dispatchers.IO) { WtClient.cleartextHome(input) }
 
 /** Adresse setzen, Einmal-Code einloesen, Baum oeffnen. Eine bestehende Anmeldung an einem anderen Server wird ersetzt. */
 fun AppViewModel.confirmConnect() {

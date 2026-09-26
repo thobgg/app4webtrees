@@ -17,7 +17,7 @@ class AndroidPlattform(private val app: Application) : Plattform {
     override val client = WtClient(
         AndroidAblage(app, "wtclient"), AndroidAblage(app, "cookies"),
         userAgent = "wtAnd/$versionName (Android ${Build.VERSION.RELEASE})",
-    ).also { it.baseUrl = settings.baseUrl }
+    ).also { it.baseUrl = settings.baseUrl; it.klartextUeberall = isDebug }
     override val cacheOrdner: File get() = app.cacheDir
     override val kannErinnern = true
     override fun setReminders(on: Boolean) = AnniversaryWorker.schedule(app, on)

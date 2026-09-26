@@ -23,6 +23,7 @@ class DesktopPlattform : Plattform {
         userAgent = "$appName/$versionName (${System.getProperty("os.name")})",
     ).also {
         it.baseUrl = settings.baseUrl
+        it.klartextUeberall = isDebug
         // Kachelserver sehen denselben ehrlichen User-Agent, mit Projektadresse (OSM-Regel).
         kachelUserAgent = "$appName/$versionName (https://github.com/thobgg/app4webtrees)"
     }

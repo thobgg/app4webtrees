@@ -93,6 +93,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import de.bgghome.webtrees.nativ.api.Person
+import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.ui.*
 import de.bgghome.webtrees.nativ.ui.tree.FamilyTreeView
@@ -898,7 +899,8 @@ private fun StatusBar(state: UiState, version: String, appName: String) {
     val host = state.baseUrl.toHttpUrlOrNull()?.let { url -> url.host + (if (url.port != 80 && url.port != 443) ":${url.port}" else "") } ?: state.baseUrl
     val user = state.info?.user
     val who = if (user?.loggedIn == true) stringResource(Res.string.trees_signed_in_as, user.userName) else stringResource(Res.string.desk_guest)
-    val parts = listOfNotNull(host.takeIf { it.isNotEmpty() }, state.tree?.title, who, state.tree?.role?.let { roleLabel(it) })
+    val parts = listOfNotNull(host.takeIf { it.isNotEmpty() }, state.tree?.title, who, state.tree?.role?.let { roleLabel(it) },
+        if (WtClient.isCleartext(state.baseUrl)) stringResource(Res.string.http_home_hint) else null)
     Surface(color = MaterialTheme.colorScheme.surface) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(parts.joinToString("  ·  "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1)
