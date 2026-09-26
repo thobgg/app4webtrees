@@ -147,6 +147,7 @@ private object TafelWahl {
         orte = prefs.getBoolean(k(art, "orte"), false),
         volleDaten = prefs.getBoolean(k(art, "voll"), false),
         waagerecht = art in waagerechtMoeglich && prefs.getBoolean(k(art, "waagerecht"), art == TafelArt.Sanduhr),
+        geschwister = (prefs.getString(k(art, "geschw"), null)?.toIntOrNull() ?: 0).coerceIn(0, 2),
     )
     fun sichern(art: TafelArt, o: TafelOptionen) {
         prefs.putString("tafel_art", art.name)
@@ -155,7 +156,7 @@ private object TafelWahl {
         prefs.putBoolean(k(art, "nummern"), o.nummern); prefs.putBoolean(k(art, "oben"), o.ausgangOben)
         prefs.putString(k(art, "nach"), o.nachfahren.toString()); prefs.putBoolean(k(art, "namen"), o.namenstraeger)
         prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
-        prefs.putBoolean(k(art, "waagerecht"), o.waagerecht)
+        prefs.putBoolean(k(art, "waagerecht"), o.waagerecht); prefs.putString(k(art, "geschw"), o.geschwister.toString())
     }
 }
 
@@ -175,10 +176,11 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
     // Daten: Nachfahren einmal in voller Tiefe (Umstellen der Generationen kuerzt nur); Vorfahren so tief wie
     // eingestellt, weil jede Generation ueber sieben weitere Anfragen kostet.
     val ladeTiefe = if (art == TafelArt.Stamm) maxGen(art) else o.generationen
-    val daten by produceState<Result<TafelDaten>?>(null, tree?.name, root, art, ladeTiefe) {
+    val geschwisterLaden = if (art == TafelArt.Ahnen) o.geschwister else 0
+    val daten by produceState<Result<TafelDaten>?>(null, tree?.name, root, art, ladeTiefe, geschwisterLaden) {
         value = null
         value = if (tree == null || root == null) null else withContext(Dispatchers.IO) {
-            runCatching { tafelDatenLaden(viewModel.client, tree.name, root, art, ladeTiefe) }
+            runCatching { tafelDatenLaden(viewModel.client, tree.name, root, art, ladeTiefe, geschwisterLaden) }
         }
     }
     // Bilder im Hintergrund laden; jedes fertige Buendel zaehlt hoch und zeichnet die Vorschau neu.
@@ -186,7 +188,7 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
     LaunchedEffect(daten, o.bilder) {
         val d = daten?.getOrNull() ?: return@LaunchedEffect
         if (!o.bilder) return@LaunchedEffect
-        val personen = d.ahnen.values.map { it.person } + (d.nachfahren?.let(::nachfahrenPersonen) ?: emptyList())
+        val personen = d.ahnen.values.map { it.person } + (d.nachfahren?.let(::nachfahrenPersonen) ?: emptyList()) + d.geschwister.values.flatten()
         val urls = personen.mapNotNull { it.thumb }.distinct().filter { TafelBilder.bekannt(it) == null }
         urls.chunked(8).forEach { gruppe ->
             withContext(Dispatchers.IO) { gruppe.forEach { TafelBilder.laden(it) } }
@@ -261,6 +263,10 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
                     Haken(stringResource(Res.string.desk_chart_photos), o.bilder) { o = o.copy(bilder = it) }
                     if (art != TafelArt.Stamm) Haken(stringResource(Res.string.desk_chart_numbers), o.nummern) { o = o.copy(nummern = it) }
                     if (art == TafelArt.Ahnen) Haken(stringResource(if (o.waagerecht) Res.string.desk_chart_root_right else Res.string.desk_chart_root_top), o.ausgangOben) { o = o.copy(ausgangOben = it) }
+                    if (art == TafelArt.Ahnen) Einstellung(stringResource(Res.string.desk_chart_siblings)) {
+                        val werte = listOf(Res.string.desk_chart_siblings_none, Res.string.desk_chart_siblings_root, Res.string.desk_chart_siblings_all).map { stringResource(it) }
+                        Auswahl(werte[o.geschwister], werte) { w -> o = o.copy(geschwister = werte.indexOf(w)) }
+                    }
                     if (art == TafelArt.Stamm || art == TafelArt.Sanduhr) {
                         Haken(stringResource(Res.string.desk_chart_name_bearers), o.namenstraeger) { o = o.copy(namenstraeger = it) }
                         Haken(stringResource(Res.string.desk_chart_spouses), o.partner) { o = o.copy(partner = it) }

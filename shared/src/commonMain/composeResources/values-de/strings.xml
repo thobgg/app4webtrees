@@ -430,6 +430,10 @@ GEDCOM, Zusammenführen, Orte und Quellen verwaltet webtrees selbst – das Men�
     <string name="desk_chart_page_title">%1$s · Nr. %2$s · Fortsetzung von S. %3$d</string>
     <string name="desk_chart_page_ref">→ S. %1$d</string>
     <string name="desk_chart_root_top">Proband oben</string>
+    <string name="desk_chart_siblings">Geschwister</string>
+    <string name="desk_chart_siblings_none">keine</string>
+    <string name="desk_chart_siblings_root">des Probanden</string>
+    <string name="desk_chart_siblings_all">aller Vorfahren</string>
     <string name="desk_chart_fan">Fächertafel</string>
     <string name="desk_chart_fan_hint">Der Proband in der Mitte, jede Generation der Vorfahren ein Ring darum, als Halbkreis.</string>
     <string name="desk_chart_title_fan">Fächertafel %1$s</string>

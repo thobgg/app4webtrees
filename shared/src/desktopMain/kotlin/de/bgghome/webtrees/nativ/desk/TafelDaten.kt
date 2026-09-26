@@ -90,12 +90,15 @@ fun tafelBaum(k: DescendantNode, generationen: Int, namenstraeger: Boolean = fal
  */
 fun ahnenBaum(
     ahnen: Map<Long, AhnenEintrag>, generationen: Int, verweise: Boolean = false, start: Long = 1L, hinweise: Map<Long, String> = emptyMap(),
+    geschwister: Map<Long, List<Person>> = emptyMap(),
 ): TafelPerson? {
     val erste = if (verweise) ahnen.entries.filter { it.value.person.xref.isNotEmpty() }.groupBy { it.value.person.xref }.mapValues { e -> e.value.minOf { it.key } } else emptyMap()
     val obersteReihe = reihe(start) + generationen - 1
     fun knoten(n: Long): TafelPerson? = ahnen[n]?.let { a ->
         val v = erste[a.person.xref]?.takeIf { it != n }
-        TafelPerson(a.person, if (v != null || reihe(n) >= obersteReihe) emptyList() else listOfNotNull(knoten(2 * n), knoten(2 * n + 1)), n, verweis = v, hinweis = hinweise[n])
+        val eltern = if (v != null || reihe(n) >= obersteReihe) emptyList() else listOfNotNull(knoten(2 * n), knoten(2 * n + 1))
+        TafelPerson(a.person, eltern, n, verweis = v, hinweis = hinweise[n],
+            geschwister = if (eltern.isEmpty()) emptyList() else geschwister[n].orEmpty(), geschwisterLinks = n > 1 && n % 2 == 0L)
     }
     return knoten(start)
 }
@@ -134,7 +137,25 @@ fun linienBaum(art: TafelArt, ahnen: Map<Long, AhnenEintrag>, generationen: Int,
 }
 
 /** Geladene Daten einer Tafel: Vorfahren nach Kekule-Nummer und/oder der Nachkommenbaum. */
-class TafelDaten(val ahnen: Map<Long, AhnenEintrag>, val nachfahren: DescendantNode?)
+class TafelDaten(val ahnen: Map<Long, AhnenEintrag>, val nachfahren: DescendantNode?, val geschwister: Map<Long, List<Person>> = emptyMap())
+
+/**
+ * Geschwister der Vorfahren (volle Geschwister aus der ersten Elternfamilie, nach Geburt), je Person ein Abruf -
+ * darum hoechstens bis zur 6. Generation. [nurProband]: nur Nr. 1.
+ */
+suspend fun geschwisterLaden(client: WtClient, tree: String, ahnen: Map<Long, AhnenEintrag>, generationen: Int, nurProband: Boolean): Map<Long, List<Person>> =
+    coroutineScope {
+        ahnen.filter { (n, a) -> (if (nurProband) n == 1L else reihe(n) < minOf(generationen - 1, 6)) && a.hatEltern && !a.person.isPrivate }
+            .entries.chunked(8).flatMap { gruppe ->
+                gruppe.map { (n, a) ->
+                    async {
+                        val d = runCatching { client.individual(tree, a.person.xref) }.getOrNull()
+                        n to d?.parentFamilies?.firstOrNull()?.children.orEmpty().filter { it.xref != a.person.xref }
+                            .sortedBy { it.birth?.date?.jd?.takeIf { j -> j > 0 } ?: Int.MAX_VALUE }
+                    }
+                }.awaitAll()
+            }.filter { it.second.isNotEmpty() }.toMap()
+    }
 
 /** Groesste Tiefe je Tafelart (Vorfahren; bei der Stammtafel die Nachfahren). */
 fun maxGen(art: TafelArt) = when (art) {
@@ -146,19 +167,22 @@ fun maxGen(art: TafelArt) = when (art) {
     TafelArt.Stammlinie, TafelArt.Mutterstamm -> 30
 }
 
-suspend fun tafelDatenLaden(client: WtClient, tree: String, xref: String, art: TafelArt, generationen: Int): TafelDaten = when (art) {
+suspend fun tafelDatenLaden(client: WtClient, tree: String, xref: String, art: TafelArt, generationen: Int, geschwister: Int = 0): TafelDaten = when (art) {
     TafelArt.Stamm -> TafelDaten(emptyMap(), nachfahrenLaden(client, tree, xref, maxGen(art)))
     TafelArt.Sanduhr -> TafelDaten(ahnenLaden(client, tree, xref, generationen), nachfahrenLaden(client, tree, xref, 10))
     TafelArt.Stammlinie -> TafelDaten(ahnenLaden(client, tree, xref, generationen) { n -> n and (n - 1) == 0L }, null)
     TafelArt.Mutterstamm -> TafelDaten(ahnenLaden(client, tree, xref, generationen) { n -> (n + 1) and n == 0L }, null)
-    TafelArt.Ahnen, TafelArt.AhnenSeiten, TafelArt.Aeltester, TafelArt.Faecher, TafelArt.Kreis -> TafelDaten(ahnenLaden(client, tree, xref, generationen), null)
+    TafelArt.Ahnen -> ahnenLaden(client, tree, xref, generationen).let { a ->
+        TafelDaten(a, null, if (geschwister > 0) geschwisterLaden(client, tree, a, generationen, geschwister == 1) else emptyMap())
+    }
+    TafelArt.AhnenSeiten, TafelArt.Aeltester, TafelArt.Faecher, TafelArt.Kreis -> TafelDaten(ahnenLaden(client, tree, xref, generationen), null)
 }
 
 /** Der Inhalt einer Tafel aus den geladenen Daten und den Einstellungen. */
 fun tafelInhalt(art: TafelArt, d: TafelDaten, o: TafelOptionen): TafelInhalt? = when (art) {
     TafelArt.Stamm -> d.nachfahren?.let { TafelInhalt(nachfahren = tafelBaum(it, o.generationen, o.namenstraeger, o.partner)) }
     // Senkrecht steht der Proband klassisch unten, waagerecht links; [ausgangOben] kehrt das um ("oben" bzw. "rechts")
-    TafelArt.Ahnen -> ahnenBaum(d.ahnen, o.generationen, o.nummern)?.let { if (o.ausgangOben != o.waagerecht) TafelInhalt(nachfahren = it) else TafelInhalt(vorfahren = it) }
+    TafelArt.Ahnen -> ahnenBaum(d.ahnen, o.generationen, o.nummern, geschwister = if (o.geschwister > 0) d.geschwister else emptyMap())?.let { if (o.ausgangOben != o.waagerecht) TafelInhalt(nachfahren = it) else TafelInhalt(vorfahren = it) }
     TafelArt.Sanduhr -> d.nachfahren?.let { n ->
         TafelInhalt(vorfahren = ahnenBaum(d.ahnen, o.generationen, o.nummern), nachfahren = tafelBaum(n, o.nachfahren + 1, o.namenstraeger, o.partner))
     }

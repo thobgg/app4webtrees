@@ -61,10 +61,10 @@ class TafelBilderErzeugen {
             val o0 = TafelOptionen(
                 generationen = gen.toInt(), stil = TafelStil.valueOf(stilName), orte = "orte" in schalter, volleDaten = "voll" in schalter,
                 partner = "partner" in schalter || (art in setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester) && "allein" !in schalter),
-                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, bilder = "ohnebild" !in schalter, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
+                ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, bilder = "ohnebild" !in schalter, geschwister = if ("geschwalle" in schalter) 2 else if ("geschw" in schalter) 1 else 0, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
                 nachfahren = schalter.firstOrNull { it.startsWith("nach") }?.drop(4)?.toInt() ?: 3,
             )
-            val daten = runBlocking { tafelDatenLaden(client, baumName, xref, art, if (art == TafelArt.Stamm) maxGen(art) else o0.generationen) }
+            val daten = runBlocking { tafelDatenLaden(client, baumName, xref, art, if (art == TafelArt.Stamm) maxGen(art) else o0.generationen, o0.geschwister) }
             val name0 = daten.ahnen[1L]?.person?.name ?: daten.nachfahren?.person?.name.orEmpty()
             val o = o0.copy(titel = tafelTitel(art, name0))
             val (doc, groesse) = tafelErzeugen(art, daten, o, ::bild, "Privat", fusszeile("wtTux", baumTitel))!!

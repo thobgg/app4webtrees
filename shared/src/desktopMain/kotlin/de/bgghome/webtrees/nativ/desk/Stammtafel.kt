@@ -43,6 +43,8 @@ import java.awt.color.ColorSpace
 class TafelPerson(
     val person: Person, val kinder: List<TafelPerson>, val nummer: Long? = null,
     val partner: List<Person> = emptyList(), val verweis: Long? = null, val hinweis: String? = null, val aufLinie: Boolean = false,
+    /** Ahnentafel: Geschwister neben der Person, an derselben Elternlinie - beim Vater links, sonst rechts. */
+    val geschwister: List<Person> = emptyList(), val geschwisterLinks: Boolean = false,
 )
 
 /**
@@ -75,6 +77,8 @@ data class TafelOptionen(
     val volleDaten: Boolean = false,
     /** Generationen als Spalten von links nach rechts statt als Reihen. */
     val waagerecht: Boolean = false,
+    /** Nur Ahnentafel: 0 keine Geschwister, 1 die des Probanden, 2 die aller Vorfahren. */
+    val geschwister: Int = 0,
 )
 
 /** Was eine Tafel zeichnet: Vorfahren nach oben, Nachfahren nach unten (je nach Art einer oder beide Teile). */
@@ -117,9 +121,12 @@ fun stammtafelLayout(wurzel: TafelPerson, masse: TafelMasse): TafelLayout {
     // Ein Teilbaum: Versatz jedes Kindes zur Mitte der Person, Umriss je Tiefe (linkeste und rechteste Mitte).
     class Teil(val kinderVersatz: List<Float>, val links: MutableList<Float>, val rechts: MutableList<Float>)
     val teile = HashMap<TafelPerson, Teil>()
+    // Geschwister verbreitern die Person nach einer Seite (Mitte der aeussersten Geschwisterkarte)
+    fun lw(k: TafelPerson) = if (k.geschwisterLinks) k.geschwister.size * masse.slot else 0f
+    fun rw(k: TafelPerson) = if (k.geschwisterLinks) 0f else k.geschwister.size * masse.slot
     fun rechnen(k: TafelPerson): Teil {
         val kinder = k.kinder.map(::rechnen)
-        if (kinder.isEmpty()) return Teil(emptyList(), mutableListOf(0f), mutableListOf(0f)).also { teile[k] = it }
+        if (kinder.isEmpty()) return Teil(emptyList(), mutableListOf(-lw(k)), mutableListOf(rw(k))).also { teile[k] = it }
         // Kinder von links nach rechts ansetzen; jedes so weit rechts, dass es in keiner Tiefe den bisherigen Umriss beruehrt
         val versatz = ArrayList<Float>()
         val accL = ArrayList<Float>(); val accR = ArrayList<Float>()
@@ -136,7 +143,7 @@ fun stammtafelLayout(wurzel: TafelPerson, masse: TafelMasse): TafelLayout {
             }
         }
         val mitte = (versatz.first() + versatz.last()) / 2
-        val teil = Teil(versatz.map { it - mitte }, mutableListOf(0f).apply { addAll(accL.map { it - mitte }) }, mutableListOf(0f).apply { addAll(accR.map { it - mitte }) })
+        val teil = Teil(versatz.map { it - mitte }, mutableListOf(-lw(k)).apply { addAll(accL.map { it - mitte }) }, mutableListOf(rw(k)).apply { addAll(accR.map { it - mitte }) })
         teile[k] = teil
         return teil
     }
@@ -302,11 +309,22 @@ fun tafelPdf(
         inhalt.vorfahren?.let { add(Teil(if (inhalt.linie) linienLayout(it, masse) else stammtafelLayout(it, masse), true)) }
         inhalt.nachfahren?.let { add(Teil(stammtafelLayout(it, masse), false)) }
     }
+    // Geschwister: eigene Plaetze in der Reihe der Person, nur wenn deren Eltern auf der Tafel stehen
+    val geschwisterVon = HashMap<TafelPlatz, List<TafelPlatz>>()
+    teile.forEach { t ->
+        t.layout.plaetze.filter { it.knoten.geschwister.isNotEmpty() && it.knoten.kinder.isNotEmpty() }.forEach { pl ->
+            val richtung = if (pl.knoten.geschwisterLinks) -1 else 1
+            geschwisterVon[pl] = pl.knoten.geschwister.mapIndexed { i, g ->
+                TafelPlatz(TafelPerson(g, emptyList()), pl.mitteX + richtung * (i + 1) * masse.slot, pl.obenY, pl.ebene, null)
+            }
+        }
+    }
+    fun Teil.alle() = layout.plaetze + layout.plaetze.flatMap { geschwisterVon[it].orEmpty() }
     // Ausgangspersonen uebereinander, dann alles an den linken Rand
     if (teile.size == 2) teile[0].dx = teile[1].layout.plaetze.first().mitteX - teile[0].layout.plaetze.first().mitteX
-    val minX = teile.minOf { t -> t.layout.plaetze.minOf { it.mitteX } + t.dx } - masse.slot / 2
+    val minX = teile.minOf { t -> t.alle().minOf { it.mitteX } + t.dx } - masse.slot / 2
     teile.forEach { it.dx -= minX }
-    val layoutBreite = teile.maxOf { t -> t.layout.plaetze.maxOf { it.mitteX } + t.dx } + masse.slot / 2
+    val layoutBreite = teile.maxOf { t -> t.alle().maxOf { it.mitteX } + t.dx } + masse.slot / 2
     val oben = teile.firstOrNull { it.aufwaerts }?.layout?.plaetze?.maxOf { it.ebene } ?: 0
     val unten = teile.firstOrNull { !it.aufwaerts }?.layout?.plaetze?.maxOf { it.ebene } ?: 0
     val layoutHoehe = (oben + unten + 1) * masse.ebeneH - masse.verbinder
@@ -314,7 +332,9 @@ fun tafelPdf(
     fun Teil.oberkante(pl: TafelPlatz) = reihe(pl) * masse.ebeneH
     fun Teil.x(pl: TafelPlatz) = pl.mitteX + dx
     // Jeder Platz einmal: bei der Sanduhr steht die Ausgangsperson nur im unteren Teil
-    val gezeichnet = teile.flatMap { t -> t.layout.plaetze.filter { !(teile.size == 2 && t.aufwaerts && it.ebene == 0) }.map { t to it } }
+    val gezeichnet = teile.flatMap { t ->
+        t.layout.plaetze.filter { !(teile.size == 2 && t.aufwaerts && it.ebene == 0) }.flatMap { pl -> listOf(t to pl) + geschwisterVon[pl].orEmpty().map { t to it } }
+    }
     val nummern = doppelteNummern(gezeichnet.map { it.second })
     val doc = PDDocument()
     val f = farben(o.stil)
@@ -379,7 +399,10 @@ fun tafelPdf(
                 val ex = t.x(eltern)
                 cs.moveTo(px(start, ex), pyv(start, ex)); cs.lineTo(px(mitte, ex), pyv(mitte, ex))
                 val xs = kinder.map { t.x(it) }
-                val q1 = minOf(xs.min(), ex); val q2 = maxOf(xs.max(), ex)
+                // Geschwister haengen an derselben Linie wie die Person
+                val gs = geschwisterVon[eltern].orEmpty().map { t.x(it) }
+                gs.forEach { q -> cs.moveTo(px(start, q), pyv(start, q)); cs.lineTo(px(mitte, q), pyv(mitte, q)) }
+                val q1 = minOf(xs.min(), ex, gs.minOrNull() ?: ex); val q2 = maxOf(xs.max(), ex, gs.maxOrNull() ?: ex)
                 cs.moveTo(px(mitte, q1), pyv(mitte, q1)); cs.lineTo(px(mitte, q2), pyv(mitte, q2))
                 kinder.forEach { k ->
                     val ende = if (t.aufwaerts) t.oberkante(k) + masse.laengeG else t.oberkante(k)

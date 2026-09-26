@@ -435,6 +435,10 @@ GEDCOM, merging, places and sources are managed by webtrees itself – the webtr
     <string name="desk_chart_page_title">%1$s · no. %2$s · continued from p. %3$d</string>
     <string name="desk_chart_page_ref">→ p. %1$d</string>
     <string name="desk_chart_root_top">Starting person at the top</string>
+    <string name="desk_chart_siblings">Siblings</string>
+    <string name="desk_chart_siblings_none">none</string>
+    <string name="desk_chart_siblings_root">of the root person</string>
+    <string name="desk_chart_siblings_all">of all ancestors</string>
     <string name="desk_chart_fan">Fan chart</string>
     <string name="desk_chart_fan_hint">The root person in the middle, each generation of ancestors a ring around them, as a half circle.</string>
     <string name="desk_chart_title_fan">Fan chart %1$s</string>
