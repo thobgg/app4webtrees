@@ -78,6 +78,9 @@ data class BuchOptionen(
     val nummerierung: Nummerierung = Nummerierung.Saragossa,
     val partner: Boolean = true,
     val namenstraeger: Boolean = false,
+    /** Familienbuch: chronologisch statt alphabetisch; Ort = Ortsfamilienbuch (leer = alle Familien). */
+    val familienChronologisch: Boolean = false,
+    val ortFilter: String = "",
 )
 
 // ── Formate der Angaben ──

@@ -330,6 +330,15 @@
     <string name="desk_title_ancestors">Ahnenliste von %1$s</string>
     <string name="desk_title_descendants">Stammliste von %1$s</string>
     <string name="desk_title_events">Ereignisse – %1$s</string>
+    <string name="desk_book_needs_export">Das Familienbuch braucht den ganzen Stammbaum am Stück – dafür muss auf dem Server api4webtrees ab Version 1.9 laufen.</string>
+    <string name="desk_book_title_families">Familienbuch %1$s</string>
+    <string name="desk_book_title_ofb">Ortsfamilienbuch %1$s</string>
+    <string name="desk_book_families">Familien</string>
+    <string name="desk_book_family_hint">Alle Familien des Stammbaums wie in einem Ortsfamilienbuch: Eheleute mit Verweis auf ihre Elternfamilie, Heirat, Kinder mit Verweis auf ihre eigene Familie. Mit Ort nur die Familien dieses Orts.</string>
+    <string name="desk_book_sort">Sortierung</string>
+    <string name="desk_book_sort_alpha">alphabetisch</string>
+    <string name="desk_book_sort_chrono">chronologisch</string>
+    <string name="desk_book_place_filter">Ort (Ortsfamilienbuch, leer = alle)</string>
     <string name="desk_book_coming_family">Familienbuch folgt.</string>
     <string name="desk_book_title_descendants">Nachfahren von %1$s</string>
     <string name="desk_book_descendants">Nachfahren</string>

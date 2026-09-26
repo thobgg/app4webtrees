@@ -31,6 +31,13 @@ class BuchErzeugen {
         val titel = info.trees.first { it.name == baum }.title
         // WT_BUCH: "I1:7" (Vorfahrenbuch) oder "Nachfahren:I52:5:Henry"
         val t = (System.getenv("WT_BUCH") ?: "I1:7").split(':')
+        if (t[0] == "Familien") {
+            val o = BuchOptionen(ortFilter = t.getOrNull(1).orEmpty(), familienChronologisch = t.getOrNull(2) == "chrono")
+            val buch = familienbuch(runBlocking { familienbuchLaden(client, baum, true) { println(it) } }, o, titel, "wtTux")
+            BuchFormat.entries.forEach { f -> buchSchreiben(buch, f, File(ziel, "familienbuch.${f.endung}")) }
+            println("Buch: ${buch.bloecke.size} Bloecke")
+            return
+        }
         val nach = t[0] == "Nachfahren"
         val (xref, gen) = if (nach) t[1] to t[2].toInt() else t[0] to t[1].toInt()
         val o = BuchOptionen(generationen = gen, vorwort = "Alle Angaben dieses Buches sind erfunden.",

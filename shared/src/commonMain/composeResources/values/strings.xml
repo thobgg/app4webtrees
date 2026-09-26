@@ -335,6 +335,15 @@
     <string name="desk_title_ancestors">Ancestor list of %1$s</string>
     <string name="desk_title_descendants">Descendant list of %1$s</string>
     <string name="desk_title_events">Events – %1$s</string>
+    <string name="desk_book_needs_export">The family book needs the whole tree at once – the server must run api4webtrees 1.9 or later.</string>
+    <string name="desk_book_title_families">Family book %1$s</string>
+    <string name="desk_book_title_ofb">Local family book %1$s</string>
+    <string name="desk_book_families">Families</string>
+    <string name="desk_book_family_hint">All families of the tree like a local family book: spouses with a reference to their parents’ family, marriage, children with a reference to their own family. With a place, only the families of that place.</string>
+    <string name="desk_book_sort">Order</string>
+    <string name="desk_book_sort_alpha">alphabetical</string>
+    <string name="desk_book_sort_chrono">chronological</string>
+    <string name="desk_book_place_filter">Place (local family book, empty = all)</string>
     <string name="desk_book_coming_family">Family book follows.</string>
     <string name="desk_book_title_descendants">Descendants of %1$s</string>
     <string name="desk_book_descendants">Descendants</string>

@@ -59,6 +59,8 @@ import org.jetbrains.compose.resources.stringResource
  * Seiten des fertigen PDFs. Ausgabe als PDF, DOCX, HTML, TeX oder Text.
  */
 
+enum class BuchArt { Vorfahren, Nachfahren, Familien }
+
 private object BuchWahl {
     private val prefs get() = DeskLayout.prefs
     fun laden() = BuchOptionen(
@@ -71,14 +73,16 @@ private object BuchWahl {
         vorwort = prefs.getString("buch_vorwort", null).orEmpty(),
         nummerierung = Nummerierung.entries.firstOrNull { it.name == prefs.getString("buch_nr", null) } ?: Nummerierung.Saragossa,
         partner = prefs.getBoolean("buch_partner", true), namenstraeger = prefs.getBoolean("buch_namen", false),
+        familienChronologisch = prefs.getBoolean("buch_chrono", false), ortFilter = prefs.getString("buch_ort", null).orEmpty(),
     )
-    fun art(): Boolean = prefs.getBoolean("buch_nachfahren", false)
+    fun art(): BuchArt = BuchArt.entries.firstOrNull { it.name == prefs.getString("buch_art", null) } ?: BuchArt.Vorfahren
     fun sichern(o: BuchOptionen) {
         prefs.putString("buch_gen", o.generationen.toString()); prefs.putBoolean("buch_bilder", o.bilder); prefs.putBoolean("buch_farbe", o.farbkodierung)
         prefs.putBoolean("buch_notizen", o.notizen); prefs.putBoolean("buch_quellen", o.quellen); prefs.putBoolean("buch_orte_kurz", o.orteKuerzen)
         prefs.putBoolean("buch_doppelt", o.doppelteZeigen); prefs.putBoolean("buch_reg_namen", o.namen); prefs.putBoolean("buch_reg_orte", o.orte)
         prefs.putBoolean("buch_reg_berufe", o.berufe); prefs.putBoolean("buch_reg_quellen", o.quellenVerzeichnis); prefs.putString("buch_vorwort", o.vorwort)
         prefs.putString("buch_nr", o.nummerierung.name); prefs.putBoolean("buch_partner", o.partner); prefs.putBoolean("buch_namen", o.namenstraeger)
+        prefs.putBoolean("buch_chrono", o.familienChronologisch); prefs.putString("buch_ort", o.ortFilter)
     }
 }
 
@@ -87,17 +91,20 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     val appName = LocalAppName.current
     val baum = state.tree?.title.orEmpty()
     var o by remember { mutableStateOf(BuchWahl.laden()) }
-    var nachfahren by remember { mutableStateOf(BuchWahl.art()) }
-    LaunchedEffect(o, nachfahren) { BuchWahl.sichern(o); DeskLayout.prefs.putBoolean("buch_nachfahren", nachfahren) }
+    var art by remember { mutableStateOf(BuchWahl.art()) }
+    val nachfahren = art == BuchArt.Nachfahren
+    val familien = art == BuchArt.Familien
+    LaunchedEffect(o, art) { BuchWahl.sichern(o); DeskLayout.prefs.putString("buch_art", art.name) }
     var fortschritt by remember { mutableStateOf("") }
     // Daten: alle Angaben und Bilder - neu nur, wenn sich Buchart, Tiefe oder Bilder aendern
-    val daten by produceState<Result<Any>?>(null, state.tree?.name, state.root, o.generationen, o.bilder, nachfahren) {
+    val daten by produceState<Result<Any>?>(null, state.tree?.name, state.root, if (familien) 0 else o.generationen, o.bilder, art) {
         value = null
         fortschritt = ""
         val tree = state.tree; val root = state.root
         value = if (tree == null || root == null) null else withContext(Dispatchers.IO) {
             runCatching {
-                if (nachfahren) nachfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
+                if (familien) familienbuchLaden(viewModel.client, tree.name, o.bilder) { fortschritt = it }
+                else if (nachfahren) nachfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
                 else vorfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
             }
         }
@@ -105,6 +112,7 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     val buch = remember(daten, o) {
         when (val d = daten?.getOrNull()) {
             is NachfahrenDaten -> nachfahrenbuch(d, o, baum, appName)
+            is FamilienDaten -> familienbuch(d, o, baum, appName)
             is BuchDaten -> vorfahrenbuch(d, o, baum, appName)
             else -> null
         }
@@ -134,21 +142,29 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
             Row(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 Column(Modifier.width(200.dp).fillMaxHeight().background(MaterialTheme.colorScheme.surface).padding(vertical = 8.dp)) {
                     ArtGruppe(stringResource(Res.string.desk_book_group_standard))
-                    ArtEintrag(stringResource(Res.string.desk_book_ancestor_book), !nachfahren) { nachfahren = false; o = o.copy(generationen = o.generationen.coerceAtMost(12)) }
-                    ArtEintrag(stringResource(Res.string.desk_book_descendant_book), nachfahren) { nachfahren = true; o = o.copy(generationen = o.generationen.coerceAtMost(10)) }
+                    ArtEintrag(stringResource(Res.string.desk_book_ancestor_book), art == BuchArt.Vorfahren) { art = BuchArt.Vorfahren; o = o.copy(generationen = o.generationen.coerceAtMost(12)) }
+                    ArtEintrag(stringResource(Res.string.desk_book_descendant_book), nachfahren) { art = BuchArt.Nachfahren; o = o.copy(generationen = o.generationen.coerceAtMost(10)) }
                     Spacer(Modifier.height(8.dp))
                     ArtGruppe(stringResource(Res.string.desk_book_group_complete))
-                    ArtEintrag(stringResource(Res.string.desk_book_family_book) + " …", false) {}
-                    Text(stringResource(Res.string.desk_book_coming_family), Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    ArtEintrag(stringResource(Res.string.desk_book_family_book), familien) { art = BuchArt.Familien }
                 }
                 VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Column(Modifier.width(340.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(stringResource(if (nachfahren) Res.string.desk_book_descendant_book else Res.string.desk_book_ancestor_book), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(if (nachfahren) Res.string.desk_book_descendant_hint else Res.string.desk_book_ancestor_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(when (art) { BuchArt.Nachfahren -> Res.string.desk_book_descendant_book; BuchArt.Familien -> Res.string.desk_book_family_book; else -> Res.string.desk_book_ancestor_book }),
+                        style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(when (art) { BuchArt.Nachfahren -> Res.string.desk_book_descendant_hint; BuchArt.Familien -> Res.string.desk_book_family_hint; else -> Res.string.desk_book_ancestor_hint }),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     val wer = state.detail?.takeIf { it.person.xref == state.root }?.person?.name ?: state.people.firstOrNull { it.xref == state.root }?.name.orEmpty()
-                    Einstellung(stringResource(Res.string.desk_chart_person)) { Text(wer, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold) }
-                    Einstellung(stringResource(Res.string.desk_chart_generations)) {
+                    if (familien) {
+                        Einstellung(stringResource(Res.string.desk_book_sort)) {
+                            val werte = listOf(stringResource(Res.string.desk_book_sort_alpha), stringResource(Res.string.desk_book_sort_chrono))
+                            Auswahl(werte[if (o.familienChronologisch) 1 else 0], werte) { w -> o = o.copy(familienChronologisch = werte.indexOf(w) == 1) }
+                        }
+                        OutlinedTextField(o.ortFilter, { o = o.copy(ortFilter = it) }, label = { Text(stringResource(Res.string.desk_book_place_filter)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                    }
+                    if (!familien) Einstellung(stringResource(Res.string.desk_chart_person)) { Text(wer, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold) }
+                    if (!familien) Einstellung(stringResource(Res.string.desk_chart_generations)) {
                         Auswahl(o.generationen.toString(), (2..(if (nachfahren) 10 else 12)).map { it.toString() }) { o = o.copy(generationen = it.toInt()) }
                     }
                     if (nachfahren) {
@@ -165,10 +181,10 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     Haken(stringResource(Res.string.desk_book_notes), o.notizen) { o = o.copy(notizen = it) }
                     Haken(stringResource(Res.string.desk_book_sources), o.quellen) { o = o.copy(quellen = it) }
                     Haken(stringResource(Res.string.desk_book_short_places), o.orteKuerzen) { o = o.copy(orteKuerzen = it) }
-                    if (!nachfahren) Haken(stringResource(Res.string.desk_book_duplicates), o.doppelteZeigen) { o = o.copy(doppelteZeigen = it) }
+                    if (art == BuchArt.Vorfahren) Haken(stringResource(Res.string.desk_book_duplicates), o.doppelteZeigen) { o = o.copy(doppelteZeigen = it) }
                     Text(stringResource(Res.string.desk_book_section_look), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_chart_photos), o.bilder) { o = o.copy(bilder = it) }
-                    Haken(stringResource(if (nachfahren) Res.string.desk_book_branch_colors else Res.string.desk_book_color), o.farbkodierung) { o = o.copy(farbkodierung = it) }
+                    if (!familien) Haken(stringResource(if (nachfahren) Res.string.desk_book_branch_colors else Res.string.desk_book_color), o.farbkodierung) { o = o.copy(farbkodierung = it) }
                     Text(stringResource(Res.string.desk_book_section_indexes), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_book_index_names), o.namen) { o = o.copy(namen = it) }
                     Haken(stringResource(Res.string.desk_book_index_places), o.orte) { o = o.copy(orte = it) }
