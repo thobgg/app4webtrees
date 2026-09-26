@@ -21,6 +21,15 @@
 | :-: | :-: |
 | **Person sheet** – events as a table, the family beside them, print and PDF | **wtTux on Linux** – the same program |
 
+<p align="center">
+  <img src="docs/screenshots/desktop-tafel-fenster.jpg" alt="wtTux: chart window with ancestor chart" width="100%">
+  <br><b>Charts</b> – chart type, generations, style (parchment, classic, colour, black and white), pictures and Kekule numbers; the preview is the finished sheet, ready to print or save as PDF.
+</p>
+
+| <img src="docs/screenshots/tafel-stammtafel.jpg" alt="Descendant chart of Cosimo de' Medici" width="100%"> | <img src="docs/screenshots/tafel-ahnentafel.jpg" alt="Ancestor chart of Cosimo I de' Medici with Kekule numbers" width="100%"> |
+| :-: | :-: |
+| **Descendant chart** – all descendants on one sheet | **Ancestor chart** – root person at the bottom, Kekule numbers |
+
 <p align="center"><sub>Historical tree of the Medici. Portrait of Caterina Sforza: <a href="https://commons.wikimedia.org/wiki/File:Italia,_caterina_riario_di_forl%C3%AC,_riproduzione_della_medaglia_del_1488_ca..JPG">Sailko</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; all other portraits public domain (Wikimedia Commons).</sub></p>
 
 **Android:** the APK is signed. To install outside the Play Store, Android asks once to allow your browser to install apps.  
