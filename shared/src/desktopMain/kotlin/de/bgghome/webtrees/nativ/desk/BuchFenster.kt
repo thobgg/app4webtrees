@@ -204,7 +204,8 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     if (art == BuchArt.Vorfahren) Haken(stringResource(Res.string.desk_book_duplicates), o.doppelteZeigen, stringResource(Res.string.tipp_duplicates)) { o = o.copy(doppelteZeigen = it) }
                     Text(stringResource(Res.string.desk_book_section_look), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_chart_photos), o.bilder) { o = o.copy(bilder = it) }
-                    if (o.bilder && state.tree != null) MedienOrdnerZeile(viewModel.client.baseUrl, state.tree.name)
+                    // Beim Stammbaum auf diesem PC liegt der Medienordner bei uns - kein Feld noetig
+                    if (o.bilder && state.tree != null && !de.bgghome.webtrees.nativ.lokal.LokalBetrieb.istLokal(viewModel.client.baseUrl)) MedienOrdnerZeile(viewModel.client.baseUrl, state.tree.name)
                     if (!familien) Haken(stringResource(Res.string.desk_book_foldout), o.tafel, stringResource(Res.string.tipp_foldout)) { o = o.copy(tafel = it) }
                     if (!familien) Haken(stringResource(if (nachfahren) Res.string.desk_book_branch_colors else Res.string.desk_book_color), o.farbkodierung, stringResource(Res.string.tipp_book_color)) { o = o.copy(farbkodierung = it) }
                     Text(stringResource(Res.string.desk_book_section_indexes), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))

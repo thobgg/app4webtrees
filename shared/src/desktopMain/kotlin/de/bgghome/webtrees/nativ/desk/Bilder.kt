@@ -57,9 +57,13 @@ object Bilder {
 
     private fun ordnerSchluessel(server: String, tree: String) = "medien_ordner:${schluessel(server)}/$tree"
 
-    /** Der Medienordner auf diesem PC fuer diesen Baum, wenn eingestellt und vorhanden. */
+    /**
+     * Der Medienordner auf diesem PC fuer diesen Baum: eingestellt und vorhanden - oder beim Stammbaum auf diesem PC der
+     * Medienordner des lokalen webtrees, ohne dass jemand etwas eintragen muss.
+     */
     fun medienOrdner(server: String, tree: String): File? =
         DeskLayout.prefs.getString(ordnerSchluessel(server, tree), null)?.takeIf(String::isNotBlank)?.let(::File)?.takeIf { it.isDirectory }
+            ?: if (de.bgghome.webtrees.nativ.lokal.LokalBetrieb.istLokal(server)) File(de.bgghome.webtrees.nativ.lokal.LokalOrte.webtrees, "data/media").takeIf { it.isDirectory } else null
 
     fun medienOrdnerPfad(server: String, tree: String): String = DeskLayout.prefs.getString(ordnerSchluessel(server, tree), null).orEmpty()
 
