@@ -23,3 +23,9 @@
 - **HTML** for a website, **TeX** for typesetting with LaTeX, **Text**.
 
 For large trees, loading persons and pictures takes a moment; the window shows the progress.
+
+## Large trees with many pictures
+
+webtrees renders every thumbnail on the server when it is first requested – with thousands of people the first run takes a while. wtWin loads only the main picture per person, six at a time, shows the progress (“Pictures 2,340/8,900 – from this PC …, cache …, server …”) and can be stopped with **Continue without the remaining pictures**. Whatever has been loaded once stays in the cache on this PC (`~/.cache/app4webtrees/medien/<server>/<tree>/`, on Windows in the application data folder); the next run and the charts afterwards need nothing from the server. The book dialog shows the cache size and **Clear picture cache** under Appearance.
+
+If you keep a copy of the webtrees media folder on this PC (for example because you upload by FTP), enter it as **Media folder on this PC**: pictures are then read from there and scaled locally, without the server. Everyone else leaves the field empty. webtrees always remains the source; the cache and the folder are copies only.

@@ -290,7 +290,7 @@ internal fun geschlechtZeichen(p: Person) = when (p.sex) { "M" -> "♂"; "F" -> 
 
 class BuchDaten(val ahnen: Map<Long, AhnenEintrag>, val details: Map<Long, IndividualDetail>, val bilder: Map<String, BufferedImage>)
 
-suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean, fortschritt: (String) -> Unit = {}): BuchDaten = coroutineScope {
+suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean, fortschritt: (String) -> Unit = {}, abbruch: () -> Boolean = { false }): BuchDaten = coroutineScope {
     // Ganzer Baum aus Zwischenspeicher oder Export (ab Stufe 17), wenn sich das lohnt - sonst Person fuer Person
     val baum = BaumSpeicher.holen(client, tree, (1 shl generationen.coerceAtMost(20)) - 1) { g, t -> fortschritt(Texte.t(Res.string.desk_book_progress_tree, g, t)) }
     val ahnen = if (baum != null) ahnenAusBaum(baum, xref, generationen) else ahnenLaden(client, tree, xref, generationen)
@@ -300,16 +300,9 @@ suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, gen
         gruppe.map { x -> async { x to runCatching { client.individual(tree, x) }.getOrNull() } }.awaitAll()
     }.mapNotNull { (x, d) -> d?.let { x to it } }.toMap()
     fortschritt(Texte.t(Res.string.desk_book_progress_persons, details.size))
-    if (bilder) fortschritt(Texte.t(Res.string.desk_book_progress_pictures))
-    val fotos = if (!bilder) emptyMap() else ahnen.values.mapNotNull { it.person.thumb }.distinct().chunked(8).flatMap { gruppe ->
-        gruppe.map { url ->
-            async {
-                url to runCatching {
-                    client.http.newCall(Request.Builder().url(url).build()).execute().use { r -> if (r.isSuccessful) r.body?.byteStream()?.use { ImageIO.read(it) } else null }
-                }.getOrNull()?.let { b -> BufferedImage(b.width, b.height, BufferedImage.TYPE_INT_RGB).also { it.createGraphics().apply { color = Color.WHITE; fillRect(0, 0, b.width, b.height); drawImage(b, 0, 0, null); dispose() } } }
-            }
-        }.awaitAll()
-    }.mapNotNull { (u, b) -> b?.let { u to it } }.toMap()
+    // Ein Portraet je Person, ueber den Bildspeicher (Medienordner auf dem PC, Zwischenspeicher, Server)
+    val fotos = if (!bilder) emptyMap() else Bilder.alle(client, client.baseUrl, tree,
+        ahnen.values.mapNotNull { a -> a.person.thumb?.let { Bilder.Quelle(it, details[a.person.xref]?.media?.firstOrNull { m -> m.isImage }?.path) } }, fortschritt, abbruch)
     BuchDaten(ahnen, ahnen.entries.mapNotNull { (n, a) -> details[a.person.xref]?.let { n to it } }.toMap(), fotos)
 }
 

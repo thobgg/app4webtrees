@@ -23,3 +23,9 @@
 - **HTML** für die Homepage, **TeX** für den Satz mit LaTeX, **Text**.
 
 Bei großen Stammbäumen dauert das Laden der Personen und Bilder einen Moment; das Fenster zeigt den Fortschritt.
+
+## Große Stammbäume mit vielen Bildern
+
+webtrees rechnet jedes Vorschaubild beim ersten Abruf auf dem Server neu – bei Tausenden Personen dauert der erste Lauf entsprechend. wtWin lädt je Person nur das Hauptbild, sechs gleichzeitig, zeigt den Fortschritt („Bilder 2 340/8 900 – von diesem PC …, Zwischenspeicher …, Server …“) und lässt sich mit **Ohne die restlichen Bilder fortfahren** abbrechen. Was einmal geladen ist, bleibt im Zwischenspeicher auf diesem PC (`~/.cache/app4webtrees/medien/<server>/<stammbaum>/`, unter Windows im Anwendungsdaten-Ordner); der nächste Lauf und die Tafeln danach brauchen nichts mehr vom Server. Im Buchdialog unter Darstellung stehen die Größe des Zwischenspeichers und **Bilder-Zwischenspeicher leeren**.
+
+Wer eine Kopie des webtrees-Medienordners auf diesem PC hat (etwa weil er per FTP hochlädt), trägt sie als **Medienordner auf diesem PC** ein: Bilder werden dann von dort gelesen und selbst verkleinert, ohne Server. Alle anderen lassen das Feld leer. webtrees bleibt immer die Quelle; der Zwischenspeicher und der Ordner sind nur Kopien.

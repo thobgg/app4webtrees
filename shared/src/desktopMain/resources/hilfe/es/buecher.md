@@ -23,3 +23,9 @@
 - **HTML** para un sitio web, **TeX** para maquetar con LaTeX, **Texto**.
 
 En árboles grandes, cargar personas e imágenes lleva un momento; la ventana muestra el progreso.
+
+## Árboles grandes con muchas imágenes
+
+webtrees calcula cada miniatura en el servidor la primera vez que se pide; con miles de personas la primera pasada tarda. wtWin carga solo la imagen principal por persona, seis a la vez, muestra el progreso («Imágenes 2 340/8 900 – de este PC …, caché …, servidor …») y se puede detener con **Continuar sin las imágenes restantes**. Lo cargado una vez queda en la caché de este PC (`~/.cache/app4webtrees/medien/<servidor>/<árbol>/`, en Windows en la carpeta de datos de aplicación); la siguiente pasada y los cuadros después no necesitan nada del servidor. El diálogo del libro muestra bajo Presentación el tamaño de la caché y **Vaciar la caché de imágenes**.
+
+Quien tenga una copia de la carpeta de medios de webtrees en este PC (por ejemplo porque sube por FTP) la indica como **Carpeta de medios en este PC**: las imágenes se leen entonces de ahí y se reducen localmente, sin servidor. Los demás dejan el campo vacío. webtrees sigue siendo siempre la fuente; la caché y la carpeta son solo copias.

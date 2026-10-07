@@ -32,7 +32,7 @@ private val ZWEIG_FARBE = listOf(
 )
 
 suspend fun nachfahrenbuchLaden(
-    client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean, fortschritt: (String) -> Unit = {},
+    client: WtClient, tree: String, xref: String, generationen: Int, bilder: Boolean, fortschritt: (String) -> Unit = {}, abbruch: () -> Boolean = { false },
 ): NachfahrenDaten = coroutineScope {
     // Ganzer Baum, wenn verfuegbar (Stufe 17, Zwischenspeicher), sonst Person fuer Person
     val schaetzung = Math.pow(3.0, generationen.toDouble()).toInt().coerceAtMost(20000)
@@ -50,18 +50,8 @@ suspend fun nachfahrenbuchLaden(
             .filter { it.isNotEmpty() && it !in details }.distinct()
         if (ebene.isEmpty()) break
     }
-    val fotos = if (!bilder) emptyMap() else {
-        fortschritt(Texte.t(Res.string.desk_book_progress_pictures))
-        details.values.mapNotNull { it.person.thumb }.distinct().chunked(8).flatMap { gruppe ->
-            gruppe.map { url ->
-                async {
-                    url to runCatching {
-                        client.http.newCall(Request.Builder().url(url).build()).execute().use { r -> if (r.isSuccessful) r.body?.byteStream()?.use { ImageIO.read(it) } else null }
-                    }.getOrNull()?.let { b -> BufferedImage(b.width, b.height, BufferedImage.TYPE_INT_RGB).also { it.createGraphics().apply { color = Color.WHITE; fillRect(0, 0, b.width, b.height); drawImage(b, 0, 0, null); dispose() } } }
-                }
-            }.awaitAll()
-        }.mapNotNull { (u, b) -> b?.let { u to it } }.toMap()
-    }
+    val fotos = if (!bilder) emptyMap() else Bilder.alle(client, client.baseUrl, tree,
+        details.values.mapNotNull { d -> d.person.thumb?.let { Bilder.Quelle(it, d.media.firstOrNull { m -> m.isImage }?.path) } }, fortschritt, abbruch)
     NachfahrenDaten(xref, details, fotos)
 }
 

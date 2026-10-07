@@ -81,16 +81,11 @@ private object TafelBilder {
     private val cache = ConcurrentHashMap<String, BufferedImage>()
     private val fehlt = ConcurrentHashMap.newKeySet<String>()
     fun bekannt(url: String): BufferedImage? = cache[url]
-    fun laden(url: String): BufferedImage? {
+    fun laden(url: String, tree: String): BufferedImage? {
         cache[url]?.let { return it }
         if (url in fehlt) return null
-        val bild = runCatching {
-            Desktop.plattform.client.http.newCall(Request.Builder().url(url).build()).execute().use { r ->
-                if (!r.isSuccessful) null else r.body?.byteStream()?.use { ImageIO.read(it) }
-            }
-        }.getOrNull()
-        // In RGB umkopieren: JPEG verlangt Bilder ohne Transparenz
-        val rgb = bild?.let { b -> BufferedImage(b.width, b.height, BufferedImage.TYPE_INT_RGB).also { it.createGraphics().apply { color = java.awt.Color.WHITE; fillRect(0, 0, b.width, b.height); drawImage(b, 0, 0, null); dispose() } } }
+        // Ueber den Bildspeicher (Zwischenspeicher auf der Platte, Server); liefert RGB ohne Transparenz
+        val rgb = Bilder.laden(Desktop.plattform.client, Desktop.plattform.client.baseUrl, tree, Bilder.Quelle(url))
         if (rgb != null) cache[url] = rgb else fehlt += url
         return rgb
     }
@@ -331,7 +326,7 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
         if (!o.bilder) return@LaunchedEffect
         val urls = datenPersonen(d).mapNotNull { it.thumb }.distinct().filter { TafelBilder.bekannt(it) == null }
         urls.chunked(8).forEach { gruppe ->
-            withContext(Dispatchers.IO) { gruppe.forEach { TafelBilder.laden(it) } }
+            withContext(Dispatchers.IO) { gruppe.forEach { TafelBilder.laden(it, tree?.name.orEmpty()) } }
             bilderStand++
         }
     }

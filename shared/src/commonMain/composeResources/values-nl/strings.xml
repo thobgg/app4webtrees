@@ -410,6 +410,15 @@
     <string name="desk_book_progress_tree">Stamboom wordt geladen … %1$d van %2$d</string>
     <string name="desk_book_progress_persons">%1$d personen geladen …</string>
     <string name="desk_book_progress_pictures">Afbeeldingen worden geladen …</string>
+    <string name="desk_book_progress_images">Afbeeldingen %1$d/%2$d – van deze pc %3$d, cache %4$d, server %5$d</string>
+    <string name="desk_book_progress_images_prefix">Afbeeldingen </string>
+    <string name="desk_book_cancel_images">Doorgaan zonder de overige afbeeldingen</string>
+    <string name="desk_book_media_folder">Mediamap op deze pc (optioneel)</string>
+    <string name="tipp_book_media_folder">Wie een kopie van de webtrees-mediamap op deze pc heeft (bijvoorbeeld omdat hij via FTP uploadt), vult die hier in: afbeeldingen worden dan daar gelezen, niet van de server. Anders leeg laten – afbeeldingen komen van de server en blijven in de cache. Per server en stamboom.</string>
+    <string name="desk_book_media_folder_choose">Map …</string>
+    <string name="desk_book_cache_size">Cache %1$d MB</string>
+    <string name="desk_book_cache_clear">Afbeeldingencache legen</string>
+    <string name="desk_book_cache_cleared">%1$d bestanden verwijderd</string>
     <string name="desk_book_descendant_hint">Alle nakomelingen van de proband, generatie voor generatie, met echtgenoten, kinderen en verwijzingen, genummerd naar keuze, met registers.</string>
     <string name="desk_book_branch_colors">Takkleuren (één per kind van de stamouders)</string>
     <string name="desk_book_generation">Generatie %1$d – %2$s</string>

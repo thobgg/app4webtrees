@@ -33,7 +33,7 @@ class BuchErzeugen {
         val t = (System.getenv("WT_BUCH") ?: "I1:7").split(':')
         if (t[0] == "Familien") {
             val o = BuchOptionen(ortFilter = t.getOrNull(1).orEmpty(), familienChronologisch = t.getOrNull(2) == "chrono")
-            val buch = familienbuch(runBlocking { familienbuchLaden(client, baum, true, haeuser = info.api >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY) { println(it) } }, o, titel, "wtTux")
+            val buch = familienbuch(runBlocking { familienbuchLaden(client, baum, true, haeuser = info.api >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY, fortschritt = { println(it) }) }, o, titel, "wtTux")
             BuchFormat.entries.forEach { f -> buchSchreiben(buch, f, File(ziel, "familienbuch.${f.endung}")) }
             println("Buch: ${buch.bloecke.size} Bloecke")
             return
@@ -43,7 +43,7 @@ class BuchErzeugen {
         val o = BuchOptionen(generationen = gen, vorwort = "Alle Angaben dieses Buches sind erfunden.", tafel = System.getenv("WT_BUCH_TAFEL") != null,
             nummerierung = t.getOrNull(3)?.let { Nummerierung.valueOf(it) } ?: Nummerierung.Saragossa)
         val name = if (nach) "nachfahrenbuch" else "vorfahrenbuch"
-        val buch = if (nach) nachfahrenbuch(runBlocking { nachfahrenbuchLaden(client, baum, xref, gen, true) { println(it) } }, o, titel, "wtTux")
+        val buch = if (nach) nachfahrenbuch(runBlocking { nachfahrenbuchLaden(client, baum, xref, gen, true, fortschritt = { println(it) }) }, o, titel, "wtTux")
             else vorfahrenbuch(runBlocking { vorfahrenbuchLaden(client, baum, xref, gen, true) }, o, titel, "wtTux")
         BuchFormat.entries.forEach { f -> buchSchreiben(buch, f, File(ziel, "$name.${f.endung}")) }
         println("Buch: ${buch.bloecke.size} Bloecke")

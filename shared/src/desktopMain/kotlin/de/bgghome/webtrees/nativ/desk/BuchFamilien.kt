@@ -67,24 +67,15 @@ suspend fun haeuserLaden(client: WtClient, tree: String): List<Haus> = coroutine
     }
 }
 
-suspend fun familienbuchLaden(client: WtClient, tree: String, bilder: Boolean, haeuser: Boolean = false, fortschritt: (String) -> Unit = {}): FamilienDaten = coroutineScope {
+suspend fun familienbuchLaden(client: WtClient, tree: String, bilder: Boolean, haeuser: Boolean = false, fortschritt: (String) -> Unit = {}, abbruch: () -> Boolean = { false }): FamilienDaten = coroutineScope {
     // Das ganze Buch braucht den ganzen Baum: "personen" so gross, dass der Export sich immer lohnt
     val baum = BaumSpeicher.holen(client, tree, Int.MAX_VALUE / 64) { g, t -> fortschritt(Texte.t(Res.string.desk_book_progress_tree, g, t)) }
         ?: throw IllegalStateException(Texte.t(Res.string.desk_book_needs_export))
     fortschritt(Texte.t(Res.string.desk_book_progress_persons, baum.individuals.size))
     // Bilder nur fuer die Eheleute (Kinder mit eigener Familie erscheinen dort)
-    val fotos = if (!bilder) emptyMap() else {
-        fortschritt(Texte.t(Res.string.desk_book_progress_pictures))
-        baum.families.values.flatMap { listOfNotNull(it.husband, it.wife) }.distinct().mapNotNull { baum.person(it)?.thumb }.distinct().chunked(8).flatMap { gruppe ->
-            gruppe.map { url ->
-                async {
-                    url to runCatching {
-                        client.http.newCall(Request.Builder().url(url).build()).execute().use { r -> if (r.isSuccessful) r.body?.byteStream()?.use { ImageIO.read(it) } else null }
-                    }.getOrNull()?.let { b -> BufferedImage(b.width, b.height, BufferedImage.TYPE_INT_RGB).also { it.createGraphics().apply { color = Color.WHITE; fillRect(0, 0, b.width, b.height); drawImage(b, 0, 0, null); dispose() } } }
-                }
-            }.awaitAll()
-        }.mapNotNull { (u, b) -> b?.let { u to it } }.toMap()
-    }
+    val fotos = if (!bilder) emptyMap() else Bilder.alle(client, client.baseUrl, tree,
+        baum.families.values.flatMap { listOfNotNull(it.husband, it.wife) }.distinct().mapNotNull { x ->
+            baum.person(x)?.thumb?.let { Bilder.Quelle(it, baum.individuals[x]?.media?.firstOrNull { m -> m.isImage }?.path) } }, fortschritt, abbruch)
     FamilienDaten(baum, fotos, if (haeuser) runCatching { haeuserLaden(client, tree) }.getOrDefault(emptyList()) else emptyList())
 }
 

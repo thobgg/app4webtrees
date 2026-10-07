@@ -418,6 +418,15 @@
     <string name="desk_book_progress_tree">Chargement de l’arbre … %1$d sur %2$d</string>
     <string name="desk_book_progress_persons">%1$d personnes chargées …</string>
     <string name="desk_book_progress_pictures">Chargement des images …</string>
+    <string name="desk_book_progress_images">Images %1$d/%2$d – de ce PC %3$d, cache %4$d, serveur %5$d</string>
+    <string name="desk_book_progress_images_prefix">Images </string>
+    <string name="desk_book_cancel_images">Continuer sans les images restantes</string>
+    <string name="desk_book_media_folder">Dossier des médias sur ce PC (facultatif)</string>
+    <string name="tipp_book_media_folder">Si vous gardez une copie du dossier des médias de webtrees sur ce PC (par exemple parce que vous téléversez par FTP), indiquez-la ici : les images sont alors lues là et non sur le serveur. Sinon laissez vide – les images viennent du serveur et restent dans le cache. Par serveur et arbre.</string>
+    <string name="desk_book_media_folder_choose">Dossier …</string>
+    <string name="desk_book_cache_size">Cache %1$d Mo</string>
+    <string name="desk_book_cache_clear">Vider le cache des images</string>
+    <string name="desk_book_cache_cleared">%1$d fichiers supprimés</string>
     <string name="desk_book_descendant_hint">Tous les descendants de la personne de départ génération par génération, avec conjoints, enfants et renvois, numérotés à votre choix, avec index.</string>
     <string name="desk_book_branch_colors">Couleurs des branches (une par enfant du couple souche)</string>
     <string name="desk_book_generation">Génération %1$d – %2$s</string>

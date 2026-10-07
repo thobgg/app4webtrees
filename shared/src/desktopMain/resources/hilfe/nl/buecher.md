@@ -23,3 +23,9 @@
 - **HTML** voor een website, **TeX** voor zetwerk met LaTeX, **Tekst**.
 
 Bij grote stambomen duurt het laden van personen en afbeeldingen even; het venster toont de voortgang.
+
+## Grote stambomen met veel afbeeldingen
+
+webtrees berekent elke miniatuur bij de eerste opvraging op de server – bij duizenden personen duurt de eerste keer dus even. wtWin laadt per persoon alleen de hoofdafbeelding, zes tegelijk, toont de voortgang („Afbeeldingen 2.340/8.900 – van deze pc …, cache …, server …”) en kan met **Doorgaan zonder de overige afbeeldingen** worden gestopt. Wat eenmaal geladen is, blijft in de cache op deze pc (`~/.cache/app4webtrees/medien/<server>/<stamboom>/`, onder Windows in de map met toepassingsgegevens); de volgende keer en de tabellen daarna hebben niets meer van de server nodig. Het boekvenster toont onder Weergave de grootte van de cache en **Afbeeldingencache legen**.
+
+Wie een kopie van de webtrees-mediamap op deze pc heeft (bijvoorbeeld omdat hij via FTP uploadt), vult die in als **Mediamap op deze pc**: afbeeldingen worden dan daar gelezen en lokaal verkleind, zonder server. Alle anderen laten het veld leeg. webtrees blijft altijd de bron; cache en map zijn alleen kopieën.

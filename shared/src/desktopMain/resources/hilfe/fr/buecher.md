@@ -23,3 +23,9 @@
 - **HTML** pour un site web, **TeX** pour la composition avec LaTeX, **Texte**.
 
 Pour les grands arbres, le chargement des personnes et des images prend un moment ; la fenêtre affiche la progression.
+
+## Grands arbres avec beaucoup d’images
+
+webtrees calcule chaque vignette sur le serveur au premier appel – avec des milliers de personnes, le premier passage prend du temps. wtWin ne charge que l’image principale par personne, six à la fois, affiche la progression (« Images 2 340/8 900 – de ce PC …, cache …, serveur … ») et peut être arrêté avec **Continuer sans les images restantes**. Ce qui a été chargé une fois reste dans le cache de ce PC (`~/.cache/app4webtrees/medien/<serveur>/<arbre>/`, sous Windows dans le dossier des données d’application) ; le passage suivant et les tableaux n’ont plus besoin du serveur. Le dialogue du livre montre la taille du cache et **Vider le cache des images** sous Présentation.
+
+Si vous gardez une copie du dossier des médias de webtrees sur ce PC (par exemple parce que vous téléversez par FTP), indiquez-la comme **Dossier des médias sur ce PC** : les images sont alors lues là et réduites localement, sans serveur. Les autres laissent le champ vide. webtrees reste toujours la source ; le cache et le dossier ne sont que des copies.

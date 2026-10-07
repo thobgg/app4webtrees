@@ -418,6 +418,15 @@
     <string name="desk_book_progress_tree">Stammbaum wird geladen … %1$d von %2$d</string>
     <string name="desk_book_progress_persons">%1$d Personen geladen …</string>
     <string name="desk_book_progress_pictures">Bilder werden geladen …</string>
+    <string name="desk_book_progress_images">Bilder %1$d/%2$d – von diesem PC %3$d, Zwischenspeicher %4$d, Server %5$d</string>
+    <string name="desk_book_progress_images_prefix">Bilder </string>
+    <string name="desk_book_cancel_images">Ohne die restlichen Bilder fortfahren</string>
+    <string name="desk_book_media_folder">Medienordner auf diesem PC (optional)</string>
+    <string name="tipp_book_media_folder">Wer eine Kopie des webtrees-Medienordners auf diesem PC hat (etwa weil er per FTP hochlädt), trägt sie hier ein: Bilder werden dann von dort gelesen, nicht vom Server. Sonst leer lassen – Bilder kommen vom Server und bleiben im Zwischenspeicher. Gilt je Server und Stammbaum.</string>
+    <string name="desk_book_media_folder_choose">Ordner …</string>
+    <string name="desk_book_cache_size">Zwischenspeicher %1$d MB</string>
+    <string name="desk_book_cache_clear">Bilder-Zwischenspeicher leeren</string>
+    <string name="desk_book_cache_cleared">%1$d Dateien entfernt</string>
     <string name="desk_book_descendant_hint">Alle Nachfahren der Ausgangsperson Generation für Generation, mit Ehepartnern, Kindern und Verweisen, nummeriert nach Wahl, mit Verzeichnissen.</string>
     <string name="desk_book_branch_colors">Zweigfarben (je Kind der Stammeltern)</string>
     <string name="desk_book_generation">%1$d. Generation – %2$s</string>

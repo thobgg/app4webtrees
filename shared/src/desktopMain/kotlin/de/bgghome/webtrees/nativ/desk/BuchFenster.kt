@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -101,18 +104,20 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     val familien = art == BuchArt.Familien
     LaunchedEffect(o, art) { BuchWahl.sichern(o); DeskLayout.prefs.putString("buch_art", art.name) }
     var fortschritt by remember { mutableStateOf("") }
+    // Bilder abbrechen: der Lauf endet, das Buch kommt ohne die restlichen Bilder
+    var bilderAbbruch by remember { mutableStateOf(false) }
     // Daten: alle Angaben und Bilder - neu nur, wenn sich Buchart, Tiefe oder Bilder aendern
     val daten by produceState<Result<Any>?>(null, state.tree?.name, state.root, if (familien) 0 else o.generationen, o.bilder, art) {
         value = null
-        fortschritt = ""
+        fortschritt = ""; bilderAbbruch = false
         val tree = state.tree; val root = state.root
         value = if (tree == null || root == null) null else withContext(Dispatchers.IO) {
             runCatching {
                 // Kurznamen der Orte fuer "Orte kuerzen" (Server ab API-Stufe 21; sonst bleibt es beim ersten Namensteil)
                 if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_LIST) OrtsKurznamen.laden(viewModel.client, tree.name)
-                if (familien) familienbuchLaden(viewModel.client, tree.name, o.bilder, haeuser = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY) { fortschritt = it }
-                else if (nachfahren) nachfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
-                else vorfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder) { fortschritt = it }
+                if (familien) familienbuchLaden(viewModel.client, tree.name, o.bilder, haeuser = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY, fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
+                else if (nachfahren) nachfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder, fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
+                else vorfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder, fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
             }
         }
     }
@@ -199,6 +204,7 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     if (art == BuchArt.Vorfahren) Haken(stringResource(Res.string.desk_book_duplicates), o.doppelteZeigen, stringResource(Res.string.tipp_duplicates)) { o = o.copy(doppelteZeigen = it) }
                     Text(stringResource(Res.string.desk_book_section_look), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
                     Haken(stringResource(Res.string.desk_chart_photos), o.bilder) { o = o.copy(bilder = it) }
+                    if (o.bilder && state.tree != null) MedienOrdnerZeile(viewModel.client.baseUrl, state.tree.name)
                     if (!familien) Haken(stringResource(Res.string.desk_book_foldout), o.tafel, stringResource(Res.string.tipp_foldout)) { o = o.copy(tafel = it) }
                     if (!familien) Haken(stringResource(if (nachfahren) Res.string.desk_book_branch_colors else Res.string.desk_book_color), o.farbkodierung, stringResource(Res.string.tipp_book_color)) { o = o.copy(farbkodierung = it) }
                     Text(stringResource(Res.string.desk_book_section_indexes), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
@@ -235,6 +241,10 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                         s == null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White)
                             Text(fortschritt.ifBlank { stringResource(Res.string.desk_book_loading) }, Modifier.padding(top = 8.dp), color = androidx.compose.ui.graphics.Color.White)
+                            // Waehrend die Bilder laufen: ohne den Rest weitermachen (die Personen sind dann schon da)
+                            if (fortschritt.startsWith(stringResource(Res.string.desk_book_progress_images_prefix)) && !bilderAbbruch)
+                                OutlinedButton(onClick = { bilderAbbruch = true }, Modifier.padding(top = 12.dp), shape = MaterialTheme.shapes.small,
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = androidx.compose.ui.graphics.Color.White)) { Text(stringResource(Res.string.desk_book_cancel_images)) }
                         }
                         else -> Box(Modifier.fillMaxSize()) {
                             val scroll = rememberScrollState()
@@ -247,6 +257,36 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Medienordner auf diesem PC (optional) und der Zwischenspeicher fuer Bilder - je Server und Baum. Wer den webtrees-
+ * Medienordner ohnehin auf dem PC hat, spart sich den Server; alle anderen lassen das Feld leer.
+ */
+@Composable
+private fun MedienOrdnerZeile(server: String, tree: String) {
+    var pfad by remember(server, tree) { mutableStateOf(Bilder.medienOrdnerPfad(server, tree)) }
+    var geleert by remember { mutableStateOf<Int?>(null) }
+    val cacheMb = remember(server, tree, geleert) { Bilder.cacheGroesse(server, tree) / 1_048_576 }
+    Column(Modifier.padding(start = 4.dp, top = 2.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Tipp(stringResource(Res.string.tipp_book_media_folder)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                OutlinedTextField(pfad, { pfad = it; Bilder.medienOrdnerSetzen(server, tree, it) }, Modifier.weight(1f), singleLine = true,
+                    label = { Text(stringResource(Res.string.desk_book_media_folder)) }, textStyle = MaterialTheme.typography.bodySmall,
+                    isError = pfad.isNotBlank() && !java.io.File(pfad).isDirectory)
+                TextButton(onClick = {
+                    val chooser = javax.swing.JFileChooser(pfad.takeIf { it.isNotBlank() }).apply { fileSelectionMode = javax.swing.JFileChooser.DIRECTORIES_ONLY }
+                    if (chooser.showOpenDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) { pfad = chooser.selectedFile.absolutePath; Bilder.medienOrdnerSetzen(server, tree, pfad) }
+                }) { Text(stringResource(Res.string.desk_book_media_folder_choose)) }
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(Res.string.desk_book_cache_size, cacheMb), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.desk_book_cache_clear), Modifier.clickable { geleert = Bilder.cacheLeeren(server, tree) },
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            geleert?.let { Text(stringResource(Res.string.desk_book_cache_cleared, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
 }

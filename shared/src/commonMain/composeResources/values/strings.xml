@@ -423,6 +423,15 @@
     <string name="desk_book_progress_tree">Loading tree … %1$d of %2$d</string>
     <string name="desk_book_progress_persons">%1$d persons loaded …</string>
     <string name="desk_book_progress_pictures">Loading pictures …</string>
+    <string name="desk_book_progress_images">Pictures %1$d/%2$d – from this PC %3$d, cache %4$d, server %5$d</string>
+    <string name="desk_book_progress_images_prefix">Pictures </string>
+    <string name="desk_book_cancel_images">Continue without the remaining pictures</string>
+    <string name="desk_book_media_folder">Media folder on this PC (optional)</string>
+    <string name="tipp_book_media_folder">If you keep a copy of the webtrees media folder on this PC (for example because you upload by FTP), enter it here: pictures are then read from there and not from the server. Leave empty otherwise – pictures come from the server and stay in the cache. Per server and family tree.</string>
+    <string name="desk_book_media_folder_choose">Folder …</string>
+    <string name="desk_book_cache_size">Cache %1$d MB</string>
+    <string name="desk_book_cache_clear">Clear picture cache</string>
+    <string name="desk_book_cache_cleared">%1$d files removed</string>
     <string name="desk_book_descendant_hint">All descendants of the root person generation by generation, with spouses, children and cross-references, numbered as you choose, with indexes.</string>
     <string name="desk_book_branch_colors">Branch colours (one per child of the progenitors)</string>
     <string name="desk_book_generation">Generation %1$d – %2$s</string>
