@@ -16,7 +16,7 @@
     <string name="setup_connect">Verbinden</string>
     <string name="setup_connecting">Verbinden …</string>
     <string name="setup_basic_auth_open">Vraagt de server vóór webtrees om een gebruikersnaam en wachtwoord (mapbeveiliging)?</string>
-    <string name="setup_basic_auth_help">Alleen als je webserver de hele site met een eigen gebruikersnaam en wachtwoord beveiligt (de browser toont vóór webtrees een klein aanmeldvenster, bijv. .htaccess). Vul die gegevens hier in; de aanmelding bij webtrees volgt apart.</string>
+    <string name="setup_basic_auth_help">Alleen als uw webserver de hele site met een eigen gebruikersnaam en wachtwoord beveiligt (de browser toont vóór webtrees een klein aanmeldvenster, bijv. .htaccess). Vul die gegevens hier in; de aanmelding bij webtrees volgt apart.</string>
     <string name="setup_basic_auth_user">Mapbeveiliging: gebruikersnaam</string>
     <string name="setup_basic_auth_password">Mapbeveiliging: wachtwoord</string>
     <string name="login_server_info">webtrees %1$s · module %2$s</string>
