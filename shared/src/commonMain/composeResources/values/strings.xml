@@ -401,7 +401,7 @@
     <string name="desk_book_houses_option">Houses and farms</string>
     <string name="tipp_book_houses">Farms and houses from the place manager: places with a type (farm, house …) in their location record below the place. Each with its history, residents and owners; families point to their house.</string>
     <string name="desk_book_houses_only_type">Only houses and farms (by place type)</string>
-    <string name="tipp_book_houses_only_type">Houses and farms only, judged by the location record’s type (house, farm, mill, church …); parts of town, villages and districts are chapter headings. Without a type, a house number in the name counts.</string>
+    <string name="tipp_book_houses_only_type">Houses and farms only, judged by the location record’s type (house, farm, mill, church …); parts of town, villages and districts are chapter headings. Without a type, a house number in the name counts. A GOV type number in the location record takes precedence.</string>
     <string name="desk_book_houses_untyped">Include places without a type</string>
     <string name="tipp_book_houses_untyped">Places with neither a type nor a house number go into the house section too; otherwise they go into the appendix.</string>
     <string name="desk_book_other_places">Other places</string>
@@ -1237,6 +1237,7 @@
     <string name="desk_place_tab_history">History</string>
     <string name="desk_place_type">Type</string>
     <string name="desk_place_type_hint">e.g. farm, house, parish</string>
+    <string name="desk_place_gov_type">GOV type %1$s</string>
     <string name="desk_place_loc_parents">Superior place (location record)</string>
     <string name="desk_place_event_here">Event at the place</string>
     <string name="desk_place_history_hint">Events of the place itself and all events of individuals and families here, in order of time.</string>

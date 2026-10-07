@@ -396,7 +396,7 @@
     <string name="desk_book_houses_option">Maisons et fermes</string>
     <string name="tipp_book_houses">Fermes et maisons de la gestion des lieux : lieux avec un type (ferme, maison …) dans leur fiche, sous le lieu. Pour chacune son histoire, ses habitants et propriétaires ; les familles renvoient à leur maison.</string>
     <string name="desk_book_houses_only_type">Seulement maisons et fermes (par type de lieu)</string>
-    <string name="tipp_book_houses_only_type">Seulement les bâtiments d’après le type de la fiche de lieu (maison, ferme, moulin, église …) ; quartiers, villages et districts servent de chapitres. Sans type, un numéro de maison dans le nom compte.</string>
+    <string name="tipp_book_houses_only_type">Seulement les bâtiments d’après le type de la fiche de lieu (maison, ferme, moulin, église …) ; quartiers, villages et districts servent de chapitres. Sans type, un numéro de maison dans le nom compte. Un numéro de type GOV dans la fiche de lieu a la priorité.</string>
     <string name="desk_book_houses_untyped">Inclure les lieux sans type</string>
     <string name="tipp_book_houses_untyped">Les lieux sans type ni numéro de maison vont aussi dans la partie des maisons ; sinon dans l’annexe.</string>
     <string name="desk_book_other_places">Autres lieux</string>
@@ -1232,6 +1232,7 @@
     <string name="desk_place_tab_history">Histoire</string>
     <string name="desk_place_type">Type</string>
     <string name="desk_place_type_hint">p. ex. ferme, maison, commune</string>
+    <string name="desk_place_gov_type">Type GOV %1$s</string>
     <string name="desk_place_loc_parents">Lieu supérieur (fiche de lieu)</string>
     <string name="desk_place_event_here">Événement du lieu</string>
     <string name="desk_place_history_hint">Événements du lieu lui-même et tous les événements des personnes et familles ici, par ordre chronologique.</string>

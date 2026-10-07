@@ -396,7 +396,7 @@
     <string name="desk_book_houses_option">Häuser und Höfe</string>
     <string name="tipp_book_houses">Höfe und Häuser aus der Ortsverwaltung: Orte mit Art (Hof, Haus …) im Ortsdatensatz unter dem Ort. Je Haus Geschichte, Bewohner und Besitzer; die Familien verweisen auf ihr Haus.</string>
     <string name="desk_book_houses_only_type">Nur Häuser und Höfe (nach Ortsart)</string>
-    <string name="tipp_book_houses_only_type">Nur Gebäude nach der Art im Ortsdatensatz (Haus, Hof, Mühle, Kirche …); Stadtteile, Dörfer und Kreise gliedern als Kapitel. Ohne Art zählt eine Hausnummer im Namen.</string>
+    <string name="tipp_book_houses_only_type">Nur Gebäude nach der Art im Ortsdatensatz (Haus, Hof, Mühle, Kirche …); Stadtteile, Dörfer und Kreise gliedern als Kapitel. Ohne Art zählt eine Hausnummer im Namen. Eine GOV-Typnummer im Ortsdatensatz geht vor.</string>
     <string name="desk_book_houses_untyped">Orte ohne Art aufnehmen</string>
     <string name="tipp_book_houses_untyped">Orte, die weder Art noch Hausnummer haben, kommen ebenfalls in den Häuserteil; sonst in den Anhang.</string>
     <string name="desk_book_other_places">Weitere Orte</string>
@@ -1232,6 +1232,7 @@
     <string name="desk_place_tab_history">Geschichte</string>
     <string name="desk_place_type">Art</string>
     <string name="desk_place_type_hint">z. B. Hof, Haus, Gemeinde</string>
+    <string name="desk_place_gov_type">GOV-Typ %1$s</string>
     <string name="desk_place_loc_parents">Übergeordnet (Ortsdatensatz)</string>
     <string name="desk_place_event_here">Ereignis am Ort</string>
     <string name="desk_place_history_hint">Ereignisse am Ort selbst und alle Ereignisse von Personen und Familien hier, der Zeit nach.</string>

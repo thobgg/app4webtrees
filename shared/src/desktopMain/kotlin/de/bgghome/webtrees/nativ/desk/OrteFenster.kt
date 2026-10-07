@@ -467,7 +467,13 @@ private fun Daten(o: PlaceDetail, onWahl: (String) -> Unit, openWeb: (String) ->
     OrtKopf(o, aussen, openWeb) {
         Zeile(Res.string.desk_place_levels) { Text(o.levels.joinToString(" › "), style = MaterialTheme.typography.bodyMedium) }
         // Art aus dem Ortsdatensatz (Hof, Haus, Gemeinde ...) - macht aus einem Unterort ein Gebaeude
-        loc?.type?.takeIf(String::isNotBlank)?.let { Zeile(Res.string.desk_place_type) { Text(it, style = MaterialTheme.typography.bodyMedium) } }
+        // Art als Text und, wenn vorhanden, die GOV-Typnummer (GEDCOM-L 2 _GOVTYPE) mit GOV-Namen - sie entscheidet im Haeuserteil
+        val govTyp = loc?.govType?.takeIf(String::isNotBlank)?.let { nr ->
+            de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_place_gov_type, nr) +
+                (de.bgghome.webtrees.nativ.data.GovTypen.name(nr, de.bgghome.webtrees.nativ.Sprache.aktiv)?.let { " ($it)" } ?: "")
+        }
+        listOfNotNull(loc?.type?.takeIf(String::isNotBlank), govTyp).takeIf { it.isNotEmpty() }
+            ?.let { Zeile(Res.string.desk_place_type) { Text(it.joinToString(" · "), style = MaterialTheme.typography.bodyMedium) } }
         o.parent?.let { p -> Zeile(Res.string.desk_place_parent) { Verweis(p) { onWahl(p) } } }
         // Uebergeordnete Orte aus der _LOC-Hierarchie (GEDCOM-L), wenn sie vom Ortsnamen abweichen oder datiert sind
         loc?.parents?.takeIf { ps -> ps.any { it.fullName != o.parent || it.date != null } }?.let { ps ->

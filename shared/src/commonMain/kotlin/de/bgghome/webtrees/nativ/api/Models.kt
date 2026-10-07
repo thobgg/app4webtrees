@@ -400,6 +400,8 @@ data class PlaceSummary(
     val shortName: String? = null,
     /** Art des Orts aus dem _LOC (TYPE: Hof, Haus ...), ab Stufe 27. Orte nur aus der _LOC-Hierarchie haben events 0. */
     val type: String? = null,
+    /** GOV-Typnummer der Art (GEDCOM-L 2 _GOVTYPE: 24 Hof, 55 Dorf ...), api4webtrees ab 1.18.1. */
+    val govType: String? = null,
 )
 
 @Serializable
@@ -434,7 +436,7 @@ data class PlaceUseFamily(
 
 /** Ort darunter; [location] und [type] (Hof, Haus ...) aus dem _LOC, ab Stufe 27. */
 @Serializable
-data class PlaceChild(val name: String, val events: Int = 0, val location: String? = null, val type: String? = null)
+data class PlaceChild(val name: String, val events: Int = 0, val location: String? = null, val type: String? = null, val govType: String? = null)
 
 /** Quellenangabe am _LOC: Quelle (xref null bei Text-Quelle) und Seite. */
 @Serializable
@@ -462,8 +464,10 @@ data class LocationEvent(
 data class LocationJson(
     val xref: String,
     val name: String = "",
-    /** Art des Orts (TYPE: Hof, Haus, Gemeinde ...), ab Stufe 27. */
+    /** Art des Orts (TYPE: Hof, Haus, Gemeinde ...), ab Stufe 27; bei mehreren datierten Arten die letzte. */
     val type: String? = null,
+    /** GOV-Typnummer der Art (GEDCOM-L 2 _GOVTYPE), api4webtrees ab 1.18.1. */
+    val govType: String? = null,
     val parents: List<LocationParent> = emptyList(),
     val events: List<LocationEvent> = emptyList(),
     val gov: String? = null,

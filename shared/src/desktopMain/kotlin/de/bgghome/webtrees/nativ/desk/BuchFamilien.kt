@@ -53,9 +53,9 @@ suspend fun haeuserLaden(client: WtClient, tree: String): List<Haus> = coroutine
     val oberorte = orte.map { Ortsnamen.schluessel(Ortsnamen.oberort(it.name)) }.filter(String::isNotEmpty).toSet()
     val kandidaten = orte.mapNotNull { p ->
         if (p.location == null || Ortsnamen.teile(p.name).size < 2) return@mapNotNull null
-        val klasse = Haustypen.klasse(p.type, Ortsnamen.blatt(p.name), Ortsnamen.schluessel(p.name) in oberorte)
+        val klasse = Haustypen.klasse(p.type, p.govType, Ortsnamen.blatt(p.name), Ortsnamen.schluessel(p.name) in oberorte)
         // Ohne Art und ohne Hausnummer waere jeder Ort ein Kandidat - dann nur, wenn er eine Art hat
-        if (klasse == OrtsKlasse.UNBEKANNT && p.type.isNullOrBlank()) null else p to klasse
+        if (klasse == OrtsKlasse.UNBEKANNT && p.type.isNullOrBlank() && p.govType.isNullOrBlank()) null else p to klasse
     }
     kandidaten.chunked(8).flatMap { gruppe ->
         gruppe.map { (p, klasse) ->

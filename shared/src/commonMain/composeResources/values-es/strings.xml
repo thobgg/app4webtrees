@@ -396,7 +396,7 @@
     <string name="desk_book_houses_option">Casas y granjas</string>
     <string name="tipp_book_houses">Granjas y casas del gestor de lugares: lugares con un tipo (granja, casa …) en su registro bajo el lugar. Cada una con su historia, habitantes y propietarios; las familias remiten a su casa.</string>
     <string name="desk_book_houses_only_type">Solo casas y granjas (por tipo de lugar)</string>
-    <string name="tipp_book_houses_only_type">Solo edificios según el tipo del registro de lugar (casa, granja, molino, iglesia …); barrios, pueblos y comarcas son capítulos. Sin tipo, cuenta un número de casa en el nombre.</string>
+    <string name="tipp_book_houses_only_type">Solo edificios según el tipo del registro de lugar (casa, granja, molino, iglesia …); barrios, pueblos y comarcas son capítulos. Sin tipo, cuenta un número de casa en el nombre. Un número de tipo GOV en el registro de lugar tiene prioridad.</string>
     <string name="desk_book_houses_untyped">Incluir lugares sin tipo</string>
     <string name="tipp_book_houses_untyped">Los lugares sin tipo ni número de casa van también a la parte de casas; si no, al anexo.</string>
     <string name="desk_book_other_places">Otros lugares</string>
@@ -1232,6 +1232,7 @@
     <string name="desk_place_tab_history">Historia</string>
     <string name="desk_place_type">Tipo</string>
     <string name="desk_place_type_hint">p. ej. granja, casa, municipio</string>
+    <string name="desk_place_gov_type">Tipo GOV %1$s</string>
     <string name="desk_place_loc_parents">Lugar superior (registro de lugar)</string>
     <string name="desk_place_event_here">Evento del lugar</string>
     <string name="desk_place_history_hint">Eventos del propio lugar y todos los eventos de personas y familias aquí, en orden cronológico.</string>

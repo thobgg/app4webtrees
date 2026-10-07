@@ -77,8 +77,13 @@ object Haustypen {
     fun istOber(typ: String?): Boolean = arten(typ).any { it in OBER }
 
     /**
-     * Einordnung eines Orts: nach der Art, sonst nach Lage und Namen. [hatUnterorte]: andere Orte stehen unter ihm.
+     * Einordnung eines Orts: zuerst nach der GOV-Typnummer (2 _GOVTYPE, eindeutig), dann nach dem Text der Art, sonst
+     * nach Lage und Namen. [hatUnterorte]: andere Orte stehen unter ihm.
      */
+    fun klasse(typ: String?, govType: String?, blatt: String, hatUnterorte: Boolean): OrtsKlasse =
+        GovTypen.klasse(govType) ?: klasse(typ, blatt, hatUnterorte)
+
+    /** Einordnung ohne GOV-Typnummer: nach der Art, sonst nach Lage und Namen. */
     fun klasse(typ: String?, blatt: String, hatUnterorte: Boolean): OrtsKlasse = when {
         istHaus(typ) -> OrtsKlasse.HAUS
         istOber(typ) -> OrtsKlasse.OBER

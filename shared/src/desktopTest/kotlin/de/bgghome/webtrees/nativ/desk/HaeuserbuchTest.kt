@@ -8,12 +8,15 @@ import de.bgghome.webtrees.nativ.api.LocationEvent
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.PlaceJson
 import de.bgghome.webtrees.nativ.api.TreeExport
+import de.bgghome.webtrees.nativ.data.GovTypen
 import de.bgghome.webtrees.nativ.data.Haustypen
 import de.bgghome.webtrees.nativ.data.OrtsKlasse
 import de.bgghome.webtrees.nativ.data.Ortsnamen
 import de.bgghome.webtrees.nativ.data.berufe
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
 /**
  * Haeuserteil des Ortsfamilienbuchs: nur Gebaeude nach Ortsart, Stadtteile als Kapitel oder im Anhang, Namen mit Komma
@@ -112,6 +115,16 @@ class HaeuserbuchTest {
         assertEquals(OrtsKlasse.HAUS, Haustypen.klasse(null, "Klosterstraße 6 (früher Haus Nr. 61)", false))
         assertEquals(OrtsKlasse.HAUS, Haustypen.klasse("", "Haus Nr. 12a", false))
         assertEquals(OrtsKlasse.UNBEKANNT, Haustypen.klasse("", "Oberdorf", false))
+        // GOV-Typnummer (2 _GOVTYPE) geht vor dem Text: 24 Hof, 55 Dorf, 54 Stadtteil; 229 Haeusergruppe entscheidet nichts
+        assertEquals(OrtsKlasse.HAUS, Haustypen.klasse("farm", "24", "Oberdorf", false))
+        assertEquals(OrtsKlasse.OBER, Haustypen.klasse("Hof", "55", "Hof Nr. 3", false))
+        assertEquals(OrtsKlasse.OBER, Haustypen.klasse(null, "54", "Klosterstraße 6", false))
+        assertEquals(OrtsKlasse.HAUS, Haustypen.klasse("Häusergruppe", "229", "x", false))
+        assertEquals(OrtsKlasse.UNBEKANNT, Haustypen.klasse("", "229", "Oberdorf", false))
+        assertEquals(OrtsKlasse.HAUS, Haustypen.klasse("", "unsinn", "Haus Nr. 12a", false))
+        assertEquals("Hof" to "Farm", GovTypen.NAMEN.getValue(24))
+        assertEquals("Mühle", GovTypen.name("87", "de")); assertEquals("mill", GovTypen.name("87", "en")); assertNull(GovTypen.name("9999", "de"))
+        assertTrue(GovTypen.HAUS.none { it in GovTypen.OBER }); assertEquals(276, GovTypen.NAMEN.size)
         assertEquals(listOf("Klosterstraße 6", "Ennetach", "Mengen"), Ortsnamen.teile("Klosterstraße 6; Ennetach; Mengen"))
         assertEquals("Hof Nr. 3", Ortsnamen.blatt("Hof Nr. 3, Bienenbüttel, Uelzen"))
         assertEquals("Bienenbüttel, Uelzen", Ortsnamen.oberort("Hof Nr. 3, Bienenbüttel, Uelzen"))
