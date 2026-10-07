@@ -61,6 +61,6 @@ Aus **Erstellen › Buch erstellen …**: im Stil gedruckter Ortsfamilienbücher
 | <img src="screenshots/buch-vor-reg.jpg" alt="Register" width="100%"> | <img src="screenshots/buch-nach-titel.jpg" alt="Nachfahrenbuch" width="100%"> |
 | **Register** – Namen, Orte, Berufe und Quellen, auf Eintragsnummern | **Nachfahrenbuch** – mit Porträt der Stammeltern |
 | <img src="screenshots/buch-nach-gen.jpg" alt="Nachfahrenbuch innen" width="100%"> | <img src="screenshots/buch-fam.jpg" alt="Familienbuch" width="100%"> |
-| **Nachfahrenbuch innen** – Nummern nach Saragossa, d'Aboville, Henry oder fortlaufend | **Familienbuch** – ein Eintrag je Familie, alphabetisch oder chronologisch; mit Ortsfilter als Ortsfamilienbuch |
+| **Nachfahrenbuch innen** – Nummern nach Saragossa, d'Aboville, Henry oder fortlaufend | **Familienbuch** – ein Eintrag je Familie, alphabetisch oder chronologisch; mit Ortsfilter als Ortsfamilienbuch, mit Häuserteil (Höfe und Häuser mit Geschichte, Bewohnern und Besitzern) |
 
 [Zurück zum README](../README.md) · [English](GALERIE.en.md)

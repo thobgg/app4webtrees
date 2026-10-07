@@ -395,6 +395,14 @@
     <string name="desk_book_houses">Casas y granjas</string>
     <string name="desk_book_houses_option">Casas y granjas</string>
     <string name="tipp_book_houses">Granjas y casas del gestor de lugares: lugares con un tipo (granja, casa …) en su registro bajo el lugar. Cada una con su historia, habitantes y propietarios; las familias remiten a su casa.</string>
+    <string name="desk_book_houses_only_type">Solo casas y granjas (por tipo de lugar)</string>
+    <string name="tipp_book_houses_only_type">Solo edificios según el tipo del registro de lugar (casa, granja, molino, iglesia …); barrios, pueblos y comarcas son capítulos. Sin tipo, cuenta un número de casa en el nombre.</string>
+    <string name="desk_book_houses_untyped">Incluir lugares sin tipo</string>
+    <string name="tipp_book_houses_untyped">Los lugares sin tipo ni número de casa van también a la parte de casas; si no, al anexo.</string>
+    <string name="desk_book_other_places">Otros lugares</string>
+    <string name="desk_book_resi_prop">Residencia y propiedad</string>
+    <string name="desk_book_from">de</string>
+    <string name="desk_book_to">a</string>
     <string name="desk_book_owner">Propietario</string>
     <string name="desk_book_resident">Habitante</string>
     <string name="desk_book_house_ref">Casa</string>

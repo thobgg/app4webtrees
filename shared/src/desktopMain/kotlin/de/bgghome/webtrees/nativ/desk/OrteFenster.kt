@@ -199,7 +199,8 @@ internal fun OrteInhalt(
                 if (suche.isEmpty()) Text(stringResource(Res.string.desk_places_search), Modifier.padding(8.dp),
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
             }
-            val alle = liste?.getOrNull()?.places.orEmpty()
+            // "Hof Nr. 2" vor "Hof Nr. 12": Zahlen im Namen als Zahlen (die Liste vom Server ist alphabetisch)
+            val alle = remember(liste) { liste?.getOrNull()?.places.orEmpty().sortedWith(compareBy(de.bgghome.webtrees.nativ.data.Ortsnamen.NATUERLICH) { it.name }) }
             val treffer = if (suche.isBlank()) alle else alle.filter { it.name.contains(suche.trim(), ignoreCase = true) || it.gov?.contains(suche.trim(), ignoreCase = true) == true }
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(Res.string.desk_places_count, treffer.size, alle.size), Modifier.weight(1f),
@@ -478,9 +479,9 @@ private fun Daten(o: PlaceDetail, onWahl: (String) -> Unit, openWeb: (String) ->
             }
         }
         if (o.children.isNotEmpty()) Zeile(Res.string.desk_place_children) {
-            o.children.forEach { c ->
+            o.children.sortedWith(compareBy(de.bgghome.webtrees.nativ.data.Ortsnamen.NATUERLICH) { it.name }).forEach { c ->
                 val zusatz = listOfNotNull(c.type, c.events.takeIf { it > 0 }?.toString()).joinToString(", ").let { if (it.isEmpty()) "" else "  ($it)" }
-                Verweis(c.name.substringBefore(", ") + zusatz) { onWahl(c.name) }
+                Verweis(de.bgghome.webtrees.nativ.data.Ortsnamen.blatt(c.name) + zusatz) { onWahl(c.name) }
             }
         }
         Zeile(Res.string.desk_place_events) { Text("${o.events}", style = MaterialTheme.typography.bodyMedium) }

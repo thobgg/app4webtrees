@@ -7,6 +7,9 @@ import de.bgghome.webtrees.nativ.api.LocationEvent
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.TreeExport
 import de.bgghome.webtrees.nativ.api.WtClient
+import de.bgghome.webtrees.nativ.data.Haustypen
+import de.bgghome.webtrees.nativ.data.OrtsKlasse
+import de.bgghome.webtrees.nativ.data.Ortsnamen
 import de.bgghome.webtrees.nativ.res.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -29,10 +32,13 @@ import javax.imageio.ImageIO
  * Ein Haus oder Hof fuer den Haeuserteil des Ortsfamilienbuchs (05.10.2026): ein Ortsdatensatz _LOC mit Art (TYPE) unter
  * einem anderen Ort, so wie GEDCOM-L Gebaeude abbildet. [name] ist der volle Ortsname wie an den Ereignissen.
  */
-class Haus(val name: String, val typ: String, val ereignisse: List<LocationEvent> = emptyList(), val notiz: String? = null) {
-    val blatt get() = name.substringBefore(',').trim()
+class Haus(val name: String, val typ: String, val ereignisse: List<LocationEvent> = emptyList(), val notiz: String? = null,
+           val klasse: OrtsKlasse = OrtsKlasse.HAUS) {
+    val blatt get() = Ortsnamen.blatt(name)
     /** Der Ort, zu dem das Haus gehoert ("Bienenbuettel, Uelzen ..."). */
-    val ort get() = name.substringAfter(',', "").trim()
+    val ort get() = Ortsnamen.oberort(name)
+    /** Die Ebene direkt darueber - der Stadtteil oder das Dorf, nach dem der Haeuserteil gliedert. */
+    val eltern get() = Ortsnamen.teile(name).getOrNull(1).orEmpty()
 }
 
 class FamilienDaten(val baum: TreeExport, val bilder: Map<String, BufferedImage>, val haeuser: List<Haus> = emptyList())
@@ -43,16 +49,19 @@ class FamilienDaten(val baum: TreeExport, val bilder: Map<String, BufferedImage>
  */
 suspend fun haeuserLaden(client: WtClient, tree: String): List<Haus> = coroutineScope {
     val orte = client.placeList(tree).places
-    val namen = orte.map { it.name.lowercase() }
-    val kandidaten = orte.filter { p ->
-        !p.type.isNullOrBlank() && p.location != null && p.name.contains(',') &&
-            namen.none { it.endsWith(", " + p.name.lowercase()) }
+    // Wer Orte unter sich hat, ist eine Ebene, kein Haus - erkannt am Namen, mit Komma oder Semikolon gegliedert
+    val oberorte = orte.map { Ortsnamen.schluessel(Ortsnamen.oberort(it.name)) }.filter(String::isNotEmpty).toSet()
+    val kandidaten = orte.mapNotNull { p ->
+        if (p.location == null || Ortsnamen.teile(p.name).size < 2) return@mapNotNull null
+        val klasse = Haustypen.klasse(p.type, Ortsnamen.blatt(p.name), Ortsnamen.schluessel(p.name) in oberorte)
+        // Ohne Art und ohne Hausnummer waere jeder Ort ein Kandidat - dann nur, wenn er eine Art hat
+        if (klasse == OrtsKlasse.UNBEKANNT && p.type.isNullOrBlank()) null else p to klasse
     }
     kandidaten.chunked(8).flatMap { gruppe ->
-        gruppe.map { p ->
+        gruppe.map { (p, klasse) ->
             async {
                 val loc = runCatching { client.place(tree, p.name).location }.getOrNull()
-                Haus(p.name, p.type.orEmpty(), loc?.events.orEmpty(), loc?.notes?.firstOrNull())
+                Haus(p.name, p.type.orEmpty(), loc?.events.orEmpty(), loc?.notes?.firstOrNull(), klasse)
             }
         }.awaitAll()
     }
@@ -79,18 +88,6 @@ suspend fun familienbuchLaden(client: WtClient, tree: String, bilder: Boolean, h
     FamilienDaten(baum, fotos, if (haeuser) runCatching { haeuserLaden(client, tree) }.getOrDefault(emptyList()) else emptyList())
 }
 
-/** "Hof Nr. 3" vor "Hof Nr. 12": Zahlen im Namen als Zahlen sortieren. */
-private val haeuserFolge: Comparator<String> = Comparator { a, b ->
-    val teile = Regex("\\d+|\\D+")
-    val x = teile.findAll(a.lowercase()).map { it.value }.toList()
-    val y = teile.findAll(b.lowercase()).map { it.value }.toList()
-    for (i in 0 until minOf(x.size, y.size)) {
-        val c = if (x[i][0].isDigit() && y[i][0].isDigit()) x[i].toBigInteger().compareTo(y[i].toBigInteger()) else x[i].compareTo(y[i])
-        if (c != 0) return@Comparator c
-    }
-    x.size - y.size
-}
-
 /** Rolle einer Person am Haus aus ihren Ereignissen dort: Besitz (PROP) vor Wohnen (RESI), sonst die Ereignisse. */
 private fun rolleAmHaus(fakten: List<FactJson>): String {
     val tags = fakten.map { it.tag }.toSet()
@@ -115,15 +112,19 @@ private fun jd(p: Person?) = p?.birth?.date?.jd?.takeIf { it > 0 }
 fun familienbuch(d: FamilienDaten, o: BuchOptionen, baumTitel: String, app: String): Buch {
     val b = d.baum
     val filter = o.ortFilter.trim().lowercase()
-    // Haeuser des Orts (bzw. alle ohne Ortsfilter); Ereignisse an einem Haus zaehlen fuer den Ort, zu dem es gehoert
-    val haeuser = if (!o.haeuser) emptyList() else d.haeuser
-        .filter { h -> filter.isEmpty() || h.ort.substringBefore(',').trim().lowercase().startsWith(filter) }
-        .sortedWith(compareBy(haeuserFolge) { it.blatt })
+    // Haeuser des Orts (bzw. alle ohne Ortsfilter); Ereignisse an einem Haus zaehlen fuer den Ort, zu dem es gehoert.
+    // Nach Ortsart: Gebaeude in den Haeuserteil, hoehere Ebenen (Stadtteil, Gemeinde) nur als Gliederung oder - mit
+    // eigenen Bewohnern - in den Anhang "Weitere Orte"; Orte ohne Art nach Wahl.
+    val imOrt = if (!o.haeuser) emptyList() else d.haeuser
+        .filter { h -> filter.isEmpty() || Ortsnamen.teile(h.ort).any { it.lowercase().startsWith(filter) } }
+    val haeuser = imOrt.filter { h -> !o.haeuserNurTyp || h.klasse == OrtsKlasse.HAUS || (h.klasse == OrtsKlasse.UNBEKANNT && o.haeuserOhneTyp) }
+        .sortedWith(compareBy<Haus, String>(Ortsnamen.NATUERLICH) { it.eltern }.thenBy(Ortsnamen.NATUERLICH) { it.blatt })
+    val weitere = (imOrt - haeuser.toSet()).sortedWith(compareBy(Ortsnamen.NATUERLICH) { it.blatt })
     val hausNr = haeuser.withIndex().associate { (i, h) -> h.name.lowercase() to i + 1 }
     val alleHaeuser = d.haeuser.map { it.name.lowercase() }.toSet()
     fun ortPasst(ort: String): Boolean {
-        val teile = ort.split(',').map { it.trim() }
-        return teile.first().startsWith(filter) || (ort in alleHaeuser && teile.getOrNull(1)?.startsWith(filter) == true)
+        val teile = Ortsnamen.teile(ort).map { it.lowercase() }
+        return teile.firstOrNull()?.startsWith(filter) == true || (ort in alleHaeuser && teile.drop(1).any { it.startsWith(filter) })
     }
     val familien = b.families.values.filter { f -> !f.isPrivate && (f.husband != null || f.wife != null) }
         .filter { f -> filter.isEmpty() || familienOrte(b, f).any(::ortPasst) }
@@ -131,7 +132,11 @@ fun familienbuch(d: FamilienDaten, o: BuchOptionen, baumTitel: String, app: Stri
         val p = b.person(f.husband) ?: b.person(f.wife)
         return listOf(p?.surname.orEmpty(), p?.given.orEmpty()).joinToString(" ").lowercase()
     }
+    // Einordnung in der Zeit: Heirat, sonst erstes Kind, sonst das frueheste datierte Ereignis der Eheleute (Wohnort,
+    // Besitz, Tod ...), zuletzt die Geburt des Mannes plus etwa 25 Jahre
     fun zeit(f: ExportFamily): Int = f.marriage?.date?.jd?.takeIf { it > 0 } ?: f.children.mapNotNull { jd(b.person(it)) }.minOrNull()
+        ?: listOfNotNull(f.husband, f.wife).flatMap { b.individuals[it]?.facts.orEmpty() }.filter { it.tag !in setOf("BIRT", "CHR", "BAPM") }
+            .mapNotNull { it.date?.jd?.takeIf { j -> j > 0 } }.minOrNull()
         ?: jd(b.person(f.husband))?.plus(9000) ?: Int.MAX_VALUE
     val sortiert = if (o.familienChronologisch) familien.sortedWith(compareBy(::zeit, ::schluesselName))
         else familien.sortedWith(compareBy(::schluesselName, ::zeit))
@@ -238,9 +243,11 @@ fun familienbuch(d: FamilienDaten, o: BuchOptionen, baumTitel: String, app: Stri
         if (g != gruppe) { gruppe = g; bloecke += Ueberschrift(g, "grp-${g.replace(Regex("[^A-Za-z0-9]"), "_")}", neueSeite = false) }
         bloecke += eintrag(f)
     }
-    if (haeuser.isNotEmpty()) bloecke += haeuserTeil(b, haeuser, o) { x ->
-        b.individuals[x]?.fams.orEmpty().firstNotNullOfOrNull { nummer[it] } ?: b.individuals[x]?.famc?.firstNotNullOfOrNull { nummer[it] }
-    }
+    val familieVon: (String) -> Long? = { x -> b.individuals[x]?.fams.orEmpty().firstNotNullOfOrNull { nummer[it] } ?: b.individuals[x]?.famc?.firstNotNullOfOrNull { nummer[it] } }
+    if (haeuser.isNotEmpty()) bloecke += haeuserTeil(b, haeuser, o, familieVon)
+    // Anhang: Orte, die keine Gebaeude sind, aber eigene Bewohner oder Ereignisse haben (ein Stadtteil mit Personen daran)
+    val weitereMitInhalt = weitere.filter { w -> w.ereignisse.isNotEmpty() || b.individuals.values.any { i -> !i.person.isPrivate && i.facts.any { it.place?.name?.lowercase() == w.name.lowercase() } } }
+    if (weitereMitInhalt.isNotEmpty()) bloecke += haeuserTeil(b, weitereMitInhalt, o, familieVon, Texte.t(Res.string.desk_book_other_places), "weitere", "W")
     bloecke += reg.bloecke(o)
     return Buch(titel, titel, bloecke, fusszeile(app, baumTitel))
 }
@@ -250,11 +257,19 @@ fun familienbuch(d: FamilienDaten, o: BuchOptionen, baumTitel: String, app: Stri
  * Zeit nach, mit Rolle (Besitzer, Bewohner) und Verweis auf ihre Familie im Familienteil. [familieVon]: Nummer der
  * eigenen Familie, sonst der Elternfamilie.
  */
-internal fun haeuserTeil(b: TreeExport, haeuser: List<Haus>, o: BuchOptionen, familieVon: (String) -> Long?): List<Block> = buildList {
-    add(Ueberschrift(Texte.t(Res.string.desk_book_houses), "haeuser"))
+internal fun haeuserTeil(b: TreeExport, haeuser: List<Haus>, o: BuchOptionen, familieVon: (String) -> Long?,
+                         titel: String = Texte.t(Res.string.desk_book_houses), id: String = "haeuser", marke: String = "H"): List<Block> = buildList {
+    add(Ueberschrift(titel, id))
+    // Kapitel je Ort darueber (Stadtteil, Dorf), wenn die Haeuser aus mehreren stammen
+    val kapitel = haeuser.map { it.eltern }.distinct()
+    var aktuell: String? = null
     haeuser.forEachIndexed { i, h ->
         val n = i + 1
-        add(Absatz(listOf(Lauf(h.blatt, Stil.Fett), Lauf(if (h.typ.isNotBlank()) " – ${h.typ}" else "")), marke = "H$n", anker = "h$n", abstandVor = true))
+        if (kapitel.size > 1 && h.eltern != aktuell) {
+            aktuell = h.eltern
+            add(Ueberschrift(h.eltern.ifBlank { "?" }, "$id-${h.eltern.lowercase().replace(Regex("[^a-z0-9]"), "_")}", neueSeite = false))
+        }
+        add(Absatz(listOf(Lauf(h.blatt, Stil.Fett), Lauf(if (h.typ.isNotBlank()) " – ${h.typ}" else "")), marke = "$marke$n", anker = "${marke.lowercase()}$n", abstandVor = true))
         h.notiz?.takeIf(String::isNotBlank)?.let { add(Absatz(listOf(Lauf(it.replace('\n', ' '), Stil.Kursiv)), einzug = 1)) }
         h.ereignisse.sortedBy { it.date?.jd?.takeIf { j -> j > 0 } ?: Int.MAX_VALUE }.forEach { e ->
             val was = listOfNotNull(e.type ?: e.label.takeIf(String::isNotBlank), e.value).joinToString(": ")

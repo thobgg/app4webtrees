@@ -61,6 +61,6 @@ From **Create › Create book …**: in the style of printed local family books 
 | <img src="screenshots/buch-vor-reg.jpg" alt="Index" width="100%"> | <img src="screenshots/buch-nach-titel.jpg" alt="Descendant book" width="100%"> |
 | **Index** – names, places, occupations and sources, by entry number | **Descendant book** – with a portrait of the progenitors |
 | <img src="screenshots/buch-nach-gen.jpg" alt="Descendant book inside" width="100%"> | <img src="screenshots/buch-fam.jpg" alt="Family book" width="100%"> |
-| **Descendant book inside** – numbered by Saragossa, d'Aboville, Henry or consecutively | **Family book** – one entry per family, alphabetical or chronological; with place filter as a local family book |
+| **Descendant book inside** – numbered by Saragossa, d'Aboville, Henry or consecutively | **Family book** – one entry per family, alphabetical or chronological; with place filter as a local family book, with a house section (farms and houses with history, residents and owners) |
 
 [Back to the README](../README.en.md) · [Deutsch](GALERIE.md)

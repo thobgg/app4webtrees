@@ -400,6 +400,14 @@
     <string name="desk_book_houses">Houses and farms</string>
     <string name="desk_book_houses_option">Houses and farms</string>
     <string name="tipp_book_houses">Farms and houses from the place manager: places with a type (farm, house …) in their location record below the place. Each with its history, residents and owners; families point to their house.</string>
+    <string name="desk_book_houses_only_type">Only houses and farms (by place type)</string>
+    <string name="tipp_book_houses_only_type">Houses and farms only, judged by the location record’s type (house, farm, mill, church …); parts of town, villages and districts are chapter headings. Without a type, a house number in the name counts.</string>
+    <string name="desk_book_houses_untyped">Include places without a type</string>
+    <string name="tipp_book_houses_untyped">Places with neither a type nor a house number go into the house section too; otherwise they go into the appendix.</string>
+    <string name="desk_book_other_places">Other places</string>
+    <string name="desk_book_resi_prop">Residence and property</string>
+    <string name="desk_book_from">from</string>
+    <string name="desk_book_to">to</string>
     <string name="desk_book_owner">Owner</string>
     <string name="desk_book_resident">Resident</string>
     <string name="desk_book_house_ref">House</string>

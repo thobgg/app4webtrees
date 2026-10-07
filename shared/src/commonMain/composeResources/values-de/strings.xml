@@ -395,6 +395,14 @@
     <string name="desk_book_houses">Häuser und Höfe</string>
     <string name="desk_book_houses_option">Häuser und Höfe</string>
     <string name="tipp_book_houses">Höfe und Häuser aus der Ortsverwaltung: Orte mit Art (Hof, Haus …) im Ortsdatensatz unter dem Ort. Je Haus Geschichte, Bewohner und Besitzer; die Familien verweisen auf ihr Haus.</string>
+    <string name="desk_book_houses_only_type">Nur Häuser und Höfe (nach Ortsart)</string>
+    <string name="tipp_book_houses_only_type">Nur Gebäude nach der Art im Ortsdatensatz (Haus, Hof, Mühle, Kirche …); Stadtteile, Dörfer und Kreise gliedern als Kapitel. Ohne Art zählt eine Hausnummer im Namen.</string>
+    <string name="desk_book_houses_untyped">Orte ohne Art aufnehmen</string>
+    <string name="tipp_book_houses_untyped">Orte, die weder Art noch Hausnummer haben, kommen ebenfalls in den Häuserteil; sonst in den Anhang.</string>
+    <string name="desk_book_other_places">Weitere Orte</string>
+    <string name="desk_book_resi_prop">Wohnort und Besitz</string>
+    <string name="desk_book_from">von</string>
+    <string name="desk_book_to">bis</string>
     <string name="desk_book_owner">Besitzer</string>
     <string name="desk_book_resident">Bewohner</string>
     <string name="desk_book_house_ref">Haus</string>

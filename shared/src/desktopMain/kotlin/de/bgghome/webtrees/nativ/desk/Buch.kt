@@ -88,6 +88,10 @@ data class BuchOptionen(
     val ortFilter: String = "",
     /** Familienbuch: Haeuserteil aus den Ortsdatensaetzen (Hoefe/Haeuser mit Art unter dem Ort), ab API-Stufe 27. */
     val haeuser: Boolean = true,
+    /** Haeuserteil: nur Gebaeude nach Ortsart (Haus, Hof ...) - hoehere Ebenen wie Stadtteile gliedern nur. */
+    val haeuserNurTyp: Boolean = true,
+    /** Haeuserteil: Orte ohne Art mit aufnehmen (sonst im Anhang "Weitere Orte"). */
+    val haeuserOhneTyp: Boolean = true,
 )
 
 // ── Formate der Angaben ──
@@ -149,7 +153,7 @@ internal object OrtsKurznamen {
 
 /** Ort fuers Buch; gekuerzt: der Kurzname aus der Ortsverwaltung, sonst der erste Teil ("Celle, Niedersachsen" -> "Celle"). */
 internal fun ortText(name: String?, kurz: Boolean): String =
-    name?.let { if (kurz) OrtsKurznamen.je[it.trim().lowercase()] ?: it.substringBefore(',').trim() else it }.orEmpty()
+    name?.let { if (kurz) OrtsKurznamen.je[it.trim().lowercase()] ?: de.bgghome.webtrees.nativ.data.Ortsnamen.blatt(it) else it }.orEmpty()
 
 private val EREIGNIS_ZEICHEN = mapOf("BIRT" to "*", "CHR" to "~", "BAPM" to "~", "DEAT" to "†", "BURI" to "▭", "CREM" to "▭")
 
@@ -198,7 +202,8 @@ internal fun personText(p: Person, det: IndividualDetail, o: BuchOptionen, n: Lo
     fakten.firstOrNull { it.tag == "RELI" }?.value?.takeIf(String::isNotBlank)?.let { laeufe += Lauf(", $it") }
     fakten.filter { it.tag == "OCCU" && it.value.isNotBlank() }.forEach { f ->
         laeufe += Lauf(", ${f.value}")
-        reg.berufe.getOrPut(f.value) { sortedSetOf() } += n
+        // Im Verzeichnis einzelne Berufe: "Maurer (1882), später Polizeidiener (1914)" -> Maurer, Polizeidiener
+        de.bgghome.webtrees.nativ.data.berufe(f.value).ifEmpty { listOf(f.value) }.forEach { reg.berufe.getOrPut(it) { sortedSetOf() } += n }
     }
     fun quelle(f: FactJson): String = if (!o.quellen || f.sources.isEmpty()) "" else
         " (${Texte.t(Res.string.desk_book_source)}: ${f.sources.joinToString("; ") { it.mitSeite() }})".also { f.sources.forEach { s -> reg.quellen.getOrPut(s.title) { sortedSetOf() } += n } }
@@ -215,11 +220,54 @@ internal fun personText(p: Person, det: IndividualDetail, o: BuchOptionen, n: Lo
     val reihenfolge = listOf("BIRT", "CHR", "BAPM")
     val ende = listOf("DEAT", "BURI", "CREM")
     val ohne = setOf("NAME", "SEX", "RELI", "OCCU", "NOTE", "FAMS", "FAMC", "OBJE", "SOUR", "CHAN", "_UID", "RIN", "REFN", "ASSO", "_ASSO")
-    val ereignisse = fakten.filter { it.tag in reihenfolge }.sortedBy { reihenfolge.indexOf(it.tag) } +
-        fakten.filter { it.tag !in reihenfolge && it.tag !in ende && it.tag !in ohne && (it.date != null || it.place != null || it.value.isNotBlank()) } +
+    val mitte = fakten.filter { it.tag !in reihenfolge && it.tag !in ende && it.tag !in ohne && (it.date != null || it.place != null || it.value.isNotBlank()) }
+    val ereignisse = fakten.filter { it.tag in reihenfolge }.sortedBy { reihenfolge.indexOf(it.tag) } + mitte +
         fakten.filter { it.tag in ende }.sortedBy { ende.indexOf(it.tag) }
-    ereignisse.forEach { f -> laeufe += Lauf(", " + ereignis(f)) }
+    ereignisse.filter { it.tag in reihenfolge }.forEach { f -> laeufe += Lauf(", " + ereignis(f)) }
+    // Wohnort und Besitz am selben Ort zusammenziehen: "Wohnort und Besitz: von 1814 bis 1850 Klosterstrasse 5" statt
+    // je Ereignis eine Angabe; Quellen und Verzeichnisse wie bei den einzelnen Ereignissen
+    wohnortBesitz(mitte).forEach { gruppe ->
+        if (gruppe.size == 1) { laeufe += Lauf(", " + ereignis(gruppe[0])); return@forEach }
+        val f = gruppe[0]
+        val ort = ortText(f.place?.name, o.orteKuerzen)
+        if (ort.isNotBlank()) reg.orte.getOrPut(ort) { sortedMapOf(String.CASE_INSENSITIVE_ORDER) }.getOrPut(p.surname.ifBlank { "?" }) { sortedSetOf() } += n
+        val tags = gruppe.map { it.tag }.toSet()
+        val label = when {
+            "RESI" in tags && "PROP" in tags -> Texte.t(Res.string.desk_book_resi_prop)
+            else -> f.label
+        }
+        val werte = gruppe.mapNotNull { it.value.takeIf(String::isNotBlank) }.distinct().joinToString("; ")
+        laeufe += Lauf(", " + listOf("$label:", zeitraumText(gruppe), ort).filter(String::isNotBlank).joinToString(" ") +
+            (if (werte.isNotBlank()) " – $werte" else "") + gruppe.joinToString("") { quelle(it) })
+    }
+    ereignisse.filter { it.tag in ende }.forEach { f -> laeufe += Lauf(", " + ereignis(f)) }
     return PersonText(laeufe, fakten, ereignisse)
+}
+
+/**
+ * Wohnort (RESI) und Besitz (PROP) am selben Ort zu einer Gruppe; alle anderen Ereignisse einzeln, Reihenfolge nach dem
+ * ersten Auftreten. So wird aus zehn Eintraegen fuer dasselbe Haus eine Zeile mit Zeitraum.
+ */
+internal fun wohnortBesitz(fakten: List<FactJson>): List<List<FactJson>> {
+    val gruppen = mutableListOf<MutableList<FactJson>>()
+    val jeOrt = HashMap<String, MutableList<FactJson>>()
+    fakten.forEach { f ->
+        val ort = f.place?.name?.trim()?.lowercase()
+        if ((f.tag == "RESI" || f.tag == "PROP") && !ort.isNullOrEmpty()) {
+            jeOrt[ort]?.let { it += f } ?: mutableListOf(f).also { jeOrt[ort] = it; gruppen += it }
+        } else gruppen += mutableListOf(f)
+    }
+    return gruppen
+}
+
+/** "von 1814 bis 1850" aus den Daten einer Gruppe: gleiche Angabe einmal, sonst fruehestes bis spaetestes Jahr. */
+internal fun zeitraumText(gruppe: List<FactJson>): String {
+    val daten = gruppe.mapNotNull { it.date }
+    if (daten.isEmpty()) return ""
+    val texte = daten.map { buchDatum(it) }.filter(String::isNotBlank).distinct()
+    if (texte.size <= 1) return texte.firstOrNull().orEmpty()
+    val jahre = daten.flatMap { d -> Regex("\\d{4}").findAll(d.gedcom.ifBlank { d.text }).map { it.value.toInt() }.toList() }
+    return if (jahre.isEmpty()) texte.joinToString(", ") else "${Texte.t(Res.string.desk_book_from)} ${jahre.min()} ${Texte.t(Res.string.desk_book_to)} ${jahre.max()}"
 }
 
 /** Notizen: Leerzeile = neuer Absatz, einfacher Zeilenumbruch = Leerzeichen (api4webtrees ab 1.9.1 liefert beide). */

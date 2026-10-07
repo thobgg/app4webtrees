@@ -77,6 +77,7 @@ private object BuchWahl {
         partner = prefs.getBoolean("buch_partner", true), namenstraeger = prefs.getBoolean("buch_namen", false),
         familienChronologisch = prefs.getBoolean("buch_chrono", false), ortFilter = prefs.getString("buch_ort", null).orEmpty(),
         haeuser = prefs.getBoolean("buch_haeuser", true),
+        haeuserNurTyp = prefs.getBoolean("buch_haeuser_typ", true), haeuserOhneTyp = prefs.getBoolean("buch_haeuser_ohne", true),
     )
     fun art(): BuchArt = BuchArt.entries.firstOrNull { it.name == prefs.getString("buch_art", null) } ?: BuchArt.Vorfahren
     fun sichern(o: BuchOptionen) {
@@ -86,6 +87,7 @@ private object BuchWahl {
         prefs.putBoolean("buch_reg_berufe", o.berufe); prefs.putBoolean("buch_reg_quellen", o.quellenVerzeichnis); prefs.putString("buch_vorwort", o.vorwort)
         prefs.putString("buch_nr", o.nummerierung.name); prefs.putBoolean("buch_partner", o.partner); prefs.putBoolean("buch_namen", o.namenstraeger)
         prefs.putBoolean("buch_chrono", o.familienChronologisch); prefs.putString("buch_ort", o.ortFilter); prefs.putBoolean("buch_haeuser", o.haeuser)
+        prefs.putBoolean("buch_haeuser_typ", o.haeuserNurTyp); prefs.putBoolean("buch_haeuser_ohne", o.haeuserOhneTyp)
     }
 }
 
@@ -171,6 +173,10 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                         OutlinedTextField(o.ortFilter, { o = o.copy(ortFilter = it) }, label = { Text(stringResource(Res.string.desk_book_place_filter)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY)
                             Haken(stringResource(Res.string.desk_book_houses_option), o.haeuser, stringResource(Res.string.tipp_book_houses)) { o = o.copy(haeuser = it) }
+                        if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY && o.haeuser) {
+                            Haken(stringResource(Res.string.desk_book_houses_only_type), o.haeuserNurTyp, stringResource(Res.string.tipp_book_houses_only_type)) { o = o.copy(haeuserNurTyp = it) }
+                            if (o.haeuserNurTyp) Haken(stringResource(Res.string.desk_book_houses_untyped), o.haeuserOhneTyp, stringResource(Res.string.tipp_book_houses_untyped)) { o = o.copy(haeuserOhneTyp = it) }
+                        }
                     }
                     if (!familien) Einstellung(stringResource(Res.string.desk_chart_person)) { Text(wer, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold) }
                     if (!familien) Einstellung(stringResource(Res.string.desk_chart_generations)) {

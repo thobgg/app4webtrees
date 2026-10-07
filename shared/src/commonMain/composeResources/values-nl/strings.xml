@@ -387,6 +387,14 @@
     <string name="desk_book_houses">Huizen en boerderijen</string>
     <string name="desk_book_houses_option">Huizen en boerderijen</string>
     <string name="tipp_book_houses">Boerderijen en huizen uit het plaatsenbeheer: plaatsen met een soort (boerderij, huis …) in hun locatierecord onder de plaats. Per huis de geschiedenis, bewoners en eigenaren; de gezinnen verwijzen naar hun huis.</string>
+    <string name="desk_book_houses_only_type">Alleen huizen en boerderijen (naar plaatssoort)</string>
+    <string name="tipp_book_houses_only_type">Alleen gebouwen volgens de soort in het locatierecord (huis, boerderij, molen, kerk …); stadsdelen, dorpen en districten zijn hoofdstukken. Zonder soort telt een huisnummer in de naam.</string>
+    <string name="desk_book_houses_untyped">Plaatsen zonder soort opnemen</string>
+    <string name="tipp_book_houses_untyped">Plaatsen zonder soort en zonder huisnummer komen ook in het huizendeel; anders in de bijlage.</string>
+    <string name="desk_book_other_places">Overige plaatsen</string>
+    <string name="desk_book_resi_prop">Woonplaats en bezit</string>
+    <string name="desk_book_from">van</string>
+    <string name="desk_book_to">tot</string>
     <string name="desk_book_owner">Eigenaar</string>
     <string name="desk_book_resident">Bewoner</string>
     <string name="desk_book_house_ref">Huis</string>
