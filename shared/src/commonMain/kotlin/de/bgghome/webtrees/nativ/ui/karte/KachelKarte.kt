@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -31,6 +34,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -175,7 +179,7 @@ fun rememberKachelLoader(): ImageLoader {
 }
 
 /**
- * Die Karte. [interaktiv] = Ziehen, Mausrad/Doppelklick zoomen; sonst reine
+ * Die Karte. [interaktiv] = Ziehen, Mausrad/Doppelklick zoomen (mit Umschalttaste heraus), Knoepfe + und -; sonst reine
  * Anzeige (Panel scrollt drueber). [onTap] bekommt den Ort unter dem
  * Zeiger, [onPinTap] den getroffenen Pin (hat Vorrang).
  */
@@ -238,6 +242,9 @@ fun KachelKarte(
             (s - o).getDistance() <= r
         }
 
+        // Umschalttaste beim letzten Zeigerereignis: Doppelklick mit Umschalt zoomt heraus. detectTapGestures kennt keine
+        // Tasten, darum merkt die Ereignisschleife unten sie sich (Android: immer false).
+        var umschalt by remember { mutableStateOf(false) }
         val gesten = if (!interaktiv) Modifier else Modifier
             // Mausrad: als Ereignisschleife, weil Modifier.onPointerEvent nur
             // auf dem Desktop existiert und diese Karte auch auf Android laeuft.
@@ -245,6 +252,7 @@ fun KachelKarte(
                 awaitPointerEventScope {
                     while (true) {
                         val ev = awaitPointerEvent()
+                        umschalt = ev.keyboardModifiers.isShiftPressed
                         if (ev.type != PointerEventType.Scroll) continue
                         val change = ev.changes.firstOrNull() ?: continue
                         val dy = change.scrollDelta.y
@@ -258,7 +266,7 @@ fun KachelKarte(
             .pointerInput(z, wPx, hPx, pins) {
                 detectTapGestures(
                     onTap = { o -> pinBei(o)?.let { onPinTap?.invoke(it) } ?: onTap?.invoke(zumOrt(o)) },
-                    onDoubleTap = { o -> zoomBei(o, 1) },
+                    onDoubleTap = { o -> zoomBei(o, if (umschalt) -1 else 1) },
                 )
             }
 
@@ -322,10 +330,29 @@ fun KachelKarte(
                         .then(if (onPinTap != null) Modifier.clickable { onPinTap(p) } else Modifier),
                 )
             }
+            // Plus/Minus fuer alle ohne Mausrad (Touchpad, Handy): zoomt um die Mitte
+            if (interaktiv) Column(
+                Modifier.align(Alignment.TopEnd).padding(8.dp).shadow(2.dp, RoundedCornerShape(6.dp))
+                    .background(Color.White, RoundedCornerShape(6.dp)),
+            ) {
+                ZoomKnopf("+", z < ebene.maxZoom) { zoomBei(Offset(wPx / 2f, hPx / 2f), 1) }
+                Box(Modifier.width(32.dp).height(1.dp).background(Color(0x33000000)))
+                ZoomKnopf("−", z > 1) { zoomBei(Offset(wPx / 2f, hPx / 2f), -1) }
+            }
             Text(
                 ebene.quelle, color = Color(0xCC000000), fontSize = 9.sp,
                 modifier = Modifier.align(Alignment.BottomEnd).background(Color(0x99FFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun ZoomKnopf(zeichen: String, aktiv: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier.size(32.dp).clickable(enabled = aktiv, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(zeichen, color = if (aktiv) Color(0xDD000000) else Color(0x44000000), fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }
 }
