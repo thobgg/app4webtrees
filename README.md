@@ -91,7 +91,7 @@
 
 **Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
 **Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren.  
-**Windows:** `wtWin-….exe` starten, installiert pro Benutzer ohne Adminrechte. Die Datei ist nicht signiert, darum warnt Windows beim ersten Start vor einem unbekannten Herausgeber: „Weitere Informationen" und dann „Trotzdem ausführen".  
+**Windows:** `wtWin-….exe` starten. Der Installer fragt zuerst nach der Sprache (Deutsch, Englisch, Französisch, Niederländisch, Spanisch) und installiert pro Benutzer ohne Adminrechte; ab 1.42 ersetzt er auch eine ältere Fassung von selbst. Die Datei ist nicht signiert, darum warnt Windows beim ersten Start vor einem unbekannten Herausgeber: „Weitere Informationen" und dann „Trotzdem ausführen".  
 **macOS (zum Testen):** `wtMac-…-arm64.dmg` für Macs mit Apple-Chip, `…-x64.dmg` für Intel-Macs; öffnen und wtMac in „Programme“ ziehen. Die Datei ist nicht signiert: beim ersten Start unter Systemeinstellungen › Datenschutz & Sicherheit „Trotzdem öffnen“. Noch nicht auf einem echten Mac getestet – Rückmeldungen gern als Issue.
 
 **Mit oder ohne Server:** wtWin und wtTux verbinden sich mit einem vorhandenen webtrees, dort muss das Modul [api4webtrees](https://github.com/thobgg/api4webtrees) installiert sein. Oder sie legen den Stammbaum **auf diesem PC** an, leer oder aus einer GEDCOM-Datei aus dem bisherigen Programm (ab 1.26). Dafür bringen sie webtrees (unverändert aus dem [offiziellen Release](https://github.com/fisharebest/webtrees/releases), GPL-3) und PHP mit – kein Server, kein Passwort, kein Internet nötig. wtAnd und wtMac brauchen einen Server.

@@ -91,7 +91,7 @@
 
 **Android:** the APK is signed. To install outside the Play Store, Android asks once to allow your browser to install apps.  
 **Linux:** install the package with `sudo apt install ./wttux_…_amd64.deb`.  
-**Windows:** run `wtWin-….exe`; it installs for the current user without admin rights. The file is not signed, so Windows warns about an unknown publisher on first start: choose "More info", then "Run anyway".  
+**Windows:** run `wtWin-….exe`. The installer first asks for the language (English, German, French, Dutch, Spanish) and installs for the current user without admin rights; from 1.42 it also replaces an older version by itself. The file is not signed, so Windows warns about an unknown publisher on first start: choose "More info", then "Run anyway".  
 **macOS (for testing):** `wtMac-…-arm64.dmg` for Apple silicon, `…-x64.dmg` for Intel Macs; open it and drag wtMac to Applications. The file is not signed: on first start choose System Settings › Privacy & Security › "Open Anyway". Not yet tested on a real Mac – feedback welcome as an issue.
 
 **With or without a server:** wtWin and wtTux connect to an existing webtrees, which needs the [api4webtrees](https://github.com/thobgg/api4webtrees) module. Or they create the family tree **on this PC**, empty or from a GEDCOM file exported from your previous program (from 1.26). For this they include webtrees (unchanged from the [official release](https://github.com/fisharebest/webtrees/releases), GPL-3) and PHP – no server, no password, no internet needed. wtAnd and wtMac need a server.
