@@ -924,44 +924,7 @@ fun personentextKopieren(d: de.bgghome.webtrees.nativ.api.IndividualDetail) {
     java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(text), null)
 }
 
-// ── Arbeitsbereiche ──────────────────────────────────────────────────
-
-@Composable
-internal fun WorkspaceBar(state: UiState, viewModel: AppViewModel, familie: Boolean, onQuellen: (() -> Unit)?, onOrte: (() -> Unit)? = null) {
-    Surface(color = MaterialTheme.colorScheme.surface) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            TreePicker(state, viewModel)
-            Spacer(Modifier.width(16.dp))
-            Workspace(Icons.Default.Home, stringResource(Res.string.nav_home), state.section == Section.Home) { viewModel.setSection(Section.Home) }
-            Workspace(TreeIcon, stringResource(if (familie) Res.string.nav_family else Res.string.nav_tree), state.section == Section.Tree || state.section == Section.Search) { viewModel.setSection(Section.Tree) }
-            Workspace(PhotoIcon, stringResource(Res.string.nav_photos), state.section == Section.Photos) { viewModel.setSection(Section.Photos) }
-            if (onQuellen != null) Workspace(SourceIcon, stringResource(Res.string.desk_sources_window), false, onQuellen)
-            if (onOrte != null) Workspace(Icons.Default.Place, stringResource(Res.string.desk_places_window), false, onOrte)
-            Spacer(Modifier.weight(1f))
-            if (!familie && (state.section == Section.Tree || state.section == Section.Search)) {
-                GenerationsChip(state, viewModel)
-                TreeSettings(state, viewModel)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Workspace(icon: ImageVector, label: String, active: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier
-            .padding(horizontal = 2.dp)
-            .background(if (active) colors.secondaryContainer else colors.surface, MaterialTheme.shapes.small)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, Modifier.size(20.dp), tint = if (active) colors.onSecondaryContainer else colors.onSurfaceVariant)
-        Spacer(Modifier.width(6.dp))
-        Text(label, style = MaterialTheme.typography.labelLarge, color = if (active) colors.onSecondaryContainer else colors.onSurface)
-    }
-}
+// ── Baumwahl in der Symbolleiste ─────────────────────────────────────
 
 /** Name des Baums; mit mehreren Baeumen eine Aufklappliste zum Wechseln. */
 @Composable
