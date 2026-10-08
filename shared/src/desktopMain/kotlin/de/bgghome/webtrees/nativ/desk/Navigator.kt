@@ -673,6 +673,10 @@ private fun PersonBox(
     val fill = if (stil.kante) MaterialTheme.colorScheme.surface else c.fill
     val rand = when { art == Art.Zentral -> onSurface; stil.kante -> MaterialTheme.colorScheme.outlineVariant; else -> c.border }
     val klick: () -> Unit = if (art == Art.Zentral) ({ onOpenSheet(person.xref) }) else ({ viewModel.setRoot(person.xref) })
+    // Die Lage (offset) gehoert an die aeussere Box: ContextMenuArea ist selbst eine Box mit Zeigerabfrage. Saesse der offset nur
+    // am Kasten darin, laegen die Menuebereiche aller Kinder oben in der Spalte uebereinander, und der des letzten Kindes
+    // verschluckte die Klicks auf das erste (Issue 8).
+    Box(modifier) {
     ContextMenuArea(items = {
         if (person.isPrivate) emptyList() else listOfNotNull(
             if (art != Art.Zentral) ContextMenuItem(asCentre) { viewModel.setRoot(person.xref) } else null,
@@ -684,7 +688,7 @@ private fun PersonBox(
         )
     }) {
         Row(
-            modifier.size(breite, hoehe)
+            Modifier.size(breite, hoehe)
                 .background(fill)
                 .border(if (art == Art.Zentral) 2.5.dp else 1.dp, rand)
                 .fokusRahmen()
@@ -706,6 +710,7 @@ private fun PersonBox(
             if (!stil.kante) linie?.let { farbe -> Box(Modifier.width(6.dp).fillMaxHeight().background(farbe)) }
             if (pfeilRechts) Text("▶", fontSize = 11.sp, color = onSurface, modifier = Modifier.padding(end = 2.dp))
         }
+    }
     }
 }
 
