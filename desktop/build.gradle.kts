@@ -27,7 +27,10 @@ java {
 dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
+    testImplementation(kotlin("test"))
 }
+
+tasks.withType<Test> { useJUnitPlatform() }
 
 // wtAnd zaehlt zweistellig (1.18); Windows-Installer verlangen x.y.z. Die dritte Stelle zaehlt jetzt von selbst:
 // die Zahl der Commits auf dem Stand, der gebaut wird. Windows Installer ersetzt eine installierte Fassung nur

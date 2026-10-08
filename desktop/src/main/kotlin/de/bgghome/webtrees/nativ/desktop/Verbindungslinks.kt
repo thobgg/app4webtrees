@@ -70,14 +70,48 @@ internal fun schemaAnmelden(appName: String) {
     }
 }
 
+/**
+ * Windows: Schluessel HKCU\Software\Classes\wtwin ueber eine .reg-Datei und `reg import`. Nicht per `reg add`: dessen
+ * Wert `"C:\…\wtWin.exe" "%1"` traegt Anfuehrungszeichen im Argument, und Java (Temurin 21.0.2 und neuer, Vorgabe
+ * jdk.lang.Process.allowAmbiguousCommands=false) weist so ein Argument ab ("Malformed argument has embedded quote").
+ * Darum fehlte shell\open\command bisher auf jedem Windows-PC, nur das Schema selbst stand da (Befund eines Testers,
+ * 08.10.2026). Der Installer traegt dasselbe seit 1.42 ein; hier bleibt es fuer Programme, die anders hingekommen sind.
+ */
 private fun windows(programm: String) {
-    val schluessel = "HKCU\\Software\\Classes\\wtwin"
-    fun reg(vararg args: String) = ProcessBuilder("reg", "add", *args, "/f").redirectErrorStream(true).start().waitFor()
-    reg(schluessel, "/ve", "/d", "URL:wtWin")
-    // ohne /d: leerer Wert (ein leeres Argument uebersteht die Windows-Kommandozeile nicht verlaesslich)
-    reg(schluessel, "/v", "URL Protocol", "/t", "REG_SZ")
-    reg("$schluessel\\DefaultIcon", "/ve", "/d", "\"$programm\",0")
-    reg("$schluessel\\shell\\open\\command", "/ve", "/d", "\"$programm\" \"%1\"")
+    val befehl = "\"$programm\" \"%1\""
+    // Schon eingetragen? Dann nichts anfassen.
+    val vorhanden = runCatching {
+        val p = ProcessBuilder("reg", "query", "HKCU\\Software\\Classes\\wtwin\\shell\\open\\command", "/ve").redirectErrorStream(true).start()
+        val text = p.inputStream.bufferedReader().readText(); p.waitFor(); text
+    }.getOrDefault("")
+    if (vorhanden.contains(befehl)) return
+    val datei = File(System.getProperty("java.io.tmpdir"), "wtwin-schema.reg")
+    try {
+        // regedit verlangt bei Unicode UTF-16LE mit Byte-Order-Mark FF FE (Java schreibt bei "UTF-16" FE FF).
+        datei.writeBytes(byteArrayOf(0xFF.toByte(), 0xFE.toByte()) + regDateiText(programm).toByteArray(Charsets.UTF_16LE))
+        ProcessBuilder("reg", "import", datei.path).redirectErrorStream(true).start().waitFor()
+    } finally {
+        datei.delete()
+    }
+}
+
+/** Inhalt der .reg-Datei fuer das Schema wtwin://; Backslash und Anfuehrungszeichen im Pfad sind zu maskieren. */
+internal fun regDateiText(programm: String): String {
+    val exe = programm.replace("\\", "\\\\").replace("\"", "\\\"")
+    return listOf(
+        "Windows Registry Editor Version 5.00",
+        "",
+        "[HKEY_CURRENT_USER\\Software\\Classes\\wtwin]",
+        "@=\"URL:wtWin\"",
+        "\"URL Protocol\"=\"\"",
+        "",
+        "[HKEY_CURRENT_USER\\Software\\Classes\\wtwin\\DefaultIcon]",
+        "@=\"\\\"$exe\\\",0\"",
+        "",
+        "[HKEY_CURRENT_USER\\Software\\Classes\\wtwin\\shell\\open\\command]",
+        "@=\"\\\"$exe\\\" \\\"%1\\\"\"",
+        "",
+    ).joinToString("\r\n")
 }
 
 private fun linux(programm: String) {
