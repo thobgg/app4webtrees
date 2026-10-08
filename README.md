@@ -175,8 +175,8 @@ schon dabei) verbindet ein Klick das Programm mit dem eigenen Konto – Adresse 
 
 - **wtWin/wtTux (ab 1.21):** Programm installieren und starten, dann im Browser auf **„Mit wtWin verbinden“** klicken.
   Das Programm übernimmt den Verbinden-Link aus der Zwischenablage oder bekommt ihn direkt vom Browser
-  (`wtwin://`, `wttux://` – es meldet sich dafür beim ersten Start selbst an, ohne Adminrechte), fragt einmal nach und
-  öffnet den Baum.
+  (`wtwin://`, `wttux://` – unter Windows trägt das der Installer ab 1.42 ein, sonst meldet sich das Programm beim
+  ersten Start selbst an, ohne Adminrechte), fragt einmal nach und öffnet den Baum.
 - **wtAnd:** am Handy auf „Jetzt verbinden“ tippen, oder am PC den QR-Code mit der Handy-Kamera scannen.
 
 Der Link trägt einen Einmal-Code, der 10 Minuten und genau einmal gilt; das Passwort erreicht das Gerät nie.

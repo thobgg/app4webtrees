@@ -176,7 +176,8 @@ one click connects the program to your own account – nobody has to type the ad
 
 - **wtWin/wtTux (1.21 or later):** install and start the program, then click **“Connect with wtWin”** in the browser.
   The program takes the connect link from the clipboard or gets it straight from the browser (`wtwin://`, `wttux://` –
-  it registers itself for this at first start, without admin rights), asks once and opens the tree.
+  on Windows the installer registers this from 1.42, otherwise the program registers itself at first start, without
+  admin rights), asks once and opens the tree.
 - **wtAnd:** tap “Connect now” on the phone, or scan the QR code with the phone camera at the PC.
 
 The link carries a one-time code that is valid for 10 minutes and exactly once; the password never reaches the device.

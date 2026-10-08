@@ -1,6 +1,6 @@
 // Linux/Windows/macOS-Huelle von wtAnd: ein Fenster um den geteilten Kern
 // (:shared), native Pakete via jpackage. Gebaut wird je System, auf dem
-// es laeuft: deb unter Linux, msi/exe unter Windows (WiX noetig), dmg
+// es laeuft: deb unter Linux, exe unter Windows (Inno Setup, Task packageInno), dmg
 // auf GitHub (.github/workflows/mac.yml, noch unsigniert).
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.net.URI
@@ -116,9 +116,11 @@ compose.desktop {
 
         nativeDistributions {
             appResourcesRootDir.set(lokalOrdner)
-            targetFormats(TargetFormat.Deb, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Dmg)
+            // Windows: kein Msi/Exe mehr aus jpackage - den Installer baut Inno Setup (packageInno unten) aus dem
+            // Programmverzeichnis von createDistributable.
+            targetFormats(TargetFormat.Deb, TargetFormat.Dmg)
             // NIE mehr aendern, sobald das erste Paket verteilt ist: Installationsordner und
-            // Startmenue haengen daran (wie upgradeUuid unten).
+            // Startmenue haengen daran.
             packageName = appName
             modules("java.instrument", "java.prefs", "jdk.unsupported")
             // Dieselbe Nummer wie die APK (gradle.properties). Windows
@@ -136,13 +138,8 @@ compose.desktop {
             }
             windows {
                 packageVersion = windowsVersion
-                perUserInstall = true
-                menuGroup = "wtWin"
-                shortcut = true
-                dirChooser = true
-                // NIE aendern: nur mit gleicher Kennung ersetzt eine neue
-                // Version die alte, statt zweimal im Startmenue zu stehen.
-                upgradeUuid = "b3f1d7a2-4c58-4e9b-8f60-1d2e7a9c5b41"
+                // Die jpackage-MSIs 1.21 bis 1.41 trugen die upgradeUuid b3f1d7a2-4c58-4e9b-8f60-1d2e7a9c5b41;
+                // der Inno-Installer (installer/wtWin.iss) entfernt diese Fassungen beim Update selbst.
                 iconFile.set(project.file("icons/app.ico"))
             }
             macOS {
@@ -174,4 +171,30 @@ compose.desktop {
             }
         }
     }
+}
+
+// Windows-Installer mit Inno Setup (seit 1.42): Sprachwahl, Installation pro Benutzer, wtwin:// gleich eingetragen,
+// ersetzt die jpackage-MSI-Fassungen beim Update. Braucht ISCC.exe (Inno Setup 6, windows-einrichten.ps1);
+// ein anderer Ort geht ueber die Umgebungsvariable ISCC. Ergebnis: build/compose/binaries/main/inno/wtWin-x.y.z.exe
+tasks.register<Exec>("packageInno") {
+    group = "compose desktop"
+    description = "Windows installer (Inno Setup) from the app image"
+    dependsOn("createDistributable")
+    onlyIf { osName.startsWith("Windows") }
+    val quelle = layout.buildDirectory.dir("compose/binaries/main/app/$appName").get().asFile
+    val ziel = layout.buildDirectory.dir("compose/binaries/main/inno").get().asFile
+    val skript = project.file("installer/wtWin.iss")
+    inputs.dir(quelle); inputs.file(skript); outputs.dir(ziel)
+    doFirst {
+        val kandidaten = listOfNotNull(
+            System.getenv("ISCC"),
+            System.getenv("ProgramFiles(x86)")?.let { "$it\\Inno Setup 6\\ISCC.exe" },
+            System.getenv("LOCALAPPDATA")?.let { "$it\\Programs\\Inno Setup 6\\ISCC.exe" },
+        )
+        val iscc = kandidaten.firstOrNull { File(it).isFile }
+            ?: error("ISCC.exe (Inno Setup 6) nicht gefunden - windows-einrichten.cmd ausfuehren oder ISCC auf die Datei setzen. Gesucht: $kandidaten")
+        ziel.mkdirs()
+        commandLine(iscc, "/Q", "/DVersion=$windowsVersion", "/DQuelle=${quelle.path}", "/DZiel=${ziel.path}", skript.path)
+    }
+    doLast { ziel.listFiles()?.forEach { println("Installer: ${it.path}") } }
 }

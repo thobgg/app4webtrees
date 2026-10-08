@@ -110,7 +110,8 @@ fun verbindungAusText(text: String?): ConnectRequest? {
     val t = text?.trim() ?: return null
     if (t.length > 1000 || t.any { it.isWhitespace() }) return null
     if (t.substringBefore("://", "").lowercase() !in setOf("wtwin", "wttux", "wtmac", "webtreesand")) return null
-    val rest = t.substringAfter("://")
+    // Windows reicht den Link mitunter kanonisiert weiter (wtwin://connect/?url=…) - der Schraegstrich zaehlt nicht.
+    val rest = t.substringAfter("://").removePrefix("connect/").let { if (it.startsWith("?")) "connect$it" else it }
     if (!rest.startsWith("connect?")) return null
     val q = rest.substringAfter('?').split('&').mapNotNull { teil ->
         val kv = teil.split('=', limit = 2)

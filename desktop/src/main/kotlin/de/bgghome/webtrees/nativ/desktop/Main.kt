@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
     Sprache.start(plattform.settings)
 
     // Verbinden-Link aus webtrees als Startargument (wtwin://connect?…). Laeuft schon ein Fenster, bekommt es den Link.
-    val startLink = args.firstOrNull { it.contains("://connect?") }
+    val startLink = args.firstOrNull { it.contains("://connect?") || it.contains("://connect/?") }
     val instanz = Einzelinstanz(plattform.cacheOrdner)
     if (!instanz.erste(startLink)) return
     val nachrichten = Channel<String>(Channel.UNLIMITED)
