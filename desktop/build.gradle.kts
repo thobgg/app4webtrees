@@ -126,6 +126,8 @@ compose.desktop {
             // Startmenue haengen daran.
             packageName = appName
             modules("java.instrument", "java.prefs", "jdk.unsupported")
+            // Windows-Zertifikatspeicher (KeyStore "Windows-ROOT", api/Vertrauen.desktop.kt) - das Modul gibt es nur im Windows-JDK
+            if (osName.startsWith("Windows")) modules("jdk.crypto.mscapi")
             // Dieselbe Nummer wie die APK (gradle.properties). Windows
             // Installer verlangt rein numerisch x.y.z.
             packageVersion = versionName

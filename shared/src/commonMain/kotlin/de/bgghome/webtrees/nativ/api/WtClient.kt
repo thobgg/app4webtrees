@@ -143,6 +143,8 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                 response
             }
         }
+        // Zertifikatspeicher des Systems dazu (lokale Server mit eigener Zertifikatsstelle), nur am Desktop
+        .apply { systemVertrauen(this) }
         .build()
 
     private val json = Json {
