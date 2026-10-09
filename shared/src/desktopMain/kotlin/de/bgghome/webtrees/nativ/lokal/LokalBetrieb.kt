@@ -15,23 +15,37 @@ object LokalBetrieb : WtClient.LokalerDienst {
 
     override fun betrifft(host: String, port: Int): Boolean = host == "127.0.0.1" && port == server?.port
 
+    /** Laeuft der Server nach einem Neustart unter einem anderen Port: neue Adresse fuer Einstellungen und Client. */
+    @Volatile var beiNeuerAdresse: ((String) -> Unit)? = null
+
     /**
-     * Antwortet der Server nicht mehr (abgestuerzt, haengt an einer Anfrage): beenden und unter demselben Port neu
-     * starten - die Anmeldung bleibt, die Sitzung liegt in webtrees/data. Mehrere Anfragen, die zugleich scheitern,
-     * loesen nur einen Neustart aus.
+     * Antwortet der Server nicht mehr (abgestuerzt, haengt an einer Anfrage): beenden und moeglichst unter demselben Port
+     * neu starten - die Anmeldung bleibt, die Sitzung liegt in webtrees/data. Unter Windows ist der alte Port kurz nach
+     * dem Beenden oft noch belegt: bis zu 5 s warten, sonst einen neuen nehmen und Adresse und Zugang umstellen (der erste
+     * Neustart lief sonst unbemerkt auf einem anderen Port, Issue 9). Mehrere Anfragen, die zugleich scheitern, loesen
+     * nur einen Neustart aus. Ergebnis: der Port, unter dem der Server jetzt antwortet, oder null.
      */
     @Synchronized
-    override fun neustarten(): Boolean {
-        val s = server ?: return false
+    override fun neustarten(): Int? {
+        val s = server ?: return null
         val jetzt = System.currentTimeMillis()
-        if (jetzt - letzterNeustart < 10_000) return s.laeuft
+        if (jetzt - letzterNeustart < 10_000) return s.port.takeIf { s.laeuft }
         letzterNeustart = jetzt
-        val port = s.port
-        LokalProtokoll.schreiben("Server antwortet nicht – Neustart auf Port $port")
+        val alt = s.port
+        LokalProtokoll.schreiben("Server antwortet nicht – Neustart (Port $alt)")
         s.beenden()
-        return runCatching { s.starten(wunschPort = port); s.port == port }
-            .onFailure { LokalProtokoll.schreiben("Neustart gescheitert: ${it.message?.lineSequence()?.firstOrNull()}") }
-            .getOrDefault(false)
+        val ende = System.currentTimeMillis() + 5_000
+        while (!LokalerServer.frei(alt) && System.currentTimeMillis() < ende) Thread.sleep(200)
+        return runCatching {
+            s.starten(wunschPort = alt)
+            if (s.port != alt) {
+                LokalProtokoll.schreiben("Port $alt noch belegt – Server jetzt auf Port ${s.port}")
+                LokalerZugang.laden()?.copy(port = s.port)?.sichern()
+                beiNeuerAdresse?.invoke(s.adresse.trimEnd('/'))
+            }
+            s.port
+        }.onFailure { LokalProtokoll.schreiben("Neustart gescheitert: ${it.message?.lineSequence()?.firstOrNull()}") }
+            .getOrNull()
     }
 
     override fun protokoll(text: String) = LokalProtokoll.schreiben(text)

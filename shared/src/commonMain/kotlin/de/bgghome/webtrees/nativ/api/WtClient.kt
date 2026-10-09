@@ -129,9 +129,11 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                         chain.proceed(anfrage).also { dienst.protokoll("$ziel: zweiter Versuch ok") }
                     } catch (e2: IOException) {
                         dienst.protokoll("$ziel: zweiter Versuch: $e2")
-                        if (!dienst.neustarten()) throw e2
+                        val port = dienst.neustarten() ?: throw e2
+                        // Lief der Server danach unter einem anderen Port (der alte war unter Windows noch belegt), dorthin
+                        val nochmal = if (port == anfrage.url.port) anfrage else anfrage.newBuilder().url(anfrage.url.newBuilder().port(port).build()).build()
                         try {
-                            chain.proceed(anfrage).also { dienst.protokoll("$ziel: nach Neustart ok") }
+                            chain.proceed(nochmal).also { dienst.protokoll("$ziel: nach Neustart ok") }
                         } catch (e3: IOException) {
                             dienst.protokoll("$ziel: nach Neustart: $e3")
                             throw e3
@@ -712,8 +714,8 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     interface LokalerDienst {
         /** Ist [host]:[port] der laufende lokale Server? */
         fun betrifft(host: String, port: Int): Boolean
-        /** Server neu starten, unter derselben Adresse; true, wenn er danach wieder antwortet. */
-        fun neustarten(): Boolean
+        /** Server neu starten; der Port, unter dem er danach antwortet (moeglichst derselbe), oder null. */
+        fun neustarten(): Int?
         /** Eine Zeile fuer wtwin.log. */
         fun protokoll(text: String) {}
     }

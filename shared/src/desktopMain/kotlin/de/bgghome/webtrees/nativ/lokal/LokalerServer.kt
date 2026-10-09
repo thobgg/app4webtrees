@@ -124,12 +124,13 @@ class LokalerServer(private val php: File, private val webtrees: File = LokalOrt
 
     /**
      * Antwortet webtrees selbst? Eine CSS-Datei reichte nicht: die liefert der Server, ohne PHP auszufuehren - so galt
-     * ein Server als bereit, der jede echte Anfrage abbrach (Issue 9). index.php fuehrt PHP aus; jede HTTP-Antwort
-     * (vor der Einrichtung auch 404) zeigt, dass PHP laeuft - nur ein Abbruch oder keine Antwort zaehlt als Fehler.
+     * ein Server als bereit, der jede echte Anfrage abbrach (Issue 9). Gefragt wird Info von api4webtrees (200, auch
+     * ohne Anmeldung); jede HTTP-Antwort zeigt, dass PHP laeuft - nur ein Abbruch oder keine Antwort zaehlt als Fehler.
+     * (Erst index.php: das antwortet vor der Anmeldung mit 404, was im Protokoll wie ein Fehler aussah.)
      */
     /** null, wenn webtrees antwortet, sonst der Grund (fuer wtwin.log). */
     private fun antwortFehler(): String? = try {
-        val c = URI("${adresse}index.php").toURL().openConnection() as HttpURLConnection
+        val c = URI("${adresse}index.php?route=%2Fmodule%2F_api4webtrees_%2FInfo").toURL().openConnection() as HttpURLConnection
         c.instanceFollowRedirects = false
         c.connectTimeout = 500; c.readTimeout = 10_000
         try { c.responseCode.let { if (it in 100..599) null else "HTTP $it" } } finally { c.disconnect() }
@@ -149,7 +150,7 @@ class LokalerServer(private val php: File, private val webtrees: File = LokalOrt
 
     companion object {
         fun freierPort(): Int = ServerSocket(0, 1, InetAddress.getLoopbackAddress()).use { it.localPort }
-        private fun frei(port: Int) = runCatching { ServerSocket(port, 1, InetAddress.getLoopbackAddress()).close() }.isSuccess
+        internal fun frei(port: Int) = runCatching { ServerSocket(port, 1, InetAddress.getLoopbackAddress()).close() }.isSuccess
 
         /**
          * PFLICHT: `php -S` kennt keine .htaccess. Ohne diese Sperre waere data/ (die SQLite-Datei, config.ini.php)

@@ -31,6 +31,7 @@ class DesktopPlattform : Plattform {
         it.baseUrl = settings.baseUrl
         it.klartextUeberall = isDebug
         WtClient.lokal = de.bgghome.webtrees.nativ.lokal.LokalBetrieb
+        de.bgghome.webtrees.nativ.lokal.LokalBetrieb.beiNeuerAdresse = { adresse -> settings.baseUrl = adresse; it.baseUrl = adresse }
         // Kachelserver sehen denselben ehrlichen User-Agent, mit Projektadresse (OSM-Regel).
         kachelUserAgent = "$appName/$versionName (https://github.com/thobgg/app4webtrees)"
     }

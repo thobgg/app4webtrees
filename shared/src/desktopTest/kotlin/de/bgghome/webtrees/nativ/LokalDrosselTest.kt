@@ -32,6 +32,7 @@ class LokalDrosselTest {
     private val hoechstens = AtomicInteger()
     private val abbrechen = AtomicInteger(0)
     private val neustarts = AtomicInteger()
+    @Volatile private var neuerPort: Int? = null
     private val protokoll = java.util.Collections.synchronizedList(mutableListOf<String>())
 
     init {
@@ -55,7 +56,7 @@ class LokalDrosselTest {
     private fun lokalSetzen() {
         WtClient.lokal = object : WtClient.LokalerDienst {
             override fun betrifft(host: String, port: Int) = host == "127.0.0.1" && port == server.address.port
-            override fun neustarten(): Boolean { neustarts.incrementAndGet(); return true }
+            override fun neustarten(): Int? { neustarts.incrementAndGet(); return neuerPort ?: server.address.port }
             override fun protokoll(text: String) { protokoll += text }
         }
     }
@@ -112,5 +113,21 @@ class LokalDrosselTest {
         val fehler = runCatching { c.newCall(Request.Builder().url(url() + "?route=%2Fmodule%2Fx%2FFact").post(form).build()).execute().close() }
         assertTrue(fehler.isFailure, "ein abgebrochener Schreibzugriff darf nicht still wiederholt werden")
         assertEquals(0, neustarts.get())
+    }
+
+    @Test
+    fun nachNeustartAufAnderemPortGehtDieWiederholungDorthin() {
+        val zweiter = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 5)
+        zweiter.createContext("/") { ex -> val b = "neu".toByteArray(); ex.sendResponseHeaders(200, b.size.toLong()); ex.responseBody.use { it.write(b) } }
+        zweiter.start()
+        try {
+            lokalSetzen()
+            neuerPort = zweiter.address.port
+            abbrechen.set(2)
+            assertEquals("neu", holen(client()))
+            assertEquals(1, neustarts.get())
+        } finally {
+            zweiter.stop(0)
+        }
     }
 }
