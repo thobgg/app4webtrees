@@ -40,7 +40,7 @@ internal fun PDPageContentStream.schildZeichnen(text: String, cx: Float, cy: Flo
     setNonStrokingColor(java.awt.Color(0xFF, 0xF3, 0x9A)); setStrokingColor(f.linie); setLineWidth(0.5f)
     rechteck(cx - sw / 2, cy - r, sw, 2 * r, r); fillAndStroke()
     setNonStrokingColor(f.text)
-    beginText(); setFont(s.fett, g); newLineAtOffset(cx - s.fett.breite(text, g) / 2, cy - g * 0.35f); showText(s.fett.sicher(text)); endText()
+    beginText(); setFont(s.fett, g); newLineAtOffset(cx - s.fett.breite(text, g) / 2, cy - g * 0.35f); schreibe(s.fett, g, text); endText()
 }
 
 /** Die Legende als Block ab (lx, oben) - y von oben, [py] rechnet in PDF-Koordinaten um; spaltenweise von oben nach unten. */
@@ -49,7 +49,7 @@ internal fun PDPageContentStream.legendeZeichnen(
     s: TafelSchriften, f: StilFarben, heirat: String, rahmen: Float,
 ) {
     val g = lm.g
-    fun text(t: String, schrift: PDFont, gr: Float, x: Float, y: Float) { beginText(); setFont(schrift, gr); newLineAtOffset(x, y); showText(schrift.sicher(t)); endText() }
+    fun text(t: String, schrift: PDFont, gr: Float, x: Float, y: Float) { beginText(); setFont(schrift, gr); newLineAtOffset(x, y); schreibe(schrift, gr, t); endText() }
     setNonStrokingColor(f.text)
     text(Texte.t(Res.string.desk_legend_title), s.fett, g * 1.1f, lx, py(oben + g * 1.2f))
     eintraege.forEachIndexed { i, e ->

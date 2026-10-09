@@ -113,7 +113,7 @@ fun aufBlaetter(original: PDDocument, groesse: DruckGroesse, bereich: Bereich? =
             cs.stroke()
             cs.setNonStrokingColor(Color(0x88, 0x88, 0x88))
             cs.beginText(); cs.setFont(schrift, 7f); cs.newLineAtOffset(KACHEL_RAND, KACHEL_RAND * 0.4f)
-            cs.showText(schrift.sicher("${kennung(z, sp)}  ·  ${p.spalten} × ${p.zeilen}")); cs.endText()
+            cs.schreibe(schrift, 7f, "${kennung(z, sp)}  ·  ${p.spalten} × ${p.zeilen}"); cs.endText()
         }
     }
     anhangSeiten(poster, doc)
@@ -136,9 +136,9 @@ private fun montageplan(doc: PDDocument, form: PDFormXObject, p: KachelPlan, ber
     PDPageContentStream(doc, page).use { cs ->
         cs.setNonStrokingColor(Color.BLACK)
         cs.beginText(); cs.setFont(s.fett, 12f); cs.newLineAtOffset(rand, f.height - rand - 12f)
-        cs.showText(s.fett.sicher(Texte.t(Res.string.desk_print_plan_title, p.spalten * p.zeilen, p.spalten, p.zeilen, p.endBCm, p.endHCm))); cs.endText()
+        cs.schreibe(s.fett, 12f, Texte.t(Res.string.desk_print_plan_title, p.spalten * p.zeilen, p.spalten, p.zeilen, p.endBCm, p.endHCm)); cs.endText()
         cs.beginText(); cs.setFont(s.normal, 9f); cs.newLineAtOffset(rand, f.height - rand - 28f)
-        cs.showText(s.normal.sicher(Texte.t(Res.string.desk_print_plan_hint))); cs.endText()
+        cs.schreibe(s.normal, 9f, Texte.t(Res.string.desk_print_plan_hint)); cs.endText()
         // Die Tafel an der linken oberen Ecke des Rasters
         cs.saveGraphicsState()
         cs.transform(Matrix.getTranslateInstance(x0, yOben - p.endH * k))
@@ -239,7 +239,7 @@ fun aufRolle(original: PDDocument, plan: RollenPlan, bereich: Bereich? = null): 
             val rolleText = dezimal(plan.rolle / 72f * 2.54f, 1)
             val text = (if (plan.bahnen > 1) Texte.t(Res.string.desk_print_strip, i + 1, plan.bahnen) + "  ·  " else "") +
                 "${plan.endBCm} × ${plan.endHCm} cm  ·  $rolleText cm"
-            cs.beginText(); cs.setFont(schrift, 8f); cs.newLineAtOffset(ROLLEN_RAND, ROLLEN_RAND * 0.35f); cs.showText(schrift.sicher(text)); cs.endText()
+            cs.beginText(); cs.setFont(schrift, 8f); cs.newLineAtOffset(ROLLEN_RAND, ROLLEN_RAND * 0.35f); cs.schreibe(schrift, 8f, text); cs.endText()
         }
     }
     return doc

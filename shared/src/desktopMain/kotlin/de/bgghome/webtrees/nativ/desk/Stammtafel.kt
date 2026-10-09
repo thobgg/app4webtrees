@@ -379,7 +379,7 @@ internal class TafelSchriften(doc: PDDocument, stil: TafelStil) {
         "/usr/share/fonts/truetype/noto/NotoSerif-Bold.ttf",
     )) else null) ?: basis.fett
     val titel: PDFont = if (stil == TafelStil.Pergament) {
-        runCatching { TafelSchriften::class.java.getResourceAsStream("/fonts/GreatVibes-Regular.ttf")!!.use { PDType0Font.load(doc, it) } }.getOrNull() ?: fett
+        runCatching { TafelSchriften::class.java.getResourceAsStream("/fonts/GreatVibes-Regular.ttf")!!.use { PDType0Font.load(doc, it).alsTeilVon(doc) } }.getOrNull() ?: fett
     } else fett
 }
 

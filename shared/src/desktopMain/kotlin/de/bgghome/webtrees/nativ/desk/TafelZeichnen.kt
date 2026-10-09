@@ -279,7 +279,7 @@ private class TafelZeichner(
     private val bildCache = HashMap<String, PDImageXObject>()
 
     private fun text(t: String, schrift: PDFont, groesse: Float, x: Float, y: Float) {
-        cs.beginText(); cs.setFont(schrift, groesse); cs.newLineAtOffset(x, y); cs.showText(schrift.sicher(t)); cs.endText()
+        cs.beginText(); cs.setFont(schrift, groesse); cs.newLineAtOffset(x, y); cs.schreibe(schrift, groesse, t); cs.endText()
     }
 
     /** Ein S-Bogen von (g1, q1) nach (g2, q2): startet und endet in Richtung der Generationen. */
@@ -663,7 +663,7 @@ internal fun tafelVerzeichnis(doc: PDDocument, titel: String, eintraege: List<Ve
             seite = PDPage(a4).also { doc.addPage(it) }
             cs = PDPageContentStream(doc, seite)
             val kopf = Texte.t(Res.string.desk_chart_index_title) + if (titel.isNotBlank()) " – $titel" else ""
-            cs!!.beginText(); cs!!.setFont(schrift.fett, 12f); cs!!.newLineAtOffset(rand, a4.height - rand); cs!!.showText(schrift.fett.sicher(kopf)); cs!!.endText()
+            cs!!.beginText(); cs!!.setFont(schrift.fett, 12f); cs!!.newLineAtOffset(rand, a4.height - rand); cs!!.schreibe(schrift.fett, 12f, kopf); cs!!.endText()
             spalte = 0
         }
         y = a4.height - rand - 26f
@@ -679,13 +679,13 @@ internal fun tafelVerzeichnis(doc: PDDocument, titel: String, eintraege: List<Ve
         val rb = schrift.normal.breite(rechts, g)
         val (nt, ng) = passend(schrift.normal, name, g, sw - rb - 10f)
         val c = cs!!
-        c.beginText(); c.setFont(schrift.normal, ng); c.newLineAtOffset(x, y); c.showText(schrift.normal.sicher(nt)); c.endText()
+        c.beginText(); c.setFont(schrift.normal, ng); c.newLineAtOffset(x, y); c.schreibe(schrift.normal, ng, nt); c.endText()
         val nb = schrift.normal.breite(nt, ng)
         val punkt = schrift.normal.breite(".", g)
         val sb = StringBuilder(); var px = x + nb + 3f
         while (px + punkt < x + sw - rb - 3f) { sb.append('.'); px += punkt }
         c.beginText(); c.setFont(schrift.normal, g); c.newLineAtOffset(x + nb + 3f, y); c.showText(sb.toString()); c.endText()
-        c.beginText(); c.setFont(schrift.normal, g); c.newLineAtOffset(x + sw - rb, y); c.showText(schrift.normal.sicher(rechts)); c.endText()
+        c.beginText(); c.setFont(schrift.normal, g); c.newLineAtOffset(x + sw - rb, y); c.schreibe(schrift.normal, g, rechts); c.endText()
         seite!!.annotations.add(org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink().apply {
             rectangle = PDRectangle(x, y - g * 0.3f, sw, zh)
             borderStyle = org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary().apply { width = 0f }

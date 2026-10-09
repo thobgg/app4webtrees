@@ -41,7 +41,8 @@ data class Zeile(
 /** Schriften: eine Systemschrift mit Umlauten und Akzenten, sonst Helvetica (dann ohne Sonderzeichen ausserhalb Latin-1). */
 internal class Schriften(private val doc: PDDocument) {
     internal fun ladenAus(namen: List<String>): PDFont? = laden(namen)
-    private fun laden(namen: List<String>): PDFont? = namen.map(::File).firstOrNull { it.isFile }?.let { f -> runCatching { PDType0Font.load(doc, f) }.getOrNull() }
+    private fun laden(namen: List<String>): PDFont? =
+        namen.map(::File).firstOrNull { it.isFile }?.let { f -> runCatching { PDType0Font.load(doc, f) }.getOrNull() }?.alsTeilVon(doc)
     val normal: PDFont = laden(listOf(
         "C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/arial.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
@@ -54,12 +55,74 @@ internal class Schriften(private val doc: PDDocument) {
     )) ?: PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
 }
 
-/** Text, den die Schrift auch darstellen kann - unbekannte Zeichen werden zu "?". */
-internal fun PDFont.sicher(text: String): String = buildString {
-    text.forEach { c -> append(if (runCatching { encode(c.toString()) }.isSuccess) c else '?') }
+/*
+ * Ersatzschrift fuer Zeichen, die die Hauptschrift nicht hat: Segoe UI, Arial und Times kennen das Heiratszeichen nicht,
+ * darum stand unter Windows in Listen, Personenblatt und Tafeln "?" statt dessen (Issue 10). Jede geladene Schrift merkt
+ * sich ihr Dokument, die Ersatzschrift wird je Dokument einmal eingebettet - nur wenn ein Zeichen sie braucht.
+ */
+private val dokumentJe = java.util.Collections.synchronizedMap(java.util.WeakHashMap<PDFont, PDDocument>())
+private val ersatzJe = java.util.Collections.synchronizedMap(java.util.WeakHashMap<PDDocument, Any>())
+private val kannJe = java.util.Collections.synchronizedMap(java.util.WeakHashMap<PDFont, HashMap<Int, Boolean>>())
+private val KEINE_ERSATZSCHRIFT = Any()
+private val ERSATZ_DATEIEN = listOf(
+    "C:/Windows/Fonts/seguisym.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansSymbols-Regular.ttf", "/System/Library/Fonts/Apple Symbols.ttf",
+)
+/** Letzter Ausweg, wenn auch die Ersatzschrift fehlt: das Heiratszeichen als ∞ (in der Genealogie ebenso gebraeuchlich). */
+private val ZEICHEN_ERSATZ = mapOf(0x26AD to "∞", 0x26AE to "∞")
+
+/** Schrift als Teil von [doc] vormerken, damit sie fehlende Zeichen aus der Ersatzschrift holen kann. */
+internal fun PDFont.alsTeilVon(doc: PDDocument): PDFont = also { dokumentJe[it] = doc }
+
+private fun PDFont.kann(cp: Int): Boolean = kannJe.getOrPut(this) { HashMap() }.getOrPut(cp) {
+    runCatching { encode(String(Character.toChars(cp))) }.isSuccess
 }
 
-internal fun PDFont.breite(text: String, groesse: Float) = getStringWidth(sicher(text)) / 1000f * groesse
+private fun PDFont.ersatz(): PDFont? {
+    val doc = dokumentJe[this] ?: return null
+    return ersatzJe.getOrPut(doc) {
+        ERSATZ_DATEIEN.map(::File).firstOrNull { it.isFile }?.let { f -> runCatching { PDType0Font.load(doc, f) }.getOrNull() } ?: KEINE_ERSATZSCHRIFT
+    } as? PDFont
+}
+
+/** Text in Stuecke je Schrift: was die Schrift nicht hat, aus der Ersatzschrift, sonst ein Ersatzzeichen oder "?". */
+internal fun PDFont.stuecke(text: String): List<Pair<String, PDFont>> {
+    val aus = mutableListOf<Pair<String, PDFont>>()
+    val sb = StringBuilder(); var aktuell: PDFont = this
+    fun dazu(f: PDFont, teil: String) {
+        if (f !== aktuell && sb.isNotEmpty()) { aus += sb.toString() to aktuell; sb.clear() }
+        aktuell = f; sb.append(teil)
+    }
+    text.codePoints().forEach { cp ->
+        val e by lazy { ersatz() }
+        when {
+            kann(cp) -> dazu(this, String(Character.toChars(cp)))
+            e?.kann(cp) == true -> dazu(e!!, String(Character.toChars(cp)))
+            else -> dazu(this, ZEICHEN_ERSATZ[cp]?.takeIf { z -> z.codePoints().allMatch { kann(it) } } ?: "?")
+        }
+    }
+    if (sb.isNotEmpty()) aus += sb.toString() to aktuell
+    return aus
+}
+
+/** Text nur in dieser Schrift (ohne Ersatzschrift) - unbekannte Zeichen werden zum Ersatzzeichen oder zu "?". */
+internal fun PDFont.sicher(text: String): String = buildString {
+    text.codePoints().forEach { cp ->
+        append(if (kann(cp)) String(Character.toChars(cp)) else ZEICHEN_ERSATZ[cp]?.takeIf { z -> z.codePoints().allMatch { kann(it) } } ?: "?")
+    }
+}
+
+internal fun PDFont.breite(text: String, groesse: Float) = stuecke(text).sumOf { (t, f) -> (f.getStringWidth(t) / 1000f * groesse).toDouble() }.toFloat()
+
+/** Text ausgeben (innerhalb beginText/endText, nach setFont([schrift], [groesse])); wechselt fuer fehlende Zeichen die Schrift. */
+internal fun PDPageContentStream.schreibe(schrift: PDFont, groesse: Float, text: String) {
+    var aktuell = schrift
+    for ((t, f) in schrift.stuecke(text)) {
+        if (f !== aktuell) { setFont(f, groesse); aktuell = f }
+        showText(t)
+    }
+    if (aktuell !== schrift) setFont(schrift, groesse)
+}
 
 /**
  * Fliesstext-Seiten im Hochformat: Titel, Zeilen mit Einzug, automatischer Umbruch und Seitenwechsel,
@@ -78,7 +141,7 @@ private class Textseiten(val doc: PDDocument, val fuss: String) {
         val page = PDPage(format); doc.addPage(page); seite++
         stream = PDPageContentStream(doc, page).also { cs ->
             cs.beginText(); cs.setFont(s.normal, 7.5f); cs.newLineAtOffset(rand, 24f)
-            cs.showText(s.normal.sicher("$fuss · $seite")); cs.endText()
+            cs.schreibe(s.normal, 7.5f, "$fuss · $seite"); cs.endText()
         }
         y = format.height - rand
     }
@@ -99,7 +162,7 @@ private class Textseiten(val doc: PDDocument, val fuss: String) {
             z.spalten.forEachIndexed { i, t ->
                 val w = maxBreite * anteile[i]
                 val (tx, g) = passend(schrift, t, groesse, w - 6f)
-                stream!!.apply { beginText(); setFont(schrift, g); newLineAtOffset(sx, y); showText(schrift.sicher(tx)); endText() }
+                stream!!.apply { beginText(); setFont(schrift, g); newLineAtOffset(sx, y); schreibe(schrift, g, tx); endText() }
                 sx += w
             }
             return
@@ -116,7 +179,7 @@ private class Textseiten(val doc: PDDocument, val fuss: String) {
         zeilen.forEachIndexed { i, t ->
             if (y - hoehe < rand) neueSeite()
             y -= hoehe
-            stream!!.apply { beginText(); setFont(schrift, groesse); newLineAtOffset(if (i == 0) x else x + 8f, y); showText(schrift.sicher(t)); endText() }
+            stream!!.apply { beginText(); setFont(schrift, groesse); newLineAtOffset(if (i == 0) x else x + 8f, y); schreibe(schrift, groesse, t); endText() }
         }
         if (z.gross) y -= 6f
     }

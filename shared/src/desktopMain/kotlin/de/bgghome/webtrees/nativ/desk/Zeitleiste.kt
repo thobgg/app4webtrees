@@ -108,7 +108,7 @@ fun zeitleistePdf(eintraege: List<ZeitEintrag>, o: TafelOptionen, fuss: String, 
     fun py(y: Float) = h - y
     fun xJahr(j: Int) = x0 + namenB + (j - von) * jahrB
     PDPageContentStream(doc, page).use { cs ->
-        fun text(t: String, schrift: org.apache.pdfbox.pdmodel.font.PDFont, gr: Float, x: Float, y: Float) { cs.beginText(); cs.setFont(schrift, gr); cs.newLineAtOffset(x, y); cs.showText(schrift.sicher(t)); cs.endText() }
+        fun text(t: String, schrift: org.apache.pdfbox.pdmodel.font.PDFont, gr: Float, x: Float, y: Float) { cs.beginText(); cs.setFont(schrift, gr); cs.newLineAtOffset(x, y); cs.schreibe(schrift, gr, t); cs.endText() }
         if (skala < 1f) cs.transform(Matrix.getScaleInstance(skala, skala))
         cs.tafelHintergrund(doc, o.hintergrund, b, h, f.hintergrundOben, f.hintergrundUnten, o.hintergrundBild)
         cs.schmuckrahmen(o.schmuck, b, h, rand, f.titel)

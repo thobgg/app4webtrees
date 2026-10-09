@@ -74,10 +74,9 @@ private fun PDPageContentStream.kreis(cx: Float, cy: Float, r: Float) {
 
 /** Text gedreht um [winkel] (Bogenmass), mittig auf den Punkt, [dy] quer zur Leserichtung versetzt. */
 private fun PDPageContentStream.gedreht(text: String, schrift: PDFont, groesse: Float, x: Float, y: Float, winkel: Double, dy: Float) {
-    val t = schrift.sicher(text)
-    val w = schrift.breite(t, groesse)
+    val w = schrift.breite(text, groesse)
     val at = AffineTransform().apply { translate(x.toDouble(), y.toDouble()); rotate(winkel); translate(-w / 2.0, dy.toDouble()) }
-    beginText(); setFont(schrift, groesse); setTextMatrix(Matrix(at)); showText(t); endText()
+    beginText(); setFont(schrift, groesse); setTextMatrix(Matrix(at)); schreibe(schrift, groesse, text); endText()
 }
 
 /** Groesste Schrift, bei der alle [zeilen] in [breite] x [hoehe] passen (Zeilenhoehe 1,2), hoechstens [max]. */
@@ -169,12 +168,12 @@ fun faecherPdf(
         if (o.titel.isNotBlank()) {
             cs.setNonStrokingColor(f.titel)
             cs.beginText(); cs.setFont(s.titel, titelGroesse)
-            cs.newLineAtOffset((b - titelBreite) / 2, h - (rand + titelGroesse * 1.05f)); cs.showText(s.titel.sicher(o.titel)); cs.endText()
+            cs.newLineAtOffset((b - titelBreite) / 2, h - (rand + titelGroesse * 1.05f)); cs.schreibe(s.titel, titelGroesse, o.titel); cs.endText()
         }
         if (untertitel.isNotEmpty()) {
             val y = if (o.titel.isBlank()) rand + ug * 1.1f else rand + titelGroesse * 1.05f + ug * 1.9f
             cs.setNonStrokingColor(f.linie)
-            cs.beginText(); cs.setFont(s.normal, ug); cs.newLineAtOffset((b - untertitelBreite) / 2, h - y); cs.showText(s.normal.sicher(untertitel)); cs.endText()
+            cs.beginText(); cs.setFont(s.normal, ug); cs.newLineAtOffset((b - untertitelBreite) / 2, h - y); cs.schreibe(s.normal, ug, untertitel); cs.endText()
         }
         val linie = maxOf(0.5f, r * 0.008f)
 
@@ -270,7 +269,7 @@ fun faecherPdf(
         cs.setNonStrokingColor(f.text)
         mitteZeilen.forEach { (t, schrift) ->
             val w = schrift.breite(t, mg)
-            cs.beginText(); cs.setFont(schrift, mg); cs.newLineAtOffset(cx - w / 2, ty); cs.showText(schrift.sicher(t)); cs.endText()
+            cs.beginText(); cs.setFont(schrift, mg); cs.newLineAtOffset(cx - w / 2, ty); cs.schreibe(schrift, mg, t); cs.endText()
             ty -= mg * 1.2f
         }
 
@@ -281,7 +280,7 @@ fun faecherPdf(
         }
         cs.setNonStrokingColor(Color(0x66, 0x66, 0x66))
         val fx = if (o.schmuck == Schmuckrahmen.Keiner) rand else (b - s.normal.breite(fuss, 7f)) / 2
-        cs.beginText(); cs.setFont(s.normal, 7f); cs.newLineAtOffset(fx, rand * if (o.schmuck == Schmuckrahmen.Keiner) 0.6f else 0.85f); cs.showText(s.normal.sicher(fuss)); cs.endText()
+        cs.beginText(); cs.setFont(s.normal, 7f); cs.newLineAtOffset(fx, rand * if (o.schmuck == Schmuckrahmen.Keiner) 0.6f else 0.85f); cs.schreibe(s.normal, 7f, fuss); cs.endText()
     }
     // Der Proband in der Mitte ist auch anklickbar
     orte += KartenOrt(wurzel.person, (cx - r0 * 0.7f) * skala, (h - cy - r0 * 0.7f) * skala, r0 * 1.4f * skala, r0 * 1.4f * skala)

@@ -8,9 +8,6 @@ import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.res.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -37,10 +34,7 @@ import java.awt.image.BufferedImage
 suspend fun kartenLaden(client: WtClient, tree: String, xrefs: Collection<String>): Map<String, IndividualDetail> {
     val gesucht = xrefs.filter { it.isNotEmpty() }.distinct()
     BaumSpeicher.holen(client, tree, gesucht.size)?.let { b -> return gesucht.mapNotNull { x -> b.detail(x)?.let { x to it } }.toMap() }
-    return coroutineScope {
-        gesucht.chunked(8).flatMap { gruppe -> gruppe.map { x -> async { runCatching { client.individual(tree, x) }.getOrNull()?.let { x to it } } }.awaitAll() }
-            .filterNotNull().toMap()
-    }
+    return personenLaden(client, tree, gesucht)
 }
 
 private val REIHENFOLGE = listOf("BIRT", "CHR", "BAPM")
@@ -75,7 +69,7 @@ private class KartenSchreiber(val doc: PDDocument, val s: Schriften, val fuss: S
     private fun fussZeile() {
         val c = stream()
         c.setNonStrokingColor(Color(0x88, 0x88, 0x88))
-        c.beginText(); c.setFont(s.normal, 7f); c.newLineAtOffset(rand, rand * 0.5f); c.showText(s.normal.sicher(fuss)); c.endText()
+        c.beginText(); c.setFont(s.normal, 7f); c.newLineAtOffset(rand, rand * 0.5f); c.schreibe(s.normal, 7f, fuss); c.endText()
     }
 
     private fun platz(h: Float) { if (y - h < rand + 14f) neueSeite() }
@@ -98,7 +92,7 @@ private class KartenSchreiber(val doc: PDDocument, val s: Schriften, val fuss: S
             y -= g * 1.35f
             val c = stream()
             c.setNonStrokingColor(farbe)
-            c.beginText(); c.setFont(schrift, g); c.newLineAtOffset(rand + einzug, y); c.showText(schrift.sicher(z)); c.endText()
+            c.beginText(); c.setFont(schrift, g); c.newLineAtOffset(rand + einzug, y); c.schreibe(schrift, g, z); c.endText()
         }
     }
 
@@ -200,7 +194,7 @@ internal fun karteikartenAnhaengen(
             val g = 8.5f; val tb = s.normal.breite(t, g)
             val x = w.rand + w.breite - tb; val y0 = w.rand * 0.5f
             val c = w.stream()
-            c.setNonStrokingColor(Color(0x1F, 0x3A, 0x6B)); c.beginText(); c.setFont(s.normal, g); c.newLineAtOffset(x, y0); c.showText(s.normal.sicher(t)); c.endText()
+            c.setNonStrokingColor(Color(0x1F, 0x3A, 0x6B)); c.beginText(); c.setFont(s.normal, g); c.newLineAtOffset(x, y0); c.schreibe(s.normal, g, t); c.endText()
             erste.annotations.add(link(PDRectangle(x, y0 - 2f, tb, g + 4f), PDPageXYZDestination().apply { page = doc.getPage(zs); left = zx.toInt(); top = zy.toInt() }))
         }
     }
