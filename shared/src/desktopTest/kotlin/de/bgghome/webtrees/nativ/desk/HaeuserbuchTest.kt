@@ -13,6 +13,8 @@ import de.bgghome.webtrees.nativ.data.Haustypen
 import de.bgghome.webtrees.nativ.data.OrtsKlasse
 import de.bgghome.webtrees.nativ.data.Ortsnamen
 import de.bgghome.webtrees.nativ.data.berufe
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -23,6 +25,11 @@ import kotlin.test.assertNull
  * oder Semikolon, natuerliche Sortierung, Wohnort und Besitz zusammengezogen, Berufe einzeln im Verzeichnis.
  */
 class HaeuserbuchTest {
+    // Die erwarteten Saetze sind deutsch - unabhaengig von der Sprache des Rechners (der Windows-Rechner von GitHub ist englisch)
+    private val ursprung = java.util.Locale.getDefault()
+    @BeforeTest fun deutsch() = java.util.Locale.setDefault(java.util.Locale.GERMANY)
+    @AfterTest fun zurueck() = java.util.Locale.setDefault(ursprung)
+
     private fun datum(jahr: Int, text: String = "$jahr") = DateJson(text = text, year = jahr, jd = 2300000 + jahr * 365, gedcom = text.uppercase().replace("VON ", "FROM ").replace(" BIS ", " TO "))
     private fun fakt(tag: String, label: String, ort: String?, d: DateJson? = null, wert: String = "") =
         FactJson(id = "$tag-$ort-${d?.year}", tag = tag, label = label, value = wert, date = d, place = ort?.let { PlaceJson(name = it) })
