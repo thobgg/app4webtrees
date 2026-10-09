@@ -1,0 +1,41 @@
+# Die Desktop-Tests auch unter Windows - dort traten Fehler auf, die unter Linux nie auffielen (Anfuehrungszeichen in
+# Prozessargumenten, belegte Ports nach dem Beenden). Mit echtem PHP und webtrees aus dem lokalen Paket, also auch der
+# Stammbaum auf diesem PC (GEDCOM-Import, eingebauter Server). Bei jedem Push auf main, der Code betrifft, und von Hand.
+name: Tests Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['shared/**', 'desktop/**', 'gradle.properties', '.github/workflows/tests-windows.yml']
+
+jobs:
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: PHP und webtrees laden
+        run: ./gradlew --no-daemon :desktop:lokalPaket
+      - name: Pfade fuer die Tests
+        shell: pwsh
+        run: |
+          $b = "$env:GITHUB_WORKSPACE\desktop\build\lokal"
+          "WTAND_PHP=$b\windows-x64\php\php.exe" >> $env:GITHUB_ENV
+          "WTAND_WEBTREES_ZIP=$((Get-ChildItem "$b\common\webtrees\webtrees-*.zip").FullName)" >> $env:GITHUB_ENV
+          "WTAND_API_ZIP=$((Get-ChildItem "$b\common\webtrees\api4webtrees-*.zip").FullName)" >> $env:GITHUB_ENV
+          "WTAND_SAMMLUNGEN_ZIP=$((Get-ChildItem "$b\common\webtrees\sammlungen-*.zip").FullName)" >> $env:GITHUB_ENV
+      - name: Desktop-Tests
+        run: ./gradlew --no-daemon :shared:desktopTest :desktop:test
+      - name: Bericht bei Fehlern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testbericht-windows
+          path: |
+            shared/build/reports/tests/desktopTest
+            shared/build/test-results/desktopTest
