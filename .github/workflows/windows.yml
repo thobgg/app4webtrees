@@ -1,0 +1,44 @@
+# wtWin: der Windows-Installer (Inno Setup, desktop/installer/wtWin.iss), gebaut auf GitHub statt auf einem eigenen
+# Windows-Rechner. Inno Setup ist auf den Windows-Rechnern von GitHub vorinstalliert.
+# Von Hand (Actions > wtWin > Run workflow): nur bauen, die exe liegt dann unter "Artifacts" des Laufs.
+# Bei einem veroeffentlichten Release: bauen und die exe an das Release haengen.
+name: wtWin
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # die dritte Versionsstelle ist die Zahl der Commits
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Inno Setup pruefen
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          Get-Item "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" | Select-Object FullName, Length
+      - name: exe bauen
+        run: ./gradlew --no-daemon :desktop:packageInno
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wtWin
+          path: desktop/build/compose/binaries/main/inno/*.exe
+      - name: An das Release haengen
+        if: github.event_name == 'release'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" desktop/build/compose/binaries/main/inno/*.exe --clobber
