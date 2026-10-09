@@ -12,6 +12,7 @@ import de.bgghome.webtrees.nativ.res.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import okhttp3.Request
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -296,9 +297,7 @@ suspend fun vorfahrenbuchLaden(client: WtClient, tree: String, xref: String, gen
     val ahnen = if (baum != null) ahnenAusBaum(baum, xref, generationen) else ahnenLaden(client, tree, xref, generationen)
     // Jede Person einmal abrufen (Ahnenschwund: dieselbe Person unter mehreren Nummern)
     val xrefs = ahnen.values.map { it.person.xref }.filter(String::isNotEmpty).distinct()
-    val details = if (baum != null) xrefs.mapNotNull { x -> baum.detail(x)?.let { x to it } }.toMap() else xrefs.chunked(8).flatMap { gruppe ->
-        gruppe.map { x -> async { x to runCatching { client.individual(tree, x) }.getOrNull() } }.awaitAll()
-    }.mapNotNull { (x, d) -> d?.let { x to it } }.toMap()
+    val details = if (baum != null) xrefs.mapNotNull { x -> baum.detail(x)?.let { x to it } }.toMap() else personenLaden(client, tree, xrefs)
     fortschritt(Texte.t(Res.string.desk_book_progress_persons, details.size))
     // Ein Portraet je Person, ueber den Bildspeicher (Medienordner auf dem PC, Zwischenspeicher, Server)
     val fotos = if (!bilder) emptyMap() else Bilder.alle(client, client.baseUrl, tree,
@@ -408,4 +407,24 @@ fun nummernText(n: List<Long>): String {
         i = j + 1
     }
     return teile.joinToString(", ")
+}
+
+/**
+ * Personen einzeln abrufen, acht gleichzeitig. Was dabei scheitert (Zeitueberschreitung, ueberlasteter Server, viele
+ * gleichzeitige Anfragen an einen kleinen Webspace), wird danach noch zweimal einzeln nachgeholt - sonst stand im Buch
+ * bei jedem Lauf an anderer Stelle "?" statt einer Person (Issue 9).
+ */
+internal suspend fun personenLaden(client: WtClient, tree: String, xrefs: List<String>): Map<String, IndividualDetail> = coroutineScope {
+    val aus = HashMap<String, IndividualDetail>()
+    xrefs.chunked(8).forEach { gruppe ->
+        gruppe.map { x -> async { x to runCatching { client.individual(tree, x) }.getOrNull() } }.awaitAll()
+            .forEach { (x, d) -> if (d != null) aus[x] = d }
+    }
+    for (versuch in 1..2) {
+        val fehlt = xrefs.filter { it !in aus }
+        if (fehlt.isEmpty()) break
+        delay(400L * versuch)
+        fehlt.forEach { x -> runCatching { client.individual(tree, x) }.getOrNull()?.let { aus[x] = it } }
+    }
+    aus
 }

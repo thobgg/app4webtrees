@@ -6,8 +6,6 @@ import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.res.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import okhttp3.Request
 import java.awt.Color
@@ -41,9 +39,7 @@ suspend fun nachfahrenbuchLaden(
     var ebene = listOf(xref)
     for (g in 0 until generationen) {
         val neu = ebene.filter { it !in details }
-        val geladen = if (baum != null) neu.mapNotNull { x -> baum.detail(x)?.let { x to it } } else neu.chunked(8).flatMap { gruppe ->
-            gruppe.map { x -> async { x to runCatching { client.individual(tree, x) }.getOrNull() } }.awaitAll()
-        }.mapNotNull { (x, d) -> d?.let { x to it } }
+        val geladen = if (baum != null) neu.mapNotNull { x -> baum.detail(x)?.let { x to it } } else personenLaden(client, tree, neu).toList()
         details.putAll(geladen)
         fortschritt(Texte.t(Res.string.desk_book_progress_persons, details.size))
         ebene = neu.flatMap { x -> details[x]?.spouseFamilies.orEmpty().flatMap { it.children }.map { it.xref } }
@@ -109,7 +105,8 @@ fun nachfahrenbuch(d: NachfahrenDaten, o: BuchOptionen, baum: String, app: Strin
         val det = d.details[e.xref]
         val p = det?.person
         val farbe = if (o.farbkodierung) e.zweig?.let { ZWEIG_FARBE[it % ZWEIG_FARBE.size] } else null
-        if (p == null) return listOf(Absatz(listOf(Lauf("?", Stil.Fett)), marke = etikett(i), anker = ziel(i), farbe = farbe, abstandVor = true))
+        // Auch nach dem Nachholen nicht abrufbar: die Kennung nennen, damit man die Person in webtrees findet
+        if (p == null) return listOf(Absatz(listOf(Lauf("? (${e.xref})", Stil.Fett)), marke = etikett(i), anker = ziel(i), farbe = farbe, abstandVor = true))
         e.verweis?.let { v ->
             reg.name(p, schluessel(i))
             return listOf(Absatz(listOf(Lauf(registerName(p), Stil.Fett), Lauf(" – " + Texte.t(Res.string.desk_book_see) + " "), Lauf(etikett(v), ziel = ziel(v))),
