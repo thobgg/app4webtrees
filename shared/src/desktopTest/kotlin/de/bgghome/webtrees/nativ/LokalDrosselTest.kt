@@ -130,4 +130,16 @@ class LokalDrosselTest {
             zweiter.stop(0)
         }
     }
+
+    @Test
+    fun scheitertAuchDerNeustartKommtEineVerstaendlicheMeldung() {
+        WtClient.lokal = object : WtClient.LokalerDienst {
+            override fun betrifft(host: String, port: Int) = host == "127.0.0.1" && port == server.address.port
+            override fun neustarten(): Int? = null
+        }
+        abbrechen.set(5)
+        val e = runCatching { holen(client()) }.exceptionOrNull()
+        assertTrue(e is de.bgghome.webtrees.nativ.api.LokalVerbindungException, "$e")
+        assertTrue("wtwin.log" in de.bgghome.webtrees.nativ.ui.explain(e as Exception))
+    }
 }

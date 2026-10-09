@@ -78,6 +78,12 @@ class WriteUnclearException(val httpStatus: Int) : Exception("Schreibzugriff ohn
 class KlartextException(val host: String) : IOException("cleartext outside home network: $host")
 
 /**
+ * Stammbaum auf diesem PC: die Verbindung zum eigenen Server brach auch nach allen Wiederholungen ab. Meist filtert ein
+ * anderes Programm den Netzverkehr von wtWin (Werbe- oder Webschutz, Issue 9) - die Meldung sagt das statt "Connection reset".
+ */
+class LokalVerbindungException(cause: IOException) : IOException(cause.message, cause)
+
+/**
  * Client fuer das webtrees-Modul "api4webtrees".
  *
  * Drei Dinge, die am echten Server gemessen wurden (17.09.2026):
@@ -129,14 +135,14 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                         chain.proceed(anfrage).also { dienst.protokoll("$ziel: zweiter Versuch ok") }
                     } catch (e2: IOException) {
                         dienst.protokoll("$ziel: zweiter Versuch: $e2")
-                        val port = dienst.neustarten() ?: throw e2
+                        val port = dienst.neustarten() ?: throw LokalVerbindungException(e2)
                         // Lief der Server danach unter einem anderen Port (der alte war unter Windows noch belegt), dorthin
                         val nochmal = if (port == anfrage.url.port) anfrage else anfrage.newBuilder().url(anfrage.url.newBuilder().port(port).build()).build()
                         try {
                             chain.proceed(nochmal).also { dienst.protokoll("$ziel: nach Neustart ok") }
                         } catch (e3: IOException) {
                             dienst.protokoll("$ziel: nach Neustart: $e3")
-                            throw e3
+                            throw LokalVerbindungException(e3)
                         }
                     }
                 }

@@ -53,4 +53,6 @@ Der Stammbaum auf dem PC bleibt dabei erhalten, bis du den Ordner löschst.
 
 Lässt sich der Stammbaum nicht anlegen, zeigt das Programm einen Hinweis mit dem Pfad zu `php.log`. Bitte melde das unter github.com/thobgg/app4webtrees/issues und hänge die Datei an, beim Übernehmen einer GEDCOM-Datei auch `import.log` aus demselben Ordner (Zeichensatz, übersprungene Datensätze, Abbruchgrund). **Hilfe › Über wtWin** zeigt, ob PHP und webtrees gefunden wurden.
 
+**„Verbindung … unterbrochen“:** Bricht die Verbindung zum Stammbaum auf diesem PC ab, obwohl webtrees im Browser geht, filtert meist ein anderes Programm den Netzverkehr von wtWin – Werbe- oder Webschutz, auch der Echtzeitschutz eines Virenscanners. Eine Ausnahme für wtWin (`%LOCALAPPDATA%\Programs\wtWin\wtWin.exe`) in diesem Programm hilft meist. Was wtWin dabei bemerkt, steht in `wtwin.log`.
+
 **Startperson:** Hat ein Stammbaum auf diesem PC noch keine Startperson, fragt das Programm beim Öffnen einmal „Mit wem soll der Stammbaum beginnen?“ – Person suchen und anklicken. Die Wahl gilt als Standardperson des Stammbaums; ändern unter Person › Als Startperson festlegen …

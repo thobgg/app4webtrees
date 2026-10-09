@@ -151,6 +151,7 @@
     <string name="err_module_missing">Unter dieser Adresse antwortet das Modul „api4webtrees“ nicht. Ist es in webtrees unter modules_v4 installiert?</string>
     <string name="err_unexpected">Unerwartete Antwort vom Server (HTTP %1$d). Stimmt die Adresse der webtrees-Startseite?</string>
     <string name="err_no_connection">Keine Verbindung: %1$s</string>
+    <string name="err_local_blocked">Die Verbindung zum Stammbaum auf diesem PC wurde unterbrochen. Häufige Ursache: ein Programm, das den Netzverkehr anderer Programme filtert (Werbe- oder Webschutz). Eine Ausnahme für wtWin in diesem Programm hilft meist. Einzelheiten stehen in wtwin.log.</string>
     <string name="err_unreachable">Server nicht erreichbar</string>
     <string name="err_http_only">Ohne Verschlüsselung (http://) verbindet sich die App nur im Heimnetz, z. B. mit http://192.168.178.20:8095. Für einen Server im Internet bitte die Adresse mit https:// eingeben.</string>
     <string name="http_home_hint">Unverschlüsselt – nur im Heimnetz. Für unterwegs: HTTPS einrichten.</string>

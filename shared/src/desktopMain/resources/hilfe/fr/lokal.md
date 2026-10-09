@@ -53,4 +53,6 @@ L'arbre sur l'ordinateur est conservé jusqu'à ce que vous supprimiez le dossie
 
 Si l'arbre ne peut pas être créé, le programme affiche un message avec le chemin de `php.log`. Merci de le signaler sur github.com/thobgg/app4webtrees/issues en joignant le fichier, et lors de l'import d'un fichier GEDCOM également `import.log` du même dossier (jeu de caractères, enregistrements ignorés, cause de l'échec). **Aide › À propos de wtWin** indique si PHP et webtrees ont été trouvés.
 
+**« Connexion … interrompue » :** si la connexion à l’arbre sur ce PC se coupe alors que webtrees fonctionne dans le navigateur, un autre programme filtre généralement le trafic réseau de wtWin – blocage de publicités ou protection web, aussi la protection en temps réel d’un antivirus. Une exception pour wtWin (`%LOCALAPPDATA%\Programs\wtWin\wtWin.exe`) dans ce programme aide généralement. Ce que wtWin remarque est noté dans `wtwin.log`.
+
 **Personne de départ :** si un arbre sur ce PC n'a pas encore de personne de départ, le programme demande une fois à l'ouverture « Par qui l'arbre doit-il commencer ? » – rechercher la personne et cliquer. Le choix devient l'individu par défaut de l'arbre ; à modifier sous Personne › Définir comme personne de départ …

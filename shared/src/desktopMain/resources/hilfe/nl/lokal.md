@@ -53,4 +53,6 @@ De stamboom op de pc blijft bewaard tot u de map verwijdert.
 
 Kan de stamboom niet worden aangemaakt, dan toont het programma een melding met het pad naar `php.log`. Meld het alstublieft op github.com/thobgg/app4webtrees/issues en voeg het bestand toe, en bij het importeren van een GEDCOM-bestand ook `import.log` uit dezelfde map (tekenset, overgeslagen records, reden van het mislukken). **Help › Over wtWin** toont of PHP en webtrees zijn gevonden.
 
+**„Verbinding … onderbroken”:** valt de verbinding met de stamboom op deze pc weg terwijl webtrees in de browser werkt, dan filtert meestal een ander programma het netwerkverkeer van wtWin – advertentie- of webbescherming, ook de realtimebeveiliging van een virusscanner. Een uitzondering voor wtWin (`%LOCALAPPDATA%\Programs\wtWin\wtWin.exe`) in dat programma helpt meestal. Wat wtWin daarbij opmerkt, staat in `wtwin.log`.
+
 **Startpersoon:** heeft een stamboom op deze pc nog geen startpersoon, dan vraagt het programma bij het openen één keer „Met wie moet de stamboom beginnen?” – persoon zoeken en aanklikken. De keuze wordt de standaardpersoon van de stamboom; wijzigen onder Persoon › Als startpersoon instellen …

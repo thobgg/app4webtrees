@@ -78,6 +78,9 @@ internal fun schemaAnmelden(appName: String) {
  * 08.10.2026). Der Installer traegt dasselbe seit 1.42 ein; hier bleibt es fuer Programme, die anders hingekommen sind.
  */
 private fun windows(programm: String) {
+    // Mit dem Installer (Inno Setup, seit 1.42) installiert: der hat wtwin:// schon eingetragen und deinstalliert es
+    // wieder. Dann gar nichts tun - ein Programm, das bei jedem Start reg.exe aufruft, wirkt auf Schutzsoftware verdaechtig.
+    if (File(File(programm).parentFile, "unins000.exe").isFile) return
     val befehl = "\"$programm\" \"%1\""
     // Schon eingetragen? Dann nichts anfassen.
     val vorhanden = runCatching {
