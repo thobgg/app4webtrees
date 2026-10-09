@@ -1,6 +1,7 @@
 package de.bgghome.webtrees.nativ.lokal
 
 import de.bgghome.webtrees.nativ.DesktopPlattform
+import de.bgghome.webtrees.nativ.api.WtClient
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -8,8 +9,28 @@ import java.io.File
  * Stammbaum auf diesem PC (Stufe 4): haelt den PHP-Server fuer die Laufzeit von wtWin. Der Rest des Programms merkt
  * davon nichts - fuer ihn ist das ein webtrees unter http://127.0.0.1:<port>/, bei dem man schon angemeldet ist.
  */
-object LokalBetrieb {
-    private var server: LokalerServer? = null
+object LokalBetrieb : WtClient.LokalerDienst {
+    @Volatile private var server: LokalerServer? = null
+    private var letzterNeustart = 0L
+
+    override fun betrifft(host: String, port: Int): Boolean = host == "127.0.0.1" && port == server?.port
+
+    /**
+     * Antwortet der Server nicht mehr (abgestuerzt, haengt an einer Anfrage): beenden und unter demselben Port neu
+     * starten - die Anmeldung bleibt, die Sitzung liegt in webtrees/data. Mehrere Anfragen, die zugleich scheitern,
+     * loesen nur einen Neustart aus.
+     */
+    @Synchronized
+    override fun neustarten(): Boolean {
+        val s = server ?: return false
+        val jetzt = System.currentTimeMillis()
+        if (jetzt - letzterNeustart < 10_000) return s.laeuft
+        letzterNeustart = jetzt
+        val port = s.port
+        System.err.println("Lokaler Stammbaum: Server antwortet nicht, Neustart auf Port $port")
+        s.beenden()
+        return runCatching { s.starten(wunschPort = port); s.port == port }.getOrDefault(false)
+    }
 
     /** webtrees-ZIP und api4webtrees-ZIP liegen im Paket unter resources/webtrees (desktop/build.gradle.kts). */
     private fun paketDatei(praefix: String, env: String): File? {

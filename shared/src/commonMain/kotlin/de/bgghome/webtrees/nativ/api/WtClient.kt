@@ -109,6 +109,24 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         .cookieJar(cookieJar)
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
+        // Stammbaum auf diesem PC: der eingebaute PHP-Server bearbeitet eine Anfrage nach der anderen. Darum hoechstens
+        // zwei gleichzeitig an ihn (unter Windows brach er sonst Verbindungen ab, Issue 9), und bricht er ab, einmal neu
+        // starten und die Leseanfrage wiederholen. Andere Server sind nicht betroffen.
+        .addInterceptor { chain ->
+            val anfrage = chain.request()
+            val dienst = lokal?.takeIf { it.betrifft(anfrage.url.host, anfrage.url.port) } ?: return@addInterceptor chain.proceed(anfrage)
+            lokalSperre.acquire()
+            try {
+                try {
+                    chain.proceed(anfrage)
+                } catch (e: IOException) {
+                    if ((anfrage.method != "GET" && anfrage.method != "HEAD") || !dienst.neustarten()) throw e
+                    chain.proceed(anfrage)
+                }
+            } finally {
+                lokalSperre.release()
+            }
+        }
         .addInterceptor { chain ->
             val builder = chain.request().newBuilder()
                 .header("User-Agent", userAgent)
@@ -675,7 +693,19 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     private fun <T> jsonBody(serializer: SerializationStrategy<T>, value: T): RequestBody =
         json.encodeToString(serializer, value).toRequestBody("application/json".toMediaType())
 
+    /** Der PHP-Server fuer den Stammbaum auf diesem PC (nur am Desktop gesetzt). */
+    interface LokalerDienst {
+        /** Ist [host]:[port] der laufende lokale Server? */
+        fun betrifft(host: String, port: Int): Boolean
+        /** Server neu starten, unter derselben Adresse; true, wenn er danach wieder antwortet. */
+        fun neustarten(): Boolean
+    }
+
     companion object {
+        /** Stammbaum auf diesem PC: setzt der Desktop beim Start (LokalBetrieb), sonst null. */
+        @Volatile var lokal: LokalerDienst? = null
+        private val lokalSperre = java.util.concurrent.Semaphore(2, true)
+
         /** Modul ab 1.3.0 (Ordner api4webtrees) */
         const val MODULE = "_api4webtrees_"
 

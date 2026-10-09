@@ -117,10 +117,16 @@ class LokalerServer(private val php: File, private val webtrees: File = LokalOrt
         LokalOrte.pidDatei.delete()
     }
 
+    /**
+     * Antwortet webtrees selbst? Eine CSS-Datei reichte nicht: die liefert der Server, ohne PHP auszufuehren - so galt
+     * ein Server als bereit, der jede echte Anfrage abbrach (Issue 9). index.php fuehrt PHP aus; jede HTTP-Antwort
+     * (vor der Einrichtung auch 404) zeigt, dass PHP laeuft - nur ein Abbruch oder keine Antwort zaehlt als Fehler.
+     */
     private fun antwortet(): Boolean = runCatching {
-        val c = URI("${adresse}public/css/webtrees.min.css").toURL().openConnection() as HttpURLConnection
-        c.connectTimeout = 500; c.readTimeout = 2000
-        try { c.responseCode == 200 } finally { c.disconnect() }
+        val c = URI("${adresse}index.php").toURL().openConnection() as HttpURLConnection
+        c.instanceFollowRedirects = false
+        c.connectTimeout = 500; c.readTimeout = 10_000
+        try { c.responseCode in 100..599 } finally { c.disconnect() }
     }.getOrDefault(false)
 
     /** Ist wtWin abgestuerzt (unter Windows ueberlebt das Kind dann), laeuft noch ein altes PHP - weg damit. */
