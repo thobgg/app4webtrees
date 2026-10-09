@@ -110,18 +110,33 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         // Stammbaum auf diesem PC: der eingebaute PHP-Server bearbeitet eine Anfrage nach der anderen. Darum hoechstens
-        // zwei gleichzeitig an ihn (unter Windows brach er sonst Verbindungen ab, Issue 9), und bricht er ab, einmal neu
-        // starten und die Leseanfrage wiederholen. Andere Server sind nicht betroffen.
+        // zwei gleichzeitig an ihn. Unter Windows gingen Antworten verloren, die der Server laut php.log verschickt hatte
+        // ("Connection reset", Issue 9): Leseanfragen und die Anmeldung erst sofort wiederholen, dann nach einem Neustart
+        // des Servers noch einmal. Jeder Fehlschlag steht in wtwin.log. Andere Server sind nicht betroffen.
         .addInterceptor { chain ->
             val anfrage = chain.request()
             val dienst = lokal?.takeIf { it.betrifft(anfrage.url.host, anfrage.url.port) } ?: return@addInterceptor chain.proceed(anfrage)
+            val ziel = anfrage.method + " " + (anfrage.url.queryParameter("route") ?: anfrage.url.encodedPath)
+            val wiederholbar = anfrage.method == "GET" || anfrage.method == "HEAD" || anfrage.url.queryParameter("route") in setOf("/login", "/logout")
             lokalSperre.acquire()
             try {
                 try {
                     chain.proceed(anfrage)
-                } catch (e: IOException) {
-                    if ((anfrage.method != "GET" && anfrage.method != "HEAD") || !dienst.neustarten()) throw e
-                    chain.proceed(anfrage)
+                } catch (e1: IOException) {
+                    dienst.protokoll("$ziel: $e1")
+                    if (!wiederholbar) throw e1
+                    try {
+                        chain.proceed(anfrage).also { dienst.protokoll("$ziel: zweiter Versuch ok") }
+                    } catch (e2: IOException) {
+                        dienst.protokoll("$ziel: zweiter Versuch: $e2")
+                        if (!dienst.neustarten()) throw e2
+                        try {
+                            chain.proceed(anfrage).also { dienst.protokoll("$ziel: nach Neustart ok") }
+                        } catch (e3: IOException) {
+                            dienst.protokoll("$ziel: nach Neustart: $e3")
+                            throw e3
+                        }
+                    }
                 }
             } finally {
                 lokalSperre.release()
@@ -699,6 +714,8 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         fun betrifft(host: String, port: Int): Boolean
         /** Server neu starten, unter derselben Adresse; true, wenn er danach wieder antwortet. */
         fun neustarten(): Boolean
+        /** Eine Zeile fuer wtwin.log. */
+        fun protokoll(text: String) {}
     }
 
     companion object {

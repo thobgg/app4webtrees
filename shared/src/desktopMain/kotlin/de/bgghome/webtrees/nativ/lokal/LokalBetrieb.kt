@@ -27,10 +27,14 @@ object LokalBetrieb : WtClient.LokalerDienst {
         if (jetzt - letzterNeustart < 10_000) return s.laeuft
         letzterNeustart = jetzt
         val port = s.port
-        System.err.println("Lokaler Stammbaum: Server antwortet nicht, Neustart auf Port $port")
+        LokalProtokoll.schreiben("Server antwortet nicht – Neustart auf Port $port")
         s.beenden()
-        return runCatching { s.starten(wunschPort = port); s.port == port }.getOrDefault(false)
+        return runCatching { s.starten(wunschPort = port); s.port == port }
+            .onFailure { LokalProtokoll.schreiben("Neustart gescheitert: ${it.message?.lineSequence()?.firstOrNull()}") }
+            .getOrDefault(false)
     }
+
+    override fun protokoll(text: String) = LokalProtokoll.schreiben(text)
 
     /** webtrees-ZIP und api4webtrees-ZIP liegen im Paket unter resources/webtrees (desktop/build.gradle.kts). */
     private fun paketDatei(praefix: String, env: String): File? {
@@ -120,6 +124,7 @@ object LokalBetrieb : WtClient.LokalerDienst {
             LokaleEinrichtung.moduleAuffrischen(LokalOrte.webtrees, apiZip(), sammlungenZip())
             val s = LokalerServer(php).also { server = it }
             s.starten(wunschPort = zugang.port)
+            LokalProtokoll.schreiben("Start: Server bereit auf Port ${s.port}")
             if (s.port != zugang.port) zugang.copy(port = s.port).sichern()
             // Leere Reste alter Importversuche weg; zeigte die Merkung auf so einen, den Baum mit den Daten oeffnen
             runCatching {
@@ -133,7 +138,11 @@ object LokalBetrieb : WtClient.LokalerDienst {
             plattform.client.baseUrl = settings.baseUrl
             runBlocking { plattform.client.login(zugang.benutzer, zugang.passwort) }
             settings.userName = zugang.benutzer
-        }.onFailure { System.err.println("Lokaler Stammbaum: ${it.message}") }
+            LokalProtokoll.schreiben("Start: angemeldet")
+        }.onFailure {
+            System.err.println("Lokaler Stammbaum: ${it.message}")
+            LokalProtokoll.schreiben("Start gescheitert: $it")
+        }
     }
 
     fun beenden() {

@@ -21,7 +21,7 @@ Foto's komen niet mee uit de GEDCOM. Voeg ze toe in het programma, of kopieer ze
 | Windows | `%LOCALAPPDATA%\app4webtrees` (in de adresbalk van de Verkenner typen) |
 | Linux | `~/.local/share/app4webtrees` |
 
-Daarin staan `webtrees/` met het programma en `webtrees/data/` met de database (SQLite) en de mediamap `media/`. Het logboek van de PHP-server is `php.log`.
+Daarin staan `webtrees/` met het programma en `webtrees/data/` met de database (SQLite) en de mediamap `media/`. Het logboek van de PHP-server is `php.log`. Wat wtWin zelf opmerkt (afgebroken verbindingen, herhalingen, herstarts van de server) staat in `wtwin.log` ernaast.
 
 ## Archief
 

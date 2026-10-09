@@ -97,11 +97,16 @@ class LokalerServer(private val php: File, private val webtrees: File = LokalOrt
         Runtime.getRuntime().addShutdownHook(Thread { beenden() })
 
         val ende = System.currentTimeMillis() + wartenMs
+        var versuch = 0
         while (System.currentTimeMillis() < ende) {
             if (!p.isAlive) break
-            if (antwortet()) return adresse
+            versuch++
+            val fehler = antwortFehler() ?: return adresse
+            // Die ersten Versuche scheitern ueblich, solange PHP noch hochfaehrt - erst ab dem dritten mitschreiben
+            if (versuch >= 3) LokalProtokoll.schreiben("Startpruefung, Versuch $versuch: $fehler")
             Thread.sleep(150)
         }
+        LokalProtokoll.schreiben(if (!p.isAlive) "PHP beendet sich gleich nach dem Start (Port $port)" else "Startpruefung: keine Antwort nach ${wartenMs / 1000} s (Port $port)")
         beenden()
         val rest = runCatching { LokalOrte.protokoll.readLines().takeLast(15).joinToString("\n") }.getOrDefault("")
         error("PHP startet nicht (Port $port).\n$rest")
@@ -122,12 +127,15 @@ class LokalerServer(private val php: File, private val webtrees: File = LokalOrt
      * ein Server als bereit, der jede echte Anfrage abbrach (Issue 9). index.php fuehrt PHP aus; jede HTTP-Antwort
      * (vor der Einrichtung auch 404) zeigt, dass PHP laeuft - nur ein Abbruch oder keine Antwort zaehlt als Fehler.
      */
-    private fun antwortet(): Boolean = runCatching {
+    /** null, wenn webtrees antwortet, sonst der Grund (fuer wtwin.log). */
+    private fun antwortFehler(): String? = try {
         val c = URI("${adresse}index.php").toURL().openConnection() as HttpURLConnection
         c.instanceFollowRedirects = false
         c.connectTimeout = 500; c.readTimeout = 10_000
-        try { c.responseCode in 100..599 } finally { c.disconnect() }
-    }.getOrDefault(false)
+        try { c.responseCode.let { if (it in 100..599) null else "HTTP $it" } } finally { c.disconnect() }
+    } catch (e: Exception) {
+        e.toString()
+    }
 
     /** Ist wtWin abgestuerzt (unter Windows ueberlebt das Kind dann), laeuft noch ein altes PHP - weg damit. */
     private fun altenBeenden() {

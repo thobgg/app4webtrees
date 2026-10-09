@@ -21,7 +21,7 @@ Las fotos no vienen con el GEDCOM. Añádalas en el programa o cópielas más ta
 | Windows | `%LOCALAPPDATA%\app4webtrees` (escríbalo en la barra de direcciones del Explorador) |
 | Linux | `~/.local/share/app4webtrees` |
 
-Dentro están `webtrees/` con el programa y `webtrees/data/` con la base de datos (SQLite) y la carpeta de medios `media/`. El registro del servidor PHP es `php.log`.
+Dentro están `webtrees/` con el programa y `webtrees/data/` con la base de datos (SQLite) y la carpeta de medios `media/`. El registro del servidor PHP es `php.log`. Lo que el propio wtWin detecta (conexiones interrumpidas, reintentos, reinicios del servidor) se anota en `wtwin.log`, al lado.
 
 ## Archivo
 

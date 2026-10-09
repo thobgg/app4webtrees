@@ -21,7 +21,7 @@ Les photos ne sont pas reprises du GEDCOM. Ajoutez-les dans le programme, ou cop
 | Windows | `%LOCALAPPDATA%\app4webtrees` (à taper dans la barre d'adresse de l'Explorateur) |
 | Linux | `~/.local/share/app4webtrees` |
 
-On y trouve `webtrees/` avec le programme et `webtrees/data/` avec la base de données (SQLite) et le dossier des médias `media/`. Le journal du serveur PHP est `php.log`.
+On y trouve `webtrees/` avec le programme et `webtrees/data/` avec la base de données (SQLite) et le dossier des médias `media/`. Le journal du serveur PHP est `php.log`. Ce que wtWin remarque lui-même (connexions interrompues, nouvelles tentatives, redémarrages du serveur) est noté dans `wtwin.log`, juste à côté.
 
 ## Archives
 

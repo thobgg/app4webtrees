@@ -32,6 +32,7 @@ class LokalDrosselTest {
     private val hoechstens = AtomicInteger()
     private val abbrechen = AtomicInteger(0)
     private val neustarts = AtomicInteger()
+    private val protokoll = java.util.Collections.synchronizedList(mutableListOf<String>())
 
     init {
         server.createContext("/") { ex ->
@@ -55,6 +56,7 @@ class LokalDrosselTest {
         WtClient.lokal = object : WtClient.LokalerDienst {
             override fun betrifft(host: String, port: Int) = host == "127.0.0.1" && port == server.address.port
             override fun neustarten(): Boolean { neustarts.incrementAndGet(); return true }
+            override fun protokoll(text: String) { protokoll += text }
         }
     }
 
@@ -77,11 +79,38 @@ class LokalDrosselTest {
         assertTrue(hoechstens.get() > 2, "gleichzeitig: ${hoechstens.get()}")
     }
 
+    private fun holen(c: WtClient, url: String = url()) = c.http.newCall(Request.Builder().url(url).build()).execute().use { it.body!!.string() }
+
     @Test
-    fun abbruchFuehrtZuNeustartUndWiederholung() {
+    fun einAbbruchWirdSofortWiederholtOhneNeustart() {
         lokalSetzen()
         abbrechen.set(1)
-        client().http.newCall(Request.Builder().url(url()).build()).execute().use { assertEquals("ok", it.body!!.string()) }
+        assertEquals("ok", holen(client()))
+        assertEquals(0, neustarts.get())
+        assertTrue(protokoll.any { "GET /x" in it } && protokoll.any { "zweiter Versuch ok" in it }, protokoll.toString())
+    }
+
+    @Test
+    fun zweiAbbruecheFuehrenZuNeustartUndDrittemVersuch() {
+        lokalSetzen()
+        abbrechen.set(2)
+        assertEquals("ok", holen(client()))
         assertEquals(1, neustarts.get())
+        assertTrue(protokoll.any { "nach Neustart ok" in it }, protokoll.toString())
+    }
+
+    @Test
+    fun anmeldungWirdWiederholtAndereSchreibzugriffeNicht() {
+        lokalSetzen()
+        // Wie writeHttp in WtClient: ohne OkHttps eigene Wiederholung, damit nur unsere Regel wirkt
+        val c = client().http.newBuilder().retryOnConnectionFailure(false).build()
+        abbrechen.set(1)
+        val form = okhttp3.FormBody.Builder().add("a", "1").build()
+        c.newCall(Request.Builder().url(url() + "?route=%2Flogin").post(form).build()).execute().use { assertEquals(200, it.code) }
+        assertTrue(protokoll.any { "POST /login: zweiter Versuch ok" in it }, protokoll.toString())
+        abbrechen.set(1)
+        val fehler = runCatching { c.newCall(Request.Builder().url(url() + "?route=%2Fmodule%2Fx%2FFact").post(form).build()).execute().close() }
+        assertTrue(fehler.isFailure, "ein abgebrochener Schreibzugriff darf nicht still wiederholt werden")
+        assertEquals(0, neustarts.get())
     }
 }

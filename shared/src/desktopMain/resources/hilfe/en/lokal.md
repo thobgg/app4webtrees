@@ -21,7 +21,7 @@ Photos do not come along from the GEDCOM. Add them in the program, or copy them 
 | Windows | `%LOCALAPPDATA%\app4webtrees` (type it into the Explorer address bar) |
 | Linux | `~/.local/share/app4webtrees` |
 
-Inside are `webtrees/` with the program and `webtrees/data/` with the database (SQLite) and the media folder `media/`. The PHP server's log is `php.log`.
+Inside are `webtrees/` with the program and `webtrees/data/` with the database (SQLite) and the media folder `media/`. The PHP server's log is `php.log`. What wtWin itself notices (dropped connections, retries, server restarts) is written to `wtwin.log` next to it.
 
 ## Archive
 

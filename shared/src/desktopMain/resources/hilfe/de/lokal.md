@@ -21,7 +21,7 @@ Fotos kommen aus der GEDCOM nicht mit. Du fügst sie im Programm hinzu oder kopi
 | Windows | `%LOCALAPPDATA%\app4webtrees` (im Explorer oben eintippen) |
 | Linux | `~/.local/share/app4webtrees` |
 
-Darin liegt `webtrees/` mit dem Programm und `webtrees/data/` mit der Datenbank (SQLite) und dem Medienordner `media/`. Das Protokoll des PHP-Servers heißt `php.log`.
+Darin liegt `webtrees/` mit dem Programm und `webtrees/data/` mit der Datenbank (SQLite) und dem Medienordner `media/`. Das Protokoll des PHP-Servers heißt `php.log`. Was wtWin selbst dabei bemerkt (abgebrochene Verbindungen, Wiederholungen, Neustarts des Servers), steht in `wtwin.log` daneben.
 
 ## Archiv
 
