@@ -1685,7 +1685,7 @@
     <string name="regel_615">Heeft een persoon meer dan één geboorte of meer dan één overlijden?</string>
     <string name="regel_616">Staat een gezinskoppeling maar aan één kant (FAMC/FAMS zonder CHIL/HUSB/WIFE of andersom)?</string>
     <string name="regel_617">Ontbreekt de kop, of wijkt de tekenset daarin af van het bestand?</string>
-    <string name="regel_618">Zijn er tags buiten de GEDCOM-standaard (5.5.1 of 7)?</string>
+    <string name="regel_618">Zijn er labels buiten de GEDCOM-standaard (5.5.1 of 7)?</string>
     <string name="regel_619">Is het geslacht van een persoon onbekend?</string>
     <string name="pruef_zeile">regel</string>
     <string name="pruef_verweis_auf">koppeling naar</string>
@@ -1702,11 +1702,11 @@
     <string name="ga_structure_menu">Opbouw van het bestand …</string>
     <string name="ga_structure_records">%1$d records</string>
     <string name="ga_structure_std">standaard</string>
-    <string name="ga_structure_vendor">leverancierstag</string>
+    <string name="ga_structure_vendor">leverancierslabel</string>
     <string name="ga_structure_foreign">niet in de standaard</string>
     <string name="ga_structure_head">Kop: %1$s</string>
     <string name="ga_structure_count">Aantal</string>
-    <string name="ga_structure_hint">De tagboom van het bestand per recordtype, met het aantal keren dat elke tag voorkomt. Tags met een onderstrepingsteken zijn uitbreidingen van de leverancier; tags zonder dat niet in GEDCOM 5.5.1 of 7 staan, zijn gemarkeerd. Tags uit het GEDCOM-L-addendum (bijv. _LOC, _GODP, _UID) zijn gemarkeerd als GEDCOM-L, andere met een liggend streepje als leverancierstag.</string>
+    <string name="ga_structure_hint">De labelboom van het bestand per recordtype, met het aantal keren dat elk label voorkomt. Labels met een onderstrepingsteken zijn uitbreidingen van de leverancier; labels zonder dat niet in GEDCOM 5.5.1 of 7 staan, zijn gemarkeerd. Labels uit het GEDCOM-L-addendum (bijv. _LOC, _GODP, _UID) zijn gemarkeerd als GEDCOM-L, andere met een liggend streepje als leverancierslabel.</string>
     <string name="ga_person_second">Tweede persoon</string>
     <!-- Dateien vergleichen (gedaudit 0.3, 13.10.2026) -->
     <string name="ga_compare_menu">Met een ander bestand vergelijken …</string>

@@ -14,9 +14,9 @@ Links staan de regels in groepen, rechts de bevindingen. Hoe regels, voorinstell
 
 ## Vorm van het bestand
 
-De groep **Vorm** bestaat alleen voor bestanden: regels die geen GEDCOM zijn, koppelingen naar personen of gezinnen die niet bestaan, dubbel gebruikte kenmerken, data in een onleesbare vorm, personen zonder naam, meer dan één geboorte of overlijden, gezinskoppelingen die maar aan één kant staan, een ontbrekende kop of een tekenset in de kop die niet bij het bestand past, en tags buiten de standaard 5.5.1 of 7. De laatste twee regels staan standaard uit, omdat ze bij sommige programma's heel veel melden.
+De groep **Vorm** bestaat alleen voor bestanden: regels die geen GEDCOM zijn, koppelingen naar personen of gezinnen die niet bestaan, dubbel gebruikte kenmerken, data in een onleesbare vorm, personen zonder naam, meer dan één geboorte of overlijden, gezinskoppelingen die maar aan één kant staan, een ontbrekende kop of een tekenset in de kop die niet bij het bestand past, en labels buiten de standaard 5.5.1 of 7. De laatste twee regels staan standaard uit, omdat ze bij sommige programma's heel veel melden.
 
-**Beeld › Opbouw van het bestand …** (F6) toont de tagboom per recordtype met het aantal keren dat elke tag voorkomt. Leverancierstags (met onderstrepingsteken) en tags buiten de standaard zijn gekleurd gemarkeerd. Zo ziet u wat een programma bij het exporteren maakt en wat een ander bij het importeren zal verliezen.
+**Beeld › Opbouw van het bestand …** (F6) toont de labelboom per recordtype met het aantal keren dat elk label voorkomt. Leverancierslabels (met onderstrepingsteken) en labels buiten de standaard zijn gekleurd gemarkeerd. Zo ziet u wat een programma bij het exporteren maakt en wat een ander bij het importeren zal verliezen.
 
 ## Twee bestanden vergelijken
 
@@ -40,4 +40,4 @@ Bevindingen die u bekeken hebt en die zo blijven, vinkt u af; ze verdwijnen uit 
 
 ## GEDCOM-L
 
-gedaudit kent het GEDCOM-L-addendum bij GEDCOM 5.5.1. In het venster **Opbouw van het bestand** staan de tags ervan (_LOC, _GODP, _UID …) als „GEDCOM-L” en niet als leverancierstag; de kopregel noemt de addendumversie als het bestand die vermeldt. De persoonskaart toont peetouders en getuigen zonder eigen record (_GODP, _WITN), het adres en de GOV-code, postcode en Maidenhead-locator van de plaats. Verwijzingen naar plaatsrecords (`3 _LOC` bij een plaats, `1 _LOC` in een plaatsrecord) waarvan het doel ontbreekt, meldt de controle zoals elke andere verwijzing in het niets.
+gedaudit kent het GEDCOM-L-addendum bij GEDCOM 5.5.1. In het venster **Opbouw van het bestand** staan de labels ervan (_LOC, _GODP, _UID …) als „GEDCOM-L” en niet als leverancierslabel; de kopregel noemt de addendumversie als het bestand die vermeldt. De persoonskaart toont peetouders en getuigen zonder eigen record (_GODP, _WITN), het adres en de GOV-code, postcode en Maidenhead-locator van de plaats. Verwijzingen naar plaatsrecords (`3 _LOC` bij een plaats, `1 _LOC` in een plaatsrecord) waarvan het doel ontbreekt, meldt de controle zoals elke andere verwijzing in het niets.
