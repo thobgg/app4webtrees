@@ -63,6 +63,7 @@ Dubbele personen ontstaan bij het samenvoegen van twee bestanden of bij het invo
 
 - **Bestand › Persoonsblad afdrukken …** (Ctrl+P) en **Persoonsblad als PDF …**
 - **Persoon › Persoonstekst kopiëren** (Ctrl+Shift+C) zet alle gegevens als tekst op het klembord, bijv. voor een e-mail of een tekstverwerker.
+- **Persoon › Zoeken in de CompGen-metazoekmachine …** (ook via rechtsklik op een persoon) zoekt de achternaam in de databanken van de Duitse vereniging voor computergenealogie: GEDBAS, adresboeken, online dorpsfamilieboeken, verlieslijsten en meer. Een klein venster toont wat wordt verzonden – alleen de achternaam zonder voorvoegsel zoals „von”, desgewenst een plaats van de persoon, nooit voornamen of data – en de resultaten openen in de browser. Zonder plaats vindt de zoekopdracht meestal meer.
 - Meer uitvoer: [Lijsten](hilfe:listen) (persoonsblad als lijst), [Schema's](hilfe:tafeln), [Boeken](hilfe:buecher).
 
 ## GEDCOM-L

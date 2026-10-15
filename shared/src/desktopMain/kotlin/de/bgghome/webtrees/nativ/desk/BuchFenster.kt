@@ -114,7 +114,9 @@ private object BuchWahl {
         lebende = Lebende.entries.firstOrNull { it.name == prefs.getString("buch_lebende", null) } ?: Lebende.NurName,
         grenzjahr = (prefs.getString("buch_grenzjahr", null)?.toIntOrNull() ?: 100).coerceIn(50, 130),
         aufbau = FamilienAufbau.entries.firstOrNull { it.name == prefs.getString("buch_aufbau", null) } ?: FamilienAufbau.Familien,
-        nurOeffentlich = prefs.getBoolean("buch_oeffentlich", false),
+        // bis 1.53 ein Haken "Nur, was Besucher sehen duerfen"
+        sicht = Sichtbarkeit.entries.firstOrNull { it.name == prefs.getString("buch_sicht", null) }
+            ?: if (prefs.getBoolean("buch_oeffentlich", false)) Sichtbarkeit.Besucher else Sichtbarkeit.Alle,
     )
     fun art(): BuchArt = BuchArt.entries.firstOrNull { it.name == prefs.getString("buch_art", null) } ?: BuchArt.Vorfahren
     fun sichern(o: BuchOptionen) {
@@ -126,7 +128,7 @@ private object BuchWahl {
         prefs.putBoolean("buch_chrono", o.familienChronologisch); prefs.putString("buch_ort", o.ortFilter); prefs.putBoolean("buch_haeuser", o.haeuser)
         prefs.putBoolean("buch_haeuser_typ", o.haeuserNurTyp); prefs.putBoolean("buch_haeuser_ohne", o.haeuserOhneTyp)
         prefs.putString("buch_lebende", o.lebende.name); prefs.putString("buch_grenzjahr", o.grenzjahr.toString()); prefs.putString("buch_aufbau", o.aufbau.name)
-        prefs.putBoolean("buch_oeffentlich", o.nurOeffentlich)
+        prefs.putString("buch_sicht", o.sicht.name)
     }
 }
 
@@ -160,8 +162,9 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     // Nur, was Besucher sehen duerfen (Issue 21): der Server meldet es ab API-Stufe 36
     val zugangBekannt = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ACCESS
     fun bauen(daten: Any?, opt: BuchOptionen): Buch? {
-        val d = if (!opt.nurOeffentlich || !zugangBekannt) daten else when (daten) {
-            is NachfahrenDaten -> daten.oeffentlich(); is FamilienDaten -> daten.oeffentlich(); is BuchDaten -> daten.oeffentlich(); else -> daten
+        val s = if (zugangBekannt) opt.sicht else Sichtbarkeit.Alle
+        val d = when (daten) {
+            is NachfahrenDaten -> daten.fuer(s); is FamilienDaten -> daten.fuer(s); is BuchDaten -> daten.fuer(s); else -> daten
         }
         return when (d) {
             is NachfahrenDaten -> nachfahrenbuch(d, opt, baum, appName)
@@ -286,7 +289,10 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                         }) { Text(stringResource(Res.string.desk_book_template_load), style = MaterialTheme.typography.labelMedium) }
                     }
                     // Fuer Buecher zum Weitergeben: nur, was Besucher in webtrees sehen duerfen (ab API-Stufe 36)
-                    if (zugangBekannt) Haken(stringResource(Res.string.desk_book_public), o.nurOeffentlich, stringResource(Res.string.tipp_book_public)) { o = o.copy(nurOeffentlich = it) }
+                    if (zugangBekannt) Einstellung(stringResource(Res.string.desk_book_public), stringResource(Res.string.tipp_book_public)) {
+                        val werte = listOf(stringResource(Res.string.desk_book_public_all), stringResource(Res.string.desk_book_public_members), stringResource(Res.string.desk_book_public_visitors))
+                        Auswahl(werte[o.sicht.ordinal], werte) { w -> o = o.copy(sicht = Sichtbarkeit.entries[werte.indexOf(w)]) }
+                    }
                     seiten?.second?.let { Text(stringResource(Res.string.desk_list_pages, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     val b = buch
@@ -297,7 +303,7 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                             // Fuenf Knoepfe nebeneinander: ohne den ueblichen Innenabstand bricht "DOCX" sonst je Buchstabe um
                             // Die Website ist zum Veroeffentlichen: sie zeigt immer nur, was Besucher sehen duerfen
                             OutlinedButton(onClick = {
-                                val zuSpeichern = if (f == BuchFormat.WEBSITE && !o.nurOeffentlich && zugangBekannt) bauen(daten?.getOrNull(), o.copy(nurOeffentlich = true)) else b
+                                val zuSpeichern = if (f == BuchFormat.WEBSITE && o.sicht != Sichtbarkeit.Besucher && zugangBekannt) bauen(daten?.getOrNull(), o.copy(sicht = Sichtbarkeit.Besucher)) else b
                                 zuSpeichern?.let { buchSpeichern(it, f, it.titel) }
                             }, enabled = b != null, shape = MaterialTheme.shapes.small,
                                 contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp), modifier = Modifier.weight(1f)) {

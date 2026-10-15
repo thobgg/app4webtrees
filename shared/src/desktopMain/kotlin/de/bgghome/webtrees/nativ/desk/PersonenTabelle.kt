@@ -308,6 +308,7 @@ internal fun PersonenTabelleInhalt(state: UiState, viewModel: AppViewModel, open
                                             ContextMenuItem(Texte.t(Res.string.desk_sheet)) { openSheet(z.xref) },
                                             ContextMenuItem(Texte.t(Res.string.chip_open_web)) { openWeb(z.url) },
                                             ContextMenuItem(Texte.t(Res.string.desk_copy_text)) { personentextKopieren(viewModel, z.xref) },
+                                            ContextMenuItem(Texte.t(Res.string.desk_meta_menu)) { MetaSuche.fuer(viewModel, z.xref) },
                                         ) + listOfNotNull(onZusammenfuehren?.let { f -> ContextMenuItem(Texte.t(Res.string.desk_merge_with)) { f(z.xref) } },
                                             if (state.tree?.canEdit == true) ContextMenuItem(Texte.t(Res.string.action_delete_person)) { Loeschwahl.person = z.xref to z.name } else null)
                                     }) {

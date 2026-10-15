@@ -1812,11 +1812,23 @@
     <string name="desk_gl_godparents">Paten</string>
     <string name="desk_gl_witnesses">Zeugen</string>
     <string name="desk_media_make_primary">Als Hauptbild</string>
-    <string name="desk_book_public">Nur, was Besucher sehen dürfen</string>
-    <string name="tipp_book_public">Lässt weg, was webtrees vor Besuchern verbirgt: Ereignisse mit Einschränkung („Für Mitglieder“, „Für Verwalter“), Angaben nach den Datenschutzregeln des Stammbaums und lebende Personen (je nach Einstellung des Stammbaums nur mit Namen oder als „Privat“). Für Bücher, die weitergegeben werden. Die Website enthält immer nur diese Angaben.</string>
+    <string name="desk_book_public">Sichtbarkeit</string>
+    <string name="desk_book_public_all">Alles (Sicht des Verwalters)</string>
+    <string name="desk_book_public_members">Was Mitglieder sehen dürfen</string>
+    <string name="desk_book_public_visitors">Was Besucher sehen dürfen</string>
+    <string name="tipp_book_public">Lässt weg, was webtrees dem gewählten Leser verbirgt: Ereignisse mit Einschränkung („Für Mitglieder“, „Für Verwalter“), Angaben nach den Datenschutzregeln des Stammbaums und lebende Personen (je nach Einstellung des Stammbaums nur mit Namen oder als „Privat“). Mitglieder sehen mehr als Besucher, aber nichts, was nur Verwaltern gezeigt wird. Für Bücher, die weitergegeben werden. Die Website enthält immer nur, was Besucher sehen dürfen.</string>
     <string name="ga_check_as">Prüfen als</string>
     <string name="ga_version_auto">Automatisch (%1$s)</string>
     <string name="ga_version_none">keine Angabe</string>
     <string name="ga_structure_only551">nur 5.5.1</string>
     <string name="ga_structure_only7">nur 7</string>
+    <string name="desk_meta_menu">In der CompGen-Meta-Suche suchen …</string>
+    <string name="desk_meta_title">CompGen-Meta-Suche</string>
+    <string name="desk_meta_text">Sucht den Familiennamen gleichzeitig in GEDBAS, Adressbüchern, Online-Ortsfamilienbüchern, Verlustlisten und weiteren Datenbanken des Vereins für Computergenealogie. Die Ergebnisse öffnen sich im Browser. An meta.genealogy.net geht nur der Familienname und, wenn gewählt, der Ort – keine Vornamen, keine Daten.</string>
+    <string name="desk_meta_surname">Familienname</string>
+    <string name="desk_meta_place">Ort</string>
+    <string name="desk_meta_no_place">Ohne Ort</string>
+    <string name="desk_meta_place_hint">Mit Ort finden manche Datenbanken weniger oder nichts, andere übergehen ihn. Ohne Ort ist meist ergiebiger.</string>
+    <string name="desk_meta_search">Im Browser suchen</string>
+    <string name="desk_meta_no_name">Für diese Person ist kein Familienname bekannt.</string>
 </resources>

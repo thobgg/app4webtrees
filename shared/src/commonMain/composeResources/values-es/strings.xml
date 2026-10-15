@@ -1812,11 +1812,23 @@
     <string name="desk_gl_godparents">Padrinos</string>
     <string name="desk_gl_witnesses">Testigos</string>
     <string name="desk_media_make_primary">Como imagen principal</string>
-    <string name="desk_book_public">Solo lo que pueden ver los visitantes</string>
-    <string name="tipp_book_public">Omite lo que webtrees oculta a los visitantes: eventos restringidos («Mostrar a miembros», «Mostrar a gestores»), datos sujetos a las reglas de privacidad del árbol y personas vivas (solo el nombre o «Privado», según la configuración del árbol). Para libros que se comparten. El sitio web siempre contiene solo estos datos.</string>
+    <string name="desk_book_public">Visibilidad</string>
+    <string name="desk_book_public_all">Todo (vista del gestor)</string>
+    <string name="desk_book_public_members">Lo que pueden ver los miembros</string>
+    <string name="desk_book_public_visitors">Lo que pueden ver los visitantes</string>
+    <string name="tipp_book_public">Omite lo que webtrees oculta al lector elegido: eventos restringidos («Mostrar a miembros», «Mostrar a gestores»), datos sujetos a las reglas de privacidad del árbol y personas vivas (solo el nombre o «Privado», según la configuración del árbol). Los miembros ven más que los visitantes, pero nada de lo que solo se muestra a los gestores. Para libros que se comparten. El sitio web siempre contiene solo lo que pueden ver los visitantes.</string>
     <string name="ga_check_as">Comprobar como</string>
     <string name="ga_version_auto">Automático (%1$s)</string>
     <string name="ga_version_none">sin indicación</string>
     <string name="ga_structure_only551">solo 5.5.1</string>
     <string name="ga_structure_only7">solo 7</string>
+    <string name="desk_meta_menu">Buscar en la metabúsqueda de CompGen …</string>
+    <string name="desk_meta_title">Metabúsqueda de CompGen</string>
+    <string name="desk_meta_text">Busca el apellido a la vez en GEDBAS, libros de direcciones, libros de familias locales en línea, listas de bajas y otras bases de datos de la asociación alemana de genealogía informática (CompGen). Los resultados se abren en el navegador. Solo se envían a meta.genealogy.net el apellido y, si se elige, el lugar – ni nombres de pila ni fechas.</string>
+    <string name="desk_meta_surname">Apellido</string>
+    <string name="desk_meta_place">Lugar</string>
+    <string name="desk_meta_no_place">Sin lugar</string>
+    <string name="desk_meta_place_hint">Con un lugar, algunas bases de datos encuentran menos o nada y otras lo ignoran. Sin lugar suele dar más resultados.</string>
+    <string name="desk_meta_search">Buscar en el navegador</string>
+    <string name="desk_meta_no_name">No se conoce ningún apellido para esta persona.</string>
 </resources>

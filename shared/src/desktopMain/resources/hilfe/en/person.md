@@ -63,6 +63,7 @@ Duplicate individuals arise when two files are combined or while entering data �
 
 - **File › Print person sheet …** (Ctrl+P) and **Person sheet as PDF …**
 - **Person › Copy person text** (Ctrl+Shift+C) puts all details as text on the clipboard, e.g. for an e-mail or a word processor.
+- **Person › Search in the CompGen meta search …** (also by right-clicking a person) searches the surname in the databases of the German Association for Computer Genealogy: GEDBAS, address books, online local family books, casualty lists and more. A small window shows what is sent – only the surname without particles such as “von”, a place of the person if you like, never given names or dates – and the results open in the browser. Without a place the search usually finds more.
 - More output: [Lists](hilfe:listen) (person sheet as a list), [Charts](hilfe:tafeln), [Books](hilfe:buecher).
 
 ## GEDCOM-L

@@ -63,6 +63,7 @@ Doppelte Personen entstehen beim Zusammenführen zweier Dateien oder beim Eingeb
 
 - **Datei › Personenblatt drucken …** (Strg+P) und **Personenblatt als PDF …**
 - **Person › Personentext kopieren** (Strg+Umschalt+C) legt alle Angaben als Text in die Zwischenablage, etwa für eine E-Mail oder die Textverarbeitung.
+- **Person › In der CompGen-Meta-Suche suchen …** (auch per Rechtsklick auf eine Person) sucht den Familiennamen in den Datenbanken des Vereins für Computergenealogie: GEDBAS, Adressbücher, Online-Ortsfamilienbücher, Verlustlisten und weitere. Ein kleines Fenster zeigt, was gesendet wird – nur der Familienname ohne Zusatz wie „von“, auf Wunsch ein Ort der Person, nie Vornamen oder Daten –, die Ergebnisse öffnen sich im Browser. Ohne Ort findet die Suche meist mehr.
 - Mehr Ausgaben: [Listen](hilfe:listen) (Personenblatt als Liste), [Tafeln](hilfe:tafeln), [Bücher](hilfe:buecher).
 
 ## GEDCOM-L

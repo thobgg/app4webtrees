@@ -1817,11 +1817,23 @@
     <string name="desk_gl_godparents">Godparents</string>
     <string name="desk_gl_witnesses">Witnesses</string>
     <string name="desk_media_make_primary">Make main image</string>
-    <string name="desk_book_public">Only what visitors may see</string>
-    <string name="tipp_book_public">Leaves out what webtrees hides from visitors: restricted events (“Show to members”, “Show to managers”), data covered by the tree’s privacy rules and living people (name only or “Private”, depending on the tree setting). For books that are passed on. The website always contains only these data.</string>
+    <string name="desk_book_public">Visibility</string>
+    <string name="desk_book_public_all">Everything (manager view)</string>
+    <string name="desk_book_public_members">What members may see</string>
+    <string name="desk_book_public_visitors">What visitors may see</string>
+    <string name="tipp_book_public">Leaves out what webtrees hides from the chosen reader: restricted events (“Show to members”, “Show to managers”), data covered by the tree’s privacy rules and living people (name only or “Private”, depending on the tree setting). Members see more than visitors, but nothing shown only to managers. For books that are passed on. The website always contains only what visitors may see.</string>
     <string name="ga_check_as">Check as</string>
     <string name="ga_version_auto">Automatic (%1$s)</string>
     <string name="ga_version_none">not stated</string>
     <string name="ga_structure_only551">5.5.1 only</string>
     <string name="ga_structure_only7">7 only</string>
+    <string name="desk_meta_menu">Search in the CompGen meta search …</string>
+    <string name="desk_meta_title">CompGen meta search</string>
+    <string name="desk_meta_text">Searches the surname at once in GEDBAS, address books, online local family books, casualty lists and further databases of the German Association for Computer Genealogy (CompGen). The results open in the browser. Only the surname and, if chosen, the place are sent to meta.genealogy.net – no given names, no dates.</string>
+    <string name="desk_meta_surname">Surname</string>
+    <string name="desk_meta_place">Place</string>
+    <string name="desk_meta_no_place">No place</string>
+    <string name="desk_meta_place_hint">With a place some databases find less or nothing, others ignore it. Without a place is usually more productive.</string>
+    <string name="desk_meta_search">Search in browser</string>
+    <string name="desk_meta_no_name">No surname is known for this person.</string>
 </resources>

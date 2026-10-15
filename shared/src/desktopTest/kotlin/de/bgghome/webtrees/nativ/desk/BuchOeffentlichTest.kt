@@ -34,7 +34,7 @@ class BuchOeffentlichTest {
             ),
             spouseFamilies = listOf(ehe),
         )
-        val o = d.oeffentlich()
+        val o = d.fuer(Sichtbarkeit.Besucher)
         assertEquals(listOf("NAME", "CHR", "OCCU"), o.facts.map { it.tag })
         assertEquals("Schmied", o.facts.first { it.tag == "OCCU" }.value)
         // der lebende Pate faellt weg, der verstorbene bleibt
@@ -54,10 +54,44 @@ class BuchOeffentlichTest {
     }
 
     @Test
+    fun mitgliederSehenMehrAlsBesucher() {
+        val kind = Person("I3", name = "Lebhart Offen", birth = ev(1990), lifespan = "1990–", access = "member", nameAccess = "member")
+        val geheim = Person("I4", name = "Gerda Geheim", birth = ev(1992), access = "manager", nameAccess = "manager")
+        val ehe = FamilyJson("F1", children = listOf(kind, geheim), marriage = ev(1828), access = "member",
+            facts = listOf(FactJson("m", tag = "MARR", access = "member")))
+        val d = IndividualDetail(
+            person = Person("I1", name = "Theodor Offen", isDead = true, birth = ev(1800), death = ev(1870), occupation = "Markerberuf",
+                access = "visitor", restricted = listOf("OCCU", "BURI"), buri = ev(1870)),
+            facts = listOf(
+                FactJson("b", tag = "CHR", access = "visitor", associates = listOf(Associate("I2", access = "visitor"), Associate("I3", access = "member"), Associate("I4", access = "manager"))),
+                FactJson("o2", tag = "OCCU", value = "Markerberuf", access = "member"),
+                FactJson("u", tag = "BURI", access = "manager"),
+                FactJson("r", tag = "RELI", value = "geheim", access = "manager"),
+            ),
+            spouseFamilies = listOf(ehe),
+        )
+        val o = d.fuer(Sichtbarkeit.Mitglieder)
+        assertEquals(listOf("CHR", "OCCU"), o.facts.map { it.tag })
+        assertEquals(listOf("I2", "I3"), o.facts.first { it.tag == "CHR" }.associates.map { it.xref })
+        // Beruf nur fuer Mitglieder -> bleibt; Begraebnis nur fuer Verwalter -> weg
+        assertEquals("Markerberuf", o.person.occupation)
+        assertNull(o.person.buri)
+        val f = o.spouseFamilies.single()
+        assertEquals(listOf("MARR"), f.facts.map { it.tag })
+        assertEquals("Lebhart Offen", f.children[0].name)
+        assertEquals(1990, f.children[0].birth?.date?.year)
+        // nur fuer Verwalter: ohne Daten und als "Privat"
+        assertNull(f.children[1].birth)
+        assertTrue(f.children[1].name != "Gerda Geheim")
+        // Alles: unveraendert
+        assertEquals(d, d.fuer(Sichtbarkeit.Alle))
+    }
+
+    @Test
     fun ohneAngabeBleibtAlles() {
         // aelteres Modul ohne access: nichts wird weggelassen
         val d = IndividualDetail(person = Person("I1", birth = ev(1800)), facts = listOf(FactJson("x", tag = "OCCU", value = "Bauer")))
-        assertEquals(d.facts, d.oeffentlich().facts)
-        assertEquals(1800, d.oeffentlich().person.birth?.date?.year)
+        assertEquals(d.facts, d.fuer(Sichtbarkeit.Besucher).facts)
+        assertEquals(1800, d.fuer(Sichtbarkeit.Besucher).person.birth?.date?.year)
     }
 }

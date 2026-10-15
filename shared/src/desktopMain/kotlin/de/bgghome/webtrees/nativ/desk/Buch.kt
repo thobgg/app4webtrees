@@ -102,8 +102,8 @@ data class BuchOptionen(
     val grenzjahr: Int = 100,
     /** Familienbuch: ein Eintrag je Familie (Ortsfamilienbuch) oder je Person (Personenbericht). */
     val aufbau: FamilienAufbau = FamilienAufbau.Familien,
-    /** Nur, was Besucher in webtrees sehen duerfen (Issue 21, ab API-Stufe 36); die Website ist es immer. */
-    val nurOeffentlich: Boolean = false,
+    /** Fuer wen das Buch ist: alles, was Mitglieder oder was Besucher in webtrees sehen duerfen (Issue 21, ab API-Stufe 36); die Website ist immer fuer Besucher. */
+    val sicht: Sichtbarkeit = Sichtbarkeit.Alle,
 )
 
 enum class Lebende { Voll, NurName, Weg }

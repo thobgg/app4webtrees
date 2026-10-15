@@ -150,6 +150,16 @@ fun GedcomPruefenFenster(onClose: () -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () -> Unit, vorgabeTreffer: Boolean = false, inWtWin: Boolean = false) {
+    // Meta-Suche aus Treffern und Personenkarte: der Dialog erscheint in diesem Fenster, nicht im Hauptfenster von wtWin
+    val metaWahl = remember { MetaSucheWahl() }
+    androidx.compose.runtime.CompositionLocalProvider(LocalMetaSuche provides metaWahl) {
+        GedauditFensterInhalt(fenster, startDatei, onQuit, vorgabeTreffer, inWtWin)
+        MetaSucheDialog(metaWahl)
+    }
+}
+
+@Composable
+private fun GedauditFensterInhalt(fenster: FrameWindowScope?, startDatei: File?, onQuit: () -> Unit, vorgabeTreffer: Boolean, inWtWin: Boolean) {
     val appName = LocalAppName.current
     val wahl = remember { PruefWahl(GedauditAblage.prefs) }
     val ablage = remember { AbhakAblage("gedaudit") }
@@ -413,7 +423,10 @@ private fun TrefferZeileDatei(t: Treffer, b: TreeExport, mitRegel: Boolean, schw
     val p = b.person(xref)
     val blass = if (abgehakt) 0.45f else 1f
     val kopierText = stringResource(Res.string.desk_copy_text)
-    ContextMenuArea(items = { listOfNotNull(xref?.let { x -> ContextMenuItem(kopierText) { b.detail(x)?.let(::personentextKopieren) } }) }) {
+    val metaText = stringResource(Res.string.desk_meta_menu)
+    val meta = LocalMetaSuche.current
+    ContextMenuArea(items = { listOfNotNull(xref?.let { x -> ContextMenuItem(kopierText) { b.detail(x)?.let(::personentextKopieren) } },
+        xref?.let { x -> ContextMenuItem(metaText) { b.detail(x)?.let(meta::fuer) } }) }) {
     Row(
         Modifier.fillMaxWidth().background(if (aktiv) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent)
             .fokusRahmen().clickable(onClick = onClick).padding(start = 8.dp, top = 3.dp, bottom = 3.dp),
@@ -448,6 +461,8 @@ internal fun PersonKarte(b: TreeExport, xref: String?) {
     }
     val rollen = rememberScrollState()
     val zeileKopieren = stringResource(Res.string.desk_copy_row); val textKopieren = stringResource(Res.string.desk_copy_text)
+    val metaText = stringResource(Res.string.desk_meta_menu)
+    val meta = LocalMetaSuche.current
     val godparentText = stringResource(Res.string.desk_gl_godparents); val witnessText = stringResource(Res.string.desk_gl_witnesses)
     val adresseText = stringResource(Res.string.desk_detail_address)
     Box(Modifier.fillMaxSize()) {
@@ -460,7 +475,7 @@ internal fun PersonKarte(b: TreeExport, xref: String?) {
             Ueberschrift(stringResource(Res.string.ga_person_facts))
             d.facts.filter { it.tag != "NAME" }.forEach { f ->
                 val zeile = listOfNotNull(f.label.ifBlank { f.tag }, f.date?.text?.takeIf(String::isNotBlank), f.place?.name?.takeIf(String::isNotBlank), f.value.takeIf(String::isNotBlank)).joinToString("  ")
-                ContextMenuArea(items = { listOf(ContextMenuItem(zeileKopieren) { inZwischenablage(zeile) }, ContextMenuItem(textKopieren) { personentextKopieren(d) }) }) {
+                ContextMenuArea(items = { listOf(ContextMenuItem(zeileKopieren) { inZwischenablage(zeile) }, ContextMenuItem(textKopieren) { personentextKopieren(d) }, ContextMenuItem(metaText) { meta.fuer(d) }) }) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(f.label.ifBlank { f.tag }, Modifier.width(110.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(f.date?.text.orEmpty(), Modifier.width(150.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -407,6 +407,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         orte?.let { start -> if (state.tree != null) OrteFenster(state, viewModel, start, openWeb, onClose = { orte = null; orteBereinigen = false }, onBlatt = openSheet, bereinigen = orteBereinigen) }
         if (goTo) GoToDialog(state, viewModel, openWeb, onClose = { goTo = false })
         LoeschRueckfrage(viewModel)
+        MetaSucheDialog()
         Anfuegewahl.person?.let { z -> state.tree?.let { t -> if (t.canEdit) AnfuegenDialog(z, viewModel, t.name, onClose = { Anfuegewahl.person = null }) } }
         liste?.let { art -> ListenFenster(art, state, viewModel, onClose = { liste = null }) }
         HilfeFenster()
@@ -533,6 +534,7 @@ private fun FrameWindowScope.DeskMenuBar(
                 // Sonstiges
                 Item(stringResource(Res.string.chip_open_web), enabled = selected != null, onClick = { selected?.let { openWeb(it.person.url) } })
                 Item(stringResource(Res.string.desk_copy_text), enabled = state.detail != null, shortcut = KeyShortcut(Key.C, ctrl = true, shift = true), onClick = { state.detail?.let(::personentextKopieren) })
+                Item(stringResource(Res.string.desk_meta_menu), enabled = state.detail != null && state.detail?.person?.isPrivate == false, onClick = { state.detail?.let(MetaSuche::fuer) })
             }
             Menu(stringResource(Res.string.desk_menu_create), enabled = main) {
                 Item(stringResource(Res.string.desk_list_ancestors), enabled = state.root != null, onClick = { onListe(ListenArt.Ahnen) })
@@ -1108,6 +1110,7 @@ private fun IndexRow(person: Person, selected: Boolean, root: Boolean, viewModel
     val merken = stringResource(Res.string.desk_bookmark_add); val merkWeg = stringResource(Res.string.desk_bookmark_remove)
     val anfuegen = stringResource(Res.string.desk_link_existing)
     val kopieren = stringResource(Res.string.desk_copy_text)
+    val meta = stringResource(Res.string.desk_meta_menu)
     ContextMenuArea(items = {
         if (person.isPrivate) emptyList() else listOf(
             ContextMenuItem(makeRoot) { viewModel.setRoot(person.xref) },
@@ -1115,6 +1118,7 @@ private fun IndexRow(person: Person, selected: Boolean, root: Boolean, viewModel
             if (viewModel.bookmarksSupported) ContextMenuItem(if (viewModel.isBookmarked(person.xref)) merkWeg else merken) { viewModel.toggleBookmark(person.xref) } else null,
             ContextMenuItem(web) { openWeb(person.url) },
             ContextMenuItem(kopieren) { personentextKopieren(viewModel, person.xref) },
+            ContextMenuItem(meta) { MetaSuche.fuer(viewModel, person.xref) },
             if (viewModel.uiState.value.tree?.canEdit == true) ContextMenuItem(anfuegen) { Anfuegewahl.person = person } else null,
         ).filterNotNull()
     }) {

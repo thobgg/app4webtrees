@@ -685,10 +685,12 @@ private fun EreignisTabelle(
                     .ifEmpty { if (f.tag == "NAME") de.bgghome.webtrees.nativ.data.GedcomName.aus(f.value).anzeige() else "" }
                 val zeileKopieren = stringResource(Res.string.desk_copy_row)
                 val textKopieren = stringResource(Res.string.desk_copy_text)
+                val metaSuche = stringResource(Res.string.desk_meta_menu)
                 // Rechtsklick (Issue 14): die Zeile als Text in die Zwischenablage, oder gleich der ganze Personentext
                 ContextMenuArea(items = { listOf(
                     ContextMenuItem(zeileKopieren) { selected = i; inZwischenablage(listOf(row.label, f.date?.text.orEmpty(), where, alterBeiEreignis(geburtJd, f)?.toString().orEmpty()).filter(String::isNotBlank).joinToString("\t")) },
                     ContextMenuItem(textKopieren) { detail?.let(::personentextKopieren) },
+                    ContextMenuItem(metaSuche) { detail?.let(MetaSuche::fuer) },
                 ) }) {
                 Row(
                     Modifier.fillMaxWidth()

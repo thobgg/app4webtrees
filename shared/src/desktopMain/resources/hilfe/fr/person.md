@@ -63,6 +63,7 @@ Les personnes en double apparaissent quand on réunit deux fichiers ou lors de l
 
 - **Fichier › Imprimer la fiche individuelle …** (Ctrl+P) et **Fiche individuelle en PDF …**
 - **Personne › Copier le texte de la personne** (Ctrl+Shift+C) place tous les détails sous forme de texte dans le presse-papiers, p. ex. pour un e-mail ou un traitement de texte.
+- **Personne › Rechercher dans la méta-recherche CompGen …** (aussi par clic droit sur une personne) recherche le nom de famille dans les bases de données de l’association allemande de généalogie informatique : GEDBAS, annuaires d’adresses, livres de familles locaux en ligne, listes de pertes et d’autres. Une petite fenêtre montre ce qui est envoyé – seulement le nom de famille sans particule comme « von », un lieu de la personne si vous le souhaitez, jamais de prénoms ni de dates – et les résultats s’ouvrent dans le navigateur. Sans lieu, la recherche trouve généralement davantage.
 - Autres sorties : [Listes](hilfe:listen) (fiche individuelle sous forme de liste), [Tableaux](hilfe:tafeln), [Livres](hilfe:buecher).
 
 ## GEDCOM-L

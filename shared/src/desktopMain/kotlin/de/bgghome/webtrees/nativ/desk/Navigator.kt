@@ -683,6 +683,7 @@ private fun PersonBox(
             if (viewModel.bookmarksSupported) ContextMenuItem(if (viewModel.isBookmarked(person.xref)) merkWeg else merken) { viewModel.toggleBookmark(person.xref) } else null,
             ContextMenuItem(web) { openWeb(person.url) },
             ContextMenuItem(Texte.t(Res.string.desk_copy_text)) { personentextKopieren(viewModel, person.xref) },
+            ContextMenuItem(Texte.t(Res.string.desk_meta_menu)) { MetaSuche.fuer(viewModel, person.xref) },
             if (darfLoeschen) ContextMenuItem(anfuegen) { Anfuegewahl.person = person } else null,
             if (darfLoeschen) ContextMenuItem(loeschen) { Loeschwahl.person = person.xref to person.name } else null,
         )

@@ -494,6 +494,7 @@ private fun Anklickbar(person: Person, a: KartenAktionen, inhalt: @Composable (M
             if (a.canEdit) add(ContextMenuItem(Texte.t(Res.string.desk_link_existing)) { Anfuegewahl.person = person })
             add(ContextMenuItem(Texte.t(Res.string.chip_open_web)) { a.openWeb(person.url) })
             add(ContextMenuItem(Texte.t(Res.string.desk_copy_text)) { personentextKopieren(a.viewModel, person.xref) })
+            add(ContextMenuItem(Texte.t(Res.string.desk_meta_menu)) { MetaSuche.fuer(a.viewModel, person.xref) })
             if (a.canEdit) add(ContextMenuItem(Texte.t(Res.string.action_delete_person)) { Loeschwahl.person = person.xref to person.name })
         }
     }) {

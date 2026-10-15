@@ -1812,11 +1812,23 @@
     <string name="desk_gl_godparents">Parrains</string>
     <string name="desk_gl_witnesses">Témoins</string>
     <string name="desk_media_make_primary">Image principale</string>
-    <string name="desk_book_public">Seulement ce que les visiteurs peuvent voir</string>
-    <string name="tipp_book_public">Omet ce que webtrees cache aux visiteurs : événements restreints (« Visible par les membres », « Visible par les gestionnaires »), données soumises aux règles de confidentialité de l’arbre et personnes vivantes (seulement le nom ou « Privé », selon le réglage de l’arbre). Pour les livres destinés à être diffusés. Le site web ne contient toujours que ces données.</string>
+    <string name="desk_book_public">Visibilité</string>
+    <string name="desk_book_public_all">Tout (vue du gestionnaire)</string>
+    <string name="desk_book_public_members">Ce que les membres peuvent voir</string>
+    <string name="desk_book_public_visitors">Ce que les visiteurs peuvent voir</string>
+    <string name="tipp_book_public">Omet ce que webtrees cache au lecteur choisi : événements restreints (« Visible par les membres », « Visible par les gestionnaires »), données soumises aux règles de confidentialité de l’arbre et personnes vivantes (seulement le nom ou « Privé », selon le réglage de l’arbre). Les membres voient plus que les visiteurs, mais rien de ce qui n’est montré qu’aux gestionnaires. Pour les livres destinés à être diffusés. Le site web ne contient toujours que ce que les visiteurs peuvent voir.</string>
     <string name="ga_check_as">Vérifier comme</string>
     <string name="ga_version_auto">Automatique (%1$s)</string>
     <string name="ga_version_none">non indiquée</string>
     <string name="ga_structure_only551">5.5.1 seulement</string>
     <string name="ga_structure_only7">7 seulement</string>
+    <string name="desk_meta_menu">Rechercher dans la méta-recherche CompGen …</string>
+    <string name="desk_meta_title">Méta-recherche CompGen</string>
+    <string name="desk_meta_text">Recherche le nom de famille en une fois dans GEDBAS, les annuaires d’adresses, les livres de familles locaux en ligne, les listes de pertes et d’autres bases de données de l’association allemande de généalogie informatique (CompGen). Les résultats s’ouvrent dans le navigateur. Seuls le nom de famille et, si choisi, le lieu sont envoyés à meta.genealogy.net – ni prénoms, ni dates.</string>
+    <string name="desk_meta_surname">Nom de famille</string>
+    <string name="desk_meta_place">Lieu</string>
+    <string name="desk_meta_no_place">Sans lieu</string>
+    <string name="desk_meta_place_hint">Avec un lieu, certaines bases trouvent moins ou rien, d’autres l’ignorent. Sans lieu, la recherche est généralement plus fructueuse.</string>
+    <string name="desk_meta_search">Rechercher dans le navigateur</string>
+    <string name="desk_meta_no_name">Aucun nom de famille n’est connu pour cette personne.</string>
 </resources>

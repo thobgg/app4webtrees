@@ -1793,11 +1793,23 @@
     <string name="desk_gl_godparents">Peetouders</string>
     <string name="desk_gl_witnesses">Getuigen</string>
     <string name="desk_media_make_primary">Als hoofdafbeelding</string>
-    <string name="desk_book_public">Alleen wat bezoekers mogen zien</string>
-    <string name="tipp_book_public">Laat weg wat webtrees voor bezoekers verbergt: beperkte gebeurtenissen („Tonen aan leden”, „Tonen aan beheerders”), gegevens onder de privacyregels van de stamboom en levende personen (alleen de naam of „Privé”, afhankelijk van de instelling van de stamboom). Voor boeken die worden doorgegeven. De website bevat altijd alleen deze gegevens.</string>
+    <string name="desk_book_public">Zichtbaarheid</string>
+    <string name="desk_book_public_all">Alles (weergave van de beheerder)</string>
+    <string name="desk_book_public_members">Wat leden mogen zien</string>
+    <string name="desk_book_public_visitors">Wat bezoekers mogen zien</string>
+    <string name="tipp_book_public">Laat weg wat webtrees voor de gekozen lezer verbergt: beperkte gebeurtenissen („Tonen aan leden”, „Tonen aan beheerders”), gegevens onder de privacyregels van de stamboom en levende personen (alleen de naam of „Privé”, afhankelijk van de instelling van de stamboom). Leden zien meer dan bezoekers, maar niets wat alleen aan beheerders wordt getoond. Voor boeken die worden doorgegeven. De website bevat altijd alleen wat bezoekers mogen zien.</string>
     <string name="ga_check_as">Controleren als</string>
     <string name="ga_version_auto">Automatisch (%1$s)</string>
     <string name="ga_version_none">niet opgegeven</string>
     <string name="ga_structure_only551">alleen 5.5.1</string>
     <string name="ga_structure_only7">alleen 7</string>
+    <string name="desk_meta_menu">Zoeken in de CompGen-metazoekmachine …</string>
+    <string name="desk_meta_title">CompGen-metazoekmachine</string>
+    <string name="desk_meta_text">Zoekt de achternaam tegelijk in GEDBAS, adresboeken, online dorpsfamilieboeken, verlieslijsten en andere databanken van de Duitse vereniging voor computergenealogie (CompGen). De resultaten openen in de browser. Alleen de achternaam en, indien gekozen, de plaats gaan naar meta.genealogy.net – geen voornamen, geen data.</string>
+    <string name="desk_meta_surname">Achternaam</string>
+    <string name="desk_meta_place">Plaats</string>
+    <string name="desk_meta_no_place">Zonder plaats</string>
+    <string name="desk_meta_place_hint">Met een plaats vinden sommige databanken minder of niets, andere negeren hem. Zonder plaats levert meestal meer op.</string>
+    <string name="desk_meta_search">Zoeken in de browser</string>
+    <string name="desk_meta_no_name">Voor deze persoon is geen achternaam bekend.</string>
 </resources>

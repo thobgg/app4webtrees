@@ -63,6 +63,7 @@ Las personas duplicadas surgen al unir dos archivos o al introducir datos: el mi
 
 - **Archivo › Imprimir ficha personal …** (Ctrl+P) y **Ficha personal como PDF …**
 - **Persona › Copiar texto de la persona** (Ctrl+Shift+C) copia todos los datos como texto al portapapeles, p. ej. para un correo electrónico o un procesador de textos.
+- **Persona › Buscar en la metabúsqueda de CompGen …** (también con clic derecho sobre una persona) busca el apellido en las bases de datos de la asociación alemana de genealogía informática: GEDBAS, libros de direcciones, libros de familias locales en línea, listas de bajas y otras. Una pequeña ventana muestra lo que se envía – solo el apellido sin partícula como «von», si se desea un lugar de la persona, nunca nombres de pila ni fechas – y los resultados se abren en el navegador. Sin lugar la búsqueda suele encontrar más.
 - Más salidas: [Listas](hilfe:listen) (ficha personal como lista), [Gráficos](hilfe:tafeln), [Libros](hilfe:buecher).
 
 ## GEDCOM-L
