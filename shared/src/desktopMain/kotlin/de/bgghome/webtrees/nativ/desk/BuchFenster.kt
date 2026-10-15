@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -132,6 +133,7 @@ private object BuchWahl {
     }
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     val appName = LocalAppName.current
@@ -271,7 +273,8 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     Haken(stringResource(Res.string.desk_book_index_occupations), o.berufe) { o = o.copy(berufe = it) }
                     Haken(stringResource(Res.string.desk_book_index_sources), o.quellenVerzeichnis) { o = o.copy(quellenVerzeichnis = it) }
                     OutlinedTextField(o.vorwort, { o = o.copy(vorwort = it) }, label = { Text(stringResource(Res.string.desk_book_preface_field)) }, minLines = 3, maxLines = 8, modifier = Modifier.fillMaxWidth())
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Umbrechen statt quetschen: in manchen Sprachen passen die drei Knoepfe nicht in eine Zeile (Issue 23)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         // Vorwort aus einer Textdatei (.txt, .md); Vorlage = Buchart und alle Einstellungen als Datei
                         TextButton(onClick = {
                             val d = java.awt.FileDialog(null as java.awt.Frame?, Texte.t(Res.string.desk_book_preface_file), java.awt.FileDialog.LOAD).apply { isVisible = true }
