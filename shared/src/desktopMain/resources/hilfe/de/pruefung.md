@@ -7,7 +7,7 @@
 
 ## Regeln und Grenzen
 
-Die Regeln stehen links in Gruppen: **Chronologie**, **Altersgrenzen**, **Struktur**, **Namen**, **Quellen**, **Orte**, **Form**. Die Gruppe Form prüft den Aufbau einer GEDCOM-Datei (Verweise, Datumsform, Pflichtangaben); in wtWin greifen davon nur die Regeln, die auch im Baum sichtbar sind. Ein Klick auf eine Regel zeigt nur ihre Treffer, **Alle Treffer** wieder alles.
+Die Regeln stehen links in Gruppen: **Chronologie**, **Altersgrenzen**, **Struktur**, **Namen**, **Quellen**, **Orte**, **Form**. Die Gruppe Form prüft den Aufbau einer GEDCOM-Datei (Verweise, Datumsform, Pflichtangaben); in wtWin greifen davon nur die Regeln, die auch im Baum sichtbar sind. Eine Datei mit allen Regeln, auch GEDCOM 7, prüft **Extras › GEDCOM-Datei prüfen …**. Ein Klick auf eine Regel zeigt nur ihre Treffer, **Alle Treffer** wieder alles.
 
 - **Voreinstellung:** von streng bis großzügig; „Quellen belegen“ schaltet zusätzlich die Regeln 420 und 421 ein (Ereignisse und Personen ohne Quelle). Sobald du etwas änderst, heißt sie „Eigene Einstellung“.
 - Je Regel: **Grenze** (Jahre oder Monate, die Vorgabe steht dabei), **Schwere** (Fehler oder Warnung) oder die Regel ganz ausschalten.

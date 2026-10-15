@@ -1613,6 +1613,7 @@
     <string name="desk_menu_extras">Extra</string>
     <string name="desk_tool_date">Datumcalculator …</string>
     <string name="desk_tool_church">Kerkelijk jaar en feestdagen …</string>
+    <string name="desk_tool_gedcom_check">GEDCOM-bestand controleren …</string>
     <string name="desk_date_hint">Datums invoeren zoals in de datumvelden: 17.05.1924, 17 MAY 1924 of 1924-05-17.</string>
     <string name="desk_date_diff">Verschil tussen twee datums</string>
     <string name="desk_date_first">Eerste datum</string>
@@ -1657,7 +1658,7 @@
     <string name="ga_open">GEDCOM-bestand openen …</string>
     <string name="ga_recent">Onlangs geopend</string>
     <string name="ga_reload">Bestand opnieuw laden</string>
-    <string name="ga_welcome">gedaudit controleert een GEDCOM-bestand op tegenstrijdigheden en opvallendheden: chronologie, leeftijdsgrenzen, structuur, namen, bronnen, plaatsen en de vorm van het bestand. Het bestand wordt alleen gelezen; niets verlaat deze computer.</string>
+    <string name="ga_welcome">%1$s controleert een GEDCOM-bestand op tegenstrijdigheden en opvallendheden: chronologie, leeftijdsgrenzen, structuur, namen, bronnen, plaatsen en de vorm van het bestand. Het bestand wordt alleen gelezen; niets verlaat deze computer.</string>
     <string name="ga_loading">Bestand wordt gelezen …</string>
     <string name="ga_read_error">Het bestand kon niet worden gelezen: %1$s</string>
     <string name="ga_file_info">%1$d personen, %2$d gezinnen · %3$s</string>

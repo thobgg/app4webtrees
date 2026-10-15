@@ -1637,6 +1637,7 @@
     <string name="desk_menu_extras">Tools</string>
     <string name="desk_tool_date">Date calculator …</string>
     <string name="desk_tool_church">Church year and feast days …</string>
+    <string name="desk_tool_gedcom_check">Check GEDCOM file …</string>
     <string name="desk_date_hint">Enter dates as in the date fields: 17.05.1924, 17 MAY 1924 or 1924-05-17.</string>
     <string name="desk_date_diff">Difference between two dates</string>
     <string name="desk_date_first">First date</string>
@@ -1681,7 +1682,7 @@
     <string name="ga_open">Open GEDCOM file …</string>
     <string name="ga_recent">Recently opened</string>
     <string name="ga_reload">Reload file</string>
-    <string name="ga_welcome">gedaudit checks a GEDCOM file for contradictions and oddities: chronology, age limits, structure, names, sources, places and the form of the file. The file is only read; nothing leaves this computer.</string>
+    <string name="ga_welcome">%1$s checks a GEDCOM file for contradictions and oddities: chronology, age limits, structure, names, sources, places and the form of the file. The file is only read; nothing leaves this computer.</string>
     <string name="ga_loading">Reading file …</string>
     <string name="ga_read_error">The file could not be read: %1$s</string>
     <string name="ga_file_info">%1$d individuals, %2$d families · %3$s</string>

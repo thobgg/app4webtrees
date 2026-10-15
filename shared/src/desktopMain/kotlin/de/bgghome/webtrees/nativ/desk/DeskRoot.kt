@@ -179,6 +179,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     // Werkzeuge (Menue Extras)
     var datumsrechner by remember { mutableStateOf(false) }
     var kirchenjahr by remember { mutableStateOf(false) }
+    var gedcomPruefen by remember { mutableStateOf(false) }
     var zusammenPaar by remember { mutableStateOf<de.bgghome.webtrees.nativ.data.Dublette?>(null) }
     val openSheet: (String) -> Unit = { xref -> viewModel.select(xref); sheetOpen = true }
 
@@ -242,7 +243,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         onSichern = if (LokalBetrieb.istLokal(state.baseUrl) && LokalBetrieb.verfuegbar) ({ sicherung = true }) else null,
         onGedcom = if (LokalBetrieb.istLokal(state.baseUrl) && LokalBetrieb.verfuegbar) ({ gedcomSpeichern = true }) else null,
         onUpdate = { updateScope.launch { updateErgebnis = UpdatePruefung.jetzt(viewModel.versionName, viewModel.client.userAgent) } },
-        onDatumsrechner = { datumsrechner = true }, onKirchenjahr = { kirchenjahr = true },
+        onDatumsrechner = { datumsrechner = true }, onKirchenjahr = { kirchenjahr = true }, onGedcomPruefen = { gedcomPruefen = true },
     )
 
     // Beim Sprachwechsel entsteht alles darunter neu und liest die Texte frisch. Die Menueleiste oben bleibt stehen:
@@ -271,6 +272,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
             HilfeFenster()
             if (datumsrechner) DatumsrechnerFenster(onClose = { datumsrechner = false })
             if (kirchenjahr) KirchenjahrFenster(onClose = { kirchenjahr = false })
+            if (gedcomPruefen) GedcomPruefenFenster(onClose = { gedcomPruefen = false })
             if (about) UeberDialog(state, viewModel, appName, onClose = { about = false })
             if (Entwuerfe.beendenAnfrage) UngespeichertDialog(viewModel, onWeiter = { Entwuerfe.beendenAnfrage = false; onQuit() }, onAbbrechen = { Entwuerfe.beendenAnfrage = false })
             return@Umgebung
@@ -427,6 +429,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         if (gedcomSpeichern) state.tree?.name?.let { GedcomSpeichernDialog(viewModel, it, onClose = { gedcomSpeichern = false }) }
         if (datumsrechner) DatumsrechnerFenster(onClose = { datumsrechner = false })
         if (kirchenjahr) KirchenjahrFenster(onClose = { kirchenjahr = false })
+        if (gedcomPruefen) GedcomPruefenFenster(onClose = { gedcomPruefen = false })
         aufgabeNeu?.let { z -> state.tree?.let { t -> AufgabeDialog(z, viewModel, t.name, onClose = { ok -> aufgabeNeu = null; if (ok) viewModel.setRoot(z.xref, remember = false) }) } }
         if (tabelle && state.tree != null) PersonenTabelle(state, viewModel, openSheet, openWeb, onClose = { tabelle = false },
             onZusammenfuehren = if (mergeApi) ({ zusammen = it }) else null)
@@ -467,6 +470,7 @@ private fun FrameWindowScope.DeskMenuBar(
     onUpdate: () -> Unit = {},
     onDatumsrechner: () -> Unit = {},
     onKirchenjahr: () -> Unit = {},
+    onGedcomPruefen: () -> Unit = {},
 ) {
     val main = state.screen == Screen.Main
     val loggedIn = state.info?.user?.loggedIn == true
@@ -611,6 +615,7 @@ private fun FrameWindowScope.DeskMenuBar(
                 }
                 Item(stringResource(Res.string.desk_tool_date), onClick = onDatumsrechner)
                 Item(stringResource(Res.string.desk_tool_church), onClick = onKirchenjahr)
+                Item(stringResource(Res.string.desk_tool_gedcom_check), onClick = onGedcomPruefen)
             }
             Menu(stringResource(Res.string.desk_menu_help)) {
                 Item(stringResource(Res.string.desk_help), shortcut = KeyShortcut(Key.F1), onClick = onHilfe)

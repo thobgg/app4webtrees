@@ -134,10 +134,22 @@ internal fun gedcomDateiWaehlen(titel: String): File? {
     return File(dialog.directory, name)
 }
 
-/** [fenster] null: ohne Menueleiste, fuer Bilder ohne Bildschirm (GedauditBildErzeugen); [vorgabeTreffer] waehlt dann den ersten Treffer. */
+/** wtWin, Extras > GEDCOM-Datei pruefen: das Fenster von gedaudit fuer eine Datei, unabhaengig vom Stammbaum (auch GEDCOM 7). */
+@Composable
+fun GedcomPruefenFenster(onClose: () -> Unit) {
+    androidx.compose.ui.window.Window(onCloseRequest = onClose, title = stringResource(Res.string.desk_tool_gedcom_check).removeSuffix(" …"),
+        state = arbeitsfenster("fenster_gedcom_pruefen", 1240, 860), onKeyEvent = ::gedauditKopierTaste) {
+        DeskTheme { GedauditFenster(this, null, onQuit = onClose, inWtWin = true) }
+    }
+}
+
+/**
+ * [fenster] null: ohne Menueleiste, fuer Bilder ohne Bildschirm (GedauditBildErzeugen); [vorgabeTreffer] waehlt dann den ersten Treffer.
+ * [inWtWin]: Fenster in wtWin (Extras > GEDCOM-Datei pruefen); Schliessen statt Beenden, Sprache, Erscheinungsbild und Ueber kommen von wtWin.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () -> Unit, vorgabeTreffer: Boolean = false) {
+fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () -> Unit, vorgabeTreffer: Boolean = false, inWtWin: Boolean = false) {
     val appName = LocalAppName.current
     val wahl = remember { PruefWahl(GedauditAblage.prefs) }
     val ablage = remember { AbhakAblage("gedaudit") }
@@ -208,24 +220,25 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
             Item(stringResource(Res.string.desk_print), enabled = bereit, shortcut = KeyShortcut(Key.P, ctrl = true), onClick = { drucken(doc(), druckTitel) })
             Item(stringResource(Res.string.desk_save_pdf), enabled = bereit, onClick = { alsPdf(doc(), druckTitel) })
             Separator()
-            Item(stringResource(Res.string.desk_quit), shortcut = KeyShortcut(Key.Q, ctrl = true), onClick = onQuit)
+            if (inWtWin) Item(stringResource(Res.string.action_close), shortcut = KeyShortcut(Key.W, ctrl = true), onClick = onQuit)
+            else Item(stringResource(Res.string.desk_quit), shortcut = KeyShortcut(Key.Q, ctrl = true), onClick = onQuit)
         }
         Menu(stringResource(Res.string.desk_menu_view)) {
             Item(stringResource(Res.string.ga_structure_menu), enabled = baum != null, shortcut = KeyShortcut(Key.F6), onClick = { aufbau = true })
-            Separator()
-            Menu(stringResource(Res.string.ga_menu_language)) {
+            if (!inWtWin) Separator()
+            if (!inWtWin) Menu(stringResource(Res.string.ga_menu_language)) {
                 RadioButtonItem(stringResource(Res.string.ga_menu_system), selected = Sprache.wahl.value == null, onClick = { Sprache.setzen(null) })
                 Sprache.ALLE.forEach { (code, name) -> RadioButtonItem(name, selected = Sprache.wahl.value == code, onClick = { Sprache.setzen(code) }) }
             }
-            Menu(stringResource(Res.string.desk_appearance)) {
+            if (!inWtWin) Menu(stringResource(Res.string.desk_appearance)) {
                 RadioButtonItem(stringResource(Res.string.ga_appearance_light), selected = DeskErscheinung.wahl.value == DeskErscheinung.Wahl.Hell, onClick = { DeskErscheinung.setzen(DeskErscheinung.Wahl.Hell) })
                 RadioButtonItem(stringResource(Res.string.ga_appearance_dark), selected = DeskErscheinung.wahl.value == DeskErscheinung.Wahl.Dunkel, onClick = { DeskErscheinung.setzen(DeskErscheinung.Wahl.Dunkel) })
                 RadioButtonItem(stringResource(Res.string.ga_menu_system), selected = DeskErscheinung.wahl.value == DeskErscheinung.Wahl.System, onClick = { DeskErscheinung.setzen(DeskErscheinung.Wahl.System) })
             }
         }
         Menu(stringResource(Res.string.desk_menu_help)) {
-            Item(stringResource(Res.string.desk_help), shortcut = KeyShortcut(Key.F1), onClick = { Hilfe.oeffnen("gedaudit") })
-            Item(stringResource(Res.string.desk_about, appName), onClick = { ueber = true })
+            Item(stringResource(Res.string.desk_help), shortcut = KeyShortcut(Key.F1), onClick = { Hilfe.oeffnen(if (inWtWin) "pruefung" else "gedaudit") })
+            if (!inWtWin) Item(stringResource(Res.string.desk_about, appName), onClick = { ueber = true })
         }
     }
 
@@ -379,7 +392,7 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
 private fun Startseite(zuletzt: List<File>, onOeffnen: () -> Unit, onDatei: (File) -> Unit) {
     Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         Markenkopf(mitClaim = false, groesse = 36)
-        Text(stringResource(Res.string.ga_welcome), Modifier.padding(top = 20.dp).widthIn(max = 560.dp), style = MaterialTheme.typography.bodyMedium,
+        Text(stringResource(Res.string.ga_welcome, LocalAppName.current), Modifier.padding(top = 20.dp).widthIn(max = 560.dp), style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         Box(Modifier.padding(top = 20.dp).width(280.dp)) { Knopf(stringResource(Res.string.ga_open), true, onClick = onOeffnen) }
         if (zuletzt.isNotEmpty()) {

@@ -7,7 +7,7 @@
 
 ## Regels en grenzen
 
-De regels staan links in groepen: **Chronologie**, **Leeftijdsgrenzen**, **Structuur**, **Namen**, **Bronnen**, **Plaatsen**, **Vorm**. De groep Vorm controleert de opbouw van een GEDCOM-bestand (koppelingen, datumvorm, verplichte gegevens); in wtWin gelden daarvan alleen de regels die ook in de stamboom zichtbaar zijn. Een klik op een regel toont alleen haar meldingen, **Alle meldingen** toont weer alles.
+De regels staan links in groepen: **Chronologie**, **Leeftijdsgrenzen**, **Structuur**, **Namen**, **Bronnen**, **Plaatsen**, **Vorm**. De groep Vorm controleert de opbouw van een GEDCOM-bestand (koppelingen, datumvorm, verplichte gegevens); in wtWin gelden daarvan alleen de regels die ook in de stamboom zichtbaar zijn. Een bestand met alle regels controleren, ook GEDCOM 7: **Extra › GEDCOM-bestand controleren …**. Een klik op een regel toont alleen haar meldingen, **Alle meldingen** toont weer alles.
 
 - **Voorinstelling:** van streng tot soepel; „Bronnen“ schakelt bovendien de regels 420 en 421 in (gebeurtenissen en personen zonder bron). Zodra u iets wijzigt, wordt het „Eigen instellingen“.
 - Per regel: **Grens** (jaren of maanden, de standaardwaarde staat erbij), **Ernst** (fout of waarschuwing), of de regel uitschakelen.

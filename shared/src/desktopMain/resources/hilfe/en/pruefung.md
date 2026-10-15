@@ -7,7 +7,7 @@
 
 ## Rules and limits
 
-The rules are grouped on the left: **Chronology**, **Age limits**, **Structure**, **Names**, **Sources**, **Places**, **Form**. The Form group checks the structure of a GEDCOM file (links, date format, required entries); in wtWin only those of its rules apply that are visible in the tree. A click on a rule shows only its findings, **All findings** shows everything again.
+The rules are grouped on the left: **Chronology**, **Age limits**, **Structure**, **Names**, **Sources**, **Places**, **Form**. The Form group checks the structure of a GEDCOM file (links, date format, required entries); in wtWin only those of its rules apply that are visible in the tree. To check a file with all rules, including GEDCOM 7, use **Tools › Check GEDCOM file …**. A click on a rule shows only its findings, **All findings** shows everything again.
 
 - **Preset:** from strict to generous; "Sources" additionally enables rules 420 and 421 (events and individuals without a source). As soon as you change something it becomes "Own settings".
 - Per rule: **limit** (years or months, the default is shown), **severity** (error or warning), or switch the rule off.

@@ -7,7 +7,7 @@
 
 ## Règles et limites
 
-Les règles sont regroupées à gauche : **Chronologie**, **Limites d'âge**, **Structure**, **Noms**, **Sources**, **Lieux**, **Forme**. Le groupe Forme vérifie la structure d’un fichier GEDCOM (liens, forme des dates, mentions obligatoires) ; dans wtWin, seules les règles visibles dans l’arbre s’appliquent. Un clic sur une règle n'affiche que ses anomalies, **Toutes les anomalies** affiche de nouveau tout.
+Les règles sont regroupées à gauche : **Chronologie**, **Limites d'âge**, **Structure**, **Noms**, **Sources**, **Lieux**, **Forme**. Le groupe Forme vérifie la structure d’un fichier GEDCOM (liens, forme des dates, mentions obligatoires) ; dans wtWin, seules les règles visibles dans l’arbre s’appliquent. Pour vérifier un fichier avec toutes les règles, GEDCOM 7 compris : **Outils › Vérifier un fichier GEDCOM …**. Un clic sur une règle n'affiche que ses anomalies, **Toutes les anomalies** affiche de nouveau tout.
 
 - **Préréglage :** de strict à large ; « Sources » active en plus les règles 420 et 421 (événements et individus sans source). Dès que vous modifiez quelque chose, il devient « Réglages personnels ».
 - Pour chaque règle : **limite** (années ou mois, la valeur par défaut est indiquée), **gravité** (erreur ou avertissement), ou désactiver la règle.

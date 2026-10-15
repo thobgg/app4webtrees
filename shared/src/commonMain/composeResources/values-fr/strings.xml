@@ -1632,6 +1632,7 @@
     <string name="desk_menu_extras">Outils</string>
     <string name="desk_tool_date">Calculateur de dates …</string>
     <string name="desk_tool_church">Année liturgique et fêtes …</string>
+    <string name="desk_tool_gedcom_check">Vérifier un fichier GEDCOM …</string>
     <string name="desk_date_hint">Saisir les dates comme dans les champs de date : 17.05.1924, 17 MAY 1924 ou 1924-05-17.</string>
     <string name="desk_date_diff">Écart entre deux dates</string>
     <string name="desk_date_first">Première date</string>
@@ -1676,7 +1677,7 @@
     <string name="ga_open">Ouvrir un fichier GEDCOM …</string>
     <string name="ga_recent">Récemment ouverts</string>
     <string name="ga_reload">Recharger le fichier</string>
-    <string name="ga_welcome">gedaudit vérifie un fichier GEDCOM à la recherche de contradictions et d’anomalies : chronologie, limites d’âge, structure, noms, sources, lieux et forme du fichier. Le fichier est seulement lu ; rien ne quitte cet ordinateur.</string>
+    <string name="ga_welcome">%1$s vérifie un fichier GEDCOM à la recherche de contradictions et d’anomalies : chronologie, limites d’âge, structure, noms, sources, lieux et forme du fichier. Le fichier est seulement lu ; rien ne quitte cet ordinateur.</string>
     <string name="ga_loading">Lecture du fichier …</string>
     <string name="ga_read_error">Le fichier n’a pas pu être lu : %1$s</string>
     <string name="ga_file_info">%1$d personnes, %2$d familles · %3$s</string>
