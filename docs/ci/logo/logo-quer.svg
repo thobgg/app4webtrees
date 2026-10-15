@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- wtWin Logo quer: Ahnenzeichen links, Wortmarke rechts. Schutzraum = Radius des Personenkreises. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 64" width="1000" height="256">
+  <rect width="64" height="64" rx="14" fill="#1F6F78"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 46 V40 H17 V33 M32 40 H47 V33"/>
+    <path d="M17 29 V23 H10 V17 M17 23 H24 V17"/>
+    <path d="M47 29 V23 H40 V17 M47 23 H54 V17"/>
+  </g>
+  <g fill="#FFFFFF">
+    <circle cx="10" cy="14" r="3.4"/><circle cx="24" cy="14" r="3.4"/>
+    <circle cx="40" cy="14" r="3.4"/><circle cx="54" cy="14" r="3.4"/>
+    <circle cx="17" cy="31" r="4.2"/><circle cx="47" cy="31" r="4.2"/>
+  </g>
+  <circle cx="32" cy="50" r="5.6" fill="#B5562F" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="80" y="46" font-family="Inter" font-weight="600" font-size="40" letter-spacing="-1.2"><tspan fill="#1F6F78">wt</tspan><tspan fill="#24302F">Win</tspan></text>
+</svg>

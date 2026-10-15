@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- wtWin Wortmarke. Schrift Inter SemiBold; "wt" petrol, Zusatz tinte. Gleiche Datei fuer wtTux/wtMac/wtAnd mit anderem Zusatz. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" width="800" height="192">
+  <text x="0" y="36" font-family="Inter" font-weight="600" font-size="40" letter-spacing="-1.2"><tspan fill="#1F6F78">wt</tspan><tspan fill="#24302F">Win</tspan></text>
+</svg>
