@@ -102,6 +102,13 @@
 </p>
 
 <p align="center">
+  <img src="docs/screenshots/desktop-metasuche-en.jpg" alt="CompGen meta search dialog for Georg Mohwinkel: surname Mohwinkel, place optionally Bienenbüttel (birth) or Amelinghausen (marriage), no place preselected" width="60%">
+  <br><b>CompGen meta search</b> (from 1.54) – for any person from the Person menu or by right-click, also in gedaudit: looks up the surname at once in GEDBAS, address books, online local family books, casualty lists and further databases of the German Association for Computer Genealogy. Only what the dialog shows is sent – the surname and, if you like, a place of the person; the hits open in the browser.
+</p>
+
+<p align="center"><b>Books for members or visitors</b> (from 1.54) – in the book dialog under <b>Visibility</b>: everything (manager view), what members may see, or what visitors may see. The book then leaves out what webtrees hides from that reader; the website is always for visitors.</p>
+
+<p align="center">
   <img src="docs/screenshots/desktop-hilfe.jpg" alt="wtTux: help window with table of contents, search for “Plotter” and highlighted hits in the Charts chapter" width="100%">
   <br><b>Help inside the program</b> (from 1.27) – F1 opens twelve chapters with search, in every window the matching one; technical terms in the settings explain themselves on mouse-over:
 </p>

@@ -102,6 +102,13 @@
 </p>
 
 <p align="center">
+  <img src="docs/screenshots/desktop-metasuche.jpg" alt="Dialog CompGen-Meta-Suche für Georg Mohwinkel: Familienname Mohwinkel, Ort wahlweise Bienenbüttel (Geburt) oder Amelinghausen (Heirat), vorgewählt ohne Ort" width="60%">
+  <br><b>CompGen-Meta-Suche</b> (ab 1.54) – bei jeder Person über das Menü Person oder per Rechtsklick, auch in gedaudit: sucht den Familiennamen gleichzeitig in GEDBAS, Adressbüchern, Online-Ortsfamilienbüchern, Verlustlisten und weiteren Datenbanken des Vereins für Computergenealogie. Gesendet wird nur, was der Dialog zeigt – der Familienname und auf Wunsch ein Ort der Person; die Treffer öffnen sich im Browser.
+</p>
+
+<p align="center"><b>Bücher für Mitglieder oder Besucher</b> (ab 1.54) – im Buchdialog unter <b>Sichtbarkeit</b>: alles (Sicht des Verwalters), was Mitglieder sehen dürfen, oder was Besucher sehen dürfen. Das Buch lässt dann weg, was webtrees diesem Leser verbirgt; die Website ist immer für Besucher.</p>
+
+<p align="center">
   <img src="docs/screenshots/desktop-hilfe.jpg" alt="wtTux: Hilfefenster mit Inhaltsverzeichnis, Suche nach „Plotter“ und markierten Treffern im Kapitel Tafeln" width="100%">
   <br><b>Hilfe im Programm</b> (ab 1.27) – F1 öffnet zwölf Kapitel mit Suche, in jedem Fenster gleich das passende; Fachbegriffe in den Einstellungen erklären sich beim Überfahren mit der Maus:
 </p>
