@@ -293,6 +293,3 @@ Einstieg in den Code: `MainActivity` zeigt `ui/MainScreen.kt` (Bildschirmwahl, N
 ## Lizenz
 
 [GPL-3.0](LICENSE), wie webtrees. Der [Demo-Stammbaum](https://github.com/thobgg/falkenrath-demo-tree) steht unter CC0.
-
-Verwandt: [wtAnd (Wrapper)](https://github.com/thobgg/wtAnd-wrapper) – die schlanke WebView-Hülle für alle,
-die kein Modul installieren möchten.

@@ -3,7 +3,7 @@
 agp = "8.13.2"
 # Compose Multiplatform 1.11.1 braucht Kotlin 2.2.x.
 kotlin = "2.2.10"
-# Desktop-Client: Compose Multiplatform (Linux/Windows aus einer Codebasis), Stand wie mpd-app/Skribo.
+# Desktop-Client: Compose Multiplatform (Linux/Windows aus einer Codebasis), Stand wie mpd-app.
 composeMultiplatform = "1.11.1"
 coreKtx = "1.18.0"
 lifecycle = "2.8.7"
