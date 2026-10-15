@@ -1,0 +1,153 @@
+regel	version	kennungen	fehler
+010	5.5.1	E010	Tod 1840 vor Geburt 1850
+010	7.0	E010	Tod 1840 vor Geburt 1850
+011	5.5.1	E011A EF011	Heirat 1845 vor der Geburt des Mannes 1850
+011	7.0	E011A EF011	Heirat 1845 vor der Geburt des Mannes 1850
+012	5.5.1	E012A EF012	Heirat 1875 nach dem Tod des Mannes 1870
+012	7.0	E012A EF012	Heirat 1875 nach dem Tod des Mannes 1870
+013	5.5.1	E013K1 EF013	Kind 1870 vor der Mutter 1880 geboren
+013	7.0	E013K1 EF013	Kind 1870 vor der Mutter 1880 geboren
+014	5.5.1	E014K1 EF014	Kind 1870 vor dem Vater 1880 geboren
+014	7.0	E014K1 EF014	Kind 1870 vor dem Vater 1880 geboren
+015	5.5.1	E015K1 EF015	Kind Juni 1880, Mutter im Januar 1880 gestorben
+015	7.0	E015K1 EF015	Kind Juni 1880, Mutter im Januar 1880 gestorben
+016	5.5.1	E016K1 EF016	Kind Dezember 1880, Vater 11 Monate vorher gestorben (Grenze 9,5)
+016	7.0	E016K1 EF016	Kind Dezember 1880, Vater 11 Monate vorher gestorben (Grenze 9,5)
+017	5.5.1	E017K1 EF017	Kind 1870, Eltern heiraten erst 1875
+017	7.0	E017K1 EF017	Kind 1870, Eltern heiraten erst 1875
+018	5.5.1	E018	Geburt am 31. April
+018	7.0	E018	Geburt am 31. April
+019	5.5.1	E019	Geburt 2099
+019	7.0	E019	Geburt 2099
+020	5.5.1	E020	Taufe einen Monat vor der Geburt
+020	7.0	E020	Taufe einen Monat vor der Geburt
+021	5.5.1	E021	Begräbnis einen Monat vor dem Tod
+021	7.0	E021	Begräbnis einen Monat vor dem Tod
+022	5.5.1	E022A EF022	Geburtsdatum gleich Heiratsdatum
+022	7.0	E022A EF022	Geburtsdatum gleich Heiratsdatum
+023	5.5.1	E023K2 EF023	Kinder nicht in Geburtsreihenfolge (1875 vor 1870)
+023	7.0	E023K2 EF023	Kinder nicht in Geburtsreihenfolge (1875 vor 1870)
+024	5.5.1	E024	Pate 1850 gestorben, Taufe 1860
+024	7.0	E024	Pate 1850 gestorben, Taufe 1860
+110	5.5.1	E110	120 Jahre alt (Grenze 110)
+110	7.0	E110	120 Jahre alt (Grenze 110)
+111	5.5.1	E111K1 EF111	Mutter bei der Geburt 10 Jahre (Grenze 14)
+111	7.0	E111K1 EF111	Mutter bei der Geburt 10 Jahre (Grenze 14)
+112	5.5.1	E112K1 EF112	Mutter bei der Geburt 60 Jahre (Grenze 55)
+112	7.0	E112K1 EF112	Mutter bei der Geburt 60 Jahre (Grenze 55)
+113	5.5.1	E113K1 EF113	Vater bei der Geburt 10 Jahre (Grenze 14)
+113	7.0	E113K1 EF113	Vater bei der Geburt 10 Jahre (Grenze 14)
+114	5.5.1	E114K1 EF114	Vater bei der Geburt 80 Jahre (Grenze 75)
+114	7.0	E114K1 EF114	Vater bei der Geburt 80 Jahre (Grenze 75)
+115	5.5.1	E115B EF115	Frau heiratet mit 10 Jahren (Grenze 15)
+115	7.0	E115B EF115	Frau heiratet mit 10 Jahren (Grenze 15)
+116	5.5.1	E116A EF116	Mann heiratet mit 95 Jahren (Grenze 90)
+116	7.0	E116A EF116	Mann heiratet mit 95 Jahren (Grenze 90)
+117	5.5.1	E117A EF117	50 Jahre zwischen den Ehepartnern (Grenze 40)
+117	7.0	E117A EF117	50 Jahre zwischen den Ehepartnern (Grenze 40)
+118	5.5.1	E118K1 E118K2 EF118	Geschwister 4 Monate auseinander (Grenze 8)
+118	7.0	E118K1 E118K2 EF118	Geschwister 4 Monate auseinander (Grenze 8)
+119	5.5.1	EF119	35 Jahre zwischen ältestem und jüngstem Kind (Grenze 30)
+119	7.0	EF119	35 Jahre zwischen ältestem und jüngstem Kind (Grenze 30)
+120	5.5.1	EF120	17 Kinder in einer Ehe (Grenze 16)
+120	7.0	EF120	17 Kinder in einer Ehe (Grenze 16)
+121	5.5.1	E121	Vier Ehen (Grenze 3)
+121	7.0	E121	Vier Ehen (Grenze 3)
+122	5.5.1	E122 EF122B	Wiederheirat zwei Wochen nach dem Tod der ersten Frau (Grenze 2 Monate)
+122	7.0	E122 EF122B	Wiederheirat zwei Wochen nach dem Tod der ersten Frau (Grenze 2 Monate)
+123	5.5.1	E123M	Mutter mit 21 Kindern aus zwei Ehen (Grenze 20)
+123	7.0	E123M	Mutter mit 21 Kindern aus zwei Ehen (Grenze 20)
+124	5.5.1	E124K2 EF124	20 Jahre zwischen zwei Geschwistern (Grenze 12)
+124	7.0	E124K2 EF124	20 Jahre zwischen zwei Geschwistern (Grenze 12)
+125	5.5.1	E125A EF125	Heirat 1875 nach dem eigenen Tod 1870
+125	7.0	E125A EF125	Heirat 1875 nach dem eigenen Tod 1870
+126	5.5.1	E126	Pate bei der Taufe 10 Jahre alt (Grenze 12)
+126	7.0	E126	Pate bei der Taufe 10 Jahre alt (Grenze 12)
+127	5.5.1	E127	Geboren 1850, keine Sterbeangabe
+127	7.0	E127	Geboren 1850, keine Sterbeangabe
+210	5.5.1	E210	Person ohne Namen, ohne Angaben, ohne Familie
+210	7.0	E210	Person ohne Namen, ohne Angaben, ohne Familie
+211	5.5.1	E211	Person in keiner Familie
+211	7.0	E211	Person in keiner Familie
+212	5.5.1	E212B EF212	Ehefrau ohne jede Angabe, Ehe ohne Kinder
+212	7.0	E212B EF212	Ehefrau ohne jede Angabe, Ehe ohne Kinder
+213	5.5.1	E213	Kind in zwei Familien
+213	7.0	E213	Kind in zwei Familien
+214	5.5.1	E214 EF214	Vater und Kind derselben Familie
+214	7.0	E214 EF214	Vater und Kind derselben Familie
+215	5.5.1	E215A EF215	Beide Ehepartner männlich
+215	7.0	E215A EF215	Beide Ehepartner männlich
+216	5.5.1	E216A E216B EF216	Frau als Vater, Mann als Mutter eingetragen
+216	7.0	E216A E216B EF216	Frau als Vater, Mann als Mutter eingetragen
+217	5.5.1	EF217	Familie ohne Partner und ohne Kinder
+217	7.0	EF217	Familie ohne Partner und ohne Kinder
+219	5.5.1	E219A E219B	Gleicher Name und gleiches Geburtsdatum
+219	7.0	E219A E219B	Gleicher Name und gleiches Geburtsdatum
+220	5.5.1	E220PK1 EF220	Ehepartner sind Geschwister
+220	7.0	E220PK1 EF220	Ehepartner sind Geschwister
+221	5.5.1	E221V EF221	Vater heiratet seine Tochter
+221	7.0	E221V EF221	Vater heiratet seine Tochter
+222	5.5.1	E222 EF222B	Zweite Heirat 1890, erste Frau lebt bis 1900
+222	7.0	E222 EF222B	Zweite Heirat 1890, erste Frau lebt bis 1900
+223	5.5.1	E223A EF223	Beide Ehepartner heißen Gleich
+223	7.0	E223A EF223	Beide Ehepartner heißen Gleich
+224	5.5.1	E224K2 EF224	Zwei lebende Brüder heißen Peter
+224	7.0	E224K2 EF224	Zwei lebende Brüder heißen Peter
+225	5.5.1	E225A E225B	Zwei Personen sind gegenseitig Vater (eigener Vorfahr)
+225	7.0	E225A E225B	Zwei Personen sind gegenseitig Vater (eigener Vorfahr)
+226	5.5.1	EF226B	Dasselbe Paar zweimal als Familie
+226	7.0	EF226B	Dasselbe Paar zweimal als Familie
+228	5.5.1	E228A E228B	Gleicher Name, Geburt 1850 und 1851
+228	7.0	E228A E228B	Gleicher Name, Geburt 1850 und 1851
+310	5.5.1	E310	Nachname Maria
+310	7.0	E310	Nachname Maria
+311	5.5.1	E311	Vorname N.N.
+311	7.0	E311	Vorname N.N.
+315	5.5.1	E315	Jahreszahl im Nachnamen
+315	7.0	E315	Jahreszahl im Nachnamen
+319	5.5.1	E319B EF319	Ehepartner mit unbekanntem Geschlecht
+319	7.0	E319B EF319	Ehepartner mit unbekanntem Geschlecht
+330	5.5.1	E330	Mann mit Vornamen Anna
+330	7.0	E330	Mann mit Vornamen Anna
+420	5.5.1	E420	Geburt ohne Quelle, die Person selbst hat eine
+420	7.0	E420	Geburt ohne Quelle, die Person selbst hat eine
+421	5.5.1	E421	Person ganz ohne Quelle
+421	7.0	E421	Person ganz ohne Quelle
+510	5.5.1	E510	Herrmannsburg neben Hermannsburg
+510	7.0	E510	Herrmannsburg neben Hermannsburg
+511	5.5.1	E511	Ort Hambühren ohne Koordinaten
+511	7.0	E511	Ort Hambühren ohne Koordinaten
+512	5.5.1	E512	Geburt in Celle, Taufe am selben Tag in Paderborn (ca. 170 km)
+512	7.0	E512	Geburt in Celle, Taufe am selben Tag in Paderborn (ca. 170 km)
+513	5.5.1	E513	Ortsname mit doppeltem Komma
+513	7.0	E513	Ortsname mit doppeltem Komma
+610	5.5.1	(Datei)	Zeile "Diese Zeile ist kein GEDCOM." vor @E611@
+610	7.0	(Datei)	Zeile "Diese Zeile ist kein GEDCOM." vor @E611@
+611	5.5.1	E611	FAMC zeigt auf @EF999@, die es nicht gibt
+611	7.0	E611	FAMC zeigt auf @EF999@, die es nicht gibt
+612	5.5.1	E612	Kennung @E612@ zweimal vergeben
+612	7.0	E612	Kennung @E612@ zweimal vergeben
+613	5.5.1	E613	Datum 15.03.1850
+613	7.0	E613	Datum 15.03.1850
+614	5.5.1	E614	Person ohne NAME
+614	7.0	E614	Person ohne NAME
+615	5.5.1	E615	Zwei Geburten
+615	7.0	E615	Zwei Geburten
+616	5.5.1	E616	FAMC zu einer Familie, die das Kind nicht als CHIL hat
+616	7.0	E616	FAMC zu einer Familie, die das Kind nicht als CHIL hat
+617	5.5.1	(Kopf)	1 CHAR UNICODE (UTF-16), Datei ist UTF-8
+617	7.0	(Kopf)	1 CHAR UNICODE (UTF-16), Datei ist UTF-8
+618	5.5.1	E618	Tag HOBBY (Regel standardmaessig aus)
+618	7.0	E618	Tag HOBBY (Regel standardmaessig aus)
+619	5.5.1	E619	Geschlecht U (Regel standardmaessig aus)
+619	7.0	E619	Geschlecht U (Regel standardmaessig aus)
+620	5.5.1	(Kopf)	1 SUBM @U9@, den Einsender gibt es nicht
+620	7.0	(Kopf)	1 SUBM @U9@, den Einsender gibt es nicht
+621	5.5.1	(Kopf)	1 FILE falkenrath-1.7.ged, Datei heisst anders
+622	5.5.1	(Kopf)	_ADDENDUM GEDCOM-L mit VERS 2.0
+622	7.0	(Kopf)	_ADDENDUM in einer GEDCOM-7-Datei
+623	5.5.1	(Kopf)	1 DATE 15.10.2026
+623	7.0	(Kopf)	1 DATE 15.10.2026
+624	7.0	E624 E624M	CONC, RELA, ROLE godparent, SEX f, EXID ohne TYPE, LANG German, FORM jpg mit TYPE, CHAR und FILE im Kopf
+625	5.5.1	E625	Text hinter EMIG
+625	7.0	E625	Text hinter EMIG
