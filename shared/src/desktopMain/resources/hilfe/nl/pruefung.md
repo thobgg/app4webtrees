@@ -1,6 +1,6 @@
 # Plausibiliteitscontrole
 
-**Extra › Plausibiliteitscontrole …** (Ctrl+Shift+P) of het symbool **Controle** controleert de hele stamboom, voor zover u die mag zien, met 71 regels. **Fouten** zijn tegenstrijdigheden in de gegevens (overlijden voor geboorte, eigen voorouder), **waarschuwingen** zijn ongewoon, maar mogelijk (zeer jonge moeder, doopgetuige al overleden, mogelijke dubbele persoon, plaatsvariant). Met api4webtrees 1.11 of nieuwer gebruiken de doopgetuigenregels (024, 126) direct de gekoppelde doop- en huwelijksgetuigen en zoeken ze die als vrije tekst op naam op; met een oudere module lezen ze de notitie „Getuigen: …“.
+**Extra › Plausibiliteitscontrole …** (Ctrl+Shift+P) of het symbool **Controle** controleert de hele stamboom, voor zover u die mag zien, met 77 regels. **Fouten** zijn tegenstrijdigheden in de gegevens (overlijden voor geboorte, eigen voorouder), **waarschuwingen** zijn ongewoon, maar mogelijk (zeer jonge moeder, doopgetuige al overleden, mogelijke dubbele persoon, plaatsvariant). Met api4webtrees 1.11 of nieuwer gebruiken de doopgetuigenregels (024, 126) direct de gekoppelde doop- en huwelijksgetuigen en zoeken ze die als vrije tekst op naam op; met een oudere module lezen ze de notitie „Getuigen: …“.
 
 ![](desktop-pruefung.jpg)
 

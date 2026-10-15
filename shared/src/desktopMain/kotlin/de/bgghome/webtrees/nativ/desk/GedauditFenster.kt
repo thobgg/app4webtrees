@@ -151,6 +151,8 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
     var gewaehlt by remember { mutableStateOf<String?>(null) }
     var treffer by remember { mutableStateOf<Treffer?>(null) }
     var aufbau by remember { mutableStateOf(false) }
+    /** Version, als die geprueft wird: null = wie im Kopf angegeben, sonst "5.5.1" oder "7.0". */
+    var pruefenAls by remember { mutableStateOf<String?>(null) }
     var vergleich by remember { mutableStateOf(false) }
     var abhak by remember { mutableStateOf(ablage.laden()) }
     var zeigeAbgehakt by remember { mutableStateOf(false) }
@@ -161,13 +163,13 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
     fun oeffnen(f: File) { datei = f; treffer = null; gewaehlt = null; GedauditAblage.merken(f); zuletzt = GedauditAblage.zuletzt() }
     fun waehlen() { gedcomDateiWaehlen(Texte.t(Res.string.ga_open))?.let(::oeffnen) }
 
-    val geladen by produceState<Result<GeladeneDatei>?>(null, datei, neu) {
+    val geladen by produceState<Result<GeladeneDatei>?>(null, datei, neu, pruefenAls) {
         value = null
         val f = datei ?: return@produceState
         value = withContext(Dispatchers.IO) {
             runCatching {
                 val d = GedcomLeser.lesen(f)
-                val (baum, form) = GedcomLeser.auswerten(d, stand = f.lastModified())
+                val (baum, form) = GedcomLeser.auswerten(d, stand = f.lastModified(), dateiname = f.name, pruefenAls = pruefenAls)
                 GeladeneDatei(f, baum, d.befund, d, form)
             }
         }
@@ -250,6 +252,15 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
                             }
                         }
                         Haken(stringResource(Res.string.desk_check_estimate), schaetzen, stringResource(Res.string.tipp_estimate)) { schaetzen = it; wahl.schaetzen = it; eigene() }
+                        // GEDCOM-Version: wie im Kopf angegeben oder erzwungen (Regeln 620-624 haengen davon ab)
+                        Einstellung(stringResource(Res.string.ga_check_as)) {
+                            val angabe = geladen?.getOrNull()?.gedcom?.versionAngabe
+                            val auto = stringResource(Res.string.ga_version_auto, angabe?.let { "GEDCOM $it" } ?: stringResource(Res.string.ga_version_none))
+                            val werte = listOf(auto, "GEDCOM 5.5.1", "GEDCOM 7.0")
+                            Auswahl(when (pruefenAls) { "5.5.1" -> werte[1]; "7.0" -> werte[2]; else -> auto }, werte) { w ->
+                                pruefenAls = when (w) { werte[1] -> "5.5.1"; werte[2] -> "7.0"; else -> null }
+                            }
+                        }
                     }
                     HorizontalDivider(Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.outlineVariant)
                     val liste = rememberLazyListState()
@@ -306,7 +317,7 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
                             val fehler = offen.filterKeys { schwereVon(it) == Schwere.Fehler }.values.sum()
                             stringResource(Res.string.desk_check_summary, offen.values.sum(), fehler) + "  ·  "
                         } else ""
-                        Text(zeile + stringResource(Res.string.ga_file_info, b.individuals.size, b.families.size, befund?.let { stringResource(Res.string.ga_charset, it.zeichensatz) }.orEmpty()),
+                        Text(zeile + stringResource(Res.string.ga_file_info, b.individuals.size, b.families.size, befund?.let { stringResource(Res.string.ga_charset, it.zeichensatz) }.orEmpty()) + (geladen?.getOrNull()?.form?.version?.let { "  ·  GEDCOM $it" } ?: ""),
                             Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         val zahlAbgehakt = (e?.anzahl ?: 0) - (e?.treffer?.values?.sumOf { l -> l.count { it.schluessel !in abgehakt } } ?: 0)
                         if (zahlAbgehakt > 0) Haken(stringResource(Res.string.desk_check_show_ticked, zahlAbgehakt), zeigeAbgehakt) { zeigeAbgehakt = it }
@@ -360,7 +371,7 @@ fun GedauditFenster(fenster: FrameWindowScope?, startDatei: File?, onQuit: () ->
     }
     HilfeFenster()
     if (ueber) GedauditUeber(appName) { ueber = false }
-    if (aufbau) geladen?.getOrNull()?.let { g -> AufbauFenster(g.gedcom, g.datei.name) { aufbau = false } }
+    if (aufbau) geladen?.getOrNull()?.let { g -> AufbauFenster(g.gedcom, g.datei.name, g.form.version == "7.0") { aufbau = false } }
     if (vergleich) geladen?.getOrNull()?.let { g -> VergleichFenster(g) { vergleich = false } }
 }
 

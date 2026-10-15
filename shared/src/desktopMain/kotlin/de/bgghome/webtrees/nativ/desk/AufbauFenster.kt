@@ -42,10 +42,11 @@ import org.jetbrains.compose.resources.stringResource
 
 /** Eine Zeile des Baums: Pfad (INDI > BIRT > DATE), Einrueckung, Anzahl, Art. */
 internal class AufbauZeile(val tag: String, val tiefe: Int, val anzahl: Int, val art: Art) {
-    enum class Art { Standard, GedcomL, Hersteller, Fremd }
+    enum class Art { Standard, GedcomL, Hersteller, Fremd, Nur551, Nur7 }
 }
 
-internal fun aufbauZeilen(d: GedcomDatei): List<Pair<String, List<AufbauZeile>>> {
+/** [sieben]: als GEDCOM 7 gelesen; dann sind Tags, die es nur in 5.5.1 gibt, markiert (und umgekehrt). */
+internal fun aufbauZeilen(d: GedcomDatei, sieben: Boolean = d.istSieben): List<Pair<String, List<AufbauZeile>>> {
     // je Datensatzart ein Baum aus Pfaden
     class Knoten { var anzahl = 0; val kinder = LinkedHashMap<String, Knoten>() }
     val wurzeln = LinkedHashMap<String, Knoten>()
@@ -54,6 +55,8 @@ internal fun aufbauZeilen(d: GedcomDatei): List<Pair<String, List<AufbauZeile>>>
     fun art(tag: String) = when {
         tag in GedcomLeser.GEDCOML_TAGS -> AufbauZeile.Art.GedcomL
         tag.startsWith("_") -> AufbauZeile.Art.Hersteller
+        sieben && tag in GedcomLeser.STANDARD_TAGS && tag !in GedcomLeser.STANDARD_70 -> AufbauZeile.Art.Nur551
+        !sieben && tag in GedcomLeser.STANDARD_TAGS && tag !in GedcomLeser.STANDARD_551 -> AufbauZeile.Art.Nur7
         tag in GedcomLeser.STANDARD_TAGS -> AufbauZeile.Art.Standard
         else -> AufbauZeile.Art.Fremd
     }
@@ -67,8 +70,8 @@ internal fun aufbauZeilen(d: GedcomDatei): List<Pair<String, List<AufbauZeile>>>
 }
 
 @Composable
-fun AufbauFenster(d: GedcomDatei, dateiName: String, onClose: () -> Unit) {
-    val zeilen = remember(d) { aufbauZeilen(d) }
+fun AufbauFenster(d: GedcomDatei, dateiName: String, sieben: Boolean = d.istSieben, onClose: () -> Unit) {
+    val zeilen = remember(d, sieben) { aufbauZeilen(d, sieben) }
     val kopf = remember(d) {
         val k = d.kopf
         // GEDCOM-L-Angabe im Kopf: 1 GEDC / 2 VERS 5.5.1 / 3 _ADDENDUM GEDCOM-L / 4 VERS 2.0
@@ -98,9 +101,10 @@ fun AufbauFenster(d: GedcomDatei, dateiName: String, onClose: () -> Unit) {
                                     Spacer(Modifier.width((z.tiefe * 22).dp))
                                     Text(z.tag, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace,
                                         fontWeight = if (z.tiefe == 0) FontWeight.Bold else FontWeight.Normal,
-                                        color = when (z.art) { AufbauZeile.Art.Fremd -> MaterialTheme.colorScheme.error; AufbauZeile.Art.Hersteller -> WARN_FARBE
+                                        color = when (z.art) { AufbauZeile.Art.Fremd, AufbauZeile.Art.Nur551, AufbauZeile.Art.Nur7 -> MaterialTheme.colorScheme.error; AufbauZeile.Art.Hersteller -> WARN_FARBE
                                             AufbauZeile.Art.GedcomL -> MaterialTheme.colorScheme.primary; else -> MaterialTheme.colorScheme.onSurface })
                                     Text(when (z.art) { AufbauZeile.Art.Fremd -> stringResource(Res.string.ga_structure_foreign); AufbauZeile.Art.Hersteller -> stringResource(Res.string.ga_structure_vendor)
+                                            AufbauZeile.Art.Nur551 -> stringResource(Res.string.ga_structure_only551); AufbauZeile.Art.Nur7 -> stringResource(Res.string.ga_structure_only7)
                                             AufbauZeile.Art.GedcomL -> "GEDCOM-L"; else -> "" },
                                         Modifier.width(150.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     Text(z.anzahl.toString(), Modifier.width(70.dp), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)

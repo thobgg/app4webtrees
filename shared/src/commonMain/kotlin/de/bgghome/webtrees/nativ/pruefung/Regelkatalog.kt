@@ -5,6 +5,8 @@ package de.bgghome.webtrees.nativ.pruefung
  * (0xx Chronologie, 1xx Altersgrenzen, 2xx Struktur, 3xx Namen, 4xx Quellen); 5xx Orte ist neu (Stufe 2, 27.09.2026),
  * 6xx Form (13.10.2026, fuer gedaudit): Aufbau der Datei, Verweise, Datumsform, Pflichtangaben - was nur die Datei
  * selbst zeigt (610-612, 616-618), bekommt der Motor als [DateiBefund]; im Export von webtrees bleiben diese Regeln leer.
+ * 620-625 (15.10.2026): Kopf (Pflichtangaben, FILE, GEDCOM-L-Addendum, Datum), Verstoesse gegen GEDCOM 7 und Text hinter
+ * Ereignissen - ebenfalls nur aus der Datei.
  * Die Fragen zu den Regeln und die Namen der Voreinstellungen stehen in den Ressourcen (regel_<id>, preset_<id>,
  * siehe PruefTexte); der Motor selbst braucht sie nicht und laeuft in Tests ohne Compose-Ressourcen.
  */
@@ -120,6 +122,12 @@ object Regelkatalog {
         Regel("617", FO, W, null, null),
         Regel("618", FO, W, null, null, standardAus = true),
         Regel("619", FO, W, null, null, standardAus = true),
+        Regel("620", FO, F, null, null),
+        Regel("621", FO, W, null, null),
+        Regel("622", FO, W, null, null),
+        Regel("623", FO, W, null, null),
+        Regel("624", FO, F, null, null),
+        Regel("625", FO, W, null, null),
     )
 
     val nachId: Map<String, Regel> = alle.associateBy { it.id }

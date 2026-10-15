@@ -1687,6 +1687,12 @@
     <string name="regel_617">Ontbreekt de kop, of wijkt de tekenset daarin af van het bestand?</string>
     <string name="regel_618">Zijn er labels buiten de GEDCOM-standaard (5.5.1 of 7)?</string>
     <string name="regel_619">Is het geslacht van een persoon onbekend?</string>
+    <string name="regel_620">Ontbreken verplichte gegevens in de kop (programma, inzender, GEDCOM-versie, tekenset)?</string>
+    <string name="regel_621">Noemt de kop een andere bestandsnaam (FILE)?</string>
+    <string name="regel_622">Wijkt de vermelding van het GEDCOM-L-addendum af van de aanbeveling?</string>
+    <string name="regel_623">Is de datum in de kop onleesbaar?</string>
+    <string name="regel_624">Overtreedt het bestand regels van GEDCOM 7?</string>
+    <string name="regel_625">Staat er tekst achter een gebeurtenis waar alleen Y is toegestaan?</string>
     <string name="pruef_zeile">regel</string>
     <string name="pruef_verweis_auf">koppeling naar</string>
     <string name="pruef_kennung_doppelt">kenmerk dubbel gebruikt</string>
@@ -1696,6 +1702,24 @@
     <string name="pruef_sterbefaelle">overlijdens</string>
     <string name="pruef_nur_hinweg">slechts aan één kant</string>
     <string name="pruef_kopf_fehlt">kop (HEAD) ontbreekt</string>
+    <string name="pruef_kopf_ohne_sour">programma (SOUR) ontbreekt</string>
+    <string name="pruef_kopf_ohne_subm">inzender (SUBM) ontbreekt</string>
+    <string name="pruef_kopf_subm_leer">inzender (SUBM) verwijst naar geen record</string>
+    <string name="pruef_kopf_ohne_gedc">GEDCOM-versie (GEDC VERS) ontbreekt</string>
+    <string name="pruef_kopf_ohne_form">GEDC FORM ontbreekt</string>
+    <string name="pruef_kopf_ohne_char">tekenset (CHAR) ontbreekt</string>
+    <string name="pruef_addendum_name">naam niet volgens aanbeveling (GEDCOM-L Addendum)</string>
+    <string name="pruef_addendum_vers">versie niet volgens aanbeveling, bijv. R2 (2020-12-01)</string>
+    <string name="pruef_addendum_www">adres niet volgens aanbeveling (https://genealogy.net/GEDCOM)</string>
+    <string name="pruef_addendum_sieben">het GEDCOM-L-addendum geldt voor GEDCOM 5.5.1, niet voor 7</string>
+    <string name="pruef_g7_conc">CONC bestaat niet meer in GEDCOM 7</string>
+    <string name="pruef_g7_kopf_tag">niet toegestaan in de kop van GEDCOM 7</string>
+    <string name="pruef_g7_alt_tag">bestaat alleen in GEDCOM 5.5.1</string>
+    <string name="pruef_g7_medientyp">geen mediatype (bijv. image/jpeg)</string>
+    <string name="pruef_g7_aufzaehlung">waarde niet uit de lijst van GEDCOM 7</string>
+    <string name="pruef_g7_exid_type">externe identificatie zonder TYPE</string>
+    <string name="pruef_g7_sprache">geen taalcode (bijv. de)</string>
+    <string name="pruef_ereignis_text">tekst achter de gebeurtenis (alleen Y is toegestaan)</string>
     <string name="pruef_datei">bestand</string>
     <string name="pruef_geschlecht_unbekannt">geslacht onbekend</string>
     <string name="ga_structure">Opbouw van het bestand</string>
@@ -1770,4 +1794,9 @@
     <string name="desk_media_make_primary">Als hoofdafbeelding</string>
     <string name="desk_book_public">Alleen wat bezoekers mogen zien</string>
     <string name="tipp_book_public">Laat weg wat webtrees voor bezoekers verbergt: beperkte gebeurtenissen („Tonen aan leden”, „Tonen aan beheerders”), gegevens onder de privacyregels van de stamboom en levende personen (alleen de naam of „Privé”, afhankelijk van de instelling van de stamboom). Voor boeken die worden doorgegeven. De website bevat altijd alleen deze gegevens.</string>
+    <string name="ga_check_as">Controleren als</string>
+    <string name="ga_version_auto">Automatisch (%1$s)</string>
+    <string name="ga_version_none">niet opgegeven</string>
+    <string name="ga_structure_only551">alleen 5.5.1</string>
+    <string name="ga_structure_only7">alleen 7</string>
 </resources>

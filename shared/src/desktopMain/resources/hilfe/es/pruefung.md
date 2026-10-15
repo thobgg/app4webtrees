@@ -1,6 +1,6 @@
 # Comprobación de plausibilidad
 
-**Herramientas › Comprobación de plausibilidad …** (Ctrl+Shift+P) o el icono **Comprobar** revisa todo el árbol, en la medida en que usted puede verlo, con 71 reglas. Los **errores** son contradicciones en los datos (defunción antes del nacimiento, antepasado de sí mismo); los **avisos** son cosas inusuales pero posibles (madre muy joven, padrino ya fallecido, posible duplicado, variante de lugar). Con api4webtrees 1.11 o posterior, las reglas de padrinos (024, 126) usan directamente los padrinos y testigos vinculados y buscan por nombre los de texto libre; con un módulo más antiguo leen la nota «Paten: …».
+**Herramientas › Comprobación de plausibilidad …** (Ctrl+Shift+P) o el icono **Comprobar** revisa todo el árbol, en la medida en que usted puede verlo, con 77 reglas. Los **errores** son contradicciones en los datos (defunción antes del nacimiento, antepasado de sí mismo); los **avisos** son cosas inusuales pero posibles (madre muy joven, padrino ya fallecido, posible duplicado, variante de lugar). Con api4webtrees 1.11 o posterior, las reglas de padrinos (024, 126) usan directamente los padrinos y testigos vinculados y buscan por nombre los de texto libre; con un módulo más antiguo leen la nota «Paten: …».
 
 ![](desktop-pruefung.jpg)
 

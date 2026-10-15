@@ -1706,6 +1706,12 @@
     <string name="regel_617">Fehlt der Kopfsatz, oder weicht sein Zeichensatz von der Datei ab?</string>
     <string name="regel_618">Gibt es Tags außerhalb des GEDCOM-Standards (5.5.1 oder 7)?</string>
     <string name="regel_619">Ist das Geschlecht einer Person unbekannt?</string>
+    <string name="regel_620">Fehlen Pflichtangaben im Kopfsatz (Programm, Einsender, GEDCOM-Version, Zeichensatz)?</string>
+    <string name="regel_621">Nennt der Kopfsatz einen anderen Dateinamen (FILE)?</string>
+    <string name="regel_622">Weicht die Angabe zum GEDCOM-L-Addendum von der Empfehlung ab?</string>
+    <string name="regel_623">Ist das Datum im Kopfsatz unlesbar?</string>
+    <string name="regel_624">Verstößt die Datei gegen Regeln von GEDCOM 7?</string>
+    <string name="regel_625">Steht Text hinter einem Ereignis, wo nur Y erlaubt ist?</string>
     <string name="pruef_zeile">Zeile</string>
     <string name="pruef_verweis_auf">Verweis auf</string>
     <string name="pruef_kennung_doppelt">Kennung doppelt vergeben</string>
@@ -1715,6 +1721,24 @@
     <string name="pruef_sterbefaelle">Sterbefälle</string>
     <string name="pruef_nur_hinweg">nur in einer Richtung</string>
     <string name="pruef_kopf_fehlt">Kopfsatz (HEAD) fehlt</string>
+    <string name="pruef_kopf_ohne_sour">Programm (SOUR) fehlt</string>
+    <string name="pruef_kopf_ohne_subm">Einsender (SUBM) fehlt</string>
+    <string name="pruef_kopf_subm_leer">Einsender (SUBM) zeigt auf keinen Datensatz</string>
+    <string name="pruef_kopf_ohne_gedc">GEDCOM-Version (GEDC VERS) fehlt</string>
+    <string name="pruef_kopf_ohne_form">GEDC FORM fehlt</string>
+    <string name="pruef_kopf_ohne_char">Zeichensatz (CHAR) fehlt</string>
+    <string name="pruef_addendum_name">Name nicht wie empfohlen (GEDCOM-L Addendum)</string>
+    <string name="pruef_addendum_vers">Version nicht wie empfohlen, z. B. R2 (2020-12-01)</string>
+    <string name="pruef_addendum_www">Adresse nicht wie empfohlen (https://genealogy.net/GEDCOM)</string>
+    <string name="pruef_addendum_sieben">Das GEDCOM-L-Addendum gilt für GEDCOM 5.5.1, nicht für 7</string>
+    <string name="pruef_g7_conc">CONC gibt es in GEDCOM 7 nicht mehr</string>
+    <string name="pruef_g7_kopf_tag">Im Kopf von GEDCOM 7 nicht erlaubt</string>
+    <string name="pruef_g7_alt_tag">Gibt es nur in GEDCOM 5.5.1</string>
+    <string name="pruef_g7_medientyp">Kein Medientyp (z. B. image/jpeg)</string>
+    <string name="pruef_g7_aufzaehlung">Wert nicht aus der Liste von GEDCOM 7</string>
+    <string name="pruef_g7_exid_type">Externe Kennung ohne TYPE</string>
+    <string name="pruef_g7_sprache">Kein Sprachcode (z. B. de)</string>
+    <string name="pruef_ereignis_text">Text hinter dem Ereignis (erlaubt ist nur Y)</string>
     <string name="pruef_datei">Datei</string>
     <string name="pruef_geschlecht_unbekannt">Geschlecht unbekannt</string>
     <string name="ga_structure">Aufbau der Datei</string>
@@ -1789,4 +1813,9 @@
     <string name="desk_media_make_primary">Als Hauptbild</string>
     <string name="desk_book_public">Nur, was Besucher sehen dürfen</string>
     <string name="tipp_book_public">Lässt weg, was webtrees vor Besuchern verbirgt: Ereignisse mit Einschränkung („Für Mitglieder“, „Für Verwalter“), Angaben nach den Datenschutzregeln des Stammbaums und lebende Personen (je nach Einstellung des Stammbaums nur mit Namen oder als „Privat“). Für Bücher, die weitergegeben werden. Die Website enthält immer nur diese Angaben.</string>
+    <string name="ga_check_as">Prüfen als</string>
+    <string name="ga_version_auto">Automatisch (%1$s)</string>
+    <string name="ga_version_none">keine Angabe</string>
+    <string name="ga_structure_only551">nur 5.5.1</string>
+    <string name="ga_structure_only7">nur 7</string>
 </resources>

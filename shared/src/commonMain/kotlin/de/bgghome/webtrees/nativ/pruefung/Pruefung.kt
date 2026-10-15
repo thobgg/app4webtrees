@@ -57,7 +57,10 @@ class Rueckverweis(val person: String, val familie: String, val tag: String)
 /** Ein Tag, das nicht zum Standard gehoert: wie oft, und ein Datensatz, in dem es steht. */
 class TagVorkommen(val anzahl: Int, val beispiel: String?)
 
-/** Befund des Lesers ueber die Datei selbst (Form), fuer die Regeln 610-612 und 616-618. */
+/** Ein Fund zur Form der Datei (Regeln 620-625): Schluessel des Textbausteins, Einzelheit, Datensatz, Anzahl. */
+class FormFund(val schluessel: String, val detail: String = "", val satz: String? = null, val anzahl: Int = 1)
+
+/** Befund des Lesers ueber die Datei selbst (Form), fuer die Regeln 610-612 und 616-625. */
 class DateiBefund(
     /** Zeilen, die kein GEDCOM sind: Zeilennummer und Text. */
     val uebersprungen: List<Pair<Int, String>> = emptyList(),
@@ -71,6 +74,21 @@ class DateiBefund(
     val zeichensatzErkannt: String = "",
     /** Tags ohne Unterstrich, die weder in 5.5.1 noch in 7 stehen. */
     val fremdeTags: Map<String, TagVorkommen> = emptyMap(),
+    /** Geprueft als "5.5.1" oder "7.0"; dazu die Angabe im Kopf (GEDC VERS), null = keine. */
+    val version: String = "5.5.1",
+    val versionAngabe: String? = null,
+    /** 620: Pflichtangaben, die im Kopf fehlen, und ein Einsender (SUBM), den es nicht gibt. */
+    val kopf: List<FormFund> = emptyList(),
+    /** 621: FILE im Kopf und der tatsaechliche Dateiname, wenn sie abweichen. */
+    val dateiname: Pair<String, String>? = null,
+    /** 622: Angabe zum GEDCOM-L-Addendum, wo sie von der Empfehlung abweicht. */
+    val addendum: List<FormFund> = emptyList(),
+    /** 623: DATE im Kopf, wenn es kein genaues Datum ist. */
+    val kopfDatum: String? = null,
+    /** 624: Verstoesse gegen GEDCOM 7 (nur wenn als 7.0 geprueft). */
+    val sieben: List<FormFund> = emptyList(),
+    /** 625: Text hinter einem Ereignis, wo nur Y erlaubt ist. */
+    val ereignisText: List<FormFund> = emptyList(),
 )
 
 class PruefErgebnis(val treffer: Map<String, List<Treffer>>) {
@@ -306,6 +324,24 @@ internal val BAUSTEINE_DE: Map<String, String> = mapOf(
     "sterbefaelle" to "Sterbefälle",
     "nur_hinweg" to "nur in einer Richtung",
     "kopf_fehlt" to "Kopfsatz (HEAD) fehlt",
+    "kopf_ohne_sour" to "Programm (SOUR) fehlt",
+    "kopf_ohne_subm" to "Einsender (SUBM) fehlt",
+    "kopf_subm_leer" to "Einsender (SUBM) zeigt auf keinen Datensatz",
+    "kopf_ohne_gedc" to "GEDCOM-Version (GEDC VERS) fehlt",
+    "kopf_ohne_form" to "GEDC FORM fehlt",
+    "kopf_ohne_char" to "Zeichensatz (CHAR) fehlt",
+    "addendum_name" to "Name nicht wie empfohlen (GEDCOM-L Addendum)",
+    "addendum_vers" to "Version nicht wie empfohlen, z. B. R2 (2020-12-01)",
+    "addendum_www" to "Adresse nicht wie empfohlen (https://genealogy.net/GEDCOM)",
+    "addendum_sieben" to "Das GEDCOM-L-Addendum gilt für GEDCOM 5.5.1, nicht für 7",
+    "g7_conc" to "CONC gibt es in GEDCOM 7 nicht mehr",
+    "g7_kopf_tag" to "Im Kopf von GEDCOM 7 nicht erlaubt",
+    "g7_alt_tag" to "Gibt es nur in GEDCOM 5.5.1",
+    "g7_medientyp" to "Kein Medientyp (z. B. image/jpeg)",
+    "g7_aufzaehlung" to "Wert nicht aus der Liste von GEDCOM 7",
+    "g7_exid_type" to "Externe Kennung ohne TYPE",
+    "g7_sprache" to "Kein Sprachcode (z. B. de)",
+    "ereignis_text" to "Text hinter dem Ereignis (erlaubt ist nur Y)",
     "datei" to "Datei",
     "geschlecht_unbekannt" to "Geschlecht unbekannt",
 )
@@ -571,7 +607,19 @@ private class Regeln(val m: PModell, val jetzt: Int, val texte: (String) -> Stri
         }.orEmpty()
         "618" -> datei?.fremdeTags.orEmpty().entries.sortedByDescending { it.value.anzahl }.map { (tag, v) -> T(v.beispiel?.takeIf { it in m.p }, v.beispiel?.takeIf { it in m.f }, "$tag (${v.anzahl}×)") }
         "619" -> personen.filter { it.geschlecht == 'u' }.map { T(it.xref, null, w("geschlecht_unbekannt")) }
+        "620" -> datei?.kopf.orEmpty().map { formTreffer(it) }
+        "621" -> datei?.dateiname?.let { (angabe, ist) -> listOf(T(null, null, "FILE $angabe, " + w("datei") + " $ist")) }.orEmpty()
+        "622" -> datei?.addendum.orEmpty().map { formTreffer(it) }
+        "623" -> datei?.kopfDatum?.let { listOf(T(null, null, "DATE „$it“ " + w("nicht_lesbar"))) }.orEmpty()
+        "624" -> datei?.sieben.orEmpty().sortedByDescending { it.anzahl }.map { formTreffer(it) }
+        "625" -> datei?.ereignisText.orEmpty().map { formTreffer(it) }
         else -> emptyList()
+    }
+
+    /** Ein Fund zur Form als Treffer: Baustein, Einzelheit, Anzahl; an Person oder Familie, wenn der Datensatz eine ist. */
+    private fun formTreffer(f: FormFund): T {
+        val text = w(f.schluessel) + (if (f.detail.isNotEmpty()) ": ${f.detail}" else "") + (if (f.anzahl > 1) " (${f.anzahl}×)" else "")
+        return T(f.satz?.takeIf { it in m.p }, f.satz?.takeIf { it in m.f }, text)
     }
 
     /** Die GEDCOM-Form eines Datums, die der Motor nicht lesen kann (kein Datum, Freitext in Klammern ist erlaubt). */

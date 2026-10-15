@@ -88,7 +88,7 @@ class PruefungTest {
         assertEquals(listOf("I307", "I319", "I321", "I340", "I342", "I370", "I376"), e.treffer.getValue("010").map { it.person }.sortedBy { it!!.drop(1).toInt() })
         assertEquals("I329", e.treffer.getValue("016").single().person)
         assertEquals("F75", e.treffer.getValue("016").single().familie)
-        assertEquals(71, Regelkatalog.alle.size)
+        assertEquals(77, Regelkatalog.alle.size)
     }
 
     @Test

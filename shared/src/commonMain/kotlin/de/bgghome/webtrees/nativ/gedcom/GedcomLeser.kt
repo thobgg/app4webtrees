@@ -88,10 +88,16 @@ class GedcomDatei(
     val uebersprungen: List<Pair<Int, String>> = emptyList(),
     /** Kennungen, die mehr als einmal vergeben sind. */
     val doppelt: Map<String, Int> = emptyMap(),
+    /** Zeilen mit CONC (in GEDCOM 7 nicht mehr erlaubt; beim Lesen schon angehaengt). */
+    val concZeilen: Int = 0,
 ) {
     val kopf: GedcomKnoten? get() = saetze.firstOrNull { it.art == "HEAD" }?.knoten
     /** "1 CHAR" im Kopf, wie geschrieben. */
     val zeichensatzAngabe: String? get() = kopf?.wert("CHAR")
+    /** "2 VERS" unter "1 GEDC", wie geschrieben (5.5.1, 7.0 ...); null = keine Angabe. */
+    val versionAngabe: String? get() = kopf?.erstes("GEDC")?.wert("VERS")?.trim()
+    /** Aus der Angabe im Kopf: GEDCOM 7 oder (sonst) 5.5.1. */
+    val istSieben: Boolean get() = versionAngabe?.startsWith("7") == true
 }
 
 object GedcomLeser {
@@ -107,7 +113,7 @@ object GedcomLeser {
     fun zerlegen(text: String, zeichensatz: String = "UTF-8"): GedcomDatei {
         val saetze = ArrayList<GedcomSatz>()
         val stapel = ArrayList<GedcomKnoten>()   // Knoten je Stufe
-        var zeilen = 0; var uebersprungen = 0
+        var zeilen = 0; var uebersprungen = 0; var conc = 0
         val schlecht = ArrayList<Pair<Int, String>>()
         val kennungen = HashMap<String, Int>()
         var zuletzt: GedcomKnoten? = null
@@ -124,6 +130,7 @@ object GedcomLeser {
             if (tag == "CONT" || tag == "CONC") {
                 val ziel = zuletzt ?: run { uebersprungen++; if (schlecht.size < 500) schlecht += zeilen to z; continue }
                 ziel.wert = if (tag == "CONT") ziel.wert + "\n" + wert else ziel.wert + wert
+                if (tag == "CONC") conc++
                 continue
             }
             val knoten = GedcomKnoten(tag, wert)
@@ -140,7 +147,7 @@ object GedcomLeser {
             }
             zuletzt = knoten
         }
-        return GedcomDatei(saetze, GedcomBefund(zeichensatz, zeilen, uebersprungen, 0), schlecht, kennungen.filterValues { it > 1 })
+        return GedcomDatei(saetze, GedcomBefund(zeichensatz, zeilen, uebersprungen, 0), schlecht, kennungen.filterValues { it > 1 }, conc)
     }
 
     private val ZEILE = Regex("^(\\d{1,2}) (?:(@[^@]+@) )?([A-Za-z0-9_]+)(?: (.*))?$")
@@ -151,10 +158,15 @@ object GedcomLeser {
     fun alsExport(d: GedcomDatei, jetzt: Int = java.time.Year.now().value, stand: Long = 0): TreeExport =
         Umsetzer(d, jetzt).export(stand)
 
-    /** Baum und Befund ueber die Form der Datei (Regeln 6xx) in einem Gang. */
-    fun auswerten(d: GedcomDatei, jetzt: Int = java.time.Year.now().value, stand: Long = 0): Pair<TreeExport, DateiBefund> {
+    /**
+     * Baum und Befund ueber die Form der Datei (Regeln 6xx) in einem Gang. [dateiname] fuer den Vergleich mit FILE im
+     * Kopf; [pruefenAls] "5.5.1" oder "7.0" erzwingt die Version, null nimmt die Angabe im Kopf.
+     */
+    fun auswerten(d: GedcomDatei, jetzt: Int = java.time.Year.now().value, stand: Long = 0, dateiname: String? = null,
+                  pruefenAls: String? = null): Pair<TreeExport, DateiBefund> {
         val u = Umsetzer(d, jetzt)
         val baum = u.export(stand)
+        val sieben = pruefenAls?.startsWith("7") ?: d.istSieben
         return baum to DateiBefund(
             uebersprungen = d.uebersprungen,
             verweise = u.verweise,
@@ -164,6 +176,14 @@ object GedcomLeser {
             zeichensatzAngabe = d.zeichensatzAngabe,
             zeichensatzErkannt = d.befund.zeichensatz,
             fremdeTags = u.fremdeTags(),
+            version = if (sieben) "7.0" else "5.5.1",
+            versionAngabe = d.versionAngabe,
+            kopf = GedcomForm.kopf(d, sieben),
+            dateiname = if (sieben) null else GedcomForm.dateiname(d, dateiname),
+            addendum = GedcomForm.addendum(d, sieben),
+            kopfDatum = GedcomForm.kopfDatum(d),
+            sieben = if (sieben) GedcomForm.sieben(d) else emptyList(),
+            ereignisText = GedcomForm.ereignisText(d),
         )
     }
 
@@ -171,7 +191,7 @@ object GedcomLeser {
         val quellen: Map<String, String> = d.saetze.filter { it.art == "SOUR" }.associate { s ->
             s.xref to (s.knoten.wert("TITL") ?: s.knoten.wert("ABBR") ?: s.xref)
         }
-        val notizen: Map<String, String> = d.saetze.filter { it.art == "NOTE" }.associate { it.xref to it.knoten.wert }
+        val notizen: Map<String, String> = d.saetze.filter { it.art == "NOTE" || it.art == "SNOTE" }.associate { it.xref to it.knoten.wert }
         val indis = d.saetze.filter { it.art == "INDI" && it.xref.isNotEmpty() }
         val fams = d.saetze.filter { it.art == "FAM" && it.xref.isNotEmpty() }
         val famIds = fams.map { it.xref }.toSet()
@@ -248,8 +268,10 @@ object GedcomLeser {
             )
         }
 
-        fun verweis(id: String, vorhanden: Set<String>, tag: String): Boolean =
-            (id in vorhanden).also { if (!it) { fehlend++; verweise += Verweis(aktuell, tag, id) } }
+        fun verweis(id: String, vorhanden: Set<String>, tag: String): Boolean {
+            if (id.equals("VOID", ignoreCase = true)) return false   // GEDCOM 7 @VOID@: bewusst ohne Datensatz
+            return (id in vorhanden).also { if (!it) { fehlend++; verweise += Verweis(aktuell, tag, id) } }
+        }
 
         /** FAMC/FAMS an der Person gegen CHIL/HUSB/WIFE an der Familie: was nur auf einer Seite steht. */
         fun rueckverweise(): List<Rueckverweis> {
@@ -311,12 +333,17 @@ object GedcomLeser {
                                 lat = karte?.wert("LATI")?.let(::koordinate), lng = karte?.wert("LONG")?.let(::koordinate))
                         }
                     },
-                    notes = n.alle("NOTE").map { notiz(it) }.filter { it.isNotBlank() },
+                    notes = (n.alle("NOTE") + n.alle("SNOTE")).map { notiz(it) }.filter { it.isNotBlank() },
                     sources = n.alle("SOUR").mapNotNull { quelle(it) },
                     // GEDCOM 5.5.1 kennt ASSO, GEDCOM-L _ASSO am Ereignis; Paten und Zeugen ohne Datensatz als _GODP/_WITN
                     associates = (n.alle("ASSO") + n.alle("_ASSO")).mapNotNull { beteiligter(it, level1 = false) },
                     freeAssociates = n.alle("_GODP").map { FreeAssociate(role = "godparent", name = it.wert.trim(), text = it.wert.trim()) } +
-                        n.alle("_WITN").map { FreeAssociate(role = "witness", name = it.wert.trim(), text = it.wert.trim()) },
+                        n.alle("_WITN").map { FreeAssociate(role = "witness", name = it.wert.trim(), text = it.wert.trim()) } +
+                        // GEDCOM 7: Beteiligte ohne Datensatz als ASSO @VOID@ mit dem Namen unter PHRASE
+                        n.alle("ASSO").filter { istVoid(it.wert) }.mapNotNull { a ->
+                            val name = a.wert("PHRASE")?.trim() ?: return@mapNotNull null
+                            FreeAssociate(role = rolle(a.wert("ROLE") ?: a.wert("RELA").orEmpty()), name = name, text = name)
+                        },
                     address = adresse?.let { a -> (listOf(a.wert) + a.alle("CONT").map { it.wert }).joinToString("\n").trim().ifBlank { a.wert("ADR1") } },
                     extras = buildList {
                         ort?.let { o -> listOf("_GOV", "_POST", "_MAIDENHEAD").forEach { t -> o.alle(t).forEach { z -> if (z.wert.isNotBlank()) add(GedcomZusatz("PLAC:$t", z.wert.trim(), z.wert("DATE"))) } } }
@@ -348,6 +375,7 @@ object GedcomLeser {
         }
 
         fun beteiligter(n: GedcomKnoten, level1: Boolean): Associate? {
+            if (istVoid(n.wert)) return null   // GEDCOM 7 @VOID@: kein Datensatz, kein fehlender Verweis
             val xref = n.wert.trim().trim('@')
             val (name, sex) = namen[xref] ?: run { fehlend++; return null }
             val rela = n.wert("RELA") ?: n.wert("ROLE") ?: ""
@@ -382,7 +410,7 @@ object GedcomLeser {
         val r = rela.lowercase()
         return when {
             r.contains("pat") || r.contains("godp") || r.contains("sponsor") || r.contains("taufzeug") || r.contains("peter") || r.contains("meter") || r.contains("padrin") || r.contains("marrain") || r.contains("parrain") -> "godparent"
-            r.contains("zeug") || r.contains("witness") || r.contains("getuige") || r.contains("témoin") || r.contains("temoin") || r.contains("testigo") -> "witness"
+            r == "witn" || r.contains("zeug") || r.contains("witness") || r.contains("getuige") || r.contains("témoin") || r.contains("temoin") || r.contains("testigo") -> "witness"
             else -> "other"
         }
     }
@@ -429,6 +457,26 @@ object GedcomLeser {
         else -> wert
     }
 
+    /** "@VOID@": GEDCOM 7 fuer einen Verweis ohne Datensatz. */
+    fun istVoid(wert: String): Boolean = wert.trim().equals("@VOID@", ignoreCase = true)
+
+    /** Die Tags von GEDCOM 7.0, aus der Registry von FamilySearch (GEDCOM-registries, g7validation.json, Oktober 2026). */
+    val STANDARD_70: Set<String> = """
+        ABBR ADDR ADOP ADR1 ADR2 ADR3 AGE AGNC ALIA ANCI ANUL ASSO AUTH BAPL BAPM BARM BASM BIRT BLES BURI CALN CAST CAUS CENS
+        CHAN CHIL CHR CHRA CITY CONF CONL CONT COPR CORP CREA CREM CROP CTRY DATA DATE DEAT DESI DEST DIV DIVF DSCR EDUC EMAIL
+        EMIG ENDL ENGA EVEN EXID FACT FAM FAMC FAMS FAX FCOM FILE FORM GEDC GIVN GRAD HEAD HEIGHT HUSB IDNO IMMI INDI INIL LANG
+        LATI LEFT LONG MAP MARB MARC MARL MARR MARS MEDI MIME NAME NATI NATU NCHI NICK NMR NO NOTE NPFX NSFX OBJE OCCU ORDN
+        PAGE PEDI PHON PHRASE PLAC POST PROB PROP PUBL QUAY REFN RELI REPO RESI RESN RETI ROLE SCHMA SDATE SEX SLGC SLGS SNOTE
+        SOUR SPFX SSN STAE STAT SUBM SURN TAG TEMP TEXT TIME TITL TOP TRAN TRLR TYPE UID VERS WIDTH WIFE WILL WWW
+    """.trim().split(Regex("\\s+")).toSet()
+
+    /** Tags, die es erst in GEDCOM 7 gibt (in einer 5.5.1-Datei nicht Standard). */
+    private val NUR_70 = setOf("SNOTE", "EXID", "MIME", "UID", "SCHMA", "TAG", "CREA", "INIL", "NO", "TRAN", "PHRASE", "SDATE",
+        "CROP", "TOP", "LEFT", "HEIGHT", "WIDTH")
+
+    /** Die Tags von GEDCOM 5.5.1 (Datensaetze, Ereignisse, Attribute, Strukturen). */
+    val STANDARD_551: Set<String> by lazy { STANDARD_TAGS - NUR_70 }
+
     /** Alle Tags aus GEDCOM 5.5.1 und 7.0 (Datensaetze, Ereignisse, Attribute, Strukturen). */
     val STANDARD_TAGS: Set<String> = """
         HEAD TRLR INDI FAM SOUR REPO NOTE SNOTE OBJE SUBM SUBN
@@ -437,7 +485,7 @@ object GedcomLeser {
         EMAIL EMAI EMIG ENDL ENGA EVEN EXID FACT FAMC FAMS FAX FCOM FILE FONE FORM GEDC GIVN GRAD HUSB IDNO IMMI INIL LANG LATI LEGA
         LONG MAP MARB MARC MARL MARR MARS MEDI MIME NAME NATI NATU NCHI NICK NMR NO NPFX NSFX OCCU ORDI ORDN PAGE PEDI PHON PLAC POST
         PROB PROP PUBL QUAY REFN RELA RELI RESI RESN RETI RFN RIN ROLE ROMN SCHMA SEX SLGC SLGS SPFX SSN STAE STAT SURN TAG TEMP TEXT
-        TIME TITL TRAN TYPE UID VERS WIFE WILL WWW
+        TIME TITL TRAN TYPE UID VERS WIFE WILL WWW PHRASE SDATE CROP TOP LEFT HEIGHT WIDTH
     """.trim().split(Regex("\\s+")).toSet()
 
     /** Unterknoten der Stufe 1, die keine Fakten sind. */

@@ -32,7 +32,7 @@ class GedcomLeserTest {
         assertEquals(listOf("I307", "I319", "I321", "I340", "I342", "I370", "I376"), e.treffer.getValue("010").map { it.person }.sortedBy { it!!.drop(1).toInt() })
         // Fakten tragen Kennungen, damit Treffer auf sie zeigen koennen
         assertTrue(b.individuals.values.all { i -> i.facts.all { it.id.isNotEmpty() } })
-        assertEquals(71, Regelkatalog.alle.size)
+        assertEquals(77, Regelkatalog.alle.size)
     }
 
     @Test

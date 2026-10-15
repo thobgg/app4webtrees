@@ -1711,6 +1711,12 @@
     <string name="regel_617">Is the header missing, or does its character set differ from the file?</string>
     <string name="regel_618">Are there tags outside the GEDCOM standard (5.5.1 or 7)?</string>
     <string name="regel_619">Is the sex of a person unknown?</string>
+    <string name="regel_620">Are mandatory entries missing in the header (program, submitter, GEDCOM version, character set)?</string>
+    <string name="regel_621">Does the header name a different file name (FILE)?</string>
+    <string name="regel_622">Does the GEDCOM-L addendum entry differ from the recommendation?</string>
+    <string name="regel_623">Is the date in the header unreadable?</string>
+    <string name="regel_624">Does the file break rules of GEDCOM 7?</string>
+    <string name="regel_625">Is there text after an event where only Y is allowed?</string>
     <string name="pruef_zeile">line</string>
     <string name="pruef_verweis_auf">link to</string>
     <string name="pruef_kennung_doppelt">identifier used twice</string>
@@ -1720,6 +1726,24 @@
     <string name="pruef_sterbefaelle">deaths</string>
     <string name="pruef_nur_hinweg">on one side only</string>
     <string name="pruef_kopf_fehlt">header (HEAD) missing</string>
+    <string name="pruef_kopf_ohne_sour">program (SOUR) missing</string>
+    <string name="pruef_kopf_ohne_subm">submitter (SUBM) missing</string>
+    <string name="pruef_kopf_subm_leer">submitter (SUBM) points to no record</string>
+    <string name="pruef_kopf_ohne_gedc">GEDCOM version (GEDC VERS) missing</string>
+    <string name="pruef_kopf_ohne_form">GEDC FORM missing</string>
+    <string name="pruef_kopf_ohne_char">character set (CHAR) missing</string>
+    <string name="pruef_addendum_name">name not as recommended (GEDCOM-L Addendum)</string>
+    <string name="pruef_addendum_vers">version not as recommended, e.g. R2 (2020-12-01)</string>
+    <string name="pruef_addendum_www">address not as recommended (https://genealogy.net/GEDCOM)</string>
+    <string name="pruef_addendum_sieben">the GEDCOM-L addendum applies to GEDCOM 5.5.1, not 7</string>
+    <string name="pruef_g7_conc">CONC no longer exists in GEDCOM 7</string>
+    <string name="pruef_g7_kopf_tag">not allowed in the GEDCOM 7 header</string>
+    <string name="pruef_g7_alt_tag">exists only in GEDCOM 5.5.1</string>
+    <string name="pruef_g7_medientyp">not a media type (e.g. image/jpeg)</string>
+    <string name="pruef_g7_aufzaehlung">value not from the GEDCOM 7 list</string>
+    <string name="pruef_g7_exid_type">external identifier without TYPE</string>
+    <string name="pruef_g7_sprache">not a language code (e.g. de)</string>
+    <string name="pruef_ereignis_text">text after the event (only Y is allowed)</string>
     <string name="pruef_datei">file</string>
     <string name="pruef_geschlecht_unbekannt">sex unknown</string>
     <string name="ga_structure">File structure</string>
@@ -1794,4 +1818,9 @@
     <string name="desk_media_make_primary">Make main image</string>
     <string name="desk_book_public">Only what visitors may see</string>
     <string name="tipp_book_public">Leaves out what webtrees hides from visitors: restricted events (“Show to members”, “Show to managers”), data covered by the tree’s privacy rules and living people (name only or “Private”, depending on the tree setting). For books that are passed on. The website always contains only these data.</string>
+    <string name="ga_check_as">Check as</string>
+    <string name="ga_version_auto">Automatic (%1$s)</string>
+    <string name="ga_version_none">not stated</string>
+    <string name="ga_structure_only551">5.5.1 only</string>
+    <string name="ga_structure_only7">7 only</string>
 </resources>
