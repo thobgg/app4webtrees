@@ -1,0 +1,1 @@
+Ehepartner verheirateter Enkel erscheinen im Baum gleich mit. Datum und Ort im Lebenslauf brechen sauber um (auch bei langen Datumsformaten). In der webtrees-Ansicht geht die Zurück-Taste eine Seite zurück, fremde Links öffnen im Browser.

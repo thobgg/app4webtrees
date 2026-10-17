@@ -1,0 +1,1 @@
+Los cónyuges de los nietos casados aparecen ahora directamente en el árbol. La fecha y el lugar en la cronología se ajustan correctamente (también con formatos de fecha largos). En la vista de webtrees, el botón Atrás retrocede una página; los enlaces externos se abren en el navegador.

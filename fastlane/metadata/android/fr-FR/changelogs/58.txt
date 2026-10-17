@@ -1,0 +1,1 @@
+Les conjoints des petits-enfants mariés apparaissent directement dans l’arbre. La date et le lieu dans la chronologie passent proprement à la ligne (aussi avec des formats de date longs). Dans la vue webtrees, le bouton Retour revient d’une page ; les liens externes s’ouvrent dans le navigateur.

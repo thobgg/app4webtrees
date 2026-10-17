@@ -1,0 +1,1 @@
+Spouses of married grandchildren now appear in the tree right away. Date and place in the life events wrap cleanly (also with long date formats). In the webtrees view the Back button goes back one page; external links open in the browser.
