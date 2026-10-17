@@ -1,0 +1,1 @@
+Stamboom: het aantal generaties nakomelingen is instelbaar (0 tot 4, in de knop Generaties). Met de hand uitgeklapte nakomelingen kunt u met ▲ weer inklappen.

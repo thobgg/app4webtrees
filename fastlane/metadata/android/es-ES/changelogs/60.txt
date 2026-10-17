@@ -1,0 +1,1 @@
+Árbol: se puede elegir el número de generaciones de descendientes (0 a 4, en el botón Generaciones). Los descendientes desplegados a mano se pliegan de nuevo con ▲.

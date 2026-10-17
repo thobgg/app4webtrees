@@ -1,0 +1,1 @@
+Baum: Die Zahl der Nachkommen-Generationen ist wählbar (0 bis 4, im Generationen-Knopf). Von Hand aufgeklappte Nachkommen lassen sich mit ▲ wieder zuklappen.

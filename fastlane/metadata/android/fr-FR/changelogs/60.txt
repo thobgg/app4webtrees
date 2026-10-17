@@ -1,0 +1,1 @@
+Arbre : le nombre de générations de descendants est réglable (0 à 4, bouton Générations). Les descendants dépliés à la main se replient avec ▲.
