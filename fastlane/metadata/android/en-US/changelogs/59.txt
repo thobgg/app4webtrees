@@ -1,0 +1,1 @@
+Descendants can now be expanded downwards in the tree: a symbol below people in the bottom row loads their children and grandchildren without changing the central person.

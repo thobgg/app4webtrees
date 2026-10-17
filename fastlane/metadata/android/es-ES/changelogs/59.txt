@@ -1,0 +1,1 @@
+Ahora los descendientes se pueden desplegar hacia abajo en el árbol: un símbolo bajo las personas de la última fila carga sus hijos y nietos sin cambiar la persona central.
