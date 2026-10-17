@@ -1,7 +1,10 @@
 package de.bgghome.webtrees.nativ.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.webkit.CookieManager
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +18,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -26,12 +34,21 @@ import de.bgghome.webtrees.nativ.res.*
 /**
  * Rueckfall fuer alles, was (noch) nicht nativ ist: die webtrees-Seite selbst, in derselben
  * Sitzung - das Sitzungs-Cookie der App wird an das WebView uebergeben.
+ *
+ * Die Zurueck-Taste geht innerhalb von webtrees eine Seite zurueck; erst auf der ersten Seite schliesst sie die Ansicht.
+ * Links auf fremde Seiten (etwa eine URL in einer Quelle) oeffnet der Browser des Geraets - so bleibt der Weg durch
+ * webtrees erhalten und Zurueck fuehrt wieder hierher (Issue 25).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
     val app = LocalContext.current.applicationContext as WtApp
+    val host = url.toHttpUrlOrNull()?.host
+    var webView by remember { mutableStateOf<WebView?>(null) }
+    var kannZurueck by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = kannZurueck) { webView?.goBack() }
 
     Scaffold(
         topBar = {
@@ -58,8 +75,21 @@ actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
                     settings.domStorageEnabled = true
                     settings.builtInZoomControls = true
                     settings.displayZoomControls = false
-                    webViewClient = WebViewClient()
+                    webViewClient = object : WebViewClient() {
+                        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                            val ziel = request.url
+                            val fremd = ziel.scheme !in setOf("http", "https") || (host != null && ziel.host != host)
+                            if (!fremd) return false
+                            runCatching { view.context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ziel.toString())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                            return true
+                        }
+
+                        override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
+                            kannZurueck = view.canGoBack()
+                        }
+                    }
                     loadUrl(url)
+                    webView = this
                 }
             },
         )

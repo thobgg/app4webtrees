@@ -1,6 +1,7 @@
 package de.bgghome.webtrees.nativ.ui
 
 import androidx.lifecycle.viewModelScope
+import de.bgghome.webtrees.nativ.api.DescendantNode
 import de.bgghome.webtrees.nativ.api.Pedigree
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.ui.tree.Sibling
@@ -146,7 +147,12 @@ fun AppViewModel.loadChart() {
             // coroutineScope: scheitert eine der beiden Anfragen, landet der Fehler unten im catch.
             val (p, d) = coroutineScope {
                 val pedigree = async { client.pedigree(tree.name, xref, generations) }
-                val descendants = async { client.descendants(tree.name, xref, AppViewModel.DESCENDANT_GENERATIONS) }
+                // Eine Generation mehr: der Server liefert zur untersten Generation keine Familien - verheiratete
+                // Enkel stuenden sonst ohne Ehepartner da. Aus der Zusatzgeneration bleiben nur die Partner.
+                val descendants = async {
+                    client.descendants(tree.name, xref, AppViewModel.DESCENDANT_GENERATIONS + 1)
+                        .let { it.copy(generations = AppViewModel.DESCENDANT_GENERATIONS, tree = it.tree.bisTiefe(AppViewModel.DESCENDANT_GENERATIONS)) }
+                }
                 pedigree.await() to descendants.await()
             }
             uiState.update { if (it.root == xref) it.copy(pedigree = p, descendants = d, siblings = null) else it }
@@ -206,6 +212,14 @@ internal suspend fun AppViewModel.siblingsFromParents(tree: String, byNumber: Ma
             )
         }
 }
+
+/**
+ * Nachkommenbaum auf [generationen] Reihen kuerzen: die unterste Reihe behaelt ihre Ehepartner (und Heiraten), aber keine
+ * Kinder mehr. So zeigt der Baum auch bei verheirateten Enkeln das Paar.
+ */
+internal fun DescendantNode.bisTiefe(generationen: Int): DescendantNode =
+    if (generationen <= 1) copy(families = families.map { it.copy(children = emptyList()) })
+    else copy(families = families.map { f -> f.copy(children = f.children.map { it.bisTiefe(generationen - 1) }) })
 
 /** Generation zu einer Kekule-Nummer: 1 -> 0, 2..3 -> 1, 4..7 -> 2 ... */
 internal fun AppViewModel.generationOf(n: Int) = 31 - Integer.numberOfLeadingZeros(n)
