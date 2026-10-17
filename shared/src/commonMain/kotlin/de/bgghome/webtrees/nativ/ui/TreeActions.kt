@@ -218,7 +218,7 @@ internal suspend fun AppViewModel.siblingsFromParents(tree: String, byNumber: Ma
  * Kinder mehr. So zeigt der Baum auch bei verheirateten Enkeln das Paar.
  */
 internal fun DescendantNode.bisTiefe(generationen: Int): DescendantNode =
-    if (generationen <= 1) copy(families = families.map { it.copy(children = emptyList()) })
+    if (generationen <= 1) copy(families = families.map { it.copy(children = emptyList()) }, weitere = families.any { it.children.isNotEmpty() })
     else copy(families = families.map { f -> f.copy(children = f.children.map { it.bisTiefe(generationen - 1) }) })
 
 /** Generation zu einer Kekule-Nummer: 1 -> 0, 2..3 -> 1, 4..7 -> 2 ... */
@@ -255,6 +255,32 @@ fun AppViewModel.expandAncestors(n: Int, xref: String) {
         }
     }
 }
+
+/**
+ * "Weiter nach unten": die Nachkommen einer Person der untersten Reihe nachladen und an ihrer Stelle einhaengen. Wie beim
+ * ersten Laden eine Generation mehr, damit die neue unterste Reihe ihre Partner zeigt und wieder aufklappbar ist.
+ */
+fun AppViewModel.expandDescendants(xref: String) {
+    val tree = uiState.value.tree ?: return
+    val root = uiState.value.root ?: return
+
+    viewModelScope.launch {
+        try {
+            val zweig = client.descendants(tree.name, xref, AppViewModel.DESCENDANT_GENERATIONS + 1).tree.bisTiefe(AppViewModel.DESCENDANT_GENERATIONS)
+            uiState.update { state ->
+                val d = state.descendants
+                if (state.root != root || d == null) state else state.copy(descendants = d.copy(tree = d.tree.einhaengen(xref, zweig)))
+            }
+        } catch (e: Exception) {
+            fail(e)
+        }
+    }
+}
+
+/** Den aufklappbaren Knoten [xref] durch den nachgeladenen Zweig ersetzen (Person bleibt, Familien kommen dazu). */
+internal fun DescendantNode.einhaengen(xref: String, zweig: DescendantNode): DescendantNode =
+    if (weitere && person.xref == xref) copy(families = zweig.families, weitere = false)
+    else copy(families = families.map { f -> f.copy(children = f.children.map { it.einhaengen(xref, zweig) }) })
 
 fun AppViewModel.setDetailTab(tab: Int) = uiState.update { it.copy(detailTab = tab) }
 

@@ -20,6 +20,8 @@ data class TreeBox(
     val ahnen: Int? = null,
     /** Diese Person hat Eltern, die noch nicht geladen sind -> "weiter nach oben"-Symbol ueber der Karte. */
     val canExpand: Boolean = false,
+    /** Unter dieser Person gibt es Nachkommen, die noch nicht geladen sind -> "weiter nach unten"-Symbol unter der Karte. */
+    val canExpandDown: Boolean = false,
 ) {
     val centerX get() = x + TreeLayout.BOX_W / 2
     val centerY get() = y + TreeLayout.BOX_H / 2
@@ -57,6 +59,15 @@ class TreeLayout private constructor(
         box.canExpand && (x - box.centerX) * (x - box.centerX) + (y - (box.y - EXPAND_OFFSET)) * (y - (box.y - EXPAND_OFFSET)) <= PLUS_HIT_RADIUS * PLUS_HIT_RADIUS
     }
 
+    /** Das Symbol fuer "weiter nach unten" sitzt unter der Karte, neben der "+"-Lasche (ohne Lasche mittig). */
+    fun expandDownDx(box: TreeBox): Float = if (hasPlus(box)) EXPAND_DOWN_DX else 0f
+
+    fun expandDownAt(x: Float, y: Float): TreeBox? = boxes.lastOrNull { box ->
+        val cx = box.centerX + expandDownDx(box)
+        val cy = box.bottom + EXPAND_OFFSET - 6f
+        box.canExpandDown && (x - cx) * (x - cx) + (y - cy) * (y - cy) <= PLUS_HIT_RADIUS * PLUS_HIT_RADIUS
+    }
+
     /** Hat diese Karte eine "+"-Lasche (Verwandte hinzufuegen: Vater, Mutter, Partner, Kind)? Der eine Weg dafuer - Geisterkarten gibt es nicht. */
     fun hasPlus(box: TreeBox): Boolean = canEdit && !box.person.isPrivate
 
@@ -77,6 +88,8 @@ class TreeLayout private constructor(
         const val PLUS_HIT_RADIUS = 20f
         /** Abstand des Aufklapp-Symbols (Mitte) ueber der Kartenoberkante */
         const val EXPAND_OFFSET = 20f
+        /** Seitlicher Abstand des Symbols "weiter nach unten" von der Kartenmitte, wenn darunter die "+"-Lasche haengt */
+        const val EXPAND_DOWN_DX = 40f
         /** Luft zwischen Geschwistergruppe und Person - groesser als zum Partner, sonst liest man den Schwager als Partner. */
         const val SIBLING_GAP = 40f
 
@@ -127,7 +140,7 @@ class TreeLayout private constructor(
             val y = depth * (BOX_H + V_GAP)
             var x = left + (span - unitWidth(node)) / 2
 
-            val personBox = TreeBox(person = node.person, x = x, y = y, isFocus = isFocus).also { boxes += it }
+            val personBox = TreeBox(person = node.person, x = x, y = y, isFocus = isFocus, canExpandDown = node.weitere).also { boxes += it }
             if (isFocus) focusBox = personBox
             x += BOX_W
 

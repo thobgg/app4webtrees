@@ -1198,6 +1198,7 @@ private fun DeskTree(state: UiState, viewModel: AppViewModel, openWeb: (String) 
             onPerson = { viewModel.select(it.xref) },
             onPlus = { viewModel.requestAddRelative(it.xref) },
             onExpand = viewModel::expandAncestors,
+            onExpandDown = viewModel::expandDescendants,
             onSecondary = { person, at -> viewModel.select(person.xref); menu = person to at },
             onOpen = { viewModel.setRoot(it.xref) },
             showFullscreen = true,

@@ -607,7 +607,12 @@ data class DescendantFamily(
 )
 
 @Serializable
-data class DescendantNode(val person: Person, val families: List<DescendantFamily> = emptyList())
+data class DescendantNode(
+    val person: Person,
+    val families: List<DescendantFamily> = emptyList(),
+    /** Nur in der App: unterste gezeigte Reihe, unter der es weitere Nachkommen gibt (Baum zum Aufklappen nach unten). */
+    @kotlinx.serialization.Transient val weitere: Boolean = false,
+)
 
 @Serializable
 data class Descendants(val root: String = "", val generations: Int = 0, val tree: DescendantNode)

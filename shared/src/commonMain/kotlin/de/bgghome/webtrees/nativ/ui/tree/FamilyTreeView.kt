@@ -118,6 +118,8 @@ fun FamilyTreeView(
     onOpen: ((Person) -> Unit)? = null,
     /** Desktop: kein Vollbild-Knopf, das Fenster selbst laesst sich maximieren. */
     showFullscreen: Boolean = true,
+    /** Tipp auf "weiter nach unten" unter einer Karte der untersten Reihe: ihre Nachkommen nachladen. */
+    onExpandDown: (xref: String) -> Unit = {},
 ) {
     if (layout == null) {
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -228,10 +230,12 @@ fun FamilyTreeView(
                             val y = (tap.y - offset.y) / (scale * density)
 
                             val expand = layout.expandAt(x, y)
+                            val expandDown = layout.expandDownAt(x, y)
                             val plus = layout.plusAt(x, y)
                             val box = layout.boxAt(x, y)
                             when {
                                 expand != null && expand.ahnen != null -> onExpand(expand.ahnen, expand.person.xref)
+                                expandDown != null -> onExpandDown(expandDown.person.xref)
                                 plus != null -> onPlus(plus.person)
                                 box != null && !box.person.isPrivate -> {
                                     centerOn(box)
@@ -290,7 +294,7 @@ fun FamilyTreeView(
                 }
 
                 layout.boxes.forEach { box ->
-                    TreeCard(box, level, isSelected = box.person.xref == selected, showPlus = layout.hasPlus(box))
+                    TreeCard(box, level, isSelected = box.person.xref == selected, showPlus = layout.hasPlus(box), expandDownDx = layout.expandDownDx(box))
                 }
             }
         }
@@ -316,7 +320,7 @@ private fun ToolButton(glyph: String, description: String, onClick: () -> Unit) 
 }
 
 @Composable
-private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, showPlus: Boolean) {
+private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, showPlus: Boolean, expandDownDx: Float = 0f) {
     val shape = RoundedCornerShape(8.dp)
     val base = Modifier.offset(box.x.dp, box.y.dp).size(TreeLayout.BOX_W.dp, TreeLayout.BOX_H.dp)
     val person = box.person
@@ -387,6 +391,11 @@ private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, show
         if (showPlus && readable) {
             Box(Modifier.align(Alignment.BottomCenter).offset(y = (TreeLayout.PLUS_RADIUS + 4f).dp)) { PlusTab() }
         }
+
+        // Kinder-Symbol: unter dieser Person gibt es weitere Nachkommen - Tipp klappt den Baum nach unten auf
+        if (box.canExpandDown && readable) {
+            Box(Modifier.align(Alignment.BottomCenter).offset(x = expandDownDx.dp, y = (TreeLayout.EXPAND_OFFSET + 5f).dp)) { ExpandDownBadge() }
+        }
     }
 }
 
@@ -403,6 +412,22 @@ private fun ExpandBadge() {
     ) {
         Box(Modifier.size(width = 12.dp, height = 10.dp).background(colors.male, RoundedCornerShape(2.dp)))
         Box(Modifier.size(width = 12.dp, height = 10.dp).background(colors.female, RoundedCornerShape(2.dp)))
+    }
+}
+
+/** Drei kleine Kaestchen unter einem Strich - das Zeichen fuer "hier geht es weiter nach unten" (Kinder). */
+@Composable
+private fun ExpandDownBadge() {
+    val outline = MaterialTheme.colorScheme.outline
+    Column(
+        Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp)).border(1.dp, outline, RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        Box(Modifier.size(width = 30.dp, height = 2.dp).background(outline))
+        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            repeat(3) { Box(Modifier.size(width = 8.dp, height = 8.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(2.dp))) }
+        }
     }
 }
 
