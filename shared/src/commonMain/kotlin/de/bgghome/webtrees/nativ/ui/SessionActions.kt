@@ -241,7 +241,7 @@ fun AppViewModel.chooseTree(tree: TreeInfo) {
     uiState.update {
         UiState(
             screen = Screen.Main, baseUrl = it.baseUrl, userName = it.userName, info = it.info,
-            tree = tree, home = home, section = Section.Tree, ancestorGenerations = it.ancestorGenerations,
+            tree = tree, home = home, section = Section.Tree, ancestorGenerations = it.ancestorGenerations, descendantRows = it.descendantRows,
             reminders = settings.reminders, showSiblings = settings.showSiblings, showCousins = settings.showCousins,
             denseGrid = settings.denseGrid, anniversaryLivingOnly = settings.anniversaryLivingOnly,
         )

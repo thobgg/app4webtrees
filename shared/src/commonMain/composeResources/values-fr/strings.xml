@@ -1831,4 +1831,7 @@
     <string name="desk_meta_place_hint">Avec un lieu, certaines bases trouvent moins ou rien, d’autres l’ignorent. Sans lieu, la recherche est généralement plus fructueuse.</string>
     <string name="desk_meta_search">Rechercher dans le navigateur</string>
     <string name="desk_meta_no_name">Aucun nom de famille n’est connu pour cette personne.</string>
+    <string name="tree_ancestors_head">Ancêtres</string>
+    <string name="tree_descendants_head">Descendants</string>
+    <string name="tree_descendants_none">Seulement le couple</string>
 </resources>

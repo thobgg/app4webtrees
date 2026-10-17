@@ -1831,4 +1831,7 @@
     <string name="desk_meta_place_hint">Con un lugar, algunas bases de datos encuentran menos o nada y otras lo ignoran. Sin lugar suele dar más resultados.</string>
     <string name="desk_meta_search">Buscar en el navegador</string>
     <string name="desk_meta_no_name">No se conoce ningún apellido para esta persona.</string>
+    <string name="tree_ancestors_head">Antepasados</string>
+    <string name="tree_descendants_head">Descendientes</string>
+    <string name="tree_descendants_none">Solo la pareja</string>
 </resources>

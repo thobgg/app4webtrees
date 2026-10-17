@@ -87,6 +87,8 @@ data class UiState(
     /** Fruehere Mittelpersonen - die Zurueck-Taste geht sie rueckwaerts durch. */
     val rootHistory: List<String> = emptyList(),
     val ancestorGenerations: Int = 4,
+    /** Wie viele Generationen Nachkommen der Baum unter der Mittelperson zeigt (0 = nur das Paar, Vorgabe Kinder und Enkel). */
+    val descendantRows: Int = 2,
     val pedigree: Pedigree? = null,
     val descendants: Descendants? = null,
     /** Geschwister (mit Partnern) je XREF fuer die unteren Ahnenreihen; null = noch nicht geladen */

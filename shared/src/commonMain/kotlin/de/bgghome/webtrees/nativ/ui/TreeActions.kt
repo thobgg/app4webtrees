@@ -120,6 +120,11 @@ fun AppViewModel.openPerson(xref: String, wide: Boolean) {
     if (!wide) uiState.update { it.copy(profileOpen = true) }
 }
 
+/** Nachkommen-Generationen im Baum (0 bis 4); weiter unten bleibt das Aufklapp-Symbol. */
+fun AppViewModel.setDescendantRows(rows: Int) {
+    uiState.update { it.copy(descendantRows = rows.coerceIn(0, 4), descendants = null) }
+}
+
 fun AppViewModel.setAncestorGenerations(generations: Int) {
     uiState.update { it.copy(ancestorGenerations = generations, pedigree = null, descendants = null) }
 }
@@ -141,6 +146,8 @@ fun AppViewModel.loadChart() {
     val tree = uiState.value.tree ?: return
     val xref = uiState.value.root ?: return
     val generations = uiState.value.ancestorGenerations
+    // Reihen samt Mittelperson; die Generation darunter nur fuer Partner und das Aufklapp-Symbol
+    val reihen = uiState.value.descendantRows + 1
 
     viewModelScope.launch {
         try {
@@ -150,8 +157,8 @@ fun AppViewModel.loadChart() {
                 // Eine Generation mehr: der Server liefert zur untersten Generation keine Familien - verheiratete
                 // Enkel stuenden sonst ohne Ehepartner da. Aus der Zusatzgeneration bleiben nur die Partner.
                 val descendants = async {
-                    client.descendants(tree.name, xref, AppViewModel.DESCENDANT_GENERATIONS + 1)
-                        .let { it.copy(generations = AppViewModel.DESCENDANT_GENERATIONS, tree = it.tree.bisTiefe(AppViewModel.DESCENDANT_GENERATIONS)) }
+                    client.descendants(tree.name, xref, reihen + 1)
+                        .let { it.copy(generations = reihen, tree = it.tree.bisTiefe(reihen)) }
                 }
                 pedigree.await() to descendants.await()
             }

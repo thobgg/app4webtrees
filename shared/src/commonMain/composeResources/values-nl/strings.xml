@@ -1812,4 +1812,7 @@
     <string name="desk_meta_place_hint">Met een plaats vinden sommige databanken minder of niets, andere negeren hem. Zonder plaats levert meestal meer op.</string>
     <string name="desk_meta_search">Zoeken in de browser</string>
     <string name="desk_meta_no_name">Voor deze persoon is geen achternaam bekend.</string>
+    <string name="tree_ancestors_head">Voorouders</string>
+    <string name="tree_descendants_head">Nakomelingen</string>
+    <string name="tree_descendants_none">Alleen het paar</string>
 </resources>

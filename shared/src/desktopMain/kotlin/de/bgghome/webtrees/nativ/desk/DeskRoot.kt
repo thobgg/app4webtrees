@@ -603,6 +603,12 @@ private fun FrameWindowScope.DeskMenuBar(
                         CheckboxItem(stringResource(Res.string.tree_generations, n), checked = state.ancestorGenerations == n, onCheckedChange = { viewModel.setAncestorGenerations(n) })
                     }
                 }
+                Menu(stringResource(Res.string.tree_descendants_head), enabled = layout == DeskLayout.TreeCentre) {
+                    (0..4).forEach { n ->
+                        CheckboxItem(if (n == 0) stringResource(Res.string.tree_descendants_none) else stringResource(Res.string.tree_generations, n),
+                            checked = state.descendantRows == n, onCheckedChange = { viewModel.setDescendantRows(n) })
+                    }
+                }
                 CheckboxItem(stringResource(Res.string.desk_color_coding), checked = farbkodierung, enabled = state.home != null && layout == DeskLayout.Navigator, onCheckedChange = onFarbkodierung)
                 CheckboxItem(stringResource(Res.string.tree_show_siblings), checked = state.showSiblings, enabled = layout == DeskLayout.TreeCentre, onCheckedChange = viewModel::setShowSiblings)
                 CheckboxItem(stringResource(Res.string.tree_show_cousins), checked = state.showCousins && state.showSiblings, enabled = state.showSiblings && layout == DeskLayout.TreeCentre, onCheckedChange = viewModel::setShowCousins)

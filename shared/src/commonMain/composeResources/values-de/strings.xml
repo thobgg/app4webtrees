@@ -1831,4 +1831,7 @@
     <string name="desk_meta_place_hint">Mit Ort finden manche Datenbanken weniger oder nichts, andere übergehen ihn. Ohne Ort ist meist ergiebiger.</string>
     <string name="desk_meta_search">Im Browser suchen</string>
     <string name="desk_meta_no_name">Für diese Person ist kein Familienname bekannt.</string>
+    <string name="tree_ancestors_head">Vorfahren</string>
+    <string name="tree_descendants_head">Nachkommen</string>
+    <string name="tree_descendants_none">Nur das Paar</string>
 </resources>

@@ -181,7 +181,7 @@ fun Navigator(
     val zentral = ahnen[1]?.person ?: detail?.person ?: return
     val canEdit = state.tree?.canEdit == true
     // Kinder, die selbst Kinder haben (aus dem Nachkommenbaum) - bekommen einen Pfeil nach links.
-    val mitNachkommen = state.descendants?.tree?.families?.flatMap { it.children }?.filter { k -> k.families.any { it.children.isNotEmpty() } }?.map { it.person.xref }?.toSet().orEmpty()
+    val mitNachkommen = state.descendants?.tree?.families?.flatMap { it.children }?.filter { k -> k.weitere || k.families.any { it.children.isNotEmpty() } }?.map { it.person.xref }?.toSet().orEmpty()
 
     // Eine Partnerschaft auf einmal: Partner und deren Kinder; der Pfeil unter dem Partner wechselt.
     val familien = detail?.spouseFamilies.orEmpty()

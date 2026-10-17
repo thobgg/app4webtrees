@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -168,10 +169,23 @@ internal fun GenerationsChip(state: UiState, viewModel: AppViewModel) {
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            Text(stringResource(Res.string.tree_ancestors_head), Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             (2..6).forEach { n ->
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.tree_generations, n)) },
+                    leadingIcon = { RadioButton(selected = state.ancestorGenerations == n, onClick = null) },
                     onClick = { open = false; viewModel.setAncestorGenerations(n) },
+                )
+            }
+            HorizontalDivider()
+            Text(stringResource(Res.string.tree_descendants_head), Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            (0..4).forEach { n ->
+                DropdownMenuItem(
+                    text = { Text(if (n == 0) stringResource(Res.string.tree_descendants_none) else stringResource(Res.string.tree_generations, n)) },
+                    leadingIcon = { RadioButton(selected = state.descendantRows == n, onClick = null) },
+                    onClick = { open = false; viewModel.setDescendantRows(n) },
                 )
             }
         }

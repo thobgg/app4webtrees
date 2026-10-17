@@ -1836,4 +1836,7 @@
     <string name="desk_meta_place_hint">With a place some databases find less or nothing, others ignore it. Without a place is usually more productive.</string>
     <string name="desk_meta_search">Search in browser</string>
     <string name="desk_meta_no_name">No surname is known for this person.</string>
+    <string name="tree_ancestors_head">Ancestors</string>
+    <string name="tree_descendants_head">Descendants</string>
+    <string name="tree_descendants_none">Couple only</string>
 </resources>
