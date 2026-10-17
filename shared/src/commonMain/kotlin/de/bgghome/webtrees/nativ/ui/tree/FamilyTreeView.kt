@@ -59,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.ui.Avatar
@@ -120,6 +121,8 @@ fun FamilyTreeView(
     showFullscreen: Boolean = true,
     /** Tipp auf "weiter nach unten" unter einer Karte der untersten Reihe: ihre Nachkommen nachladen. */
     onExpandDown: (xref: String) -> Unit = {},
+    /** Tipp auf "zuklappen" unter einer aufgeklappten Karte. */
+    onCollapse: (xref: String) -> Unit = {},
 ) {
     if (layout == null) {
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -231,11 +234,13 @@ fun FamilyTreeView(
 
                             val expand = layout.expandAt(x, y)
                             val expandDown = layout.expandDownAt(x, y)
+                            val collapse = layout.collapseAt(x, y)
                             val plus = layout.plusAt(x, y)
                             val box = layout.boxAt(x, y)
                             when {
                                 expand != null && expand.ahnen != null -> onExpand(expand.ahnen, expand.person.xref)
                                 expandDown != null -> onExpandDown(expandDown.person.xref)
+                                collapse != null -> onCollapse(collapse.person.xref)
                                 plus != null -> onPlus(plus.person)
                                 box != null && !box.person.isPrivate -> {
                                     centerOn(box)
@@ -393,8 +398,8 @@ private fun TreeCard(box: TreeBox, level: DetailLevel, isSelected: Boolean, show
         }
 
         // Kinder-Symbol: unter dieser Person gibt es weitere Nachkommen - Tipp klappt den Baum nach unten auf
-        if (box.canExpandDown && readable) {
-            Box(Modifier.align(Alignment.BottomCenter).offset(x = expandDownDx.dp, y = (TreeLayout.EXPAND_OFFSET + 5f).dp)) { ExpandDownBadge() }
+        if ((box.canExpandDown || box.canCollapse) && readable) {
+            Box(Modifier.align(Alignment.BottomCenter).offset(x = expandDownDx.dp, y = (TreeLayout.EXPAND_OFFSET + 5f).dp)) { ExpandDownBadge(zu = box.canCollapse) }
         }
     }
 }
@@ -415,9 +420,12 @@ private fun ExpandBadge() {
     }
 }
 
-/** Drei kleine Kaestchen unter einem Strich - das Zeichen fuer "hier geht es weiter nach unten" (Kinder). */
+/**
+ * Drei kleine Kaestchen unter einem Strich - das Zeichen fuer "hier geht es weiter nach unten" (Kinder). Zum Zuklappen
+ * stehen statt der Kaestchen ein Pfeil nach oben.
+ */
 @Composable
-private fun ExpandDownBadge() {
+private fun ExpandDownBadge(zu: Boolean = false) {
     val outline = MaterialTheme.colorScheme.outline
     Column(
         Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp)).border(1.dp, outline, RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 4.dp),
@@ -425,8 +433,12 @@ private fun ExpandDownBadge() {
         verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         Box(Modifier.size(width = 30.dp, height = 2.dp).background(outline))
-        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-            repeat(3) { Box(Modifier.size(width = 8.dp, height = 8.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(2.dp))) }
+        if (zu) {
+            Text("▲", color = MaterialTheme.colorScheme.primary, fontSize = 8.sp, lineHeight = 8.sp)
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                repeat(3) { Box(Modifier.size(width = 8.dp, height = 8.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(2.dp))) }
+            }
         }
     }
 }

@@ -284,9 +284,19 @@ fun AppViewModel.expandDescendants(xref: String) {
     }
 }
 
+/** Zuklappen: die nachgeladenen Nachkommen wieder ausblenden; die Partner bleiben, das Aufklapp-Symbol kommt zurueck. */
+fun AppViewModel.collapseDescendants(xref: String) = uiState.update { state ->
+    val d = state.descendants ?: return@update state
+    state.copy(descendants = d.copy(tree = d.tree.zuklappen(xref)))
+}
+
+internal fun DescendantNode.zuklappen(xref: String): DescendantNode =
+    if (aufgeklappt && person.xref == xref) copy(families = families.map { it.copy(children = emptyList()) }, weitere = true, aufgeklappt = false)
+    else copy(families = families.map { f -> f.copy(children = f.children.map { it.zuklappen(xref) }) })
+
 /** Den aufklappbaren Knoten [xref] durch den nachgeladenen Zweig ersetzen (Person bleibt, Familien kommen dazu). */
 internal fun DescendantNode.einhaengen(xref: String, zweig: DescendantNode): DescendantNode =
-    if (weitere && person.xref == xref) copy(families = zweig.families, weitere = false)
+    if (weitere && person.xref == xref) copy(families = zweig.families, weitere = false, aufgeklappt = true)
     else copy(families = families.map { f -> f.copy(children = f.children.map { it.einhaengen(xref, zweig) }) })
 
 fun AppViewModel.setDetailTab(tab: Int) = uiState.update { it.copy(detailTab = tab) }

@@ -52,5 +52,15 @@ class NachkommenTiefeTest {
         val x = karte.centerX + layout.expandDownDx(karte)
         assertEquals("I4", layout.expandDownAt(x, karte.bottom + de.bgghome.webtrees.nativ.ui.tree.TreeLayout.EXPAND_OFFSET - 6f)?.person?.xref)
         assertEquals(null, layout.expandDownAt(karte.centerX - 60f, karte.bottom + 14f))
+
+        // Der aufgeklappte Enkel laesst sich wieder zuklappen: Kinder weg, Partner bleibt, wieder aufklappbar
+        val enkelKarte = layout.boxes.single { it.person.xref == "I3" }
+        assertTrue(enkelKarte.canCollapse)
+        assertEquals("I3", layout.collapseAt(enkelKarte.centerX + layout.expandDownDx(enkelKarte), enkelKarte.bottom + de.bgghome.webtrees.nativ.ui.tree.TreeLayout.EXPAND_OFFSET - 6f)?.person?.xref)
+        val zu = neu.zuklappen("I3").families.single().children.single().families.single().children.single()
+        assertTrue(zu.weitere)
+        assertFalse(zu.aufgeklappt)
+        assertEquals("I30", zu.families.single().spouse?.xref)
+        assertEquals(emptyList(), zu.families.single().children)
     }
 }

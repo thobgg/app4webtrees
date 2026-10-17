@@ -612,6 +612,8 @@ data class DescendantNode(
     val families: List<DescendantFamily> = emptyList(),
     /** Nur in der App: unterste gezeigte Reihe, unter der es weitere Nachkommen gibt (Baum zum Aufklappen nach unten). */
     @kotlinx.serialization.Transient val weitere: Boolean = false,
+    /** Nur in der App: von Hand aufgeklappt - laesst sich wieder zuklappen. */
+    @kotlinx.serialization.Transient val aufgeklappt: Boolean = false,
 )
 
 @Serializable

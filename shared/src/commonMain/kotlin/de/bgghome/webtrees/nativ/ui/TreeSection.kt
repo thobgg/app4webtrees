@@ -151,6 +151,7 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean) {
         onPlus = { viewModel.requestAddRelative(it.xref) },
         onExpand = viewModel::expandAncestors,
         onExpandDown = viewModel::expandDescendants,
+        onCollapse = viewModel::collapseDescendants,
         // Langer Druck haengt den Baum um - am Handy der kurze Weg zu den Ahnen eines Partners, ohne Umweg ueber das Profil.
         onMakeRoot = { viewModel.setRoot(it.xref) },
     )
