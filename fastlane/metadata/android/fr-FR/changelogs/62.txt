@@ -1,0 +1,1 @@
+Les événements affichent tous leurs détails venant du serveur : âge, cause, organisme, coordonnées et plus (nécessite api4webtrees 1.23). Prêt pour GEDCOM 7 : lit les fichiers GEDCOM 7.0 et est prêt pour GEDCOM 7.0 sur le serveur.

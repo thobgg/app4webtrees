@@ -1,0 +1,1 @@
+Gebeurtenissen tonen al hun gegevens van de server: leeftijd, oorzaak, instantie, contactgegevens en meer (vereist api4webtrees 1.23). Klaar voor GEDCOM 7: leest GEDCOM 7.0-bestanden en is klaar voor GEDCOM 7.0 op de server.
