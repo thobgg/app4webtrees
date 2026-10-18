@@ -24,7 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
@@ -220,15 +223,25 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
             fact.notizenOhnePaten().forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             // Paten und Trauzeugen (ab API-Stufe 19): verlinkte anklickbar, freie als Text
             PatenZeilen(fact, onPerson)
-            // Je Verweis eine Zeile; am Desktop oeffnet ein Klick die Quelle (LocalSourceOpener), am Handy nur Text.
+            // Je Verweis eine Zeile; der Titel oeffnet die Quelle (LocalSourceOpener), eine Adresse in der Seitenangabe den
+            // Browser - frueher war die ganze Zeile ein Klick auf die Quelle, auch die Adresse (Issue 29).
             val oeffnen = LocalSourceOpener.current
+            val linkFarbe = MaterialTheme.colorScheme.primary
+            val (vorText, nachText) = stringResource(Res.string.fact_sources, "\u0000").split('\u0000').let { it.first() to it.getOrElse(1) { "" } }
             fact.sources.forEach { q ->
-                val klickbar = oeffnen != null && !q.istText
+                val titel = q.title.ifBlank { q.xref }
+                val seite = q.page.replace('\n', ' ').trim()
                 Text(
-                    stringResource(Res.string.fact_sources, q.mitSeite()),
-                    modifier = if (klickbar) Modifier.clickable { oeffnen(q.xref) } else Modifier,
+                    buildAnnotatedString {
+                        append(vorText)
+                        if (oeffnen != null && !q.istText) {
+                            withLink(LinkAnnotation.Clickable("quelle", TextLinkStyles(SpanStyle(color = linkFarbe))) { oeffnen(q.xref) }) { append(titel) }
+                        } else mitAdressen(titel, linkFarbe)
+                        if (seite.isNotEmpty()) { append(", "); mitAdressen(seite, linkFarbe) }
+                        append(nachText)
+                    },
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (klickbar) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -244,4 +257,19 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
             }
         }
     }
+}
+
+private val ADRESSE = Regex("""(?:https?://|www\.)[^\s<>"]+""")
+
+/** Haengt den Text an und macht Web-Adressen darin zu Links, die der Browser oeffnet (Satzzeichen am Ende gehoeren nicht dazu). */
+internal fun AnnotatedString.Builder.mitAdressen(text: String, farbe: Color) {
+    var pos = 0
+    ADRESSE.findAll(text).forEach { m ->
+        val adresse = m.value.trimEnd('.', ',', ';', ':', ')', ']', '!', '?')
+        append(text.substring(pos, m.range.first))
+        val ziel = if (adresse.startsWith("www.")) "https://$adresse" else adresse
+        withLink(LinkAnnotation.Url(ziel, TextLinkStyles(SpanStyle(color = farbe, textDecoration = TextDecoration.Underline)))) { append(adresse) }
+        pos = m.range.first + adresse.length
+    }
+    append(text.substring(pos))
 }

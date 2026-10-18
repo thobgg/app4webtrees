@@ -3,6 +3,7 @@ package de.bgghome.webtrees.nativ.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.view.View
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -87,11 +88,28 @@ actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
                         override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
                             kannZurueck = view.canGoBack()
                         }
+
+                        override fun onPageFinished(view: WebView, url: String?) {
+                            view.evaluateJavascript(MENUE_HOEHE, null)
+                        }
                     }
-                    loadUrl(url)
+                    // Erst laden, wenn das WebView seine Groesse hat: sonst rechnet es "vh" mit der Hoehe 0 und die
+                    // aufgeklappten webtrees-Menues (max-height: 90vh) bleiben ein schmaler Streifen (Issue 28).
+                    addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                        override fun onLayoutChange(v: View, l: Int, t: Int, r: Int, b: Int, ol: Int, ot: Int, or: Int, ob: Int) {
+                            if (b - t <= 0) return
+                            v.removeOnLayoutChangeListener(this)
+                            loadUrl(url)
+                        }
+                    })
                     webView = this
                 }
             },
         )
     }
 }
+
+/** Menues hoechstens 90 % der wirklichen Fensterhoehe in Pixeln statt 90vh, auch nach Drehen des Geraets. */
+private const val MENUE_HOEHE = """(function(){var s=document.getElementById('wtand-menue');if(!s){s=document.createElement('style');s.id='wtand-menue';
+document.head.appendChild(s);addEventListener('resize',function(){s.textContent='.dropdown-menu{max-height:'+Math.round(innerHeight*0.9)+'px!important}';});}
+s.textContent='.dropdown-menu{max-height:'+Math.round(innerHeight*0.9)+'px!important}';})()"""
