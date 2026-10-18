@@ -1,0 +1,1 @@
+Los menús de la vista de webtrees se despliegan por completo en la aplicación. Una dirección web en una cita de fuente abre el navegador; el título de la fuente abre la fuente.

@@ -1,0 +1,1 @@
+Menüs der webtrees-Ansicht klappen in der App ganz auf. Eine Web-Adresse im Quellenverweis öffnet den Browser, der Quellentitel die Quelle.

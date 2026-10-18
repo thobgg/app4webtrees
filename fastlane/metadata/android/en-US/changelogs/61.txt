@@ -1,0 +1,1 @@
+Menus in the webtrees view now open fully inside the app. A web address in a source citation opens the browser; the source title opens the source.

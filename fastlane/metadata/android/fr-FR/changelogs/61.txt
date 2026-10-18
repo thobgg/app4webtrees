@@ -1,0 +1,1 @@
+Les menus de la vue webtrees s’ouvrent entièrement dans l’application. Une adresse web dans une citation de source ouvre le navigateur, le titre de la source ouvre la source.

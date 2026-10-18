@@ -1,0 +1,1 @@
+Menu’s in de webtrees-weergave klappen in de app volledig uit. Een webadres in een bronvermelding opent de browser, de brontitel opent de bron.
