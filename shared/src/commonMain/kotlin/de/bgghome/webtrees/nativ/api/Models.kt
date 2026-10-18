@@ -155,7 +155,16 @@ data class FactJson(
     val gedcomValue: String? = null,
     /** Ab API-Stufe 36: wer das Ereignis sehen darf - visitor, member oder manager (RESN, Datenschutzregeln des Baums). */
     val access: String? = null,
+    /** Ab API-Stufe 37: die übrigen Angaben (Alter, Ursache, Telefon, Abstammung ...), fertig übersetzt vom Server. */
+    val details: List<FactDetail> = emptyList(),
 )
+
+/** Eine Angabe am Ereignis, wie webtrees sie zeigt; [level] 0 steht direkt am Ereignis, 1 darunter ... */
+@Serializable
+data class FactDetail(val tag: String = "", val label: String = "", val value: String = "", val level: Int = 0) {
+    /** "Alter: 8 Tage", ohne Wert nur die Bezeichnung. */
+    val text: String get() = if (value.isBlank()) label else "$label: $value"
+}
 
 /** Eine GEDCOM-L-Angabe an einem Ereignis: [tag] als Pfad unter dem Ereignis ("PLAC:_GOV"), [date] roh wie im GEDCOM. */
 @Serializable

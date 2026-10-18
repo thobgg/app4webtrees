@@ -781,6 +781,8 @@ private fun EreignisDetail(row: FactRow?, geburtJd: Int, modifier: Modifier, can
                         // Adresse (ab API-Stufe 33) und GEDCOM-L-Angaben am Ort und an der Adresse (ab Stufe 34)
                         Zeile(stringResource(Res.string.desk_detail_address), f.address.orEmpty())
                         f.extras.forEach { z -> Zeile(gedcomLLabel(z.tag), gedcomLWert(z.value, z.date)) }
+                        // Uebrige Angaben (ab API-Stufe 37), vom Server fertig beschriftet
+                        f.details.forEach { d -> Zeile("   ".repeat(d.level) + d.label, d.value) }
                         val civil = heiratsartText(Heiratsart.Standesamtlich); val reli = heiratsartText(Heiratsart.Kirchlich)
                         val partners = heiratsartText(Heiratsart.Partnerschaft); val common = heiratsartText(Heiratsart.OhneTrauschein)
                         f.artZusatz { when (it) { Heiratsart.Standesamtlich -> civil; Heiratsart.Kirchlich -> reli; Heiratsart.Partnerschaft -> partners; Heiratsart.OhneTrauschein -> common } }

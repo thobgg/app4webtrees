@@ -223,6 +223,8 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
             fact.notizenOhnePaten().forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             // Paten und Trauzeugen (ab API-Stufe 19): verlinkte anklickbar, freie als Text
             PatenZeilen(fact, onPerson)
+            // Uebrige Angaben (ab API-Stufe 37), vom Server fertig beschriftet
+            fact.details.forEach { Text("   ".repeat(it.level) + it.text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             // Je Verweis eine Zeile; der Titel oeffnet die Quelle (LocalSourceOpener), eine Adresse in der Seitenangabe den
             // Browser - frueher war die ganze Zeile ein Klick auf die Quelle, auch die Adresse (Issue 29).
             val oeffnen = LocalSourceOpener.current

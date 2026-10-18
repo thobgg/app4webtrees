@@ -219,6 +219,7 @@ fun personenblattZeilen(d: IndividualDetail): List<Zeile> = buildList {
     d.facts.filter { it.known && it.tag != "NOTE" }.ohneDoppelteAsso().forEach { f ->
         add(Zeile("${f.label}: ${ereignis(f)}".trimEnd(':', ' '), 1))
         patenZeilenText(f).forEach { add(Zeile(it, 2)) }
+        f.details.forEach { add(Zeile(it.text, 2 + it.level)) }
     }
     d.parentFamilies.firstOrNull()?.let { fam ->
         add(Zeile("")); add(Zeile(Texte.t(Res.string.desk_tab_parents), fett = true))
