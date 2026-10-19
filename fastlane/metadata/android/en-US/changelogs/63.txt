@@ -1,0 +1,1 @@
+Smaller app: the code is shrunk when building (R8); the APK is about a third of the size. Otherwise unchanged.

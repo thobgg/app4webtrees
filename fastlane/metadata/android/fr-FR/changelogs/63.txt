@@ -1,0 +1,1 @@
+Application plus légère : le code est réduit à la compilation (R8), l’APK fait environ un tiers de la taille. Sinon inchangée.

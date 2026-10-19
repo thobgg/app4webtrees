@@ -1,0 +1,1 @@
+Aplicación más pequeña: el código se reduce al compilar (R8), el APK ocupa aproximadamente un tercio. Por lo demás, sin cambios.

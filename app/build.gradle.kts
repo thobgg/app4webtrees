@@ -55,7 +55,7 @@ android {
             }
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             // Kein META-INF/version-control-info.textproto (Commit-Hash des Bauplatzes) ins APK:
             // sonst ist der F-Droid-Bau nie byte-gleich zum veroeffentlichten APK.
             vcsInfo { include = false }

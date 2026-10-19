@@ -1,0 +1,1 @@
+Kleinere app: de code wordt bij het bouwen verkleind (R8), de APK is ongeveer een derde zo groot. Verder ongewijzigd.
