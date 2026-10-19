@@ -319,6 +319,10 @@ class LokaleEinrichtung(
                 schritt("Archiv (Sammlungen) wird eingerichtet …")
                 File(module, "sammlungen").deleteRecursively()
                 LokalerServer.entpacken(sammlungenZip, module, ohneOberordner = false)
+            } else if (de.bgghome.webtrees.nativ.Variante.kennung.isNotEmpty()) {
+                // wtTux7/wtWin7: Sammlungen 1.x laeuft nicht auf webtrees7 (Routing von webtrees 2.3) - ein frueher
+                // mitgeliefertes Modul wieder entfernen, sonst scheitert webtrees beim Start des Moduls
+                File(module, "sammlungen").deleteRecursively()
             }
             marke.writeText(stand)
         }

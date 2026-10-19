@@ -95,8 +95,9 @@ val lokalPaket by tasks.registering {
             project.property("lokal.webtreesSha256") as String).copyTo(File(web, "webtrees-$wt.zip"))
         laden("https://github.com/thobgg/api4webtrees/releases/download/v$api/api4webtrees-v$api.zip", "api4webtrees-v$api.zip",
             project.property("lokal.api4webtreesSha256") as String).copyTo(File(web, "api4webtrees-v$api.zip"))
+        // Leer = ohne Modul Sammlungen (Variante 7: Sammlungen 1.x laeuft nicht auf webtrees7)
         val sam = project.property("lokal.sammlungen") as String
-        laden("https://github.com/thobgg/webtrees-sammlungen/releases/download/v$sam/sammlungen-v$sam.zip", "sammlungen-v$sam.zip",
+        if (sam.isNotBlank()) laden("https://github.com/thobgg/webtrees-sammlungen/releases/download/v$sam/sammlungen-v$sam.zip", "sammlungen-v$sam.zip",
             project.property("lokal.sammlungenSha256") as String).copyTo(File(web, "sammlungen-v$sam.zip"))
         if (phpSystem != null) {
             val endung = if (phpSystem.startsWith("windows")) "zip" else "tar.gz"
