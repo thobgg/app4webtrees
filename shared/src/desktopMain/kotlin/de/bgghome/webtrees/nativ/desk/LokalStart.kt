@@ -29,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.lokal.LokalBetrieb
+import de.bgghome.webtrees.nativ.lokal.LokalOrte
+import de.bgghome.webtrees.nativ.lokal.LokalerZugang
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.ui.AppRoot
 import de.bgghome.webtrees.nativ.ui.AppViewModel
@@ -69,12 +71,15 @@ private fun LokalAnlegen(viewModel: AppViewModel) {
                 Modifier.widthIn(max = 460.dp).fillMaxWidth().padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(stringResource(Res.string.lokal_heading), style = MaterialTheme.typography.headlineMedium)
+                // Gibt es schon Stammbaeume auf diesem PC, oeffnet der Knopf den zuletzt benutzten - dann heisst er auch so
+                // (vorher "Stammbaum anlegen", das hielt niemand fuer den Weg zurueck, Issue 31).
+                val vorhanden = remember { LokalOrte.eingerichtet && LokalerZugang.laden() != null }
+                Text(stringResource(if (vorhanden) Res.string.lokal_heading_existing else Res.string.lokal_heading), style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    stringResource(Res.string.lokal_text, appName),
+                    if (vorhanden) stringResource(Res.string.lokal_text_existing) else stringResource(Res.string.lokal_text, appName),
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                LokalAnlegenFeld(viewModel)
+                LokalAnlegenFeld(viewModel, oeffnen = vorhanden)
                 Text(
                     stringResource(Res.string.lokal_hint),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -89,7 +94,7 @@ private fun LokalAnlegen(viewModel: AppViewModel) {
  * "Stammbäume auf diesem PC" (dort mit [neu]: immer ein weiterer Baum, nie der vorhandene).
  */
 @Composable
-internal fun LokalAnlegenFeld(viewModel: AppViewModel, neu: Boolean = false, onFertig: () -> Unit = {}) {
+internal fun LokalAnlegenFeld(viewModel: AppViewModel, neu: Boolean = false, oeffnen: Boolean = false, onFertig: () -> Unit = {}) {
     val vorgabe = stringResource(Res.string.lokal_title_default)
     var titel by remember { mutableStateOf(vorgabe) }
     var schritt by remember { mutableStateOf<String?>(null) }
@@ -118,15 +123,16 @@ internal fun LokalAnlegenFeld(viewModel: AppViewModel, neu: Boolean = false, onF
     val dialogTitel = stringResource(Res.string.lokal_gedcom_choose)
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedTextField(
+        // Mit [oeffnen] kein Namensfeld: der Knopf oeffnet den vorhandenen Baum (LokaleEinrichtung.einrichten ohne GEDCOM)
+        if (!oeffnen) OutlinedTextField(
             value = titel, onValueChange = { titel = it }, singleLine = true, enabled = schritt == null,
             label = { Text(stringResource(Res.string.lokal_title_label)) }, modifier = Modifier.fillMaxWidth(),
         )
         Button(
             onClick = { anlegen(null) },
-            enabled = schritt == null && titel.isNotBlank(),
+            enabled = schritt == null && (oeffnen || titel.isNotBlank()),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(stringResource(Res.string.lokal_create)) }
+        ) { Text(stringResource(if (oeffnen) Res.string.lokal_trees_open else Res.string.lokal_create)) }
         OutlinedButton(
             onClick = { gedcomWaehlen(dialogTitel)?.let(::anlegen) },
             enabled = schritt == null,

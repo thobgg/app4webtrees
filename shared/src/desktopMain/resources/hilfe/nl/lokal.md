@@ -4,7 +4,7 @@ Zonder server legt wtWin de stamboom op deze computer aan. Op de achtergrond dra
 
 ## Aanmaken
 
-Bij de eerste start, rechts: voer een naam in en klik op **Stamboom aanmaken** (leeg) of **Uit een GEDCOM-bestand overnemen …**. Om over te stappen vanuit een ander programma exporteert u daar een GEDCOM-bestand (`.ged`) en kiest u het hier. Personen, gezinnen, gebeurtenissen, bronnen en notities worden overgenomen. Het GEDCOM-bestand zelf blijft ongewijzigd; een tweede import maakt een extra stamboom ernaast aan en overschrijft nooit. Na **Bestand › Afmelden** staat deze mogelijkheid weer rechts naast het aanmelden – ook als u eerder met een server verbonden was.
+Bij de eerste start, rechts: voer een naam in en klik op **Stamboom aanmaken** (leeg) of **Uit een GEDCOM-bestand overnemen …**. Om over te stappen vanuit een ander programma exporteert u daar een GEDCOM-bestand (`.ged`) en kiest u het hier. Personen, gezinnen, gebeurtenissen, bronnen en notities worden overgenomen. Het GEDCOM-bestand zelf blijft ongewijzigd; een tweede import maakt een extra stamboom ernaast aan en overschrijft nooit. Na **Bestand › Afmelden** staat deze mogelijkheid weer rechts naast het aanmelden – ook als u eerder met een server verbonden was. Staan er al stambomen op deze pc, dan heet de knop daar **Openen** en opent hij de laatst gebruikte.
 
 Het bestand mag UTF-8 (met of zonder byte order mark), UTF-16, ANSEL of ANSI zijn; de tekenset wordt herkend en omgezet zoals bij de import in webtrees. Afzonderlijke onbruikbare records (zoals dubbele ID's) worden overgeslagen en in `import.log` vermeld, de rest wordt overgenomen.
 

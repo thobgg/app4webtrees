@@ -894,6 +894,8 @@
     <!-- Stufe 4: Stammbaum auf diesem PC -->
     <string name="lokal_heading">Neuer Stammbaum auf diesem PC</string>
     <string name="lokal_text">Neu anfangen oder vom bisherigen Programm umsteigen: %1$s legt deinen Stammbaum auf diesem Computer an. Kein Server, kein Passwort, kein Internet nötig. Soll die Familie später mitlesen, zieht der Stammbaum per GEDCOM-Export mit seinen Fotos auf eine NAS oder zu einem Webhoster um – %1$s bedienst du danach wie gewohnt.</string>
+    <string name="lokal_heading_existing">Stammbaum auf diesem PC</string>
+    <string name="lokal_text_existing">Öffnet den zuletzt benutzten Stammbaum auf diesem Computer. Zu einem anderen wechselst du danach über Datei › Stammbäume auf diesem PC …</string>
     <string name="lokal_title_label">Name des Stammbaums</string>
     <string name="lokal_title_default">Mein Stammbaum</string>
     <string name="lokal_create">Stammbaum anlegen</string>

@@ -899,6 +899,8 @@
     <!-- Stufe 4: Stammbaum auf diesem PC -->
     <string name="lokal_heading">New family tree on this PC</string>
     <string name="lokal_text">Start from scratch or switch from another program: %1$s keeps your family tree on this computer. No server, no password, no internet needed. If the family should see it later, the tree moves with its photos to a NAS or web host via GEDCOM export – you keep using the program as before.</string>
+    <string name="lokal_heading_existing">Family tree on this PC</string>
+    <string name="lokal_text_existing">Opens the family tree on this computer you used last. Afterwards you switch to another one via File › Family trees on this PC …</string>
     <string name="lokal_title_label">Name of the family tree</string>
     <string name="lokal_title_default">My family tree</string>
     <string name="lokal_create">Create family tree</string>

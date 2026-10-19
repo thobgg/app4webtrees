@@ -894,6 +894,8 @@
     <!-- Étape 4 : arbre généalogique sur cet ordinateur -->
     <string name="lokal_heading">Nouvel arbre généalogique sur cet ordinateur</string>
     <string name="lokal_text">Partez de zéro ou changez de logiciel : %1$s conserve votre arbre généalogique sur cet ordinateur. Pas de serveur, pas de mot de passe, pas d’Internet nécessaire. Si la famille doit le voir plus tard, l’arbre déménage avec ses photos vers un NAS ou un hébergeur web par export GEDCOM – et vous continuez à utiliser le programme comme avant.</string>
+    <string name="lokal_heading_existing">Arbre sur ce PC</string>
+    <string name="lokal_text_existing">Ouvre le dernier arbre utilisé sur cet ordinateur. Pour passer à un autre, utilisez ensuite Fichier › Arbres sur ce PC …</string>
     <string name="lokal_title_label">Nom de l’arbre généalogique</string>
     <string name="lokal_title_default">Mon arbre généalogique</string>
     <string name="lokal_create">Créer l’arbre généalogique</string>

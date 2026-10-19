@@ -4,7 +4,7 @@ Ohne Server legt wtWin den Stammbaum auf diesem Computer an. Im Hintergrund arbe
 
 ## Anlegen
 
-Beim ersten Start rechts: einen Namen eingeben und **Stammbaum anlegen** (leer) oder **Aus GEDCOM-Datei übernehmen …**. Für den Umstieg exportierst du im bisherigen Programm eine GEDCOM-Datei (`.ged`) und wählst sie hier. Übernommen werden Personen, Familien, Ereignisse, Quellen und Notizen. Die GEDCOM-Datei selbst bleibt unverändert; ein zweiter Import legt einen weiteren Stammbaum daneben an und überschreibt nie. Nach **Datei › Abmelden** steht dieser Weg wieder rechts neben der Anmeldung – auch wenn du vorher mit einem Server verbunden warst.
+Beim ersten Start rechts: einen Namen eingeben und **Stammbaum anlegen** (leer) oder **Aus GEDCOM-Datei übernehmen …**. Für den Umstieg exportierst du im bisherigen Programm eine GEDCOM-Datei (`.ged`) und wählst sie hier. Übernommen werden Personen, Familien, Ereignisse, Quellen und Notizen. Die GEDCOM-Datei selbst bleibt unverändert; ein zweiter Import legt einen weiteren Stammbaum daneben an und überschreibt nie. Nach **Datei › Abmelden** steht dieser Weg wieder rechts neben der Anmeldung – auch wenn du vorher mit einem Server verbunden warst. Gibt es schon Stammbäume auf diesem PC, heißt der Knopf dort **Öffnen** und öffnet den zuletzt benutzten.
 
 Die Datei darf in UTF-8 (mit oder ohne Byte-Reihenfolge-Marke), UTF-16, ANSEL oder ANSI vorliegen; der Zeichensatz wird wie beim Import in webtrees erkannt und gewandelt. Einzelne unbrauchbare Datensätze (etwa doppelte Kennzeichen) werden übersprungen und in `import.log` aufgeführt, der Rest kommt an.
 

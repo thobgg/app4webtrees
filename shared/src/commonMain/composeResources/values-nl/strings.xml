@@ -884,6 +884,8 @@
     <string name="desk_check_untick">Opnieuw openen</string>
     <string name="lokal_heading">Nieuwe stamboom op deze pc</string>
     <string name="lokal_text">Opnieuw beginnen of overstappen van een ander programma: %1$s zet uw stamboom op deze computer. Geen server, geen wachtwoord, geen internet nodig. Wil de familie later meelezen, dan verhuist de stamboom met zijn foto’s via GEDCOM-export naar een NAS of een webhoster – %1$s gebruikt u daarna zoals u gewend bent.</string>
+    <string name="lokal_heading_existing">Stamboom op deze pc</string>
+    <string name="lokal_text_existing">Opent de laatst gebruikte stamboom op deze computer. Daarna wisselt u naar een andere via Bestand › Stambomen op deze pc …</string>
     <string name="lokal_title_label">Naam van de stamboom</string>
     <string name="lokal_title_default">Mijn stamboom</string>
     <string name="lokal_create">Stamboom aanmaken</string>

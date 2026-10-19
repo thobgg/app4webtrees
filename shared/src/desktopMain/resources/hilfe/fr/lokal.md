@@ -4,7 +4,7 @@ Sans serveur, wtWin crée l'arbre généalogique sur cet ordinateur. En arrière
 
 ## Créer
 
-Au premier démarrage, à droite : saisissez un nom et cliquez sur **Créer l'arbre généalogique** (vide) ou sur **Importer depuis un fichier GEDCOM …**. Pour venir d'un autre programme, exportez-y un fichier GEDCOM (`.ged`) et choisissez-le ici. Les personnes, familles, événements, sources et notes sont importés. Le fichier GEDCOM lui-même reste inchangé ; un second import crée un autre arbre à côté et n'écrase jamais rien. Après **Fichier › Se déconnecter**, cette option revient à droite de la connexion – même si vous étiez connecté à un serveur auparavant.
+Au premier démarrage, à droite : saisissez un nom et cliquez sur **Créer l'arbre généalogique** (vide) ou sur **Importer depuis un fichier GEDCOM …**. Pour venir d'un autre programme, exportez-y un fichier GEDCOM (`.ged`) et choisissez-le ici. Les personnes, familles, événements, sources et notes sont importés. Le fichier GEDCOM lui-même reste inchangé ; un second import crée un autre arbre à côté et n'écrase jamais rien. Après **Fichier › Se déconnecter**, cette option revient à droite de la connexion – même si vous étiez connecté à un serveur auparavant. S’il existe déjà des arbres sur ce PC, le bouton s’appelle **Ouvrir** et ouvre le dernier utilisé.
 
 Le fichier peut être en UTF-8 (avec ou sans indicateur d'ordre des octets), UTF-16, ANSEL ou ANSI ; le jeu de caractères est détecté et converti comme lors de l'import dans webtrees. Les enregistrements isolés inutilisables (comme des ID en double) sont ignorés et listés dans `import.log`, le reste est importé.
 

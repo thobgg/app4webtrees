@@ -4,7 +4,7 @@ Without a server, wtWin creates the family tree on this computer. In the backgro
 
 ## Creating
 
-On first start, on the right: enter a name and click **Create family tree** (empty) or **Import from GEDCOM file …**. To move over from another program, export a GEDCOM file (`.ged`) there and choose it here. Persons, families, events, sources and notes are imported. The GEDCOM file itself stays unchanged; a second import creates another tree next to it and never overwrites. After **File › Sign out** this option is back on the right next to the sign-in – also if you were connected to a server before.
+On first start, on the right: enter a name and click **Create family tree** (empty) or **Import from GEDCOM file …**. To move over from another program, export a GEDCOM file (`.ged`) there and choose it here. Persons, families, events, sources and notes are imported. The GEDCOM file itself stays unchanged; a second import creates another tree next to it and never overwrites. After **File › Sign out** this option is back on the right next to the sign-in – also if you were connected to a server before. If there are family trees on this PC already, the button there is called **Open** and opens the one you used last.
 
 The file may be UTF-8 (with or without byte order mark), UTF-16, ANSEL or ANSI; the character set is detected and converted as in the webtrees import. Single unusable records (such as duplicate IDs) are skipped and listed in `import.log`, the rest is imported.
 
