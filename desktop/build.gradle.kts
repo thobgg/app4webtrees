@@ -49,11 +49,14 @@ val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.$co
 // seinem eigenen System gebaut, darum entscheidet das System, auf dem Gradle laeuft.
 // wtMac kam am 27.09.2026 dazu (versuchsweise, gebaut nur auf GitHub).
 val osName = System.getProperty("os.name").orEmpty()
+// Paketvariante "7" (wtand.variante in gradle.properties): wtWin7/wtTux7 fuer webtrees7, installiert und laeuft neben
+// der normalen Fassung - eigener Paketname, eigene AppId, eigene Ordner (Variante.kt).
+val variante = (findProperty("wtand.variante") as String?).orEmpty()
 val appName = when {
     osName.startsWith("Windows") -> "wtWin"
     osName.startsWith("Mac") -> "wtMac"
     else -> "wtTux"
-}
+} + variante
 
 // Was "Neuen Stammbaum auf diesem PC anlegen" braucht, liegt im Paket (mitliefern, damit das Anlegen
 // auch ohne Internet klappt). Landet unter resources/ (compose.application.resources.dir):
@@ -114,6 +117,7 @@ compose.desktop {
         mainClass = "de.bgghome.webtrees.nativ.desktop.MainKt"
         jvmArgs += "-Dwtand.desktopBuild=${property("wtand.desktopBuild")}"
         jvmArgs += "-Dwtand.versionName=$versionName"
+        jvmArgs += "-Dwtand.variante=$variante"
         // Build-Nummer wie im exe-Namen (wtWin-1.26.157.exe), damit "Ueber" zeigt, welche exe laeuft
         jvmArgs += "-Dwtand.build=$commitZahl"
 
@@ -132,12 +136,12 @@ compose.desktop {
             // Dieselbe Nummer wie die APK (gradle.properties). Windows
             // Installer verlangt rein numerisch x.y.z.
             packageVersion = versionName
-            description = "$appName - client for webtrees (app4webtrees)"
+            description = "$appName - client for webtrees (app4webtrees)" + if (variante == "7") ", webtrees7 / GEDCOM 7.0" else ""
             vendor = "bgg-home.de"
 
             linux {
                 menuGroup = "Office"
-                packageName = "wttux"
+                packageName = "wttux$variante"
                 appRelease = property("wtand.desktopBuild") as String
                 // Dasselbe Symbol wie wtAnd; ohne Angabe zeigt das Menue das Java-Standardsymbol.
                 iconFile.set(project.file("icons/app.png"))
@@ -189,7 +193,7 @@ tasks.register<Exec>("packageInno") {
     onlyIf { osName.startsWith("Windows") }
     val quelle = layout.buildDirectory.dir("compose/binaries/main/app/$appName").get().asFile
     val ziel = layout.buildDirectory.dir("compose/binaries/main/inno").get().asFile
-    val skript = project.file("installer/wtWin.iss")
+    val skript = project.file("installer/wtWin$variante.iss")
     inputs.dir(quelle); inputs.file(skript); outputs.dir(ziel)
     doFirst {
         val kandidaten = listOfNotNull(

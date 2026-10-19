@@ -114,7 +114,7 @@ internal class PruefWahl(private val prefs: de.bgghome.webtrees.nativ.data.Ablag
 }
 
 /** Die Abhakliste liegt als Datei bei den Einstellungen des Programms (nicht im Zwischenspeicher, der darf weg). */
-internal class AbhakAblage(private val programm: String = "app4webtrees") {
+internal class AbhakAblage(private val programm: String = de.bgghome.webtrees.nativ.Variante.ordner) {
     val datei: File by lazy {
         val basis = System.getenv("APPDATA")?.takeIf { it.isNotBlank() }?.let(::File)
             ?: System.getenv("XDG_CONFIG_HOME")?.takeIf { it.isNotBlank() }?.let(::File)

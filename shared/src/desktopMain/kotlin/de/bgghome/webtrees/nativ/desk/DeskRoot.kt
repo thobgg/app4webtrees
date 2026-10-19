@@ -628,9 +628,12 @@ private fun FrameWindowScope.DeskMenuBar(
             }
             Menu(stringResource(Res.string.desk_menu_help)) {
                 Item(stringResource(Res.string.desk_help), shortcut = KeyShortcut(Key.F1), onClick = onHilfe)
-                Separator()
-                CheckboxItem(stringResource(Res.string.desk_update_check), checked = UpdatePruefung.aktiv.value, onCheckedChange = { UpdatePruefung.setzen(it) })
-                Item(stringResource(Res.string.desk_update_now), onClick = onUpdate)
+                // Die Variante (wtTux7/wtWin7) hat keine oeffentliche Version, gegen die sie pruefen koennte
+                if (de.bgghome.webtrees.nativ.Variante.kennung.isEmpty()) {
+                    Separator()
+                    CheckboxItem(stringResource(Res.string.desk_update_check), checked = UpdatePruefung.aktiv.value, onCheckedChange = { UpdatePruefung.setzen(it) })
+                    Item(stringResource(Res.string.desk_update_now), onClick = onUpdate)
+                }
                 Separator()
                 Item(stringResource(Res.string.desk_about, LocalAppName.current), onClick = onAbout)
             }
@@ -1280,6 +1283,7 @@ private fun UeberDialog(state: UiState, viewModel: AppViewModel, appName: String
                 // Mit Build-Nummer wie im Namen der exe ("1.26.157"), damit man sieht, welches Paket laeuft
                 val version = viewModel.versionName + (System.getProperty("wtand.build")?.let { ".$it" } ?: "")
                 Text(stringResource(Res.string.desk_about_text, appName, version))
+                de.bgghome.webtrees.nativ.Variante.zusatz.takeIf { it.isNotEmpty() }?.let { Text(it, fontWeight = FontWeight.SemiBold) }
                 Text(stringResource(Res.string.app_author), style = MaterialTheme.typography.bodySmall)
                 state.info?.module?.takeIf { it.isNotEmpty() }?.let {
                     Text(stringResource(Res.string.menu_about_module, "api4webtrees $it"), style = MaterialTheme.typography.bodySmall)

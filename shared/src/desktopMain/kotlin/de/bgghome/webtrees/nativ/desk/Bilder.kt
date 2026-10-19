@@ -50,7 +50,7 @@ object Bilder {
         val basis = System.getenv("XDG_CACHE_HOME")?.takeIf { it.isNotBlank() }?.let(::File)
             ?: System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let(::File)
             ?: File(System.getProperty("user.home"), ".cache")
-        File(basis, "app4webtrees")
+        File(basis, de.bgghome.webtrees.nativ.Variante.ordner)
     }
 
     fun cacheOrdner(server: String, tree: String): File = File(basisOrdner(), "medien/${schluessel(server)}/${tree.replace(Regex("[^A-Za-z0-9._-]"), "_")}")
