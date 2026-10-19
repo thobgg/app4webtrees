@@ -1,14 +1,9 @@
-# wtWin: der Windows-Installer (Inno Setup, desktop/installer/wtWin.iss), gebaut auf GitHub statt auf einem eigenen
-# Windows-Rechner. Inno Setup ist auf den Windows-Rechnern von GitHub vorinstalliert.
-# Von Hand (Actions > wtWin > Run workflow): nur bauen, die exe liegt dann unter "Artifacts" des Laufs.
+# wtWin7: Windows-Installer der Variante fuer webtrees7 (desktop/installer/wtWin7.iss), nur in diesem privaten Repo.
+# Von Hand (Actions > wtWin7 > Run workflow): bauen, die exe liegt unter "Artifacts" des Laufs.
 # Bei einem veroeffentlichten Release: bauen und die exe an das Release haengen.
-#
-# Code-Signatur (SignPath Foundation, siehe https://wtwin.bgg-home.de/code-signing.html): sobald im Repo die
-# Variablen SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG, SIGNPATH_POLICY_SLUG und das Secret SIGNPATH_API_TOKEN
-# gesetzt sind, werden wtWin.exe (vor dem Packen) und der fertige Installer bei SignPath signiert; jede Anfrage
-# wird dort von Hand freigegeben. Ohne die Variablen laeuft alles wie bisher, unsigniert.
-# Artefakt-Konfigurationen bei SignPath: desktop/installer/signpath-wtwin-exe.xml und signpath-wtwin-installer.xml.
-name: wtWin
+# Die privaten Pakete (webtrees7, api4webtrees 2.x) kommen aus dem Release "lokal-pakete" dieses Repos, in den Namen,
+# die gradle.properties erwartet (webtrees-<lokal.webtrees>.zip, api4webtrees-v<lokal.api4webtrees>.zip).
+name: wtWin7
 
 on:
   workflow_dispatch:
@@ -17,15 +12,11 @@ on:
 
 permissions:
   contents: write
-  actions: read
 
 jobs:
   exe:
-    # Releases mit Tag gedaudit-* gehoeren gedaudit.yml, nicht hierher (13.10.2026)
-    if: github.event_name != 'release' || !startsWith(github.event.release.tag_name, 'gedaudit-')
+    if: github.event_name != 'release' || github.event.release.tag_name != 'lokal-pakete'
     runs-on: windows-latest
-    env:
-      SIGNIEREN: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' && vars.SIGNPATH_PROJECT_SLUG != '' && vars.SIGNPATH_POLICY_SLUG != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,88 +32,19 @@ jobs:
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
           Get-Item "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" | Select-Object FullName, Length
-
-      - name: Programmverzeichnis bauen
-        run: ./gradlew --no-daemon :desktop:createDistributable
-
-      # 1. Signierung: die Programmdatei, bevor der Installer sie einpackt
-      - name: wtWin.exe hochladen
-        if: env.SIGNIEREN == 'true'
-        id: exe_unsigniert
-        uses: actions/upload-artifact@v4
-        with:
-          name: wtWin-exe-unsigniert
-          path: desktop/build/compose/binaries/main/app/wtWin/wtWin.exe
-      - name: wtWin.exe signieren
-        if: env.SIGNIEREN == 'true'
-        uses: signpath/github-action-submit-signing-request@v3
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
-          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
-          artifact-configuration-slug: wtwin-exe
-          github-artifact-id: ${{ steps.exe_unsigniert.outputs.artifact-id }}
-          wait-for-completion: true
-          wait-for-completion-timeout-in-seconds: 3600
-          output-artifact-directory: signiert/exe
-      - name: Signierte wtWin.exe einsetzen
-        if: env.SIGNIEREN == 'true'
-        shell: pwsh
-        run: Copy-Item signiert/exe/wtWin.exe desktop/build/compose/binaries/main/app/wtWin/wtWin.exe -Force
-
-      # Der Installer; createDistributable darf hier nicht erneut laufen, sonst ueberschreibt es die signierte exe
+      - name: Private Pakete holen
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p desktop/build/lokal-cache
+          gh release download lokal-pakete -p '*.zip' -D desktop/build/lokal-cache --clobber
+          ls -l desktop/build/lokal-cache
       - name: Installer bauen
-        run: ./gradlew --no-daemon :desktop:packageInno -x :desktop:createDistributable
-
-      # 2. Signierung: der fertige Installer (fester Dateiname fuer die Artefakt-Konfiguration, danach zurueckbenannt)
-      - name: Installer hochladen
-        if: env.SIGNIEREN == 'true'
-        id: setup_unsigniert
-        shell: pwsh
-        run: |
-          $exe = Get-ChildItem desktop/build/compose/binaries/main/inno/*.exe | Select-Object -First 1
-          "name=$($exe.Name)" >> $env:GITHUB_OUTPUT
-          New-Item -ItemType Directory -Force signiert/setup-in | Out-Null
-          Copy-Item $exe.FullName signiert/setup-in/wtWin-Setup.exe
-      - name: Installer-Artefakt
-        if: env.SIGNIEREN == 'true'
-        id: setup_artefakt
-        uses: actions/upload-artifact@v4
-        with:
-          name: wtWin-setup-unsigniert
-          path: signiert/setup-in/wtWin-Setup.exe
-      - name: Installer signieren
-        if: env.SIGNIEREN == 'true'
-        uses: signpath/github-action-submit-signing-request@v3
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
-          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
-          artifact-configuration-slug: wtwin-installer
-          github-artifact-id: ${{ steps.setup_artefakt.outputs.artifact-id }}
-          wait-for-completion: true
-          wait-for-completion-timeout-in-seconds: 3600
-          output-artifact-directory: signiert/setup-out
-      - name: Signierten Installer einsetzen
-        if: env.SIGNIEREN == 'true'
-        shell: pwsh
-        run: Copy-Item signiert/setup-out/wtWin-Setup.exe "desktop/build/compose/binaries/main/inno/${{ steps.setup_unsigniert.outputs.name }}" -Force
-
-      - name: Signatur pruefen
-        if: env.SIGNIEREN == 'true'
-        shell: pwsh
-        run: |
-          foreach ($f in @("desktop/build/compose/binaries/main/app/wtWin/wtWin.exe") + (Get-ChildItem desktop/build/compose/binaries/main/inno/*.exe).FullName) {
-            $s = Get-AuthenticodeSignature $f
-            "$f : $($s.Status) $($s.SignerCertificate.Subject)"
-            if ($s.Status -ne 'Valid') { throw "Signatur fehlt oder ungueltig: $f" }
-          }
-
+        run: ./gradlew --no-daemon :desktop:packageInno
       - uses: actions/upload-artifact@v4
         with:
-          name: wtWin
+          name: wtWin7
           path: desktop/build/compose/binaries/main/inno/*.exe
       - name: An das Release haengen
         if: github.event_name == 'release'
