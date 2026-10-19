@@ -266,8 +266,9 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
 
         // Vor der Anmeldung und bei der Baumwahl: die Startbildschirme der App, mittig im Fenster.
         if (state.screen != Screen.Main) {
-            // Erster Start (noch keine Adresse): daneben der Weg "Neuen Stammbaum auf diesem PC anlegen" (Stufe 4).
-            if (state.screen == Screen.Setup && LokalBetrieb.verfuegbar) DeskStart(viewModel) else AppRoot(viewModel)
+            // Erster Start und nach dem Abmelden: daneben der Weg zum Stammbaum auf diesem PC (Stufe 4) - sonst war er nach
+            // dem Abmelden von einem Server nur noch ueber "Andere Adresse" zu finden (Issue 31).
+            if ((state.screen == Screen.Setup || state.screen == Screen.Login) && LokalBetrieb.verfuegbar) DeskStart(viewModel) else AppRoot(viewModel)
             // Hilfe und "Ueber" stehen im Menue schon vor der Anmeldung
             HilfeFenster()
             if (datumsrechner) DatumsrechnerFenster(onClose = { datumsrechner = false })
