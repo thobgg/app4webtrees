@@ -13,7 +13,7 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), zum Testen"></a>
 </p>
 
-<p align="center"><b>Neu in 1.55: Alle Angaben am Ereignis, bereit für GEDCOM 7.</b> Ereignisse zeigen jetzt alles, was der Server weiß – Alter, Todesursache, Behörde, Telefon, E-Mail und jede weitere Angabe, fertig beschriftet in der eigenen Sprache: im Lebenslauf, im Personenblatt und im Druck. Braucht <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.23.0">api4webtrees 1.23</a>; der Stammbaum auf diesem PC bringt es mit. Die App liest GEDCOM-7.0-Dateien und ist bereit für GEDCOM 7.0 auf dem Server.</p>
+<p align="center"><b>Neu in 1.55: Alle Angaben am Ereignis.</b> Ereignisse zeigen jetzt alles, was der Server weiß – Alter, Todesursache, Behörde, Telefon, E-Mail und jede weitere Angabe, fertig beschriftet in der eigenen Sprache: im Lebenslauf, im Personenblatt und im Druck. Braucht <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.23.0">api4webtrees 1.23</a>; der Stammbaum auf diesem PC bringt es mit.</p>
 
 <p align="center"><b>Neu in 1.54: Sichtbarkeit in drei Stufen und CompGen-Meta-Suche.</b> Bücher gibt es jetzt für drei Leser: alles (Sicht des Verwalters), was Mitglieder sehen dürfen, oder was Besucher sehen dürfen – die Website ist immer für Besucher. Bei jeder Person sucht <b>In der CompGen-Meta-Suche suchen …</b> (Menü Person und Rechtsklick, auch in gedaudit) den Familiennamen in GEDBAS, Adressbüchern, Online-Ortsfamilienbüchern, Verlustlisten und weiteren Datenbanken des Vereins für Computergenealogie; gesendet wird nur der Familienname und auf Wunsch ein Ort.</p>
 

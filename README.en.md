@@ -13,7 +13,7 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), for testing"></a>
 </p>
 
-<p align="center"><b>New in 1.55: every detail of an event, GEDCOM 7 ready.</b> Events now show everything the server knows – age, cause of death, agency, phone, e-mail and any other detail, labelled in your language: in the timeline, the person sheet and in print. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.23.0">api4webtrees 1.23</a>; the tree on this PC brings it along. The app reads GEDCOM 7.0 files and is ready for GEDCOM 7.0 on the server.</p>
+<p align="center"><b>New in 1.55: every detail of an event.</b> Events now show everything the server knows – age, cause of death, agency, phone, e-mail and any other detail, labelled in your language: in the timeline, the person sheet and in print. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.23.0">api4webtrees 1.23</a>; the tree on this PC brings it along.</p>
 
 <p align="center"><b>New in 1.54: visibility in three levels and the CompGen meta search.</b> Books can now be made for three readers: everything (manager view), what members may see, or what visitors may see – the website is always for visitors. For any person, <b>Search in the CompGen meta search …</b> (Person menu and right-click, also in gedaudit) looks up the surname in GEDBAS, address books, online local family books, casualty lists and further databases of the German Association for Computer Genealogy; only the surname and, if you like, a place are sent.</p>
 
