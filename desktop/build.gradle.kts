@@ -49,9 +49,11 @@ val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.$co
 // seinem eigenen System gebaut, darum entscheidet das System, auf dem Gradle laeuft.
 // wtMac kam am 27.09.2026 dazu (versuchsweise, gebaut nur auf GitHub).
 val osName = System.getProperty("os.name").orEmpty()
-// Paketvariante "7" (wtand.variante in gradle.properties): wtWin7/wtTux7 fuer webtrees7, installiert und laeuft neben
-// der normalen Fassung - eigener Paketname, eigene AppId, eigene Ordner (Variante.kt).
+// Paketvariante "7" (-Pwtand.variante=7, Workflows wtWin7/wtMac7): wtWin7/wtTux7/wtMac7 fuer webtrees-gedcom7-lab,
+// installiert und laeuft neben der normalen Fassung - eigener Paketname, eigene AppId, eigene Ordner (Variante.kt).
 val variante = (findProperty("wtand.variante") as String?).orEmpty()
+// Die Pakete fuer "Stammbaum auf diesem PC": lokal.* (webtrees 2.2.6, GEDCOM 5.5.1) oder lokal7.* (webtrees7)
+val lokalPrefix = if (variante == "7") "lokal7" else "lokal"
 val appName = when {
     osName.startsWith("Windows") -> "wtWin"
     osName.startsWith("Mac") -> "wtMac"
@@ -69,7 +71,7 @@ val phpSystem = when {
     else -> "linux-x64"
 }
 val lokalPaket by tasks.registering {
-    val props = listOf("lokal.webtrees", "lokal.webtreesSha256", "lokal.api4webtrees", "lokal.api4webtreesSha256", "lokal.sammlungen", "lokal.sammlungenSha256") +
+    val props = listOf("$lokalPrefix.webtrees", "$lokalPrefix.webtreesSha256", "$lokalPrefix.api4webtrees", "$lokalPrefix.api4webtreesSha256", "$lokalPrefix.sammlungen", "$lokalPrefix.sammlungenSha256") +
         listOfNotNull(phpSystem?.let { "lokal.phpSha256.$it" })
     props.forEach { inputs.property(it, project.property(it) as String) }
     outputs.dir(lokalOrdner)
@@ -88,17 +90,21 @@ val lokalPaket by tasks.registering {
             return f
         }
         basis.deleteRecursively()
-        val wt = project.property("lokal.webtrees") as String
-        val api = project.property("lokal.api4webtrees") as String
+        val wt = project.property("$lokalPrefix.webtrees") as String
+        val api = project.property("$lokalPrefix.api4webtrees") as String
         val web = File(basis, "common/webtrees").apply { mkdirs() }
-        laden("https://github.com/fisharebest/webtrees/releases/download/$wt/webtrees-$wt.zip", "webtrees-$wt.zip",
-            project.property("lokal.webtreesSha256") as String).copyTo(File(web, "webtrees-$wt.zip"))
-        laden("https://github.com/thobgg/api4webtrees/releases/download/v$api/api4webtrees-v$api.zip", "api4webtrees-v$api.zip",
-            project.property("lokal.api4webtreesSha256") as String).copyTo(File(web, "api4webtrees-v$api.zip"))
+        // Variante 7: webtrees7 aus dem Lab-Repo (Datei webtrees7-<version>.zip), im Paket unter dem gewohnten Namen
+        val wtUrl = if (variante == "7") "https://github.com/thobgg/webtrees-gedcom7-lab/releases/download/$wt/webtrees7-$wt.zip"
+        else "https://github.com/fisharebest/webtrees/releases/download/$wt/webtrees-$wt.zip"
+        val apiRepo = if (variante == "7") "api4webtrees-gedcom7-lab" else "api4webtrees"
+        laden(wtUrl, "webtrees-$wt.zip",
+            project.property("$lokalPrefix.webtreesSha256") as String).copyTo(File(web, "webtrees-$wt.zip"))
+        laden("https://github.com/thobgg/$apiRepo/releases/download/v$api/api4webtrees-v$api.zip", "api4webtrees-v$api.zip",
+            project.property("$lokalPrefix.api4webtreesSha256") as String).copyTo(File(web, "api4webtrees-v$api.zip"))
         // Leer = ohne Modul Sammlungen (Variante 7: Sammlungen 1.x laeuft nicht auf webtrees7)
-        val sam = project.property("lokal.sammlungen") as String
+        val sam = project.property("$lokalPrefix.sammlungen") as String
         if (sam.isNotBlank()) laden("https://github.com/thobgg/webtrees-sammlungen/releases/download/v$sam/sammlungen-v$sam.zip", "sammlungen-v$sam.zip",
-            project.property("lokal.sammlungenSha256") as String).copyTo(File(web, "sammlungen-v$sam.zip"))
+            project.property("$lokalPrefix.sammlungenSha256") as String).copyTo(File(web, "sammlungen-v$sam.zip"))
         if (phpSystem != null) {
             val endung = if (phpSystem.startsWith("windows")) "zip" else "tar.gz"
             val archiv = laden("https://github.com/thobgg/app4webtrees/releases/download/php-8.4/php-$phpSystem.$endung",

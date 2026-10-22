@@ -291,6 +291,19 @@ Where to start reading: `MainActivity` shows `ui/MainScreen.kt` (screen choice, 
 `SearchSection`, `PhotosSection`); the profile consists of `ProfilePanel`, `Timeline`, `Relatives` and `LifeMap`.
 `api/` talks to the module, `ui/tree/` lays out and draws the tree, `data/` prepares dates and photos.
 
+## wtWin7, wtTux7 and wtMac7: an experiment for GEDCOM 7.0
+
+The same code also builds wtWin7, wtTux7 and wtMac7: the programs for
+[webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), an experiment that lets webtrees store
+GEDCOM 7.0 natively, with the module [api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab).
+This is not an official webtrees edition and not for everyday use. The 7 programs install next to wtWin, wtTux and
+wtMac, with their own folder, their own settings and no update check; an existing installation is left untouched.
+“Family tree on this PC” ships webtrees7 there instead of webtrees 2.2.6.
+
+There are no releases of them: the packages are built on request only, through the workflows **wtWin7** and
+**wtMac7** (Actions, “Run workflow”, result under “Artifacts”), or locally with
+`./gradlew -Pwtand.variante=7 :desktop:packageDeb`. Without the switch `wtand.variante` the normal build is unchanged.
+
 ## License
 
 [GPL-3.0](LICENSE), like webtrees. The [demo tree](https://github.com/thobgg/falkenrath-demo-tree) is CC0.

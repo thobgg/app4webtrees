@@ -301,6 +301,19 @@ Einstieg in den Code: `MainActivity` zeigt `ui/MainScreen.kt` (Bildschirmwahl, N
 `SearchSection`, `PhotosSection`), das Profil besteht aus `ProfilePanel`, `Timeline`, `Relatives` und `LifeMap`.
 `api/` spricht mit dem Modul, `ui/tree/` rechnet und zeichnet den Baum, `data/` bereitet Datumsangaben und Fotos auf.
 
+## wtWin7, wtTux7 und wtMac7: ein Versuch für GEDCOM 7.0
+
+Aus demselben Code entstehen auch wtWin7, wtTux7 und wtMac7: die Programme für
+[webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), einen Versuch, webtrees GEDCOM 7.0 nativ
+speichern zu lassen, mit dem Modul [api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab).
+Das ist keine offizielle webtrees-Fassung und nichts für den Alltag. Die 7er-Programme installieren sich neben wtWin,
+wtTux und wtMac, mit eigenem Ordner, eigenen Einstellungen und ohne Update-Prüfung; die vorhandene Installation
+bleibt unberührt. „Stammbaum auf diesem PC“ bringt dort webtrees7 statt webtrees 2.2.6 mit.
+
+Es gibt keine Releases davon: Die Pakete entstehen nur auf Anforderung über die Workflows **wtWin7** und **wtMac7**
+(Actions, „Run workflow“, Ergebnis unter „Artifacts“) oder lokal mit `./gradlew -Pwtand.variante=7 :desktop:packageDeb`.
+Ohne den Schalter `wtand.variante` ändert sich am normalen Bau nichts.
+
 ## Lizenz
 
 [GPL-3.0](LICENSE), wie webtrees. Der [Demo-Stammbaum](https://github.com/thobgg/falkenrath-demo-tree) steht unter CC0.

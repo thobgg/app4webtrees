@@ -1,0 +1,38 @@
+# wtWin7: der Windows-Installer der Variante fuer webtrees-gedcom7-lab (webtrees7, GEDCOM 7.0), Inno Setup aus
+# desktop/installer/wtWin7.iss. Installiert und laeuft neben wtWin (eigene AppId, eigener Ordner, eigene Einstellungen).
+# Nur von Hand (Actions > wtWin7 > Run workflow): bauen, die exe liegt unter "Artifacts" des Laufs; kein Release,
+# keine Signierung - ein Versuch, keine Fassung fuer alle.
+# Die Pakete fuer "Stammbaum auf diesem PC" (webtrees7, api4webtrees 2.x) laedt der Build aus den Releases von
+# thobgg/webtrees-gedcom7-lab und thobgg/api4webtrees-gedcom7-lab (gradle.properties, lokal7.*).
+name: wtWin7
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # die dritte Versionsstelle ist die Zahl der Commits
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Inno Setup pruefen
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          Get-Item "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" | Select-Object FullName, Length
+      - name: Installer bauen
+        run: ./gradlew --no-daemon -Pwtand.variante=7 :desktop:packageInno
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wtWin7
+          path: desktop/build/compose/binaries/main/inno/*.exe
