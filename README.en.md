@@ -308,6 +308,12 @@ This is not an official webtrees edition and not for everyday use. The 7 program
 wtMac, with their own folder, their own settings and no update check; an existing installation is left untouched.
 “Family tree on this PC” ships webtrees7 there instead of webtrees 2.2.6.
 
+**The point: it works without a server.** wtWin7 and wtTux7 ship webtrees7 and PHP. “Create a new family tree on
+this PC” sets up webtrees7 locally, reads a GEDCOM 5.5.1 or 7.0 file and stores it as GEDCOM 7.0; you work with
+webtrees7 on your own computer, with no web server and no installation anywhere. Export gives you GEDCOM 7.0 or 5.5.1
+again. A server with api4webtrees-gedcom7-lab is only needed when several people work on one tree. wtMac7 cannot do
+this yet, because there is no bundled PHP for macOS.
+
 There are no releases of them: the packages are built on request only, through the workflows **wtWin7** and
 **wtMac7** (Actions, “Run workflow”, result under “Artifacts”), or locally with
 `./gradlew -Pwtand.variante=7 :desktop:packageDeb`. Without the switch `wtand.variante` the normal build is unchanged.

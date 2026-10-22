@@ -318,6 +318,12 @@ Das ist keine offizielle webtrees-Fassung und nichts für den Alltag. Die 7er-Pr
 wtTux und wtMac, mit eigenem Ordner, eigenen Einstellungen und ohne Update-Prüfung; die vorhandene Installation
 bleibt unberührt. „Stammbaum auf diesem PC“ bringt dort webtrees7 statt webtrees 2.2.6 mit.
 
+**Das Besondere: Es geht ohne Server.** wtWin7 und wtTux7 bringen webtrees7 und PHP mit. „Neuen Stammbaum auf diesem
+PC anlegen“ richtet webtrees7 lokal ein, liest eine GEDCOM-5.5.1- oder 7.0-Datei ein und speichert sie als GEDCOM 7.0;
+man arbeitet mit webtrees7 auf dem eigenen Rechner, ohne Webserver, ohne Installation irgendwo. Der Export liefert
+wieder GEDCOM 7.0 oder 5.5.1. Ein Server mit api4webtrees-gedcom7-lab ist nur nötig, wenn mehrere Leute an einem Baum
+arbeiten. wtMac7 kann das noch nicht, weil es für macOS kein mitgeliefertes PHP gibt.
+
 Es gibt keine Releases davon: Die Pakete entstehen nur auf Anforderung über die Workflows **wtWin7** und **wtMac7**
 (Actions, „Run workflow“, Ergebnis unter „Artifacts“) oder lokal mit `./gradlew -Pwtand.variante=7 :desktop:packageDeb`.
 Ohne den Schalter `wtand.variante` ändert sich am normalen Bau nichts.
