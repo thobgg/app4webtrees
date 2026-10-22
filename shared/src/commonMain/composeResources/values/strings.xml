@@ -176,6 +176,7 @@
     <string name="tree_show_siblings">Show siblings and their partners</string>
     <string name="tree_show_cousins">Show cousins</string>
     <string name="tree_show_cousin_spouses">Show cousins’ partners</string>
+    <string name="tree_home">To me</string>
     <string name="tree_fit">Show everything</string>
     <string name="tree_zoom_in">Zoom in</string>
     <string name="desk_nav_fit">Fit</string>

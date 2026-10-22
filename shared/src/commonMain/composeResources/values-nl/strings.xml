@@ -169,6 +169,7 @@
     <string name="tree_show_siblings">Broers, zussen en hun partners tonen</string>
     <string name="tree_show_cousins">Neven en nichten tonen</string>
     <string name="tree_show_cousin_spouses">Partners van neven en nichten tonen</string>
+    <string name="tree_home">Naar mij</string>
     <string name="tree_fit">Alles tonen</string>
     <string name="tree_zoom_in">Inzoomen</string>
     <string name="desk_nav_fit">Passend</string>

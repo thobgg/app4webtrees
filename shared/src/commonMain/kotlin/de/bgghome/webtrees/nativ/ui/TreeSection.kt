@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Checkbox
@@ -77,6 +78,14 @@ fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb:
     Column(Modifier.fillMaxSize()) {
         if (!state.treeFullscreen) {
             TreeTitleBar(state, viewModel, openWeb) {
+                // Issue 32: zurueck zur vorigen Mittelperson (wie die Zurueck-Taste) und zur Startperson
+                if (state.rootHistory.isNotEmpty()) IconButton(onClick = { viewModel.back() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.action_back))
+                }
+                val home = state.home
+                if (home != null && home != state.root) IconButton(onClick = { viewModel.setRoot(home) }) {
+                    Icon(Icons.Default.Person, contentDescription = stringResource(Res.string.tree_home))
+                }
                 GenerationsChip(state, viewModel)
                 TreeSettings(state, viewModel)
             }

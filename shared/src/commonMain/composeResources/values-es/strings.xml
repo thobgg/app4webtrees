@@ -171,6 +171,7 @@
     <string name="tree_show_siblings">Mostrar hermanos y sus parejas</string>
     <string name="tree_show_cousins">Mostrar primos</string>
     <string name="tree_show_cousin_spouses">Mostrar las parejas de los primos</string>
+    <string name="tree_home">A mí</string>
     <string name="tree_fit">Mostrar todo</string>
     <string name="tree_zoom_in">Acercar</string>
     <string name="desk_nav_fit">Ajustar</string>
