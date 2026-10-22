@@ -17,7 +17,7 @@ class DesktopPlattform : Plattform {
             it.startsWith("Windows") -> "wtWin"
             it.startsWith("Mac") -> "wtMac"
             else -> "wtTux"
-        }
+        } + Variante.kennung
     }
     /** Kommt als -Dwtand.versionName aus desktop/build.gradle.kts (dieselbe Nummer wie die APK). */
     override val versionName: String = System.getProperty("wtand.versionName") ?: "dev"
@@ -39,7 +39,7 @@ class DesktopPlattform : Plattform {
         val basis = System.getenv("XDG_CACHE_HOME")?.takeIf { it.isNotBlank() }?.let(::File)
             ?: System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let(::File)
             ?: File(System.getProperty("user.home"), ".cache")
-        File(basis, "app4webtrees").apply { mkdirs() }
+        File(basis, Variante.ordner).apply { mkdirs() }
     }
 }
 

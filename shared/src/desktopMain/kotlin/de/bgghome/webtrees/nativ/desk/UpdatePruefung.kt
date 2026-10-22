@@ -66,7 +66,7 @@ object UpdatePruefung {
 
     /** Beim Start: hoechstens einmal am Tag, nur wenn eingeschaltet; die uebersprungene Version bleibt still. */
     fun beimStart(scope: CoroutineScope, eigene: String, userAgent: String) {
-        if (!aktiv.value) return
+        if (!aktiv.value || de.bgghome.webtrees.nativ.Variante.kennung.isNotEmpty()) return
         val heute = LocalDate.now().toString()
         if (prefs.getString("update_letzte", null) == heute) return
         scope.launch {

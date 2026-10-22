@@ -1,8 +1,9 @@
-# wtMac: die Desktop-Fassung fuer macOS, versuchsweise und unsigniert (27.09.2026).
-# Ein Mac-Paket laesst sich nur auf einem Mac bauen - darum hier auf GitHub statt am eigenen Rechner.
-# Von Hand (Actions > wtMac > Run workflow): nur bauen, die dmg liegt dann unter "Artifacts" des Laufs.
+# wtMac7: die macOS-Fassung der Variante fuer webtrees7, versuchsweise und unsigniert wie wtMac, nur in diesem privaten Repo.
+# Eigene Bundle-ID (desktop/build.gradle.kts, wtand.variante=7), installiert und laeuft neben wtMac.
+# Von Hand (Actions > wtMac7 > Run workflow): bauen, die dmg liegt unter "Artifacts" des Laufs.
 # Bei einem veroeffentlichten Release: bauen und die dmg-Dateien an das Release haengen.
-name: wtMac
+# Die privaten Pakete (webtrees7, api4webtrees 2.x) kommen aus dem Release "lokal-pakete" dieses Repos.
+name: wtMac7
 
 on:
   workflow_dispatch:
@@ -14,8 +15,7 @@ permissions:
 
 jobs:
   dmg:
-    # Releases mit Tag gedaudit-* gehoeren gedaudit.yml, nicht hierher (13.10.2026)
-    if: github.event_name != 'release' || !startsWith(github.event.release.tag_name, 'gedaudit-')
+    if: github.event_name != 'release' || github.event.release.tag_name != 'lokal-pakete'
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +34,13 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
+      - name: Private Pakete holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p desktop/build/lokal-cache
+          gh release download lokal-pakete -p '*.zip' -D desktop/build/lokal-cache --clobber
+          ls -l desktop/build/lokal-cache
       - name: dmg bauen
         run: ./gradlew --no-daemon :desktop:packageDmg
       - name: Datei nach Prozessor benennen
@@ -45,7 +52,7 @@ jobs:
           ls -la out
       - uses: actions/upload-artifact@v4
         with:
-          name: wtMac-${{ matrix.arch }}
+          name: wtMac7-${{ matrix.arch }}
           path: out/*.dmg
       - name: An das Release haengen
         if: github.event_name == 'release'

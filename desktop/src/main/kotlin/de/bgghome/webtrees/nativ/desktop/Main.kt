@@ -71,7 +71,9 @@ fun main(args: Array<String>) {
         Window(
             // Ungespeicherte Eingaben im Personenblatt: das Hauptfenster fragt erst nach (Entwuerfe).
             onCloseRequest = { if (Entwuerfe.abschliessen(viewModel)) Entwuerfe.beendenAnfrage = true else { fenster.sichern(state); LokalBetrieb.beenden(); exitApplication() } },
-            title = plattform.appName,
+            // Die Variante nennt Version und GEDCOM 7.0 im Titel, damit man sie neben der normalen Fassung erkennt
+            title = if (de.bgghome.webtrees.nativ.Variante.zusatz.isEmpty()) plattform.appName
+                else "${plattform.appName} ${plattform.versionName} – ${de.bgghome.webtrees.nativ.Variante.zusatz}",
             // Fenster- und Taskleisten-Symbol unter Linux und macOS; unter Windows kommt es aus der exe
             icon = remember { Marke.icon()?.let { BitmapPainter(it) } },
             state = state,

@@ -22,7 +22,7 @@ object LokalOrte {
             windows -> System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let(::File)
             else -> System.getenv("XDG_DATA_HOME")?.takeIf { it.isNotBlank() }?.let(::File)
         } ?: File(System.getProperty("user.home"), if (windows) "AppData/Local" else ".local/share")
-        File(ordner, "app4webtrees")
+        File(ordner, de.bgghome.webtrees.nativ.Variante.ordner)
     }
     val webtrees get() = File(basis, "webtrees")
     val router get() = File(basis, "router.php")

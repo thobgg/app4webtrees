@@ -49,11 +49,14 @@ val windowsVersion = if (versionName.count { it == '.' } == 1) "$versionName.$co
 // seinem eigenen System gebaut, darum entscheidet das System, auf dem Gradle laeuft.
 // wtMac kam am 27.09.2026 dazu (versuchsweise, gebaut nur auf GitHub).
 val osName = System.getProperty("os.name").orEmpty()
+// Paketvariante "7" (wtand.variante in gradle.properties): wtWin7/wtTux7 fuer webtrees7, installiert und laeuft neben
+// der normalen Fassung - eigener Paketname, eigene AppId, eigene Ordner (Variante.kt).
+val variante = (findProperty("wtand.variante") as String?).orEmpty()
 val appName = when {
     osName.startsWith("Windows") -> "wtWin"
     osName.startsWith("Mac") -> "wtMac"
     else -> "wtTux"
-}
+} + variante
 
 // Was "Neuen Stammbaum auf diesem PC anlegen" braucht, liegt im Paket (mitliefern, damit das Anlegen
 // auch ohne Internet klappt). Landet unter resources/ (compose.application.resources.dir):
@@ -92,8 +95,9 @@ val lokalPaket by tasks.registering {
             project.property("lokal.webtreesSha256") as String).copyTo(File(web, "webtrees-$wt.zip"))
         laden("https://github.com/thobgg/api4webtrees/releases/download/v$api/api4webtrees-v$api.zip", "api4webtrees-v$api.zip",
             project.property("lokal.api4webtreesSha256") as String).copyTo(File(web, "api4webtrees-v$api.zip"))
+        // Leer = ohne Modul Sammlungen (Variante 7: Sammlungen 1.x laeuft nicht auf webtrees7)
         val sam = project.property("lokal.sammlungen") as String
-        laden("https://github.com/thobgg/webtrees-sammlungen/releases/download/v$sam/sammlungen-v$sam.zip", "sammlungen-v$sam.zip",
+        if (sam.isNotBlank()) laden("https://github.com/thobgg/webtrees-sammlungen/releases/download/v$sam/sammlungen-v$sam.zip", "sammlungen-v$sam.zip",
             project.property("lokal.sammlungenSha256") as String).copyTo(File(web, "sammlungen-v$sam.zip"))
         if (phpSystem != null) {
             val endung = if (phpSystem.startsWith("windows")) "zip" else "tar.gz"
@@ -114,6 +118,7 @@ compose.desktop {
         mainClass = "de.bgghome.webtrees.nativ.desktop.MainKt"
         jvmArgs += "-Dwtand.desktopBuild=${property("wtand.desktopBuild")}"
         jvmArgs += "-Dwtand.versionName=$versionName"
+        jvmArgs += "-Dwtand.variante=$variante"
         // Build-Nummer wie im exe-Namen (wtWin-1.26.157.exe), damit "Ueber" zeigt, welche exe laeuft
         jvmArgs += "-Dwtand.build=$commitZahl"
 
@@ -132,12 +137,12 @@ compose.desktop {
             // Dieselbe Nummer wie die APK (gradle.properties). Windows
             // Installer verlangt rein numerisch x.y.z.
             packageVersion = versionName
-            description = "$appName - client for webtrees (app4webtrees)"
+            description = "$appName - client for webtrees (app4webtrees)" + if (variante == "7") ", webtrees7 / GEDCOM 7.0" else ""
             vendor = "bgg-home.de"
 
             linux {
                 menuGroup = "Office"
-                packageName = "wttux"
+                packageName = "wttux$variante"
                 appRelease = property("wtand.desktopBuild") as String
                 // Dasselbe Symbol wie wtAnd; ohne Angabe zeigt das Menue das Java-Standardsymbol.
                 iconFile.set(project.file("icons/app.png"))
@@ -150,14 +155,16 @@ compose.desktop {
             }
             macOS {
                 // NIE aendern (wie upgradeUuid): macOS erkennt das Programm an dieser Kennung.
-                bundleID = "de.bgghome.webtrees.wtmac"
+                // Die Variante wtMac7 hat eine eigene, damit sie neben wtMac installiert und laeuft.
+                bundleID = "de.bgghome.webtrees.wtmac$variante"
                 packageVersion = windowsVersion
                 dmgPackageVersion = windowsVersion
                 appCategory = "public.app-category.productivity"
                 iconFile.set(project.file("icons/app.icns"))
                 // Verbinden-Links: wtmac:// und die Schemata der Geschwister, denn api4webtrees waehlt nach
                 // Geraet und kennt den Mac (noch) nicht. Die Links kommen als Apple-Event, nicht als Argument (Main.kt).
-                infoPlist {
+                // Die Variante hat kein Verbinden-Schema (Variante.kt), sonst finge sie die Links von wtMac ab.
+                if (variante.isEmpty()) infoPlist {
                     extraKeysRawXml = """
                         <key>CFBundleURLTypes</key>
                         <array>
@@ -189,7 +196,7 @@ tasks.register<Exec>("packageInno") {
     onlyIf { osName.startsWith("Windows") }
     val quelle = layout.buildDirectory.dir("compose/binaries/main/app/$appName").get().asFile
     val ziel = layout.buildDirectory.dir("compose/binaries/main/inno").get().asFile
-    val skript = project.file("installer/wtWin.iss")
+    val skript = project.file("installer/wtWin$variante.iss")
     inputs.dir(quelle); inputs.file(skript); outputs.dir(ziel)
     doFirst {
         val kandidaten = listOfNotNull(

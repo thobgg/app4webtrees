@@ -7,7 +7,7 @@ import java.util.prefs.Preferences
  * die Registry (HKCU). Je Zweck ein eigener Knoten, wie die Dateien auf Android ("settings", "cookies", "wtclient").
  */
 class DesktopAblage(datei: String) : Ablage {
-    private val prefs: Preferences = Preferences.userRoot().node("de/bgghome/app4webtrees/$datei")
+    private val prefs: Preferences = Preferences.userRoot().node("de/bgghome/${de.bgghome.webtrees.nativ.Variante.ordner}/$datei")
 
     override fun getString(key: String, default: String?): String? = prefs.get(key, default)
     override fun putString(key: String, value: String?) {

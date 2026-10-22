@@ -16,6 +16,8 @@ declare(strict_types=1);
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Cli\Console;
 use Fisharebest\Webtrees\DB;
+// Transaktionen ueber die Verbindung von Illuminate: DB::connection() gibt es ab webtrees 2.3 nicht mehr
+use Illuminate\Database\Capsule\Manager;
 use Fisharebest\Webtrees\Encodings\CP850;
 use Fisharebest\Webtrees\Encodings\UTF16BE;
 use Fisharebest\Webtrees\Encodings\UTF16LE;
@@ -162,7 +164,7 @@ $block_einlesen = static function (string $block) use ($import, $tree, &$anzahl,
 };
 
 try {
-    DB::connection()->beginTransaction();
+    Manager::connection()->beginTransaction();
 
     $tree->setPreference('keep_media', '0');
     $tree->setPreference('WORD_WRAPPED_NOTES', '0');
@@ -218,9 +220,9 @@ try {
     $block_einlesen($rest);
 
     DB::table('gedcom')->where('gedcom_id', '=', $tree->id())->update(['imported' => 1]);
-    DB::connection()->commit();
+    Manager::connection()->commit();
 } catch (Throwable $e) {
-    DB::connection()->rollBack();
+    Manager::connection()->rollBack();
     abbruch($e->getMessage());
 }
 
