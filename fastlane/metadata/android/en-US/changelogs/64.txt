@@ -1,0 +1,1 @@
+Tree: new option “Show cousins’ partners” (only with “Show cousins”), plus a back arrow to the previous centre person and “To me” for the start person in the toolbar.

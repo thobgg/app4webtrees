@@ -1,0 +1,1 @@
+Árbol: nueva opción «Mostrar las parejas de los primos» (solo con «Mostrar primos»), además de una flecha atrás a la persona central anterior y «A mí» para la persona de inicio en la barra.

@@ -1,0 +1,1 @@
+Arbre : nouvelle option « Afficher les conjoints des cousins » (seulement avec « Afficher les cousins »), plus une flèche retour vers la personne centrale précédente et « Vers moi » pour la personne de départ dans la barre.
