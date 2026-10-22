@@ -199,6 +199,13 @@ and can be entered from 1.12; with an older module everything else works as befo
 Optional: with the **[Sammlungen](https://github.com/thobgg/webtrees-sammlungen)** module, version 1.6 or newer, the
 app also shows the archive. Without it, only that tab is missing.
 
+**GEDCOM 7.0:** if the server runs [webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), the
+experiment that lets webtrees store GEDCOM 7.0 natively, it needs the module
+**[api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab)** (the 2.x line, 2.0.1 or newer)
+instead of api4webtrees. wtAnd, wtWin, wtTux and wtMac work with it unchanged: data arrives in the familiar form;
+what GEDCOM 7.0 adds (such as “did not happen”, date phrases, external identifiers with a type) the app does not
+show yet. For a family tree on this PC with webtrees7 there are the separate programs wtWin7, wtTux7 and wtMac7, see below.
+
 ## Connecting without typing
 
 On the **“App”** page in webtrees (api4webtrees 1.9.4 or later, included in [nas4webtrees](https://github.com/thobgg/nas4webtrees))
@@ -295,7 +302,8 @@ Where to start reading: `MainActivity` shows `ui/MainScreen.kt` (screen choice, 
 
 The same code also builds wtWin7, wtTux7 and wtMac7: the programs for
 [webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), an experiment that lets webtrees store
-GEDCOM 7.0 natively, with the module [api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab).
+GEDCOM 7.0 natively. On the server it requires the module
+[api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab) (2.x), not api4webtrees.
 This is not an official webtrees edition and not for everyday use. The 7 programs install next to wtWin, wtTux and
 wtMac, with their own folder, their own settings and no update check; an existing installation is left untouched.
 “Family tree on this PC” ships webtrees7 there instead of webtrees 2.2.6.

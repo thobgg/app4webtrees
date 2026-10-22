@@ -198,6 +198,13 @@ api4webtrees 1.11, eintragen lassen sie sich ab 1.12; mit einem älteren Modul l
 Optional: Mit dem Modul **[Sammlungen](https://github.com/thobgg/webtrees-sammlungen)** ab Version 1.6 zeigt die App
 zusätzlich das Archiv. Fehlt es, fehlt nur der Reiter.
 
+**GEDCOM 7.0:** Läuft der Server mit [webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), dem
+Versuch, webtrees GEDCOM 7.0 nativ speichern zu lassen, braucht er statt api4webtrees das Modul
+**[api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab)** (die 2.x-Linie, ab 2.0.1).
+wtAnd, wtWin, wtTux und wtMac arbeiten damit unverändert: Daten kommen in der gewohnten Form an, was GEDCOM 7.0 neu
+hat (etwa „ist nicht geschehen“, Datumsphrasen, externe Kennungen mit Typ), zeigt die App noch nicht.
+Für den Stammbaum auf diesem PC mit webtrees7 gibt es die eigenen Programme wtWin7, wtTux7 und wtMac7, siehe unten.
+
 ## Verbinden ohne Tippen
 
 Auf der Seite **„App“** in webtrees (api4webtrees ab 1.9.4, im Paket [nas4webtrees](https://github.com/thobgg/nas4webtrees)
@@ -305,7 +312,8 @@ Einstieg in den Code: `MainActivity` zeigt `ui/MainScreen.kt` (Bildschirmwahl, N
 
 Aus demselben Code entstehen auch wtWin7, wtTux7 und wtMac7: die Programme für
 [webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), einen Versuch, webtrees GEDCOM 7.0 nativ
-speichern zu lassen, mit dem Modul [api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab).
+speichern zu lassen. Voraussetzung auf dem Server ist dort das Modul
+[api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab) (2.x), nicht api4webtrees.
 Das ist keine offizielle webtrees-Fassung und nichts für den Alltag. Die 7er-Programme installieren sich neben wtWin,
 wtTux und wtMac, mit eigenem Ordner, eigenen Einstellungen und ohne Update-Prüfung; die vorhandene Installation
 bleibt unberührt. „Stammbaum auf diesem PC“ bringt dort webtrees7 statt webtrees 2.2.6 mit.
