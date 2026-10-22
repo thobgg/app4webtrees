@@ -1,0 +1,61 @@
+# wtMac7: die macOS-Fassung der Variante fuer webtrees7, versuchsweise und unsigniert wie wtMac, nur in diesem privaten Repo.
+# Eigene Bundle-ID (desktop/build.gradle.kts, wtand.variante=7), installiert und laeuft neben wtMac.
+# Von Hand (Actions > wtMac7 > Run workflow): bauen, die dmg liegt unter "Artifacts" des Laufs.
+# Bei einem veroeffentlichten Release: bauen und die dmg-Dateien an das Release haengen.
+# Die privaten Pakete (webtrees7, api4webtrees 2.x) kommen aus dem Release "lokal-pakete" dieses Repos.
+name: wtMac7
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    if: github.event_name != 'release' || github.event.release.tag_name != 'lokal-pakete'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-latest      # Apple Silicon (M1 und neuer)
+            arch: arm64
+          - runner: macos-15-intel    # aeltere Macs mit Intel-Prozessor
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # die dritte Versionsstelle ist die Zahl der Commits
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Private Pakete holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p desktop/build/lokal-cache
+          gh release download lokal-pakete -p '*.zip' -D desktop/build/lokal-cache --clobber
+          ls -l desktop/build/lokal-cache
+      - name: dmg bauen
+        run: ./gradlew --no-daemon :desktop:packageDmg
+      - name: Datei nach Prozessor benennen
+        run: |
+          mkdir -p out
+          for f in desktop/build/compose/binaries/main/dmg/*.dmg; do
+            cp "$f" "out/$(basename "${f%.dmg}")-${{ matrix.arch }}.dmg"
+          done
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wtMac7-${{ matrix.arch }}
+          path: out/*.dmg
+      - name: An das Release haengen
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" out/*.dmg --clobber

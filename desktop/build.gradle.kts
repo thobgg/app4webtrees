@@ -155,14 +155,16 @@ compose.desktop {
             }
             macOS {
                 // NIE aendern (wie upgradeUuid): macOS erkennt das Programm an dieser Kennung.
-                bundleID = "de.bgghome.webtrees.wtmac"
+                // Die Variante wtMac7 hat eine eigene, damit sie neben wtMac installiert und laeuft.
+                bundleID = "de.bgghome.webtrees.wtmac$variante"
                 packageVersion = windowsVersion
                 dmgPackageVersion = windowsVersion
                 appCategory = "public.app-category.productivity"
                 iconFile.set(project.file("icons/app.icns"))
                 // Verbinden-Links: wtmac:// und die Schemata der Geschwister, denn api4webtrees waehlt nach
                 // Geraet und kennt den Mac (noch) nicht. Die Links kommen als Apple-Event, nicht als Argument (Main.kt).
-                infoPlist {
+                // Die Variante hat kein Verbinden-Schema (Variante.kt), sonst finge sie die Links von wtMac ab.
+                if (variante.isEmpty()) infoPlist {
                     extraKeysRawXml = """
                         <key>CFBundleURLTypes</key>
                         <array>
