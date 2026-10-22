@@ -123,7 +123,7 @@ Needs api4webtrees 1.18 or newer on the server; the family tree on this PC inclu
 - **Language:** like the system or fixed to German, English, French, Dutch or Spanish. Takes effect at once; labels from the server (event types, places) arrive in the new language with the next reload. Help and plausibility check switch as well.
 - **Place display …:** how place names appear in views, lists and charts: full, city and country, city and country code (NL or NLD). With a home country, places in it show the city name only (“Amsterdam” instead of “Amsterdam, Noord-Holland, Nederland”), places elsewhere follow the chosen format. The country is the last part of the place name; country names in the five languages and the codes themselves are recognised. Input fields, place management and books keep the full name.
 - **Colour coding:** colours the start person's ancestors by the four grandparent lines and their descendants in a fifth colour (after Mary Hill). Needs a start person.
-- **Show siblings and partners**, **Show cousins**: for the tree view.
+- **Show siblings and partners**, **Show cousins**, **Show cousins’ partners**: for the tree view; the cousins’ partners only when the cousins are shown.
 - **Generations:** how many ancestor generations the tree loads.
 
 ## Back, forward, history

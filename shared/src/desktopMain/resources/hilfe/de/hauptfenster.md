@@ -123,7 +123,7 @@ Braucht api4webtrees ab 1.18 auf dem Server; der Stammbaum auf diesem PC bringt 
 - **Sprache:** wie das System oder fest Deutsch, Englisch, Französisch, Niederländisch oder Spanisch. Wirkt sofort; die Beschriftungen des Servers (Ereignisarten, Orte) kommen mit dem nächsten Neuladen in der neuen Sprache. Hilfe und Plausibilitätsprüfung wechseln mit.
 - **Ortsanzeige …:** wie Ortsnamen in Ansichten, Listen und Tafeln erscheinen: vollständig, Ort und Land, Ort und Länderkürzel (NL oder NLD). Mit einem Heimatland erscheinen Orte darin nur mit dem Ortsnamen („Amsterdam“ statt „Amsterdam, Noord-Holland, Nederland“), Orte anderswo nach der gewählten Form. Das Land ist der letzte Teil des Ortsnamens; erkannt werden Landesnamen in den fünf Sprachen und die Kürzel selbst. Eingabefelder, Ortsverwaltung und Bücher zeigen weiter den vollen Namen.
 - **Farbkodierung:** färbt die Vorfahren der Startperson nach den vier Großeltern-Linien und ihre Nachkommen in einer fünften Farbe (nach Mary Hill). Braucht eine Startperson.
-- **Geschwister und Partner zeigen**, **Cousins und Cousinen zeigen**: für die Baumansicht.
+- **Geschwister und Partner zeigen**, **Cousins und Cousinen zeigen**, **Partner der Cousins zeigen**: für die Baumansicht; die Partner der Cousins nur, wenn die Cousins gezeigt werden.
 - **Generationen:** wie viele Vorfahren-Generationen der Baum lädt.
 
 ## Zurück, Vor, Verlauf

@@ -6,9 +6,15 @@ import de.bgghome.webtrees.nativ.api.Person
 
 /**
  * Ein Geschwister einer Person im Baum, mit seinen Partnern (rechts daneben) und Kindern. Die Kinder werden nur fuer
- * die Geschwister der Eltern gezeichnet - das sind die Cousins der Mittelperson.
+ * die Geschwister der Eltern gezeichnet - das sind die Cousins der Mittelperson; [childSpouses] sind deren Partner
+ * (Kennung des Kindes -> Partner), gezeichnet nur mit der Einstellung "Partner der Cousins zeigen" (Issue 33).
  */
-data class Sibling(val person: Person, val spouses: List<Person> = emptyList(), val children: List<Person> = emptyList())
+data class Sibling(
+    val person: Person,
+    val spouses: List<Person> = emptyList(),
+    val children: List<Person> = emptyList(),
+    val childSpouses: Map<String, List<Person>> = emptyMap(),
+)
 
 /** Eine Karte im Baum. Koordinaten in dp, linke obere Ecke. */
 data class TreeBox(
@@ -105,6 +111,7 @@ class TreeLayout private constructor(
         /**
          * @param siblings Geschwister je Person (XREF -> Liste); Personen ohne Eintrag bekommen keine
          * @param cousins  Kinder der Eltern-Geschwister (Cousins der Mittelperson) in deren Reihe zeichnen
+         * @param cousinSpouses die Partner der Cousins rechts neben ihnen zeichnen (nur mit cousins)
          */
         fun build(
             pedigree: Pedigree,
@@ -112,8 +119,9 @@ class TreeLayout private constructor(
             canEdit: Boolean,
             siblings: Map<String, List<Sibling>> = emptyMap(),
             cousins: Boolean = false,
+            cousinSpouses: Boolean = false,
         ): TreeLayout {
-            val builder = Builder(pedigree, siblings, cousins)
+            val builder = Builder(pedigree, siblings, cousins, cousins && cousinSpouses)
 
             builder.placeDescendants(descendants, 0f, 0, isFocus = true)
             builder.placeAncestors()
@@ -122,7 +130,7 @@ class TreeLayout private constructor(
         }
     }
 
-    private class Builder(pedigree: Pedigree, val siblings: Map<String, List<Sibling>>, val cousins: Boolean) {
+    private class Builder(pedigree: Pedigree, val siblings: Map<String, List<Sibling>>, val cousins: Boolean, val cousinSpouses: Boolean) {
         val boxes = mutableListOf<TreeBox>()
         val connectors = mutableListOf<Connector>()
         val ancestors = pedigree.ancestors.associate { it.n to it.person }
@@ -212,10 +220,24 @@ class TreeLayout private constructor(
 
         private fun cardsWidth(sibling: Sibling): Float = BOX_W * (1 + sibling.spouses.size) + SPOUSE_GAP * sibling.spouses.size
 
-        private fun rowWidth(count: Int): Float = if (count == 0) 0f else count * BOX_W + (count - 1) * H_GAP
+        /** Die Partner eines Cousins, wenn sie gezeichnet werden sollen. */
+        private fun cousinSpousesOf(sibling: Sibling, cousin: Person): List<Person> =
+            if (cousinSpouses) sibling.childSpouses[cousin.xref].orEmpty() else emptyList()
+
+        /** Ein Cousin mit seinen Partnern daneben, wie eine Geschwisterkarte mit Partnern. */
+        private fun cousinWidth(sibling: Sibling, cousin: Person): Float =
+            cousinSpousesOf(sibling, cousin).size.let { BOX_W * (1 + it) + SPOUSE_GAP * it }
+
+        /** Die Reihe der Cousins eines Geschwisters: jeder mit seinen Partnern, dazwischen der Abstand der Reihe. */
+        private fun cousinsWidth(n: Int, sibling: Sibling): Float {
+            val cousins = cousinsOf(n, sibling)
+            if (cousins.isEmpty()) return 0f
+
+            return cousins.sumOf { cousinWidth(sibling, it).toDouble() }.toFloat() + (cousins.size - 1) * H_GAP
+        }
 
         /** Eine Einheit der Gruppe: das Geschwister mit Partnern, darunter ggf. seine Kinder - so breit wie das Breitere. */
-        private fun unitWidth(n: Int, sibling: Sibling): Float = maxOf(cardsWidth(sibling), rowWidth(cousinsOf(n, sibling).size))
+        private fun unitWidth(n: Int, sibling: Sibling): Float = maxOf(cardsWidth(sibling), cousinsWidth(n, sibling))
 
         private fun groupWidth(n: Int): Float {
             val group = siblingsOf(n)
@@ -327,9 +349,19 @@ class TreeLayout private constructor(
 
                 val children = cousinsOf(n, sibling)
                 if (children.isNotEmpty()) {
-                    var childX = unitLeft + (unit - rowWidth(children.size)) / 2
+                    var childX = unitLeft + (unit - cousinsWidth(n, sibling)) / 2
+                    val childY = y + BOX_H + V_GAP
                     val childBoxes = children.map { child ->
-                        TreeBox(person = child, x = childX, y = y + BOX_H + V_GAP).also { boxes += it; childX += BOX_W + H_GAP }
+                        val childBox = TreeBox(person = child, x = childX, y = childY).also { boxes += it }
+                        childX += BOX_W
+                        // Partner des Cousins rechts daneben, verbunden wie beim Geschwister (Issue 33)
+                        cousinSpousesOf(sibling, child).forEach { spouse ->
+                            val spouseBox = TreeBox(person = spouse, x = childX + SPOUSE_GAP, y = childY).also { boxes += it }
+                            connectors += Connector(listOf(childBox.x + BOX_W to childBox.centerY, spouseBox.x to spouseBox.centerY), spouse = true)
+                            childX += SPOUSE_GAP + BOX_W
+                        }
+                        childX += H_GAP
+                        childBox
                     }
                     connectDown(anchor.first, anchor.second, y + BOX_H + V_GAP / 2, childBoxes)
                 }

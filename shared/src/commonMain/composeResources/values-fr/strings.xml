@@ -170,6 +170,7 @@
     <string name="tree_settings">Affichage de l’arbre</string>
     <string name="tree_show_siblings">Afficher la fratrie et ses conjoints</string>
     <string name="tree_show_cousins">Afficher les cousins</string>
+    <string name="tree_show_cousin_spouses">Afficher les conjoints des cousins</string>
     <string name="tree_fit">Tout afficher</string>
     <string name="tree_zoom_in">Agrandir</string>
     <string name="desk_nav_fit">Ajuster</string>

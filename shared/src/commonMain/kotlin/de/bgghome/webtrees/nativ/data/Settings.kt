@@ -31,6 +31,11 @@ class Settings(private val prefs: Ablage) {
         get() = prefs.getBoolean("showCousins", true)
         set(value) = prefs.putBoolean("showCousins", value)
 
+    /** Baum: die Partner der Cousins daneben zeigen (nur zusammen mit showCousins; Issue 33) */
+    var showCousinSpouses: Boolean
+        get() = prefs.getBoolean("showCousinSpouses", false)
+        set(value) = prefs.putBoolean("showCousinSpouses", value)
+
     /** Fotos: dichtes Raster ohne Unterschriften (drei und mehr Spalten) statt Kacheln mit Text */
     var denseGrid: Boolean
         get() = prefs.getBoolean("denseGrid", false)

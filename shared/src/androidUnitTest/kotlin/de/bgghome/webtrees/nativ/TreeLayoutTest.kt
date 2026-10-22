@@ -18,7 +18,7 @@ class TreeLayoutTest {
     private fun p(xref: String, sex: String = "M") = Person(xref = xref, name = xref, sex = sex)
 
     /** Mittelperson mit zwei Ehen, Kindern, Enkeln; Ahnen lueckenhaft (Mutter fehlt, Grossvater ohne Eltern). */
-    private fun sample(canEdit: Boolean, siblings: Map<String, List<Sibling>> = emptyMap(), cousins: Boolean = false): TreeLayout {
+    private fun sample(canEdit: Boolean, siblings: Map<String, List<Sibling>> = emptyMap(), cousins: Boolean = false, cousinSpouses: Boolean = false): TreeLayout {
         val pedigree = Pedigree(
             root = "I1", generations = 4,
             ancestors = listOf(
@@ -38,7 +38,7 @@ class TreeLayoutTest {
             ),
         )
 
-        return TreeLayout.build(pedigree, descendants, canEdit, siblings, cousins)
+        return TreeLayout.build(pedigree, descendants, canEdit, siblings, cousins, cousinSpouses)
     }
 
     private fun assertNoOverlap(layout: TreeLayout) {
@@ -136,6 +136,32 @@ class TreeLayoutTest {
         assertTrue(box.getValue("K3").x + TreeLayout.BOX_W <= box.getValue("B1").x)
         assertTrue(box.getValue("K1").x < box.getValue("K2").x && box.getValue("K2").x < box.getValue("K3").x)
         assertTrue(box.getValue("K1").y > box.getValue("U1").y)
+        assertTrue(with.boxes.all { it.x >= 0 && it.right <= with.width })
+    }
+
+    @Test
+    fun cousinSpousesSitBesideTheCousinsOnlyWhenWanted() {
+        // Onkel U1 mit zwei Kindern; K1 ist zweimal verheiratet, K2 ledig (Issue 33)
+        val siblings = mapOf(
+            "I2" to listOf(Sibling(p("U1"), listOf(p("U1S", "F")), listOf(p("K1"), p("K2")), mapOf("K1" to listOf(p("K1S", "F"), p("K1T", "F"))))),
+        )
+        val without = sample(canEdit = true, siblings = siblings, cousins = true)
+        val with = sample(canEdit = true, siblings = siblings, cousins = true, cousinSpouses = true)
+        val offWithoutCousins = sample(canEdit = true, siblings = siblings, cousins = false, cousinSpouses = true)
+        assertNoOverlap(without)
+        assertNoOverlap(with)
+
+        // Ohne die Einstellung keine Partnerkarten, auch nicht ohne Cousins
+        assertNull(without.boxes.firstOrNull { it.person?.xref == "K1S" })
+        assertNull(offWithoutCousins.boxes.firstOrNull { it.person?.xref == "K1" || it.person?.xref == "K1S" })
+
+        val box = with.boxes.filter { it.person != null }.associateBy { it.person.xref }
+        // Partner in der Reihe des Cousins, rechts daneben in der Reihenfolge der Ehen, dann erst der naechste Cousin
+        listOf("K1S", "K1T").forEach { assertEquals(box.getValue("K1").y, box.getValue(it).y, 0.01f) }
+        assertEquals(box.getValue("K1").x + TreeLayout.BOX_W + TreeLayout.SPOUSE_GAP, box.getValue("K1S").x, 0.01f)
+        assertTrue(box.getValue("K1S").x < box.getValue("K1T").x && box.getValue("K1T").x + TreeLayout.BOX_W <= box.getValue("K2").x)
+        // Die Verbindung Cousin-Partner ist eine Partnerlinie
+        assertTrue(with.connectors.any { it.spouse && it.points.first().first == box.getValue("K1").x + TreeLayout.BOX_W })
         assertTrue(with.boxes.all { it.x >= 0 && it.right <= with.width })
     }
 

@@ -123,7 +123,7 @@ Requiere api4webtrees 1.18 o posterior en el servidor; el árbol en este PC lo i
 - **Idioma:** como el sistema o fijado en alemán, inglés, francés, neerlandés o español. Se aplica de inmediato; las etiquetas del servidor (tipos de evento, lugares) llegan en el nuevo idioma con la siguiente recarga. La ayuda y la comprobación de plausibilidad también cambian.
 - **Visualización de lugares …:** cómo aparecen los nombres de lugar en vistas, listas y gráficos: completo, ciudad y país, ciudad y código de país (NL o NLD). Con un país de origen, los lugares de ese país muestran solo la ciudad («Amsterdam» en vez de «Amsterdam, Noord-Holland, Nederland»), los demás siguen la forma elegida. El país es la última parte del nombre; se reconocen los nombres de país en los cinco idiomas y los propios códigos. Los campos de entrada, la gestión de lugares y los libros mantienen el nombre completo.
 - **Código de colores:** colorea los antepasados de la persona de inicio según las cuatro líneas de los abuelos y sus descendientes en un quinto color (según Mary Hill). Requiere una persona de inicio.
-- **Mostrar hermanos y sus parejas**, **Mostrar primos**: para la vista de árbol.
+- **Mostrar hermanos y sus parejas**, **Mostrar primos**, **Mostrar las parejas de los primos**: para la vista de árbol; las parejas de los primos solo si se muestran los primos.
 - **Generaciones:** cuántas generaciones de antepasados carga el árbol.
 
 ## Atrás, adelante, historial

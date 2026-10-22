@@ -96,6 +96,8 @@ data class UiState(
     val showSiblings: Boolean = true,
     /** Cousins der Mittelperson unter den Geschwistern ihrer Eltern (nur zusammen mit showSiblings) */
     val showCousins: Boolean = true,
+    /** Partner der Cousins neben ihnen (nur zusammen mit showCousins) */
+    val showCousinSpouses: Boolean = false,
     val treeFullscreen: Boolean = false,
 
     // ── Profil-Panel ─────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 package de.bgghome.webtrees.nativ.ui
 
 import androidx.lifecycle.viewModelScope
+import de.bgghome.webtrees.nativ.api.DescendantFamily
 import de.bgghome.webtrees.nativ.api.DescendantNode
 import de.bgghome.webtrees.nativ.api.Pedigree
 import de.bgghome.webtrees.nativ.api.Person
@@ -141,6 +142,12 @@ fun AppViewModel.setShowCousins(on: Boolean) {
     uiState.update { it.copy(showCousins = on) }
 }
 
+/** Partner der Cousins ein-/ausblenden (Issue 33) - auch sie sind mit den Geschwistern schon geladen. */
+fun AppViewModel.setShowCousinSpouses(on: Boolean) {
+    settings.showCousinSpouses = on
+    uiState.update { it.copy(showCousinSpouses = on) }
+}
+
 /** Daten fuer den Baum: Ahnen und Nachkommen der Mittelperson, beide Anfragen gleichzeitig. */
 fun AppViewModel.loadChart() {
     val tree = uiState.value.tree ?: return
@@ -204,21 +211,34 @@ internal suspend fun AppViewModel.siblingsFromParents(tree: String, byNumber: Ma
     val other = if (parent === father) mother else null
 
     // Nachkommen eines Elternteils, 3 Stufen: Kinder (= Geschwister) samt deren Partnern und Kindern (= Neffen,
-    // bei den Eltern-Geschwistern die Cousins). Nur die Verbindung mit dem anderen Elternteil - Halbgeschwister
-    // haengen an einer anderen Familie.
-    return client.descendants(tree, parent.xref, 3).tree.families
+    // bei den Eltern-Geschwistern die Cousins). Bei den Eltern der Mittelperson eine Stufe mehr, denn zur untersten
+    // angeforderten Generation liefert der Server keine Familien - so bekommen die Cousins ihre Partner (Issue 33).
+    val depth = if (n == 2 || n == 3) 4 else 3
+
+    return siblingsAusNachkommen(client.descendants(tree, parent.xref, depth).tree.families, self, other)
+}
+
+/**
+ * Die Geschwister von [self] aus den Familien eines Elternteils: nur die Verbindung mit dem anderen Elternteil
+ * ([other]) - Halbgeschwister haengen an einer anderen Familie. Je Geschwister seine Partner und Kinder, zu jedem
+ * Kind dessen Partner (wenn der Server die Familien dieser Generation mitgeliefert hat).
+ */
+internal fun siblingsAusNachkommen(families: List<DescendantFamily>, self: Person, other: Person?): List<Sibling> =
+    families
         .filter { other == null || it.spouse?.xref == other.xref }
         .flatMap { it.children }
         // Private Personen ("Privat", ohne Daten) wuerden die Reihe nur verbreitern
         .filter { it.person.xref != self.xref && !it.person.isPrivate }
         .map { node ->
+            val children = node.families.flatMap { family -> family.children }.filter { !it.person.isPrivate }
             Sibling(
                 node.person,
                 spouses = node.families.mapNotNull { family -> family.spouse },
-                children = node.families.flatMap { family -> family.children }.map { it.person }.filter { !it.isPrivate },
+                children = children.map { it.person },
+                childSpouses = children.associate { child -> child.person.xref to child.families.mapNotNull { it.spouse }.filter { !it.isPrivate } }
+                    .filterValues { it.isNotEmpty() },
             )
         }
-}
 
 /**
  * Nachkommenbaum auf [generationen] Reihen kuerzen: die unterste Reihe behaelt ihre Ehepartner (und Heiraten), aber keine

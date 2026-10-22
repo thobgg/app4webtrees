@@ -613,6 +613,7 @@ private fun FrameWindowScope.DeskMenuBar(
                 CheckboxItem(stringResource(Res.string.desk_color_coding), checked = farbkodierung, enabled = state.home != null && layout == DeskLayout.Navigator, onCheckedChange = onFarbkodierung)
                 CheckboxItem(stringResource(Res.string.tree_show_siblings), checked = state.showSiblings, enabled = layout == DeskLayout.TreeCentre, onCheckedChange = viewModel::setShowSiblings)
                 CheckboxItem(stringResource(Res.string.tree_show_cousins), checked = state.showCousins && state.showSiblings, enabled = state.showSiblings && layout == DeskLayout.TreeCentre, onCheckedChange = viewModel::setShowCousins)
+                CheckboxItem(stringResource(Res.string.tree_show_cousin_spouses), checked = state.showCousinSpouses && state.showCousins && state.showSiblings, enabled = state.showSiblings && state.showCousins && layout == DeskLayout.TreeCentre, onCheckedChange = viewModel::setShowCousinSpouses)
             }
             // Werkzeuge fuer den ganzen Stammbaum, dazu reine Rechnung auf diesem PC (auch ohne Stammbaum nutzbar)
             Menu(stringResource(Res.string.desk_menu_extras)) {
@@ -1189,8 +1190,9 @@ private fun DeskTree(state: UiState, viewModel: AppViewModel, openWeb: (String) 
     }
     val siblings = if (state.showSiblings) state.siblings.orEmpty() else emptyMap()
     val cousins = state.showSiblings && state.showCousins
-    val layout = remember(pedigree, descendants, canEdit, siblings, cousins) {
-        if (pedigree != null && descendants != null) TreeLayout.build(pedigree, descendants.tree, canEdit, siblings, cousins) else null
+    val cousinSpouses = cousins && state.showCousinSpouses
+    val layout = remember(pedigree, descendants, canEdit, siblings, cousins, cousinSpouses) {
+        if (pedigree != null && descendants != null) TreeLayout.build(pedigree, descendants.tree, canEdit, siblings, cousins, cousinSpouses) else null
     }
 
     // Kontextmenue einer Karte: Person und Stelle des Rechtsklicks

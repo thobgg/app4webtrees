@@ -136,8 +136,9 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean) {
 
     val siblings = if (state.showSiblings) state.siblings.orEmpty() else emptyMap()
     val cousins = state.showSiblings && state.showCousins
-    val layout = remember(pedigree, descendants, canEdit, siblings, cousins) {
-        if (pedigree != null && descendants != null) TreeLayout.build(pedigree, descendants.tree, canEdit, siblings, cousins) else null
+    val cousinSpouses = cousins && state.showCousinSpouses
+    val layout = remember(pedigree, descendants, canEdit, siblings, cousins, cousinSpouses) {
+        if (pedigree != null && descendants != null) TreeLayout.build(pedigree, descendants.tree, canEdit, siblings, cousins, cousinSpouses) else null
     }
 
     FamilyTreeView(
@@ -212,6 +213,14 @@ internal fun TreeSettings(state: UiState, viewModel: AppViewModel) {
                 leadingIcon = { Checkbox(checked = state.showCousins && state.showSiblings, onCheckedChange = null, enabled = state.showSiblings) },
                 enabled = state.showSiblings,
                 onClick = { open = false; viewModel.setShowCousins(!state.showCousins) },
+            )
+            // Partner der Cousins nur, wenn die Cousins selbst gezeigt werden (Issue 33)
+            val cousinsShown = state.showSiblings && state.showCousins
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.tree_show_cousin_spouses)) },
+                leadingIcon = { Checkbox(checked = state.showCousinSpouses && cousinsShown, onCheckedChange = null, enabled = cousinsShown) },
+                enabled = cousinsShown,
+                onClick = { open = false; viewModel.setShowCousinSpouses(!state.showCousinSpouses) },
             )
         }
     }

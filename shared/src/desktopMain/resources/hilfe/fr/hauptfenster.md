@@ -123,7 +123,7 @@ Nécessite api4webtrees 1.18 ou plus sur le serveur ; l’arbre sur ce PC l’in
 - **Langue :** comme le système ou fixée sur allemand, anglais, français, néerlandais ou espagnol. Prend effet immédiatement ; les libellés du serveur (types d'événements, lieux) arrivent dans la nouvelle langue au prochain rechargement. L'aide et la vérification de cohérence changent de langue elles aussi.
 - **Affichage des lieux … :** comment les noms de lieux apparaissent dans les vues, listes et tableaux : complet, ville et pays, ville et code pays (NL ou NLD). Avec un pays d’origine, les lieux de ce pays n’affichent que la ville (« Amsterdam » au lieu de « Amsterdam, Noord-Holland, Nederland »), les autres suivent la forme choisie. Le pays est la dernière partie du nom ; les noms de pays dans les cinq langues et les codes eux-mêmes sont reconnus. Les champs de saisie, la gestion des lieux et les livres gardent le nom complet.
 - **Code couleur :** colore les ancêtres de la personne de départ selon les quatre lignées des grands-parents et leurs descendants dans une cinquième couleur (d'après Mary Hill). Nécessite une personne de départ.
-- **Afficher la fratrie et ses conjoints**, **Afficher les cousins** : pour la vue de l'arbre.
+- **Afficher la fratrie et ses conjoints**, **Afficher les cousins**, **Afficher les conjoints des cousins** : pour la vue de l'arbre ; les conjoints des cousins seulement si les cousins sont affichés.
 - **Générations :** combien de générations d'ancêtres l'arbre charge.
 
 ## Retour, suivant, historique
