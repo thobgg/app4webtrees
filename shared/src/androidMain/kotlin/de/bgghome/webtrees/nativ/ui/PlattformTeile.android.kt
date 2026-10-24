@@ -86,3 +86,6 @@ actual fun zwischenablageText(): String? = null
 actual val zwischenablageLesbar: Boolean = false
 
 actual fun zwischenablageLeeren() = Unit
+
+actual fun tastaturDialog(): androidx.compose.ui.window.DialogProperties =
+    androidx.compose.ui.window.DialogProperties(decorFitsSystemWindows = false)

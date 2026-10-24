@@ -123,6 +123,11 @@ fun FamilyTreeView(
     onExpandDown: (xref: String) -> Unit = {},
     /** Tipp auf "zuklappen" unter einer aufgeklappten Karte. */
     onCollapse: (xref: String) -> Unit = {},
+    /**
+     * Zoom und Versatz von aussen gemerkt: am Handy ersetzt die Profilseite den Baum, und ohne diesen Halter
+     * stuende er beim Zurueck wieder bei der Mittelperson statt dort, wo man war (Issue 35).
+     */
+    ansicht: BaumAnsicht? = null,
 ) {
     if (layout == null) {
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -140,18 +145,23 @@ fun FamilyTreeView(
 
         // Neue Mittelperson -> in die Mitte ruecken, Zoom behalten.
         val focusKey = layout.focus.person?.xref
-        var scale by remember { mutableFloatStateOf(initialScale) }
+        val halter = ansicht ?: remember { BaumAnsicht() }
+        var scale by halter.scaleState
         // Nach "Alles zeigen" unter MIN_SCALE: das Rad darf von dort aus weiterzoomen, ohne auf MIN_SCALE zu springen.
-        var minScale by remember { mutableFloatStateOf(MIN_SCALE) }
+        var minScale by halter.minScaleState
         // Nur ein Stufenwechsel setzt die Karten neu zusammen, nicht jeder Zoom-Schritt.
         val level by remember { derivedStateOf { levelFor(scale) } }
-        var offset by remember(focusKey) {
-            mutableStateOf(Offset(viewW / 2 - layout.focus.centerX * density * scale, viewH / 2 - layout.focus.centerY * density * scale))
+        if (halter.scaleState.value.isNaN()) scale = initialScale
+        if (halter.focusKey != focusKey) {
+            halter.focusKey = focusKey
+            halter.offsetState.value = Offset(viewW / 2 - layout.focus.centerX * density * scale, viewH / 2 - layout.focus.centerY * density * scale)
+            halter.anchorState.value = Offset(layout.focus.centerX, layout.focus.centerY)
         }
+        var offset by halter.offsetState
 
         // Gleiche Mittelperson, aber neuer Baum (jemand wurde hinzugefuegt): die Koordinaten verschieben sich,
         // weil der Baum breiter wird - so nachfuehren, dass die Mittelperson an ihrer Bildschirmstelle bleibt.
-        var anchor by remember(focusKey) { mutableStateOf(Offset(layout.focus.centerX, layout.focus.centerY)) }
+        var anchor by halter.anchorState
         val current = Offset(layout.focus.centerX, layout.focus.centerY)
         if (anchor != current) {
             offset += (anchor - current) * (density * scale)
@@ -453,4 +463,16 @@ private fun PlusTab() {
     ) {
         Text("+", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
     }
+}
+
+/**
+ * Zoom und Versatz der Baumansicht, ausserhalb der Ansicht gemerkt (siehe FamilyTreeView.ansicht).
+ * scale NaN heisst: noch nicht gesetzt, die Ansicht nimmt ihren Anfangswert.
+ */
+class BaumAnsicht {
+    val scaleState = mutableFloatStateOf(Float.NaN)
+    val minScaleState = mutableFloatStateOf(MIN_SCALE)
+    val offsetState = mutableStateOf(Offset.Zero)
+    val anchorState = mutableStateOf(Offset.Zero)
+    var focusKey: String? = null
 }

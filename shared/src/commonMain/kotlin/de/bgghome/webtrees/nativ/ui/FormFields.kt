@@ -60,15 +60,12 @@ internal fun Field(value: String, onChange: (String) -> Unit, label: StringResou
 }
 
 @Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 internal fun ChipRow(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
-    // Mehrzeilig waere schoener (FlowRow), ist in dieser Compose-Version aber noch experimentell.
-    Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-        options.chunked(3).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { (key, label) ->
-                    FilterChip(selected = selected == key, onClick = { onSelect(key) }, label = { Text(label) })
-                }
-            }
+    // Fliessend statt feste Dreierreihe: lange Woerter ("desconocido") brachen sonst nach jedem Buchstaben um (Issue 34).
+    androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.forEach { (key, label) ->
+            FilterChip(selected = selected == key, onClick = { onSelect(key) }, label = { Text(label, maxLines = 1, softWrap = false) })
         }
     }
 }

@@ -114,17 +114,24 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
             Column(Modifier.fillMaxSize()) {
                 if (state.loadingDetail || state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
 
+                // Tipp aufs Bild zeigt es gross (Issue 37); nur ohne Bild bleibt der Tipp die Fotoauswahl.
+                val hauptbild = person.thumb?.let { t ->
+                    detail.media.firstOrNull { it.isImage && it.thumb == t }
+                        ?: detail.media.firstOrNull { it.isImage && it.highlighted }
+                        ?: detail.media.firstOrNull { it.isImage }
+                }
+                val onShowPhoto: (() -> Unit)? = hauptbild?.let { b -> { viewModel.openMediaViewer(ViewerSource.Profile, detail.media, b, owner = person.name) } }
                 if (desk) {
                     DeskProfileHeader(
                         detail, isRoot = state.root == person.xref, canEdit = canEdit, canUpload = canUpload,
-                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick,
+                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick, onShowPhoto = onShowPhoto,
                         addMenu = addMenu, onAddMenu = { addMenu = it }, addMenuItems = addMenuItems,
                         onDelete = { dialog = ProfileDialog.DeletePerson },
                     )
                 } else Box(Modifier.fillMaxWidth()) {
                     ProfileHeader(
                         detail, isRoot = state.root == person.xref, canUpload = canUpload,
-                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick,
+                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick, onShowPhoto = onShowPhoto,
                         onStartperson = if (viewModel.startPersonSupported && !person.isPrivate) ({ startperson = true }) else null,
                     )
                     if (startperson) StartpersonDialog(state, viewModel, onClose = { startperson = false }, xref = person.xref)
@@ -227,6 +234,8 @@ private fun ProfileHeader(
     onMakeRoot: () -> Unit,
     onOpenWeb: () -> Unit,
     onPickPhoto: () -> Unit,
+    /** Bild gross zeigen; null, wenn die Person kein Bild hat. */
+    onShowPhoto: (() -> Unit)? = null,
     onStartperson: (() -> Unit)? = null,
 ) {
     val person = detail.person
@@ -241,20 +250,29 @@ private fun ProfileHeader(
         Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Avatar(person, 96.dp, if (canUpload) Modifier.clip(RoundedCornerShape(48.dp)).clickable(onClick = onPickPhoto) else Modifier)
+        Avatar(person, 96.dp, avatarTipp(48.dp, canUpload, onPickPhoto, onShowPhoto))
         Text(
             person.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 10.dp),
         )
         Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
 
-        Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!isRoot) OutlinedButton(onClick = onMakeRoot) { Text(stringResource(Res.string.action_make_root)) }
-            OutlinedButton(onClick = onOpenWeb) { Text(stringResource(Res.string.chip_open_web)) }
+        // Fliessend: in langen Sprachen (Spanisch) brach der zweite Knopf sonst in zwei Zeilen um (Issue 34).
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+            if (!isRoot) OutlinedButton(onClick = onMakeRoot) { Text(stringResource(Res.string.action_make_root), maxLines = 1, softWrap = false) }
+            OutlinedButton(onClick = onOpenWeb) { Text(stringResource(Res.string.chip_open_web), maxLines = 1, softWrap = false) }
         }
         // Startperson festlegen (ab API-Stufe 24) - gilt auf dem Server, also auch im Browser und am PC
         onStartperson?.let { TextButton(onClick = it) { Text(stringResource(Res.string.desk_set_start_person)) } }
     }
+}
+
+/** Was ein Tipp auf das Bild tut: vorhandenes Bild gross zeigen, sonst (mit Recht) ein Foto waehlen, sonst nichts. */
+private fun avatarTipp(radius: androidx.compose.ui.unit.Dp, canUpload: Boolean, onPickPhoto: () -> Unit, onShowPhoto: (() -> Unit)?): Modifier = when {
+    onShowPhoto != null -> Modifier.clip(RoundedCornerShape(radius)).clickable(onClick = onShowPhoto)
+    canUpload -> Modifier.clip(RoundedCornerShape(radius)).clickable(onClick = onPickPhoto)
+    else -> Modifier
 }
 
 /** Kopf der Personentafel am Desktop: Bild links, Name und Lebensdaten daneben, darunter schlichte Knoepfe. */
@@ -267,6 +285,7 @@ private fun DeskProfileHeader(
     onMakeRoot: () -> Unit,
     onOpenWeb: () -> Unit,
     onPickPhoto: () -> Unit,
+    onShowPhoto: (() -> Unit)? = null,
     addMenu: Boolean,
     onAddMenu: (Boolean) -> Unit,
     addMenuItems: @Composable () -> Unit,
@@ -276,7 +295,7 @@ private fun DeskProfileHeader(
     val relationship = detail.relationship.replaceFirstChar { it.uppercase() }
     Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Avatar(person, 64.dp, if (canUpload) Modifier.clip(RoundedCornerShape(32.dp)).clickable(onClick = onPickPhoto) else Modifier)
+            Avatar(person, 64.dp, avatarTipp(32.dp, canUpload, onPickPhoto, onShowPhoto))
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 Text(person.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (person.lifespan.isNotBlank()) Text(person.lifespan, style = MaterialTheme.typography.bodyMedium)

@@ -54,6 +54,8 @@ import de.bgghome.webtrees.nativ.ui.tree.TreeLayout
 @Composable
 fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb: (String) -> Unit) {
     val detail = state.detail
+    // Zoom und Versatz des Baums ueberleben hier die Profilseite, die ihn am Handy ersetzt (Issue 35).
+    val ansicht = remember { de.bgghome.webtrees.nativ.ui.tree.BaumAnsicht() }
 
     // Handy: das Profil ist eine eigene Seite; bis die Daten der angetippten Person da sind, ein Ladekreis.
     if (!wide && state.profileOpen) {
@@ -110,7 +112,7 @@ fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb:
             }
 
             Box(Modifier.weight(1f).fillMaxHeight()) {
-                TreeCanvas(state, viewModel, wide)
+                TreeCanvas(state, viewModel, wide, ansicht)
             }
         }
     }
@@ -133,7 +135,7 @@ private fun FindPersonField(onClick: () -> Unit) {
 }
 
 @Composable
-private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean) {
+private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean, ansicht: de.bgghome.webtrees.nativ.ui.tree.BaumAnsicht) {
     val pedigree = state.pedigree
     val descendants = state.descendants
     val canEdit = state.tree?.canEdit == true
@@ -164,6 +166,7 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean) {
         onCollapse = viewModel::collapseDescendants,
         // Langer Druck haengt den Baum um - am Handy der kurze Weg zu den Ahnen eines Partners, ohne Umweg ueber das Profil.
         onMakeRoot = { viewModel.setRoot(it.xref) },
+        ansicht = ansicht,
     )
 }
 

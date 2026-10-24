@@ -73,3 +73,10 @@ expect fun PdfThumbnail(url: String, modifier: Modifier = Modifier, content: @Co
 /** Rueckfall fuer alles, was (noch) nicht nativ ist: die webtrees-Seite selbst, in derselben Sitzung. */
 @Composable
 expect fun WebFallbackScreen(url: String, onClose: () -> Unit)
+
+/**
+ * Dialogeigenschaften fuer Formulare mit Tastatur: am Handy soll das Dialogfenster Platz fuer die Tastatur lassen,
+ * statt nur hochgeschoben zu werden - sonst liegen untere Felder und Knoepfe hinter der Tastatur (Issue 34).
+ * Android setzt dafuer decorFitsSystemWindows=false; der Inhalt bekommt dann imePadding. Desktop: Vorgabe.
+ */
+expect fun tastaturDialog(): androidx.compose.ui.window.DialogProperties

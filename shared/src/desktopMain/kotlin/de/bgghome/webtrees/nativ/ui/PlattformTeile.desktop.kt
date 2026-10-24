@@ -264,3 +264,5 @@ actual fun zwischenablageText(): String? = runCatching {
         null
     }
 }.getOrNull()
+
+actual fun tastaturDialog(): androidx.compose.ui.window.DialogProperties = androidx.compose.ui.window.DialogProperties()

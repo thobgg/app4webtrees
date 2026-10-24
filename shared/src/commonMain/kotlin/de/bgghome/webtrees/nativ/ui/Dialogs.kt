@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
@@ -373,7 +374,9 @@ internal fun WtAlertDialog(
             confirmButton = { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { confirmButton(); dismissButton() } },
         )
     } else {
-        AlertDialog(onDismissRequest = onDismissRequest, confirmButton = confirmButton, dismissButton = dismissButton, title = title, text = text)
+        // Handy: Fenster laesst der Tastatur Platz, der Inhalt rollt (Issue 34); am PC wirkt beides nicht.
+        AlertDialog(onDismissRequest = onDismissRequest, confirmButton = confirmButton, dismissButton = dismissButton, title = title, text = text,
+            modifier = Modifier.imePadding(), properties = tastaturDialog())
     }
 }
 
