@@ -1,0 +1,1 @@
+Los diálogos de edición dejan sitio al teclado, los botones de elección y del perfil ya no se parten en idiomas largos (#34); el árbol conserva su posición tras la página de perfil (#35); tocar la foto de una persona la muestra en grande (#37).

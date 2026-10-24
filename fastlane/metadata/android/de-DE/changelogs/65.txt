@@ -1,0 +1,1 @@
+Eingabedialoge lassen der Tastatur Platz, Auswahlknöpfe und Profilknöpfe brechen in langen Sprachen nicht mehr um (#34); der Baum bleibt nach der Profilseite an seiner Stelle (#35); Tipp auf das Bild einer Person zeigt es groß (#37).

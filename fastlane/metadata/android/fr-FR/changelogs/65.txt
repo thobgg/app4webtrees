@@ -1,0 +1,1 @@
+Les boîtes de saisie laissent de la place au clavier, les puces de choix et les boutons du profil ne se coupent plus dans les langues longues (#34) ; l’arbre garde sa position après la page de profil (#35) ; toucher la photo d’une personne l’affiche en grand (#37).

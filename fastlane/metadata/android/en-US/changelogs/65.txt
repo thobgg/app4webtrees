@@ -1,0 +1,1 @@
+Edit dialogs make room for the keyboard, choice chips and profile buttons no longer wrap in long languages (#34); the tree keeps its position after the profile page (#35); tapping a person’s picture shows it full size (#37).

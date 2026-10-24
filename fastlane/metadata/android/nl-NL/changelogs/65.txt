@@ -1,0 +1,1 @@
+Invoervensters laten ruimte voor het toetsenbord, keuzeknoppen en profielknoppen breken in lange talen niet meer af (#34); de boom houdt zijn positie na de profielpagina (#35); tikken op de foto van een persoon toont die groot (#37).
