@@ -14,8 +14,8 @@ permissions:
 
 jobs:
   dmg:
-    # Releases mit Tag gedaudit-* gehoeren gedaudit.yml, nicht hierher (13.10.2026)
-    if: github.event_name != 'release' || !startsWith(github.event.release.tag_name, 'gedaudit-')
+    # Releases mit Tag gedaudit-* gehoeren dem gedaudit-Repo, wtwin7-* dem Workflow wtWin7 (windows7.yml), nicht hierher
+    if: github.event_name != 'release' || (!startsWith(github.event.release.tag_name, 'gedaudit-') && !startsWith(github.event.release.tag_name, 'wtwin7-'))
     strategy:
       fail-fast: false
       matrix:

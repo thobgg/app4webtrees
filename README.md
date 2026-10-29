@@ -324,9 +324,11 @@ man arbeitet mit webtrees7 auf dem eigenen Rechner, ohne Webserver, ohne Install
 wieder GEDCOM 7.0 oder 5.5.1. Ein Server mit api4webtrees-gedcom7-lab ist nur nötig, wenn mehrere Leute an einem Baum
 arbeiten. wtMac7 kann das noch nicht, weil es für macOS kein mitgeliefertes PHP gibt.
 
-Es gibt keine Releases davon: Die Pakete entstehen nur auf Anforderung über die Workflows **wtWin7** und **wtMac7**
-(Actions, „Run workflow“, Ergebnis unter „Artifacts“) oder lokal mit `./gradlew -Pwtand.variante=7 :desktop:packageDeb`.
-Ohne den Schalter `wtand.variante` ändert sich am normalen Bau nichts.
+Download: [Release wtWin7 / wtTux7](https://github.com/thobgg/app4webtrees/releases/tag/wtwin7-1.55.4) mit Installer
+für Windows (`wtWin7-….exe`) und Paket für Linux (`wttux7_…_amd64.deb`); eigene Releases mit Tag `wtwin7-*`, nicht als
+„Latest“. wtMac7 entsteht nur auf Anforderung über den Workflow **wtMac7** (Actions, „Run workflow“, Ergebnis unter
+„Artifacts“). Lokal: `./gradlew -Pwtand.variante=7 :desktop:packageDeb`; ohne den Schalter `wtand.variante` ändert sich
+am normalen Bau nichts.
 
 ## Lizenz
 

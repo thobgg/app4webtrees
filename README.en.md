@@ -314,9 +314,11 @@ webtrees7 on your own computer, with no web server and no installation anywhere.
 again. A server with api4webtrees-gedcom7-lab is only needed when several people work on one tree. wtMac7 cannot do
 this yet, because there is no bundled PHP for macOS.
 
-There are no releases of them: the packages are built on request only, through the workflows **wtWin7** and
-**wtMac7** (Actions, “Run workflow”, result under “Artifacts”), or locally with
-`./gradlew -Pwtand.variante=7 :desktop:packageDeb`. Without the switch `wtand.variante` the normal build is unchanged.
+Download: [release wtWin7 / wtTux7](https://github.com/thobgg/app4webtrees/releases/tag/wtwin7-1.55.4) with the
+installer for Windows (`wtWin7-….exe`) and the package for Linux (`wttux7_…_amd64.deb`); separate releases tagged
+`wtwin7-*`, never marked “Latest”. wtMac7 is built on request only, through the workflow **wtMac7** (Actions, “Run
+workflow”, result under “Artifacts”). Locally: `./gradlew -Pwtand.variante=7 :desktop:packageDeb`; without the switch
+`wtand.variante` the normal build is unchanged.
 
 ## License
 
