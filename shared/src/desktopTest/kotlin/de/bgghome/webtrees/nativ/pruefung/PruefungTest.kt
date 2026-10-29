@@ -8,6 +8,7 @@ import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.PlaceJson
 import de.bgghome.webtrees.nativ.api.SourceRef
 import de.bgghome.webtrees.nativ.api.TreeExport
+import de.bgghome.webtrees.nativ.desk.abhakSchluesselDatei
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -198,6 +199,25 @@ class PruefungStufe2Test {
         val t2 = pruefen(baum("2 MAY 1850"), PruefOptionen(jetzt = 2026)).treffer.getValue("010").single()
         assertTrue(t2.schluessel !in liste.fuer("srv|t"))
         assertEquals(0, liste.aufraeumen("srv|t", setOf(t2.schluessel)).anzahl("srv|t"))
+        // gedaudit: Haken aus der Zeit, als der Pfad der Schluessel war, ziehen um
+        val umgezogen = liste.uebernehmen("srv|t", "gedaudit|webtrees|mytree")
+        assertEquals(0, umgezogen.anzahl("srv|t")); assertTrue(t.schluessel in umgezogen.fuer("gedaudit|webtrees|mytree"))
+        assertTrue(umgezogen.uebernehmen("srv|t", "gedaudit|webtrees|mytree") === umgezogen)
+    }
+
+    @Test
+    fun abhakSchluesselEinerDateiUeberstehtKopienUndSicherungen() {
+        val s = abhakSchluesselDatei(null, "WEBTREES", "MyTree.ged")
+        assertEquals("gedaudit|WEBTREES|mytree", s)
+        listOf("MyTree (2).ged", "MyTree (3).GED", "MyTree_2026-10-08.ged", "MyTree 2026-11-01 (2).ged", "MyTree-20261008_1530.gedcom")
+            .forEach { assertEquals(s, abhakSchluesselDatei(null, "WEBTREES", it), it) }
+        // Name aus dem Kopf geht vor, auch mit Ordner davor; umbenannte Datei bleibt derselbe Baum
+        assertEquals(s, abhakSchluesselDatei("C:\\Export\\MyTree.ged", "WEBTREES", "Sicherung Oktober.ged"))
+        // anderes Programm oder anderer Name: anderer Baum
+        assertTrue(s != abhakSchluesselDatei(null, "ANDERES", "MyTree.ged"))
+        assertTrue(s != abhakSchluesselDatei(null, "WEBTREES", "Kies.ged"))
+        // nur Ziffern im Namen: nichts wegschneiden, was den Namen leer macht
+        assertEquals("gedaudit||2026-10-08", abhakSchluesselDatei(null, null, "2026-10-08.ged"))
     }
 
     @Test

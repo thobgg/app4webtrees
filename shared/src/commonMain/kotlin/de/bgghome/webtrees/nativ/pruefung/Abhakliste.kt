@@ -31,6 +31,13 @@ class Abhakliste(private var datei: Abhakdatei = Abhakdatei()) {
         return Abhakliste(datei.copy(baeume = datei.baeume + (baum to neu)))
     }
 
+    /** Eintraege unter dem alten Schluessel auf den neuen umziehen, wenn dort noch nichts liegt (gedaudit bis 0.6: Pfad der Datei). */
+    fun uebernehmen(alt: String, neu: String): Abhakliste {
+        val eintraege = datei.baeume[alt]
+        if (alt == neu || eintraege.isNullOrEmpty() || !datei.baeume[neu].isNullOrEmpty()) return this
+        return Abhakliste(datei.copy(baeume = datei.baeume - alt + (neu to eintraege)))
+    }
+
     /** Eintraege, deren Treffer es nicht mehr gibt (Daten geaendert oder Person weg), verwerfen. */
     fun aufraeumen(baum: String, vorhanden: Set<String>): Abhakliste {
         val alt = datei.baeume[baum] ?: return this

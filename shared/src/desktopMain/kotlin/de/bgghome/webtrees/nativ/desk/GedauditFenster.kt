@@ -125,6 +125,21 @@ fun gedauditHilfeEinrichten() { HilfeTexte.REIHENFOLGE = listOf("gedaudit", "pru
 
 class GeladeneDatei(val datei: File, val baum: TreeExport, val befund: GedcomBefund, val gedcom: GedcomDatei, val form: DateiBefund)
 
+/**
+ * Baum, unter dem die Haken liegen (Issue #1): Programm aus "1 SOUR" und Name aus "1 FILE" im Kopf, ohne FILE
+ * (GEDCOM 7, manche Programme) der Dateiname. Ordner, Endung und Zusaetze von Kopien und Sicherungen
+ * ("MyTree (2).ged", "MyTree_2026-10-08.ged") zaehlen nicht, damit die Haken beim naechsten Export bleiben.
+ */
+internal fun abhakSchluesselDatei(kopfDatei: String?, kopfQuelle: String?, dateiname: String): String {
+    val name = (kopfDatei?.takeIf { it.isNotBlank() } ?: dateiname).substringAfterLast('/').substringAfterLast('\\')
+    var kern = name.trim().replace(ENDUNG, "")
+    while (true) { val k = kern.replace(KOPIE, "").replace(DATUM, ""); if (k == kern || k.isBlank()) break; kern = k }
+    return "gedaudit|${kopfQuelle?.trim().orEmpty()}|${kern.lowercase()}"
+}
+private val ENDUNG = Regex("""\.(ged|gedcom)$""", RegexOption.IGNORE_CASE)
+private val KOPIE = Regex("""\s*\(\d+\)$""")
+private val DATUM = Regex("""[\s_-]+\d{4}-?\d{2}-?\d{2}([\s_T-]*\d{2}[-.:h]?\d{2}([-.:]?\d{2})?)?$""")
+
 internal fun gedcomDateiWaehlen(titel: String): File? {
     val dialog = FileDialog(null as Frame?, titel, FileDialog.LOAD).apply {
         setFilenameFilter { _, name -> name.endsWith(".ged", true) || name.endsWith(".gedcom", true) }
@@ -198,7 +213,8 @@ private fun GedauditFensterInhalt(fenster: FrameWindowScope?, startDatei: File?,
     }
     val baum = geladen?.getOrNull()?.baum
     val baumTitel = datei?.name.orEmpty()
-    val baumSchluessel = "gedaudit|" + (datei?.absolutePath ?: "")
+    val kopf = geladen?.getOrNull()?.gedcom?.kopf
+    val baumSchluessel = abhakSchluesselDatei(kopf?.wert("FILE"), kopf?.wert("SOUR"), datei?.name.orEmpty())
     val abgehakt = abhak.fuer(baumSchluessel)
     val ergebnis by produceState<PruefErgebnis?>(null, baum, aus, grenzwerte, schaetzen) {
         val b = baum ?: run { value = null; return@produceState }
@@ -206,6 +222,12 @@ private fun GedauditFensterInhalt(fenster: FrameWindowScope?, startDatei: File?,
     }
     LaunchedEffect(aus) { wahl.aus(aus) }
     LaunchedEffect(geladen) { geladen?.exceptionOrNull()?.let { datei?.let(GedauditAblage::vergessen); zuletzt = GedauditAblage.zuletzt() } }
+    // Haken aus gedaudit bis 0.6 (Schluessel war der Pfad der Datei) einmal auf den neuen Schluessel umziehen
+    LaunchedEffect(geladen) {
+        val g = geladen?.getOrNull() ?: return@LaunchedEffect
+        val neu = abhak.uebernehmen("gedaudit|" + g.datei.absolutePath, baumSchluessel)
+        if (neu !== abhak) { abhak = neu; ablage.sichern(neu) }
+    }
 
     fun abhaken(t: Treffer) { abhak = abhak.umschalten(baumSchluessel, t, java.time.LocalDate.now().toString()); ablage.sichern(abhak) }
     fun voreinstellungSetzen(v: Voreinstellung) {
