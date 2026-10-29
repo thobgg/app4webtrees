@@ -1,0 +1,1 @@
+Quelle direkt im Ereignis-Dialog zitieren: aus den Quellen des Baums wählen oder als Text eingeben, mit Seite (#39). Die eingebettete webtrees-Seite öffnet jetzt den Dateidialog, etwa zum Anlegen eines Medienobjekts (#40).

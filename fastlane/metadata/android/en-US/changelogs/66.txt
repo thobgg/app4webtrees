@@ -1,0 +1,1 @@
+Cite a source right in the event dialog: pick one from the tree’s sources or enter it as text, with the page (#39). The embedded webtrees page can now open the file picker, e.g. to create a media object (#40).

@@ -1,0 +1,1 @@
+Citer une source directement dans la boîte de l’événement : choisir parmi les sources de l’arbre ou la saisir en texte, avec la page (#39). La page webtrees intégrée ouvre désormais le sélecteur de fichiers, par exemple pour créer un objet média (#40).

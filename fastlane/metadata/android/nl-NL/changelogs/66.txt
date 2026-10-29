@@ -1,0 +1,1 @@
+Een bron direct in het gebeurtenisvenster citeren: kiezen uit de bronnen van de stamboom of als tekst invoeren, met pagina (#39). De ingebedde webtrees-pagina opent nu de bestandskiezer, bijvoorbeeld om een mediaobject aan te maken (#40).

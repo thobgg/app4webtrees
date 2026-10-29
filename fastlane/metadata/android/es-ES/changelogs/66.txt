@@ -1,0 +1,1 @@
+Citar una fuente directamente en el diálogo del evento: elegirla entre las fuentes del árbol o escribirla como texto, con la página (#39). La página de webtrees integrada ya abre el selector de archivos, por ejemplo para crear un objeto multimedia (#40).
