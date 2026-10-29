@@ -36,6 +36,8 @@ jobs:
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
           Get-Item "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" | Select-Object FullName, Length
       - name: Installer bauen
+        # bash, nicht pwsh: PowerShell zerlegt "-Pwtand.variante=7" am Punkt (Gradle suchte den Task ".variante=7")
+        shell: bash
         run: ./gradlew --no-daemon -Pwtand.variante=7 :desktop:packageInno
       - uses: actions/upload-artifact@v4
         with:
