@@ -114,6 +114,8 @@
     <string name="fact_date">Datum</string>
     <string name="fact_place">Plaats</string>
     <string name="fact_place_hint">Plaats, gemeente, land</string>
+    <string name="fact_source_none">Zonder bron</string>
+    <string name="fact_source_not_attached">Gebeurtenis opgeslagen, maar de bronverwijzing kon niet worden gekoppeld – voeg deze toe in webtrees.</string>
     <string name="fact_note">Notitie</string>
     <string name="relative_title_single">%1$s van %2$s</string>
     <string name="relative_title">Verwanten van %1$s</string>

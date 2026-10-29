@@ -344,6 +344,10 @@ internal fun ProfileDialogs(
 ) {
     val person = detail.person
     val places = viewModel.placeSuggestions()
+    // Quelle gleich im Ereignis-Dialog erfassen (Issue 39) - nur mit Bearbeitungsrecht und Server ab API-Stufe 18.
+    val baum = state.tree?.name
+    val quellen: (suspend () -> List<de.bgghome.webtrees.nativ.api.SourceSummary>)? =
+        if (baum != null && detail.canEdit && viewModel.quellenNachschlagbar) ({ viewModel.client.sources(baum).sources }) else null
 
     when (dialog) {
         null -> Unit
@@ -364,12 +368,16 @@ internal fun ProfileDialogs(
             onConfirm = { onDismiss(); viewModel.unlink(dialog.family, dialog.person.xref) },
         )
 
-        ProfileDialog.NewFact -> FactDialog(fact = null, tags = state.tags, suggestPlaces = places, onDismiss = onDismiss, onSave = { onDismiss(); viewModel.saveFact(it) })
+        ProfileDialog.NewFact -> FactDialog(
+            fact = null, tags = state.tags, suggestPlaces = places, onDismiss = onDismiss, onSave = { onDismiss(); viewModel.saveFact(it) },
+            quellen = quellen, onSaveMitZitat = { r, z -> onDismiss(); viewModel.saveFactMitZitat(r, null, z) },
+        )
 
         is ProfileDialog.NewFamilyFact -> FactDialog(
             fact = null, tags = state.familyTags, suggestPlaces = places, onDismiss = onDismiss,
             onSave = { onDismiss(); viewModel.saveFact(it, record = dialog.family) },
             typErlaubt = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE,
+            quellen = quellen, onSaveMitZitat = { r, z -> onDismiss(); viewModel.saveFactMitZitat(r, dialog.family, z) },
         )
 
         ProfileDialog.PickFamily -> ChoiceDialog(
@@ -383,6 +391,7 @@ internal fun ProfileDialogs(
             fact = dialog.fact, tags = state.tags, suggestPlaces = places, onDismiss = onDismiss,
             onSave = { onDismiss(); viewModel.saveFact(it, dialog.record) },
             typErlaubt = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE,
+            quellen = quellen, onSaveMitZitat = { r, z -> onDismiss(); viewModel.saveFactMitZitat(r, dialog.record, z) },
         )
 
         is ProfileDialog.DeleteFact -> ConfirmDialog(

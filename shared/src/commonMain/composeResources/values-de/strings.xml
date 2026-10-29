@@ -115,6 +115,8 @@
     <string name="fact_date">Datum</string>
     <string name="fact_place">Ort</string>
     <string name="fact_place_hint">Ort, Kreis, Land</string>
+    <string name="fact_source_none">Ohne Quellenangabe</string>
+    <string name="fact_source_not_attached">Ereignis gespeichert, aber der Quellenverweis konnte nicht zugeordnet werden – bitte in webtrees nachtragen.</string>
     <string name="fact_note">Notiz</string>
     <string name="relative_title_single">%1$s von %2$s</string>
     <string name="relative_title">Verwandte von %1$s</string>

@@ -8,6 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import de.bgghome.webtrees.nativ.api.CitationRequest
+import de.bgghome.webtrees.nativ.api.SourceSummary
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
@@ -79,6 +90,10 @@ fun FactDialog(
     onSave: (FactRequest) -> Unit,
     /** Feld "Art" bei der Heirat (standesamtlich, kirchlich ...) - nur mit Server ab API-Stufe 20. */
     typErlaubt: Boolean = false,
+    /** Quellen des Baums zum Zitieren (ab API-Stufe 18); null = kein Abschnitt "Quelle zitieren" (Issue 39). */
+    quellen: (suspend () -> List<SourceSummary>)? = null,
+    /** Speichern mit Quellenverweis: erst das Ereignis, dann der Verweis daran. */
+    onSaveMitZitat: ((FactRequest, CitationRequest) -> Unit)? = null,
 ) {
     var tag by remember { mutableStateOf(tags.firstOrNull()) }
     var tagMenu by remember { mutableStateOf(false) }
@@ -93,6 +108,13 @@ fun FactDialog(
     // Name: Vornamen, Familienname und Zusatz getrennt; die Schraegstriche setzt das Programm selbst.
     val alterName = remember(fact) { de.bgghome.webtrees.nativ.data.GedcomName.aus(fact?.value.orEmpty()) }
     var name by remember(fact) { mutableStateOf(alterName) }
+    // Quelle gleich mit erfassen (Issue 39): aus der Liste (Kennung) oder als freier Text, dazu die Seite.
+    var zitieren by remember { mutableStateOf(false) }
+    var textQuelle by remember { mutableStateOf(false) }
+    var quelle by remember { mutableStateOf("") }
+    var freitext by remember { mutableStateOf("") }
+    var seite by remember { mutableStateOf("") }
+    val quelleGewaehlt = if (textQuelle) freitext.isNotBlank() else quelle.isNotBlank()
 
     val isNameOrNote = fact?.tag == "NAME" || fact?.tag == "NOTE" || (fact == null && tag?.tag == "NOTE")
 
@@ -131,14 +153,22 @@ fun FactDialog(
                         ChipRow(arten, typ?.name.orEmpty()) { key -> typ = de.bgghome.webtrees.nativ.data.Heiratsart.entries.firstOrNull { it.name == key } }
                     }
                     Field(note, { note = it }, Res.string.fact_note, minLines = 2)
+                    if (quellen != null && onSaveMitZitat != null) {
+                        TextButton(onClick = { zitieren = !zitieren }) {
+                            Text(stringResource(if (zitieren) Res.string.fact_source_none else Res.string.desk_cite_add))
+                        }
+                        if (zitieren) QuellenWahl(quellen, textQuelle, { textQuelle = it }, quelle, { quelle = it }, freitext, { freitext = it }, seite, { seite = it })
+                    }
                 }
             }
         },
         confirmButton = {
             TextButton(
-                enabled = (fact != null || tag != null) && date.result != null,
+                enabled = (fact != null || tag != null) && date.result != null && (!zitieren || quelleGewaehlt),
                 onClick = {
-                    onSave(
+                    val zitat = if (zitieren && quelleGewaehlt) CitationRequest(source = if (textQuelle) freitext.trim() else quelle, page = seite.trim().ifEmpty { null }) else null
+                    val speichern: (FactRequest) -> Unit = { r -> if (zitat != null && onSaveMitZitat != null) onSaveMitZitat(r, zitat) else onSave(r) }
+                    speichern(
                         if (fact == null) {
                             FactRequest(
                                 tag = tag?.tag, value = value.trim(),
@@ -164,6 +194,44 @@ fun FactDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
     )
+}
+
+/** Abschnitt "Quelle zitieren" im Ereignis-Dialog (Issue 39): Quelle aus der Liste (mit Suche) oder als Text, dazu die Seite. */
+@Composable
+private fun QuellenWahl(
+    quellen: suspend () -> List<SourceSummary>,
+    textQuelle: Boolean, onTextQuelle: (Boolean) -> Unit,
+    quelle: String, onQuelle: (String) -> Unit,
+    freitext: String, onFreitext: (String) -> Unit,
+    seite: String, onSeite: (String) -> Unit,
+) {
+    var suche by remember { mutableStateOf("") }
+    val liste by produceState<List<SourceSummary>?>(null) { value = runCatching { quellen() }.getOrDefault(emptyList()) }
+
+    ChipRow(listOf("list" to stringResource(Res.string.desk_cite_from_list), "text" to stringResource(Res.string.desk_cite_as_text)), if (textQuelle) "text" else "list") { onTextQuelle(it == "text") }
+    if (textQuelle) {
+        Field(freitext, onFreitext, Res.string.desk_cite_text_source, hint = Res.string.desk_cite_text_source_hint)
+    } else {
+        Field(suche, { suche = it }, Res.string.desk_sources_search)
+        val treffer = liste.orEmpty().filter { q -> suche.isBlank() || listOf(q.title, q.author, q.abbreviation).any { it.contains(suche.trim(), ignoreCase = true) } }
+        // Feste Hoehe: die Liste rollt in sich, der Dialog darum herum.
+        Box(Modifier.fillMaxWidth().height(180.dp).border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)) {
+            if (liste == null) Text(stringResource(Res.string.desk_chart_loading_any), Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else LazyColumn(Modifier.fillMaxWidth()) {
+                items(treffer, key = { it.xref }) { q ->
+                    val aktiv = q.xref == quelle
+                    Text(
+                        q.title.ifBlank { q.xref } + (q.author.takeIf { it.isNotBlank() }?.let { " · $it" } ?: ""),
+                        Modifier.fillMaxWidth().background(if (aktiv) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
+                            .clickable { onQuelle(q.xref) }.padding(horizontal = 8.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium, fontWeight = if (aktiv) FontWeight.SemiBold else FontWeight.Normal,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+    Field(seite, onSeite, Res.string.desk_citation_page, hint = Res.string.desk_cite_page_hint)
 }
 
 /** Wem wird jemand hinzugefuegt - und welche Beziehungen stehen zur Wahl. */

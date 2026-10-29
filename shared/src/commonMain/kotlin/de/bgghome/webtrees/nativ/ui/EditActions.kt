@@ -43,6 +43,54 @@ fun AppViewModel.saveFact(request: FactRequest, record: String? = null) = write(
 }
 
 /**
+ * Ereignis speichern und gleich einen Quellenverweis daran haengen (Issue 39). Die Route Fact liefert die Kennung des
+ * Ereignisses nicht zurueck, und die Kennung ist der Hash des Ereignistexts - beim Aendern entsteht also auch eine neue.
+ * Darum: Kennungen des Datensatzes vor und nach dem Speichern vergleichen; genau eine neue (oder beim unveraenderten
+ * Ereignis die alte) bekommt den Verweis. Bleibt es mehrdeutig, ist das Ereignis trotzdem gespeichert, und die Meldung sagt,
+ * dass die Quelle fehlt. [record] = Familie fuer Familienereignisse, null = die gewaehlte Person.
+ */
+fun AppViewModel.saveFactMitZitat(request: FactRequest, record: String?, zitat: CitationRequest) {
+    val tree = uiState.value.tree ?: return
+    val xref = uiState.value.selected ?: return
+    val ziel = record ?: xref
+    uiState.update { it.copy(busy = true) }
+    viewModelScope.launch {
+        var fehler: Exception? = null
+        var meldung: String? = null
+        try {
+            val vorher = ereignisKennungen(tree.name, xref, ziel)
+            var wartet = client.saveFact(tree.name, ziel, request).pending
+            val nachher = ereignisKennungen(tree.name, xref, ziel)
+            val neu = nachher - vorher
+            val id = neu.singleOrNull() ?: request.factId?.takeIf { neu.isEmpty() && it in nachher }
+            if (id == null) {
+                meldung = text(Res.string.fact_source_not_attached)
+            } else {
+                wartet = client.citation(tree.name, ziel, zitat.copy(factId = id)).pending || wartet
+                meldung = if (wartet) text(Res.string.msg_pending, text(Res.string.msg_saved)) else text(Res.string.msg_saved)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            fehler = e
+        }
+        uiState.update { it.copy(busy = false, message = meldung ?: it.message, pedigree = null, descendants = null, mediaLoaded = false) }
+        fehler?.let(::fail)
+        select(xref)
+        loadPeople(reset = true)
+        loadAnniversaries()
+        loadPending()
+    }
+}
+
+/** Kennungen der Ereignisse von [record] (die Person selbst oder eine ihrer Familien), frisch vom Server. */
+private suspend fun AppViewModel.ereignisKennungen(tree: String, person: String, record: String): Set<String> {
+    val detail = client.individual(tree, person)
+    val facts = if (record == person) detail.facts else (detail.spouseFamilies + detail.parentFamilies).firstOrNull { it.xref == record }?.facts.orEmpty()
+    return facts.map { it.id }.toSet()
+}
+
+/**
  * Mehrere Ereignisse einer Person nacheinander speichern (Eingabeformular am Desktop). [items]: Datensatz (null = die
  * Person selbst, sonst die Familie) und Anfrage. Jedes gelungene meldet [onGespeichert] sofort - so legt ein Fehler
  * mittendrin beim naechsten Versuch nichts doppelt an. Neu geladen wird am Ende, sobald etwas gespeichert wurde.

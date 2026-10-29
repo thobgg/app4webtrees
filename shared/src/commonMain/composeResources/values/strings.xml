@@ -120,6 +120,8 @@
     <string name="fact_date">Date</string>
     <string name="fact_place">Place</string>
     <string name="fact_place_hint">Town, county, country</string>
+    <string name="fact_source_none">Without source</string>
+    <string name="fact_source_not_attached">Event saved, but the citation could not be attached – please add it in webtrees.</string>
     <string name="fact_note">Note</string>
     <string name="relative_title_single">%1$s of %2$s</string>
     <string name="relative_title">Relatives of %1$s</string>

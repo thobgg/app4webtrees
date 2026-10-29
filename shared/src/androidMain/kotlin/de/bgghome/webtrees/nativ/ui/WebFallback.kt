@@ -5,9 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -39,6 +43,9 @@ import de.bgghome.webtrees.nativ.res.*
  * Die Zurueck-Taste geht innerhalb von webtrees eine Seite zurueck; erst auf der ersten Seite schliesst sie die Ansicht.
  * Links auf fremde Seiten (etwa eine URL in einer Quelle) oeffnet der Browser des Geraets - so bleibt der Weg durch
  * webtrees erhalten und Zurueck fuehrt wieder hierher (Issue 25).
+ *
+ * Ein Dateifeld auf der Seite (Medienobjekt anlegen) oeffnet nur dann die Dateiwahl des Geraets, wenn die App sie
+ * ueber onShowFileChooser selbst startet - ohne das tat der Knopf "Datei auswaehlen" nichts (Issue 40).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
@@ -48,6 +55,12 @@ actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
     val host = url.toHttpUrlOrNull()?.host
     var webView by remember { mutableStateOf<WebView?>(null) }
     var kannZurueck by remember { mutableStateOf(false) }
+    // Wartet auf das Ergebnis der Dateiwahl; null, wenn gerade keine laeuft.
+    var dateiRueckgabe by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
+    val dateiWahl = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { ergebnis ->
+        dateiRueckgabe?.onReceiveValue(gewaehlteDateien(ergebnis.resultCode, ergebnis.data))
+        dateiRueckgabe = null
+    }
 
     BackHandler(enabled = kannZurueck) { webView?.goBack() }
 
@@ -76,6 +89,20 @@ actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
                     settings.domStorageEnabled = true
                     settings.builtInZoomControls = true
                     settings.displayZoomControls = false
+                    webChromeClient = object : WebChromeClient() {
+                        override fun onShowFileChooser(view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams): Boolean {
+                            // Eine noch offene Wahl abschliessen, sonst wartet das WebView ewig auf sie.
+                            dateiRueckgabe?.onReceiveValue(null)
+                            dateiRueckgabe = callback
+                            return try {
+                                dateiWahl.launch(params.createIntent())
+                                true
+                            } catch (e: Exception) {
+                                dateiRueckgabe = null
+                                false
+                            }
+                        }
+                    }
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                             val ziel = request.url
@@ -107,6 +134,14 @@ actual fun WebFallbackScreen(url: String, onClose: () -> Unit) {
             },
         )
     }
+}
+
+/** Die gewaehlten Dateien aus dem Ergebnis der Dateiwahl - auch mehrere (ClipData), abgebrochen = null. */
+private fun gewaehlteDateien(resultCode: Int, data: Intent?): Array<Uri>? {
+    if (resultCode != android.app.Activity.RESULT_OK || data == null) return null
+    val clip = data.clipData
+    if (clip != null && clip.itemCount > 0) return Array(clip.itemCount) { clip.getItemAt(it).uri }
+    return data.data?.let { arrayOf(it) }
 }
 
 /** Menues hoechstens 90 % der wirklichen Fensterhoehe in Pixeln statt 90vh, auch nach Drehen des Geraets. */

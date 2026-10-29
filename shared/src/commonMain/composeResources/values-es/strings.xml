@@ -115,6 +115,8 @@
     <string name="fact_date">Fecha</string>
     <string name="fact_place">Lugar</string>
     <string name="fact_place_hint">Localidad, provincia, país</string>
+    <string name="fact_source_none">Sin fuente</string>
+    <string name="fact_source_not_attached">Evento guardado, pero la cita no se pudo vincular – añádala en webtrees.</string>
     <string name="fact_note">Nota</string>
     <string name="relative_title_single">%1$s de %2$s</string>
     <string name="relative_title">Parientes de %1$s</string>
