@@ -26,8 +26,9 @@ import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 /**
- * Erinnerungen: laeuft alle sechs Stunden (ab 8 Uhr) und fragt den gewaehlten Baum ab - die heutigen Jahrestage einmal
- * am Tag, neue Nachrichten aus webtrees' Nachrichtensystem und (fuer Moderatoren) ausstehende Aenderungen jedes Mal.
+ * Erinnerungen: laeuft einmal am Tag (gegen 8 Uhr) und fragt den gewaehlten Baum ab - die heutigen Jahrestage, neue
+ * Nachrichten aus webtrees' Nachrichtensystem und (fuer Moderatoren) ausstehende Aenderungen. Oefter lohnt nicht: webtrees
+ * kann nichts anstossen, und wer die App oeffnet, sieht Neues ohnehin an der Zahl am Reiter Start.
  * Abschaltbar; laeuft nur, wenn der Benutzer es eingeschaltet hat. Jede Meldung kommt nur einmal: gemerkt werden der Tag
  * der Jahrestage, die hoechste gemeldete Nachrichtennummer und die Zahl der gemeldeten Aenderungen.
  * Ist die webtrees-Sitzung abgelaufen, passiert einfach nichts - es wird nie ein Passwort gespeichert.
@@ -91,7 +92,7 @@ class AnniversaryWorker(context: Context, params: WorkerParameters) : CoroutineW
             var next = now.withHour(8).withMinute(0).withSecond(0)
             if (!next.isAfter(now)) next = next.plusDays(1)
 
-            val request = PeriodicWorkRequestBuilder<AnniversaryWorker>(6, TimeUnit.HOURS)
+            val request = PeriodicWorkRequestBuilder<AnniversaryWorker>(24, TimeUnit.HOURS)
                 .setInitialDelay(Duration.between(now, next).toMinutes(), TimeUnit.MINUTES)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
