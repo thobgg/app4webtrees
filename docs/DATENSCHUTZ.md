@@ -12,7 +12,7 @@ Stand / as of 14.10.2026
 
 **Karte.** Öffnest du die Karte, lädt die App Kartenkacheln von tile.openstreetmap.org, auf Wunsch von opentopomap.org. Diese Server sehen deine IP-Adresse und die angesehenen Kartenausschnitte. Die App sendet keine weiteren Angaben. Siehe die [Datenschutzerklärung der OpenStreetMap Foundation](https://osmfoundation.org/wiki/Privacy_Policy).
 
-**Benachrichtigungen, Kamera, Fotos.** Die Erinnerung an Jahrestage fragt deinen Server im Hintergrund ab und zeigt die Mitteilung lokal an. Fotos nimmst du mit der Kamera des Geräts auf oder wählst sie aus. Sie gehen an deinen Server.
+**Benachrichtigungen, Kamera, Fotos.** Die Erinnerungen fragen deinen Server im Hintergrund nach Jahrestagen, neuen Nachrichten und ausstehenden Änderungen und zeigen die Mitteilung lokal an. Fotos nimmst du mit der Kamera des Geräts auf oder wählst sie aus. Sie gehen an deinen Server.
 
 **Berechtigungen.** Internet und Benachrichtigungen. Mehr braucht die App nicht.
 
@@ -30,7 +30,7 @@ Stand / as of 14.10.2026
 
 **Map.** When you open the map, the app loads map tiles from tile.openstreetmap.org, optionally from opentopomap.org. These servers see your IP address and the map areas you view. The app sends nothing else. See the [OpenStreetMap Foundation privacy policy](https://osmfoundation.org/wiki/Privacy_Policy).
 
-**Notifications, camera, photos.** The reminder for anniversaries queries your server in the background and shows the notification locally. You take photos with the device's camera or pick them. They go to your server.
+**Notifications, camera, photos.** The reminders query your server in the background for anniversaries, new messages and pending changes and show the notification locally. You take photos with the device's camera or pick them. They go to your server.
 
 **Permissions.** Internet and notifications. The app needs nothing more.
 

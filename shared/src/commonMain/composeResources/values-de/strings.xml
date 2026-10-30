@@ -283,8 +283,13 @@
     <string name="anniv_living_only">Nur Lebende</string>
     <string name="anniv_notification_title">Jahrestage heute</string>
     <string name="anniv_notification_line">%1$s – %2$s vor %3$d Jahren</string>
-    <string name="menu_reminders_on">Tägliche Erinnerung an Jahrestage einschalten</string>
-    <string name="menu_reminders_off">Tägliche Erinnerung ausschalten</string>
+    <string name="menu_reminders_on">Erinnerungen einschalten (Jahrestage, Nachrichten, Freigaben)</string>
+    <string name="menu_reminders_off">Erinnerungen ausschalten</string>
+    <string name="notify_news_title">Neu in webtrees</string>
+    <string name="notify_message_one">Eine neue Nachricht</string>
+    <string name="notify_messages">%1$d neue Nachrichten</string>
+    <string name="notify_pending_one">Eine Änderung wartet auf Freigabe</string>
+    <string name="notify_pending">%1$d Änderungen warten auf Freigabe</string>
     <!-- Freigabe -->
     <string name="home_pending">Warten auf Freigabe (%1$d)</string>
     <string name="messages_title">Nachrichten</string>

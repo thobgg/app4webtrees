@@ -278,8 +278,13 @@
     <string name="anniv_living_only">Alleen levenden</string>
     <string name="anniv_notification_title">Gedenkdagen vandaag</string>
     <string name="anniv_notification_line">%1$s – %2$s %3$d jaar geleden</string>
-    <string name="menu_reminders_on">Dagelijkse herinnering aan gedenkdagen inschakelen</string>
-    <string name="menu_reminders_off">Dagelijkse herinnering uitschakelen</string>
+    <string name="menu_reminders_on">Herinneringen inschakelen (gedenkdagen, berichten, goedkeuringen)</string>
+    <string name="menu_reminders_off">Herinneringen uitschakelen</string>
+    <string name="notify_news_title">Nieuw in webtrees</string>
+    <string name="notify_message_one">Eén nieuw bericht</string>
+    <string name="notify_messages">%1$d nieuwe berichten</string>
+    <string name="notify_pending_one">Eén wijziging wacht op goedkeuring</string>
+    <string name="notify_pending">%1$d wijzigingen wachten op goedkeuring</string>
     <string name="home_pending">Wacht op goedkeuring (%1$d)</string>
     <string name="messages_title">Berichten</string>
     <string name="action_share">Delen…</string>

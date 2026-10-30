@@ -288,8 +288,13 @@
     <string name="anniv_living_only">Living only</string>
     <string name="anniv_notification_title">Anniversaries today</string>
     <string name="anniv_notification_line">%1$s – %2$s %3$d years ago</string>
-    <string name="menu_reminders_on">Turn on daily anniversary reminder</string>
-    <string name="menu_reminders_off">Turn off daily reminder</string>
+    <string name="menu_reminders_on">Turn on reminders (anniversaries, messages, approvals)</string>
+    <string name="menu_reminders_off">Turn off reminders</string>
+    <string name="notify_news_title">New in webtrees</string>
+    <string name="notify_message_one">One new message</string>
+    <string name="notify_messages">%1$d new messages</string>
+    <string name="notify_pending_one">One change is waiting for approval</string>
+    <string name="notify_pending">%1$d changes are waiting for approval</string>
     <!-- Freigabe -->
     <string name="home_pending">Waiting for approval (%1$d)</string>
     <string name="messages_title">Messages</string>

@@ -50,6 +50,19 @@ class Settings(private val prefs: Ablage) {
         get() = prefs.getString("messagesSeen:$baseUrl|$userName", null)?.toIntOrNull() ?: 0
         set(value) = prefs.putString("messagesSeen:$baseUrl|$userName", value.toString())
 
+    // Erinnerungen (AnniversaryWorker): was schon gemeldet wurde, damit nichts zweimal kommt
+    var anniversaryNotified: String
+        get() = prefs.getString("anniversaryNotified", "").orEmpty()
+        set(value) = prefs.putString("anniversaryNotified", value)
+
+    var messagesNotified: Int
+        get() = prefs.getString("messagesNotified:$baseUrl|$userName", null)?.toIntOrNull() ?: 0
+        set(value) = prefs.putString("messagesNotified:$baseUrl|$userName", value.toString())
+
+    var pendingNotified: Int
+        get() = prefs.getString("pendingNotified:$baseUrl|$tree", null)?.toIntOrNull() ?: 0
+        set(value) = prefs.putString("pendingNotified:$baseUrl|$tree", value.toString())
+
     /** Sprache der Oberflaeche ("de", "en", …); leer = wie das System (siehe Sprache). */
     var language: String
         get() = prefs.getString("language", "").orEmpty()

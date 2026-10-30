@@ -283,8 +283,13 @@
     <string name="anniv_living_only">Vivants seulement</string>
     <string name="anniv_notification_title">Anniversaires du jour</string>
     <string name="anniv_notification_line">%1$s – %2$s il y a %3$d ans</string>
-    <string name="menu_reminders_on">Activer le rappel quotidien des anniversaires</string>
-    <string name="menu_reminders_off">Désactiver le rappel quotidien</string>
+    <string name="menu_reminders_on">Activer les rappels (anniversaires, messages, approbations)</string>
+    <string name="menu_reminders_off">Désactiver les rappels</string>
+    <string name="notify_news_title">Nouveau dans webtrees</string>
+    <string name="notify_message_one">Un nouveau message</string>
+    <string name="notify_messages">%1$d nouveaux messages</string>
+    <string name="notify_pending_one">Une modification attend une approbation</string>
+    <string name="notify_pending">%1$d modifications attendent une approbation</string>
     <!-- Approbation -->
     <string name="home_pending">En attente d’approbation (%1$d)</string>
     <string name="messages_title">Messages</string>

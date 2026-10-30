@@ -22,6 +22,8 @@ class WtApp : Application(), SingletonImageLoader.Factory {
         plattform = AndroidPlattform(this)
         Sprache.start(plattform.settings)
         de.bgghome.webtrees.nativ.data.Ortsanzeige.start(plattform.settings)
+        // Zeitplan der Erinnerungen auffrischen (Periode und Inhalt koennen sich mit einer neuen Fassung aendern)
+        if (plattform.settings.reminders) de.bgghome.webtrees.nativ.ui.AnniversaryWorker.schedule(this, true)
 
         // Karte (osmdroid): Kacheln im eigenen Cache-Ordner, ehrliche Kennung gegenueber den OSM-Servern.
         Configuration.getInstance().apply {
