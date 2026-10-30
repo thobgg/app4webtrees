@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -143,22 +144,23 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                             Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.action_close))
                         }
                     }
-                    // Seltenes und Endgueltiges steckt im Drei-Punkte-Menue, nicht im Aktionsknopf
+                    // Teilen als eigenes Symbol (Alltag); Seltenes und Endgueltiges steckt im Drei-Punkte-Menue, Loeschen dort rot
                     val teilbar = !person.isPrivate && person.url.isNotBlank() && (viewModel.messagesSupported || rememberTeilen() != null)
                     if (canEdit || teilbar) {
-                        Box(Modifier.align(Alignment.TopStart)) {
-                            IconButton(onClick = { moreMenu = true }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu))
+                        Row(Modifier.align(Alignment.TopStart)) {
+                            if (canEdit) Box {
+                                IconButton(onClick = { moreMenu = true }) {
+                                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu))
+                                }
+                                DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.action_delete_person), color = MaterialTheme.colorScheme.error) },
+                                        onClick = { moreMenu = false; dialog = ProfileDialog.DeletePerson },
+                                    )
+                                }
                             }
-                            DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
-                                if (teilbar) DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.action_share)) },
-                                    onClick = { moreMenu = false; dialog = ProfileDialog.Share },
-                                )
-                                if (canEdit) DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.action_delete_person)) },
-                                    onClick = { moreMenu = false; dialog = ProfileDialog.DeletePerson },
-                                )
+                            if (teilbar) IconButton(onClick = { dialog = ProfileDialog.Share }) {
+                                Icon(Icons.Default.Share, contentDescription = stringResource(Res.string.action_share))
                             }
                         }
                     }
