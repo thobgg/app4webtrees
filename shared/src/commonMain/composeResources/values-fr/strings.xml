@@ -294,6 +294,7 @@
     <string name="home_pending">En attente d’approbation (%1$d)</string>
     <string name="messages_title">Messages</string>
     <string name="action_share">Partager…</string>
+    <string name="action_change_sex">Modifier le sexe…</string>
     <string name="messages_share_external">Transmettre…</string>
     <string name="share_link_foreign">Le lien ne mène pas à votre serveur webtrees.</string>
     <string name="share_link_other_tree">Le lien appartient à un arbre que vous ne voyez pas ici.</string>

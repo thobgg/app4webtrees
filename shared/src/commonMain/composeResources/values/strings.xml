@@ -299,6 +299,7 @@
     <string name="home_pending">Waiting for approval (%1$d)</string>
     <string name="messages_title">Messages</string>
     <string name="action_share">Share…</string>
+    <string name="action_change_sex">Change sex…</string>
     <string name="messages_share_external">Pass on…</string>
     <string name="share_link_foreign">The link does not point to your webtrees server.</string>
     <string name="share_link_other_tree">The link belongs to a family tree you cannot see here.</string>

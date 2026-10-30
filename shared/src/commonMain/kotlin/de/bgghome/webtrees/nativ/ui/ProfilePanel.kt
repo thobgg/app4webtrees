@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.FactJson
+import de.bgghome.webtrees.nativ.api.FactRequest
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
 
@@ -55,6 +56,8 @@ internal sealed interface ProfileDialog {
     data object DeletePerson : ProfileDialog
     /** Person an Mitforscher schicken (webtrees-Nachricht) oder ueber das Teilen-Menue weitergeben (Nachrichten.kt) */
     data object Share : ProfileDialog
+    /** Geschlecht aendern - der SEX-Eintrag steht nicht in der Zeitleiste, darum ein eigener kleiner Dialog */
+    data object Sex : ProfileDialog
     data class Unlink(val family: String, val person: Person) : ProfileDialog
     data object NewFact : ProfileDialog
     /** Familien-XREF waehlen, an der das neue Ereignis haengen soll (bei mehreren Partnerschaften) */
@@ -153,6 +156,10 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                                     Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu))
                                 }
                                 DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.action_change_sex)) },
+                                        onClick = { moreMenu = false; dialog = ProfileDialog.Sex },
+                                    )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.action_delete_person), color = MaterialTheme.colorScheme.error) },
                                         onClick = { moreMenu = false; dialog = ProfileDialog.DeletePerson },
@@ -362,6 +369,17 @@ internal fun ProfileDialogs(
         null -> Unit
 
         ProfileDialog.Share -> NachrichtDialog(state, viewModel, teilenEntwurf(person), onDismiss = onDismiss)
+        ProfileDialog.Sex -> ChoiceDialog(
+            title = stringResource(Res.string.desk_chart_field_sex),
+            options = listOf("M" to stringResource(Res.string.sex_male), "F" to stringResource(Res.string.sex_female), "U" to stringResource(Res.string.sex_unknown)),
+            onDismiss = onDismiss,
+            onChoose = { wert ->
+                onDismiss()
+                // Vorhandene SEX-Zeile aendern, sonst eine anlegen; der Server ersetzt nur den Wert
+                val vorhanden = detail.facts.firstOrNull { it.tag == "SEX" }
+                if (wert != person.sex) viewModel.saveFact(FactRequest(factId = vorhanden?.id, tag = "SEX", value = wert))
+            },
+        )
                 ProfileDialog.DeletePerson -> ConfirmDialog(
             title = stringResource(Res.string.delete_person_title, person.name),
             text = stringResource(Res.string.delete_person_text),

@@ -288,6 +288,7 @@
     <string name="home_pending">Wacht op goedkeuring (%1$d)</string>
     <string name="messages_title">Berichten</string>
     <string name="action_share">Delen…</string>
+    <string name="action_change_sex">Geslacht wijzigen…</string>
     <string name="messages_share_external">Doorgeven…</string>
     <string name="share_link_foreign">De link verwijst niet naar uw webtrees-server.</string>
     <string name="share_link_other_tree">De link hoort bij een stamboom die u hier niet ziet.</string>
