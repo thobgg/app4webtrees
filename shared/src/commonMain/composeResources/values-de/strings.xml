@@ -294,7 +294,6 @@
     <string name="home_pending">Warten auf Freigabe (%1$d)</string>
     <string name="messages_title">Nachrichten</string>
     <string name="action_share">Teilen …</string>
-    <string name="action_change_sex">Geschlecht ändern …</string>
     <string name="messages_share_external">Weitergeben …</string>
     <string name="share_link_foreign">Der Link führt nicht zu deinem webtrees-Server.</string>
     <string name="share_link_other_tree">Der Link gehört zu einem Stammbaum, den du hier nicht siehst.</string>

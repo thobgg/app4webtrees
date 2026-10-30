@@ -56,7 +56,7 @@ internal sealed interface ProfileDialog {
     data object DeletePerson : ProfileDialog
     /** Person an Mitforscher schicken (webtrees-Nachricht) oder ueber das Teilen-Menue weitergeben (Nachrichten.kt) */
     data object Share : ProfileDialog
-    /** Geschlecht aendern - der SEX-Eintrag steht nicht in der Zeitleiste, darum ein eigener kleiner Dialog */
+    /** Geschlecht aendern - Stift an der Zeile Geschlecht in der Zeitleiste, Auswahl statt Textfeld */
     data object Sex : ProfileDialog
     data class Unlink(val family: String, val person: Person) : ProfileDialog
     data object NewFact : ProfileDialog
@@ -157,10 +157,6 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                                 }
                                 DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(Res.string.action_change_sex)) },
-                                        onClick = { moreMenu = false; dialog = ProfileDialog.Sex },
-                                    )
-                                    DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.action_delete_person), color = MaterialTheme.colorScheme.error) },
                                         onClick = { moreMenu = false; dialog = ProfileDialog.DeletePerson },
                                     )
@@ -195,7 +191,7 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                 when (tab) {
                     0 -> Timeline(
                         detail, canEdit,
-                        onEdit = { fact, record -> dialog = ProfileDialog.EditFact(fact, record) },
+                        onEdit = { fact, record -> dialog = if (fact.tag == "SEX") ProfileDialog.Sex else ProfileDialog.EditFact(fact, record) },
                         onDelete = { fact, record -> dialog = ProfileDialog.DeleteFact(fact, record) },
                         onPerson = viewModel::select,
                     )

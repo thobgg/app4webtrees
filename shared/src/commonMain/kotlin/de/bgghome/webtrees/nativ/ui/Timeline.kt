@@ -97,11 +97,11 @@ private fun buildTimeline(detail: IndividualDetail, canEdit: Boolean): List<Time
 
     val birth = detail.facts.firstOrNull { it.tag == "BIRT" }?.date
 
-    // Geschlecht steckt in der Farbe des Portraets; unbekannte Hersteller-Tags (_INET ...) sagen dem Leser nichts.
+    // Name und Geschlecht stehen vorn; unbekannte Hersteller-Tags (_INET ...) sagen dem Leser nichts.
     // 1 ASSO an der Person steht ab API-Stufe 19 schon bei der Taufe - den eigenen Fakt dann nicht doppelt zeigen.
-    detail.facts.filter { it.tag != "SEX" && it.known }.ohneDoppelteAsso().forEach { fact ->
-        val key = if (fact.tag == "NAME") Int.MIN_VALUE else fact.date?.jd?.takeIf { it > 0 } ?: last
-        if (fact.tag != "NAME") last = key
+    detail.facts.filter { it.known }.ohneDoppelteAsso().forEach { fact ->
+        val key = when (fact.tag) { "NAME" -> Int.MIN_VALUE; "SEX" -> Int.MIN_VALUE + 1; else -> fact.date?.jd?.takeIf { it > 0 } ?: last }
+        if (fact.tag != "NAME" && fact.tag != "SEX") last = key
 
         val label = faktLabelMitArt(fact)
         val age = if (fact.tag == "DEAT") ageAt(birth, fact.date) else null
@@ -200,7 +200,12 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
         }
         Column(Modifier.weight(1f)) {
             Text(row.label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            if (fact.value.isNotEmpty()) Text(if (fact.tag == "NAME") de.bgghome.webtrees.nativ.data.GedcomName.aus(fact.value).anzeige() else fact.value, style = MaterialTheme.typography.bodyMedium)
+            val wert = when (fact.tag) {
+                "NAME" -> de.bgghome.webtrees.nativ.data.GedcomName.aus(fact.value).anzeige()
+                "SEX" -> sexText(fact.value)
+                else -> fact.value
+            }
+            if (wert.isNotEmpty()) Text(wert, style = MaterialTheme.typography.bodyMedium)
 
             val ortOeffnen = LocalPlaceOpener.current
             val ort = fact.place?.name?.takeIf(String::isNotBlank)
@@ -251,8 +256,8 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
             IconButton(onClick = { onEdit(fact, row.record) }) {
                 Icon(Icons.Default.Edit, contentDescription = stringResource(Res.string.action_edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            // Den Namen kann man aendern, aber nicht loeschen - ohne Namen gibt es die Person in webtrees nicht.
-            if (fact.tag != "NAME") {
+            // Namen und Geschlecht kann man aendern, aber nicht loeschen - ohne Namen gibt es die Person in webtrees nicht.
+            if (fact.tag != "NAME" && fact.tag != "SEX") {
                 IconButton(onClick = { onDelete(fact, row.record) }) {
                     Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.action_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -274,4 +279,13 @@ internal fun AnnotatedString.Builder.mitAdressen(text: String, farbe: Color) {
         pos = m.range.first + adresse.length
     }
     append(text.substring(pos))
+}
+
+/** Der Geschlechtscode (M, F, U) in Worten; X und anderes, wie der Server es liefert. */
+@Composable
+internal fun sexText(code: String): String = when (code.trim().uppercase()) {
+    "M" -> stringResource(Res.string.sex_male)
+    "F" -> stringResource(Res.string.sex_female)
+    "U", "" -> stringResource(Res.string.sex_unknown)
+    else -> code
 }
