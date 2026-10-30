@@ -1,6 +1,8 @@
 package de.bgghome.webtrees.nativ.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -180,7 +183,8 @@ internal fun NachrichtDialog(state: UiState, viewModel: AppViewModel, entwurf: N
         onDismissRequest = onDismiss,
         title = { Text(stringResource(when { entwurf.teilenText != null -> Res.string.action_share; entwurf.subject.startsWith("RE:") -> Res.string.messages_reply; else -> Res.string.messages_new })) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Rollt, damit die Felder bei offener Tastatur erreichbar bleiben (wie beim Ereignis-Dialog, Issue 34)
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (empfaenger.isEmpty()) {
                     Text(stringResource(Res.string.messages_no_recipients), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
@@ -191,6 +195,10 @@ internal fun NachrichtDialog(state: UiState, viewModel: AppViewModel, entwurf: N
                 Field(subject, { subject = it }, Res.string.messages_subject)
                 Field(body, { body = it }, Res.string.messages_text, minLines = 4)
                 entwurf.url?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                // Nach draussen (Messenger, Mail): der Text mit Lebensdaten und dem Link, ohne webtrees-Nachricht.
+                // Steht im Inhalt, nicht in der Knopfzeile - drei Knoepfe brachen dort am Handy um.
+                val text = entwurf.teilenText
+                if (teilen != null && text != null) OutlinedButton(onClick = { onDismiss(); teilen(text) }) { Text(stringResource(Res.string.messages_share_external)) }
             }
         },
         confirmButton = {
@@ -199,14 +207,7 @@ internal fun NachrichtDialog(state: UiState, viewModel: AppViewModel, entwurf: N
                 onClick = { viewModel.sendMessage(listOf(to), subject, nachrichtText(body, entwurf.url), entwurf.url) { ok -> if (ok) { onDismiss(); viewModel.loadMessages() } } },
             ) { Text(stringResource(Res.string.messages_send)) }
         },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) }
-                // Nach draussen (Messenger, Mail): der Text mit Lebensdaten und dem Link, ohne webtrees-Nachricht
-                val text = entwurf.teilenText
-                if (teilen != null && text != null) TextButton(onClick = { onDismiss(); teilen(text) }) { Text(stringResource(Res.string.messages_share_external)) }
-            }
-        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
     )
 }
 
