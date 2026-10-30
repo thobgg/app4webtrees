@@ -71,6 +71,7 @@ internal fun NachrichtenSeite(
 ) {
     // Was beim Oeffnen neu war, bleibt auf dieser Seite hervorgehoben - gesehen ist es trotzdem ab jetzt.
     val gesehenBeimOeffnen = remember { state.messagesSeen }
+    LaunchedEffect(Unit) { viewModel.loadMessages() }
     LaunchedEffect(state.messages) { viewModel.markMessagesSeen() }
     var entwurf by remember { mutableStateOf<NachrichtEntwurf?>(null) }
     var loeschen by remember { mutableStateOf<MessageJson?>(null) }

@@ -25,6 +25,8 @@ fun AppViewModel.setWide(wide: Boolean) {
 }
 
 fun AppViewModel.setSection(section: Section) {
+    // Startseite: Nachrichten und ausstehende Aenderungen frisch holen - beides aendert sich, waehrend die App offen ist
+    if (section == Section.Home && uiState.value.section != Section.Home) { loadMessages(); loadPending() }
     uiState.update { it.copy(section = section, treeFullscreen = false, profileOpen = false) }
     if (section == Section.Photos && !uiState.value.mediaLoaded) loadMedia(reset = true)
 }
