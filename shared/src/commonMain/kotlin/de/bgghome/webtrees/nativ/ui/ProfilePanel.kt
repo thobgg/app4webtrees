@@ -58,6 +58,8 @@ internal sealed interface ProfileDialog {
     data object Share : ProfileDialog
     /** Geschlecht aendern - Stift an der Zeile Geschlecht in der Zeitleiste, Auswahl statt Textfeld */
     data object Sex : ProfileDialog
+    /** Forschungsaufgabe fuer diese Person anlegen (Aufgaben.kt) */
+    data object NewTask : ProfileDialog
     data class Unlink(val family: String, val person: Person) : ProfileDialog
     data object NewFact : ProfileDialog
     /** Familien-XREF waehlen, an der das neue Ereignis haengen soll (bei mehreren Partnerschaften) */
@@ -96,6 +98,10 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
         DropdownMenuItem(
             text = { Text(stringResource(Res.string.action_add_relative)) },
             onClick = { addMenu = false; viewModel.requestAddRelative(person.xref) },
+        )
+        if (viewModel.tasksSupported) DropdownMenuItem(
+            text = { Text(stringResource(Res.string.desk_task_add_menu)) },
+            onClick = { addMenu = false; dialog = ProfileDialog.NewTask },
         )
         if (detail.spouseFamilies.isNotEmpty()) {
             DropdownMenuItem(
@@ -365,7 +371,8 @@ internal fun ProfileDialogs(
         null -> Unit
 
         ProfileDialog.Share -> NachrichtDialog(state, viewModel, teilenEntwurf(person), onDismiss = onDismiss)
-        ProfileDialog.Sex -> ChoiceDialog(
+        ProfileDialog.NewTask -> state.tree?.let { t -> AufgabeDialogHandy(AufgabeFuer(person.xref, person.name), viewModel, t.name, onClose = { onDismiss() }) }
+                ProfileDialog.Sex -> ChoiceDialog(
             title = stringResource(Res.string.desk_chart_field_sex),
             options = listOf("M" to stringResource(Res.string.sex_male), "F" to stringResource(Res.string.sex_female), "U" to stringResource(Res.string.sex_unknown)),
             onDismiss = onDismiss,

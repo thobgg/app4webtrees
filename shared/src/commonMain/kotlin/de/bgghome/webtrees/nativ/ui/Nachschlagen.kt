@@ -69,6 +69,8 @@ sealed interface Nachschlag {
     data class Ort(val name: String) : Nachschlag
     /** Posteingang aus webtrees' Nachrichtensystem (Nachrichten.kt) */
     data object Nachrichten : Nachschlag
+    /** Forschungsaufgaben des Baums (Aufgaben.kt) */
+    data object Aufgaben : Nachschlag
 }
 
 /** Oeffnet eine Nachschlage-Seite (am Handy von AppRoot gesetzt, am Desktop null - dort gibt es eigene Fenster). */
@@ -89,6 +91,7 @@ fun NachschlagSeite(
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         when (seite) {
             Nachschlag.Nachrichten -> NachrichtenSeite(state, viewModel, onOeffnen, onZurueck, onPerson, onWeb)
+            Nachschlag.Aufgaben -> AufgabenSeite(state, viewModel, onZurueck, onPerson)
             Nachschlag.QuellenListe -> QuellenListeSeite(tree, viewModel, onOeffnen, onZurueck)
             is Nachschlag.Quelle -> QuelleSeite(tree, seite.xref, viewModel, onZurueck, onPerson)
             Nachschlag.OrteListe -> OrteListeSeite(tree, viewModel, onOeffnen, onZurueck)

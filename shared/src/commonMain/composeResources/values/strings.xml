@@ -300,6 +300,8 @@
     <string name="messages_title">Messages</string>
     <string name="action_share">Share…</string>
     <string name="messages_share_external">Pass on…</string>
+    <string name="tasks_empty_phone">No tasks yet. Add one via the “+” on a profile.</string>
+    <string name="task_done_title">Remove task as done?</string>
     <string name="share_link_foreign">The link does not point to your webtrees server.</string>
     <string name="share_link_other_tree">The link belongs to a family tree you cannot see here.</string>
     <string name="messages_new_count">%1$d new</string>

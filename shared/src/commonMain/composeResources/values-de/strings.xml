@@ -295,6 +295,8 @@
     <string name="messages_title">Nachrichten</string>
     <string name="action_share">Teilen …</string>
     <string name="messages_share_external">Weitergeben …</string>
+    <string name="tasks_empty_phone">Noch keine Aufgaben. Anlegen über das „+“ im Profil einer Person.</string>
+    <string name="task_done_title">Aufgabe als erledigt entfernen?</string>
     <string name="share_link_foreign">Der Link führt nicht zu deinem webtrees-Server.</string>
     <string name="share_link_other_tree">Der Link gehört zu einem Stammbaum, den du hier nicht siehst.</string>
     <string name="messages_new_count">%1$d neu</string>

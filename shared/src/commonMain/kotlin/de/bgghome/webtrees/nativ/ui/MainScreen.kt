@@ -274,6 +274,7 @@ fun MainMenu(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit)
             LocalNachschlagen.current?.let { oeffnen ->
                 if (viewModel.quellenNachschlagbar) DropdownMenuItem(text = { Text(stringResource(Res.string.desk_sources_window)) }, onClick = { open = false; oeffnen(Nachschlag.QuellenListe) })
                 if (viewModel.orteNachschlagbar) DropdownMenuItem(text = { Text(stringResource(Res.string.desk_places_window)) }, onClick = { open = false; oeffnen(Nachschlag.OrteListe) })
+                if (viewModel.tasksSupported) DropdownMenuItem(text = { Text(stringResource(Res.string.desk_tasks_window)) }, onClick = { open = false; oeffnen(Nachschlag.Aufgaben) })
             }
             if (viewModel.anniversariesSupported && viewModel.kannErinnern) {
                 DropdownMenuItem(

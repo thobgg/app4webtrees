@@ -295,6 +295,8 @@
     <string name="messages_title">Mensajes</string>
     <string name="action_share">Compartir…</string>
     <string name="messages_share_external">Reenviar…</string>
+    <string name="tasks_empty_phone">Aún no hay tareas. Añade una con el «+» en el perfil de una persona.</string>
+    <string name="task_done_title">¿Quitar la tarea como hecha?</string>
     <string name="share_link_foreign">El enlace no lleva a tu servidor webtrees.</string>
     <string name="share_link_other_tree">El enlace pertenece a un árbol que no ves aquí.</string>
     <string name="messages_new_count">%1$d nuevos</string>
