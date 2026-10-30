@@ -72,6 +72,20 @@ private fun photoFile(context: Context, uri: Uri): PhotoFile {
 }
 
 @Composable
+actual fun rememberTeilen(): ((String) -> Unit)? {
+    val context = LocalContext.current
+    return remember(context) {
+        { text: String ->
+            val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(android.content.Intent.EXTRA_TEXT, text)
+            }
+            context.startActivity(android.content.Intent.createChooser(send, null))
+        }
+    }
+}
+
+@Composable
 actual fun rememberNotificationPermission(onGranted: () -> Unit): () -> Unit {
     val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) onGranted()

@@ -58,6 +58,10 @@ expect fun rememberPhotoSources(onPhoto: (PhotoFile) -> Unit): PhotoSources
 @Composable
 expect fun rememberNotificationPermission(onGranted: () -> Unit): () -> Unit
 
+/** Text ueber das Teilen-Menue des Systems weitergeben (Android); null, wo es das nicht gibt (Desktop). */
+@Composable
+expect fun rememberTeilen(): ((String) -> Unit)?
+
 /** Lebensstationen auf der Karte. */
 @Composable
 expect fun LifeMap(facts: List<FactJson>)

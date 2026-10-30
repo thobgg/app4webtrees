@@ -139,6 +139,9 @@ private fun toUploadJpeg(file: File, maxBytes: Long): ByteArray? {
 @Composable
 actual fun rememberNotificationPermission(onGranted: () -> Unit): () -> Unit = onGranted
 
+@Composable
+actual fun rememberTeilen(): ((String) -> Unit)? = null
+
 // Karte: LifeMap.desktop.kt (Kachelkarte).
 
 // ── PDF: PDFBox zeichnet die Seiten, die Datei kommt ueber die Sitzung der App ──

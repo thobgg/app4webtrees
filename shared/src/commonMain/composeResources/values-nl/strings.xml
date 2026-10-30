@@ -282,6 +282,8 @@
     <string name="menu_reminders_off">Dagelijkse herinnering uitschakelen</string>
     <string name="home_pending">Wacht op goedkeuring (%1$d)</string>
     <string name="messages_title">Berichten</string>
+    <string name="action_share">Delen…</string>
+    <string name="messages_share_external">Doorgeven…</string>
     <string name="messages_new_count">%1$d nieuw</string>
     <string name="messages_none">Geen berichten.</string>
     <string name="messages_all">Alle berichten</string>

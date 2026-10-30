@@ -52,6 +52,8 @@ private val TABS = listOf(Res.string.tab_facts, Res.string.tab_media, Res.string
 /** Welcher Dialog gerade offen ist - hoechstens einer zur Zeit. */
 internal sealed interface ProfileDialog {
     data object DeletePerson : ProfileDialog
+    /** Person an Mitforscher schicken (webtrees-Nachricht) oder ueber das Teilen-Menue weitergeben (Nachrichten.kt) */
+    data object Share : ProfileDialog
     data class Unlink(val family: String, val person: Person) : ProfileDialog
     data object NewFact : ProfileDialog
     /** Familien-XREF waehlen, an der das neue Ereignis haengen soll (bei mehreren Partnerschaften) */
@@ -142,13 +144,18 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                         }
                     }
                     // Seltenes und Endgueltiges steckt im Drei-Punkte-Menue, nicht im Aktionsknopf
-                    if (canEdit) {
+                    val teilbar = !person.isPrivate && person.url.isNotBlank() && (viewModel.messagesSupported || rememberTeilen() != null)
+                    if (canEdit || teilbar) {
                         Box(Modifier.align(Alignment.TopStart)) {
                             IconButton(onClick = { moreMenu = true }) {
                                 Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu))
                             }
                             DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
-                                DropdownMenuItem(
+                                if (teilbar) DropdownMenuItem(
+                                    text = { Text(stringResource(Res.string.action_share)) },
+                                    onClick = { moreMenu = false; dialog = ProfileDialog.Share },
+                                )
+                                if (canEdit) DropdownMenuItem(
                                     text = { Text(stringResource(Res.string.action_delete_person)) },
                                     onClick = { moreMenu = false; dialog = ProfileDialog.DeletePerson },
                                 )
@@ -352,7 +359,8 @@ internal fun ProfileDialogs(
     when (dialog) {
         null -> Unit
 
-        ProfileDialog.DeletePerson -> ConfirmDialog(
+        ProfileDialog.Share -> NachrichtDialog(state, viewModel, teilenEntwurf(person), onDismiss = onDismiss)
+                ProfileDialog.DeletePerson -> ConfirmDialog(
             title = stringResource(Res.string.delete_person_title, person.name),
             text = stringResource(Res.string.delete_person_text),
             confirm = stringResource(Res.string.action_delete),

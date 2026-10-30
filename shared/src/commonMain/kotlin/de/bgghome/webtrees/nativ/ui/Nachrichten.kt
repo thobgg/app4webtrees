@@ -40,8 +40,22 @@ import org.jetbrains.compose.resources.stringResource
  * dieses Servers kommen vom Modul aufgeloest (links): Personen und Quellen oeffnen nativ, der Rest im eingebetteten Browser.
  */
 
-/** Vorbelegung des Dialogs: Empfaenger, Betreff, Text und die Seite eines geteilten Datensatzes. */
-data class NachrichtEntwurf(val to: String = "", val subject: String = "", val body: String = "", val url: String? = null)
+/**
+ * Vorbelegung des Dialogs: Empfaenger, Betreff, Text und die Seite eines geteilten Datensatzes (url). Beim Senden haengt
+ * der Link an den Text, damit er auch intern als Link erscheint; teilenText ist die Fassung fuer das Teilen-Menue des Systems.
+ */
+data class NachrichtEntwurf(val to: String = "", val subject: String = "", val body: String = "", val url: String? = null, val teilenText: String? = null)
+
+/** Eine Person teilen: Betreff "Name Kennung", Link auf ihre webtrees-Seite, Text fuer draussen mit Lebensdaten. */
+internal fun teilenEntwurf(person: de.bgghome.webtrees.nativ.api.Person): NachrichtEntwurf = NachrichtEntwurf(
+    subject = listOf(person.name, person.xref).filter { it.isNotBlank() }.joinToString(" "),
+    url = person.url.ifBlank { null },
+    teilenText = listOf(listOf(person.name, person.lifespan).filter { it.isNotBlank() }.joinToString(" · "), person.url).filter { it.isNotBlank() }.joinToString("\n"),
+)
+
+/** Der Text, wie er an den Server geht: der Link dazu, falls er noch nicht drinsteht. */
+internal fun nachrichtText(body: String, url: String?): String =
+    if (url.isNullOrBlank() || body.contains(url)) body.trim() else (body.trim() + "\n\n" + url).trim()
 
 /** Antwort auf eine Nachricht: an den Absender, Betreff mit "RE:" wie im webtrees-Block. */
 internal fun antwortEntwurf(m: MessageJson): NachrichtEntwurf =
@@ -160,10 +174,11 @@ internal fun NachrichtDialog(state: UiState, viewModel: AppViewModel, entwurf: N
     var subject by remember { mutableStateOf(entwurf.subject) }
     var body by remember { mutableStateOf(entwurf.body) }
     val mailHinweis = stringResource(Res.string.messages_contact_mail)
+    val teilen = rememberTeilen()
 
     WtAlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(if (entwurf.subject.startsWith("RE:")) Res.string.messages_reply else Res.string.messages_new)) },
+        title = { Text(stringResource(when { entwurf.teilenText != null -> Res.string.action_share; entwurf.subject.startsWith("RE:") -> Res.string.messages_reply; else -> Res.string.messages_new })) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (empfaenger.isEmpty()) {
@@ -181,10 +196,17 @@ internal fun NachrichtDialog(state: UiState, viewModel: AppViewModel, entwurf: N
         confirmButton = {
             TextButton(
                 enabled = to.isNotEmpty() && body.isNotBlank() && !state.busy,
-                onClick = { viewModel.sendMessage(listOf(to), subject, body, entwurf.url) { ok -> if (ok) { onDismiss(); viewModel.loadMessages() } } },
+                onClick = { viewModel.sendMessage(listOf(to), subject, nachrichtText(body, entwurf.url), entwurf.url) { ok -> if (ok) { onDismiss(); viewModel.loadMessages() } } },
             ) { Text(stringResource(Res.string.messages_send)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) }
+                // Nach draussen (Messenger, Mail): der Text mit Lebensdaten und dem Link, ohne webtrees-Nachricht
+                val text = entwurf.teilenText
+                if (teilen != null && text != null) TextButton(onClick = { onDismiss(); teilen(text) }) { Text(stringResource(Res.string.messages_share_external)) }
+            }
+        },
     )
 }
 

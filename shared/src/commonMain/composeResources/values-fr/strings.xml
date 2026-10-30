@@ -288,6 +288,8 @@
     <!-- Approbation -->
     <string name="home_pending">En attente d’approbation (%1$d)</string>
     <string name="messages_title">Messages</string>
+    <string name="action_share">Partager…</string>
+    <string name="messages_share_external">Transmettre…</string>
     <string name="messages_new_count">%1$d nouveaux</string>
     <string name="messages_none">Aucun message.</string>
     <string name="messages_all">Tous les messages</string>

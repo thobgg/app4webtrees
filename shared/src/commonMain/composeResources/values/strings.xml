@@ -293,6 +293,8 @@
     <!-- Freigabe -->
     <string name="home_pending">Waiting for approval (%1$d)</string>
     <string name="messages_title">Messages</string>
+    <string name="action_share">Share…</string>
+    <string name="messages_share_external">Pass on…</string>
     <string name="messages_new_count">%1$d new</string>
     <string name="messages_none">No messages.</string>
     <string name="messages_all">All messages</string>
