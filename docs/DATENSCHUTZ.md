@@ -1,6 +1,6 @@
 # Datenschutzerklärung wtAnd / Privacy policy wtAnd
 
-Stand / as of 14.10.2026
+Stand / as of 30.10.2026
 
 ## Deutsch
 

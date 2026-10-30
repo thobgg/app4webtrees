@@ -9,7 +9,8 @@ Funktionen:
 * Fotos: aufnehmen oder auswählen und an eine Person hängen; Fotoübersicht des ganzen Baums; Betrachter mit Wischen, Zwei-Finger-Zoom und Doppeltipp
 * Archiv: läuft auf dem Server das Modul Sammlungen, zeigt die App auch dessen Archiv – Ordner- und thematische Sammlungen und vor allem die Bilder, die an niemandem hängen. Unterwegs ein Bild erfassen mit Beschreibung, Datum und Personen, als EXIF in der Datei gespeichert
 * Dokumente: PDFs öffnen im eigenen Betrachter der App, Seite für Seite
-* Jahrestage: anstehende Geburtstage, Hochzeitstage und Todestage, auf Wunsch mit täglicher Erinnerung
+* Nachrichten: Posteingang aus dem Nachrichtensystem von webtrees direkt auf der Startseite – lesen, antworten, löschen, schreiben. Eine Person aus dem Profil an Mitforscher teilen; der Link öffnet beim Empfänger das Profil. wtAnd steht im Teilen-Menü anderer Apps und öffnet Links des eigenen Servers
+* Jahrestage: anstehende Geburtstage, Hochzeitstage und Todestage, auf Wunsch mit täglicher Erinnerung, die auch neue Nachrichten und wartende Freigaben meldet
 * Moderation: ausstehende Änderungen in der App annehmen oder ablehnen
 * Kompakt am Handy, umfassend am Tablet; Deutsch, Englisch, Französisch, Niederländisch und Spanisch, in der App umschaltbar
 

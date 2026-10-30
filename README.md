@@ -13,6 +13,8 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), zum Testen"></a>
 </p>
 
+<p align="center"><b>Neu in 1.56: Nachrichten – wtAnd nutzt das Nachrichtensystem von webtrees.</b> webtrees hat seit jeher einen Posteingang; jetzt ist er in der App: auf der Startseite lesen, antworten, löschen und schreiben, eine Person direkt aus dem Profil an Mitforscher teilen – der Link öffnet beim Empfänger das Profil in wtAnd, im Browser die webtrees-Seite, per Mail beides. wtAnd steht im Teilen-Menü anderer Apps und öffnet Links des eigenen Servers. Neues zeigt eine rote Zahl am Reiter Start, die tägliche Erinnerung meldet auch neue Nachrichten und wartende Freigaben. Kein Dienst dazwischen, alles bleibt auf deinem Server. Braucht <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.25.0">api4webtrees 1.25</a>; nur Android, wtWin und wtTux bleiben auf 1.55.</p>
+
 <p align="center"><b>Neu in 1.55: Alle Angaben am Ereignis.</b> Ereignisse zeigen jetzt alles, was der Server weiß – Alter, Todesursache, Behörde, Telefon, E-Mail und jede weitere Angabe, fertig beschriftet in der eigenen Sprache: im Lebenslauf, im Personenblatt und im Druck. Braucht <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.23.0">api4webtrees 1.23</a>; der Stammbaum auf diesem PC bringt es mit.</p>
 
 <p align="center"><b>Neu in 1.54: Sichtbarkeit in drei Stufen und CompGen-Meta-Suche.</b> Bücher gibt es jetzt für drei Leser: alles (Sicht des Verwalters), was Mitglieder sehen dürfen, oder was Besucher sehen dürfen – die Website ist immer für Besucher. Bei jeder Person sucht <b>In der CompGen-Meta-Suche suchen …</b> (Menü Person und Rechtsklick, auch in gedaudit) den Familiennamen in GEDBAS, Adressbüchern, Online-Ortsfamilienbüchern, Verlustlisten und weiteren Datenbanken des Vereins für Computergenealogie; gesendet wird nur der Familienname und auf Wunsch ein Ort.</p>
@@ -181,7 +183,8 @@ Rechten, Moderation und Regeln.
   der Datei, ohne an einer Person zu hängen (Modul Sammlungen ab 1.7). Verwalter ändern die Beschriftung eines
   Fotos direkt im Betrachter, aus Archiv, Baum und Profil
 - **Dokumente:** PDFs aus Archiv, Baum und Profil öffnen im eigenen Betrachter, Seite für Seite, ohne Browser-Fenster
-- **Jahrestage:** die nächsten Geburts-, Heirats- und Todestage, auf Wunsch mit täglicher Erinnerung
+- **Nachrichten** (ab 1.56, mit api4webtrees 1.25): der Posteingang von webtrees auf der Startseite – lesen, antworten, löschen, schreiben; eine Person aus dem Profil an Mitforscher teilen, der Link öffnet beim Empfänger das Profil; Links des eigenen Servers aus anderen Apps öffnen sich in wtAnd
+- **Jahrestage:** die nächsten Geburts-, Heirats- und Todestage, auf Wunsch mit täglicher Erinnerung, die auch neue Nachrichten und wartende Freigaben meldet
 - **Freigabe:** Moderatoren nehmen ausstehende Änderungen direkt in der App an oder verwerfen sie
 - **Handy kompakt, Tablet umfassend:** am Tablet stehen Profil und Baum nebeneinander
 - Deutsch, Englisch, Französisch, Niederländisch und Spanisch, umschaltbar in der App (sonst wie das Gerät, andere Sprachen sehen Englisch). Die Beschriftungen des Servers kommen in der Sprache der App

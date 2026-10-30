@@ -9,7 +9,8 @@ Features:
 * Photos: take or choose a picture and attach it to a person; photo overview of the whole tree; viewer with swipe, pinch and double-tap
 * Archive: if the server runs the Sammlungen module, the app also shows its archive – folder and thematic collections, and above all the pictures that hang on nobody. Capture a picture on the road with description, date and people, stored as EXIF inside the file
 * Documents: PDFs open in the app's own viewer, page by page
-* Anniversaries: upcoming birthdays, wedding days and days of death, with an optional daily reminder
+* Messages: inbox from webtrees’ own messaging right on the start page – read, reply, delete, write. Share a person from the profile with fellow researchers; the link opens the profile for the recipient. wtAnd appears in other apps’ share menu and opens links of your own server
+* Anniversaries: upcoming birthdays, wedding days and days of death, with an optional daily reminder that also reports new messages and pending approvals
 * Moderation: accept or reject pending changes in the app
 * Compact on phones, comprehensive on tablets; German, English, French, Dutch and Spanish, switchable in the app
 

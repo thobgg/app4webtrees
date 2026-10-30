@@ -9,7 +9,8 @@ Funciones:
 * Fotos: tomar o elegir una imagen y asociarla a una persona; vista general de las fotos de todo el árbol; visor con deslizar, pellizcar y doble toque
 * Archivo: si el servidor ejecuta el módulo Sammlungen, la aplicación muestra también su archivo – colecciones por carpeta y temáticas, y sobre todo las imágenes que no están asociadas a nadie. Capturar una imagen sobre la marcha con descripción, fecha y personas, guardadas como EXIF dentro del archivo
 * Documentos: los PDF se abren en el visor propio de la aplicación, página a página
-* Aniversarios: próximos cumpleaños, aniversarios de boda y de fallecimiento, con recordatorio diario opcional
+* Mensajes: bandeja de entrada del sistema de mensajes de webtrees directamente en la página de inicio – leer, responder, eliminar, escribir. Compartir una persona desde el perfil con otros investigadores; el enlace abre el perfil al destinatario. wtAnd aparece en el menú de compartir de otras aplicaciones y abre enlaces de tu propio servidor
+* Aniversarios: próximos cumpleaños, aniversarios de boda y de fallecimiento, con recordatorio diario opcional que avisa también de mensajes nuevos y aprobaciones pendientes
 * Moderación: aceptar o rechazar cambios pendientes en la aplicación
 * Compacta en el móvil, completa en la tableta; alemán, inglés, francés, neerlandés y español, cambiables en la aplicación
 

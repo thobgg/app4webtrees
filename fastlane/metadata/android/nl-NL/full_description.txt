@@ -9,7 +9,8 @@ Functies:
 * Foto’s: een foto maken of kiezen en aan een persoon koppelen; foto-overzicht van de hele boom; viewer met vegen, knijpen en dubbeltikken
 * Archief: draait op de server de module Sammlungen, dan toont de app ook het archief – map- en themacollecties en vooral de afbeeldingen die aan niemand hangen. Onderweg een afbeelding vastleggen met beschrijving, datum en personen, als EXIF in het bestand opgeslagen
 * Documenten: pdf’s openen in de eigen viewer van de app, pagina voor pagina
-* Jubilea: komende verjaardagen, trouwdagen en sterfdagen, desgewenst met dagelijkse herinnering
+* Berichten: postvak uit het berichtensysteem van webtrees direct op de startpagina – lezen, beantwoorden, verwijderen, schrijven. Een persoon vanuit het profiel met medeonderzoekers delen; de link opent bij de ontvanger het profiel. wtAnd staat in het deelmenu van andere apps en opent links van uw eigen server
+* Jubilea: komende verjaardagen, trouwdagen en sterfdagen, desgewenst met dagelijkse herinnering, die ook nieuwe berichten en wachtende goedkeuringen meldt
 * Moderatie: openstaande wijzigingen in de app goedkeuren of afwijzen
 * Compact op de telefoon, uitgebreid op de tablet; Duits, Engels, Frans, Nederlands en Spaans, in de app te wisselen
 

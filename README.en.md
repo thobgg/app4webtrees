@@ -13,6 +13,8 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), for testing"></a>
 </p>
 
+<p align="center"><b>New in 1.56: messages – wtAnd uses webtrees’ own messaging.</b> webtrees has always had an inbox; now it is in the app: read, reply, delete and write on the start page, share a person with fellow researchers straight from the profile – the link opens the profile in wtAnd for the recipient, the webtrees page in a browser, and e-mail carries both. wtAnd appears in other apps’ share menu and opens links of your own server. A red count on the Start tab shows what is new, and the daily reminder also reports new messages and pending approvals. No service in between, everything stays on your server. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.25.0">api4webtrees 1.25</a>; Android only, wtWin and wtTux stay on 1.55.</p>
+
 <p align="center"><b>New in 1.55: every detail of an event.</b> Events now show everything the server knows – age, cause of death, agency, phone, e-mail and any other detail, labelled in your language: in the timeline, the person sheet and in print. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.23.0">api4webtrees 1.23</a>; the tree on this PC brings it along.</p>
 
 <p align="center"><b>New in 1.54: visibility in three levels and the CompGen meta search.</b> Books can now be made for three readers: everything (manager view), what members may see, or what visitors may see – the website is always for visitors. For any person, <b>Search in the CompGen meta search …</b> (Person menu and right-click, also in gedaudit) looks up the surname in GEDBAS, address books, online local family books, casualty lists and further databases of the German Association for Computer Genealogy; only the surname and, if you like, a place are sent.</p>
@@ -182,7 +184,8 @@ rules.
   right in the viewer, from the archive, the tree and a profile
 - **Documents:** PDFs from the archive, the tree and a profile open in the app's own viewer, page by page, without a
   browser window
-- **Anniversaries:** upcoming birthdays, wedding days and days of death, with an optional daily reminder
+- **Messages** (from 1.56, with api4webtrees 1.25): webtrees’ inbox on the start page – read, reply, delete, write; share a person from the profile with fellow researchers, the link opens the profile for the recipient; links of your own server shared from other apps open in wtAnd
+- **Anniversaries:** upcoming birthdays, wedding days and days of death, with an optional daily reminder that also reports new messages and pending approvals
 - **Moderation:** moderators accept or reject pending changes in the app
 - **Compact on phones, comprehensive on tablets**
 - German, English, French, Dutch and Spanish, switchable in the app (otherwise like the device; any other language gets English). Labels from the server arrive in the language of the app
