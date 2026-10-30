@@ -13,6 +13,7 @@ import de.bgghome.webtrees.nativ.ui.AppRoot
 import de.bgghome.webtrees.nativ.ui.AppViewModel
 import de.bgghome.webtrees.nativ.ui.connect
 import de.bgghome.webtrees.nativ.ui.sharedText
+import de.bgghome.webtrees.nativ.ui.resumed
 import de.bgghome.webtrees.nativ.ui.WtTheme
 
 class MainActivity : ComponentActivity() {
@@ -35,6 +36,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.resumed()
     }
 
     override fun onNewIntent(intent: Intent) {

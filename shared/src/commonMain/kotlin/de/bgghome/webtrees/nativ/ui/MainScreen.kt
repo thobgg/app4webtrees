@@ -194,6 +194,8 @@ private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String
 
         // Vollbild-Baum und (am Handy) die Profilseite bekommen den ganzen Bildschirm.
         val chrome = !state.treeFullscreen && !(state.profileOpen && !wide)
+        // Neue Nachrichten und wartende Freigaben als Zahl am Reiter Start - sonst uebersieht man sie im Baum
+        val offen = viewModel.unreadMessages().size + state.pending.size
 
         Scaffold(
             snackbarHost = { SnackbarHost(snackbar) },
@@ -204,7 +206,7 @@ private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String
                         NAV.forEach { item ->
                             NavigationBarItem(
                                 selected = state.section == item.section, onClick = { viewModel.setSection(item.section) },
-                                icon = { Icon(item.icon, contentDescription = null) }, label = { Text(stringResource(item.label)) },
+                                icon = { NavSymbol(item, offen) }, label = { Text(stringResource(item.label)) },
                             )
                         }
                     }
@@ -217,7 +219,7 @@ private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String
                         NAV.forEach { item ->
                             NavigationRailItem(
                                 selected = state.section == item.section, onClick = { viewModel.setSection(item.section) },
-                                icon = { Icon(item.icon, contentDescription = null) }, label = { Text(stringResource(item.label)) },
+                                icon = { NavSymbol(item, offen) }, label = { Text(stringResource(item.label)) },
                             )
                         }
                     }
@@ -321,5 +323,17 @@ fun MainMenu(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit)
                 },
             )
         }
+    }
+}
+
+/** Symbol eines Reiters, am Reiter Start mit roter Zahl fuer neue Nachrichten und wartende Freigaben. */
+@Composable
+private fun NavSymbol(item: NavItem, offen: Int) {
+    if (item.section == Section.Home && offen > 0) {
+        androidx.compose.material3.BadgedBox(badge = { androidx.compose.material3.Badge { Text(offen.toString()) } }) {
+            Icon(item.icon, contentDescription = null)
+        }
+    } else {
+        Icon(item.icon, contentDescription = null)
     }
 }

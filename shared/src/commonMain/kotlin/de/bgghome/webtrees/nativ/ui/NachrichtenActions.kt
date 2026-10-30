@@ -81,3 +81,10 @@ fun AppViewModel.deleteMessage(id: Int) {
         }
     }
 }
+
+/** Die App kommt wieder in den Vordergrund (Android onResume): Nachrichten und wartende Freigaben frisch holen. */
+fun AppViewModel.resumed() {
+    if (uiState.value.screen != Screen.Main) return
+    loadMessages()
+    loadPending()
+}
