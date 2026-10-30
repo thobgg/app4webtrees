@@ -108,6 +108,27 @@ fun AppRoot(viewModel: AppViewModel) {
         )
     }
 
+    // Geteilter Link (Teilen-Menue anderer Apps): im richtigen Baum die Person, Quelle oder webtrees-Seite oeffnen
+    val sharedLink = state.sharedLink
+    LaunchedEffect(sharedLink, state.screen, state.tree?.name) {
+        if (sharedLink == null || state.screen != Screen.Main) return@LaunchedEffect
+        val tree = state.tree ?: return@LaunchedEffect
+        if (tree.name != sharedLink.tree) {
+            // Baumwechsel behaelt den Link; der Effekt laeuft danach mit dem neuen Baum erneut
+            val ziel = state.info?.trees?.firstOrNull { it.name == sharedLink.tree }
+            if (ziel == null) viewModel.sharedLinkOtherTree() else viewModel.chooseTree(ziel)
+            return@LaunchedEffect
+        }
+        viewModel.sharedLinkHandled()
+        nachschlag.clear()
+        webUrl = null
+        when (sharedLink.type) {
+            "INDI" -> viewModel.openPerson(sharedLink.xref, viewModel.layoutWide)
+            "SOUR" -> if (viewModel.quellenNachschlagbar) nachschlag.add(Nachschlag.Quelle(sharedLink.xref)) else webUrl = sharedLink.url
+            else -> webUrl = sharedLink.url
+        }
+    }
+
     if (state.screen == Screen.Main && nachschlag.isNotEmpty()) {
         WithMessages(state, viewModel) {
             androidx.compose.runtime.CompositionLocalProvider(LocalNachschlagen provides { nachschlag.add(it) }) {

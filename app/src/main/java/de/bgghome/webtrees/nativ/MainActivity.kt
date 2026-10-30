@@ -12,6 +12,7 @@ import de.bgghome.webtrees.nativ.Sprache
 import de.bgghome.webtrees.nativ.ui.AppRoot
 import de.bgghome.webtrees.nativ.ui.AppViewModel
 import de.bgghome.webtrees.nativ.ui.connect
+import de.bgghome.webtrees.nativ.ui.sharedText
 import de.bgghome.webtrees.nativ.ui.WtTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
         // Nach Drehen oder Wechsel der Systemsprache setzt Android die Voreinstellung zurueck - die Wahl erneut anlegen.
         Sprache.anwenden()
         enableEdgeToEdge()
-        if (savedInstanceState == null) handleConnectLink(intent)
+        if (savedInstanceState == null) { handleConnectLink(intent); handleSharedText(intent) }
         setContent {
             Sprache.Umgebung {
                 WtTheme {
@@ -39,6 +40,16 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleConnectLink(intent)
+        handleSharedText(intent)
+    }
+
+    /** Geteilter Text aus einer anderen App (Teilen-Menue): die App sucht darin einen Link auf einen Datensatz des eigenen Servers. */
+    private fun handleSharedText(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_SEND || intent.type != "text/plain") return
+        viewModel.sharedText(intent.getStringExtra(Intent.EXTRA_TEXT))
+        // Nicht noch einmal auswerten, wenn Android die Activity neu aufbaut
+        intent.removeExtra(Intent.EXTRA_TEXT)
+        intent.action = null
     }
 
     /** "Verbinden" aus webtrees: Adresse, Baum und Einmal-Code kommen im Link - nichts muss getippt werden. Die App fragt vor dem Koppeln nach. */

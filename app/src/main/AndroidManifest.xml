@@ -31,6 +31,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="webtreesand" android:host="connect" />
             </intent-filter>
+            <!-- Geteilter Text aus anderen Apps (Messenger, Mail): ein Link auf einen Datensatz des eigenen Servers oeffnet ihn in der App. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
         <!-- Kamera-Aufnahmen landen in einer eigenen Datei im Cache; die Kamera-App bekommt nur fuer diese Datei Schreibrecht. -->
         <provider

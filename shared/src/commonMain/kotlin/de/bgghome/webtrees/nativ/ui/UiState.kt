@@ -72,6 +72,8 @@ data class UiState(
     val loginWall: Boolean = false,
     /** Kopplungs-Link, der noch bestaetigt werden muss - jede Webseite koennte einen solchen Link ausloesen. */
     val pendingConnect: ConnectRequest? = null,
+    /** Geteilter Link auf einen Datensatz des eigenen Servers, den der Hauptbildschirm noch oeffnen muss (GeteilteLinks.kt). */
+    val sharedLink: GeteilterLink? = null,
     val info: Info? = null,
     val tree: TreeInfo? = null,
     val section: Section = Section.Tree,

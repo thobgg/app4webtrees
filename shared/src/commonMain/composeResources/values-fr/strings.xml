@@ -290,6 +290,8 @@
     <string name="messages_title">Messages</string>
     <string name="action_share">Partager…</string>
     <string name="messages_share_external">Transmettre…</string>
+    <string name="share_link_foreign">Le lien ne mène pas à votre serveur webtrees.</string>
+    <string name="share_link_other_tree">Le lien appartient à un arbre que vous ne voyez pas ici.</string>
     <string name="messages_new_count">%1$d nouveaux</string>
     <string name="messages_none">Aucun message.</string>
     <string name="messages_all">Tous les messages</string>

@@ -65,6 +65,8 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
 
     /** Ob die Breite des Bildschirms schon bekannt ist (setWide in TreeActions.kt). */
     internal var layoutKnown = false
+    /** Tablet-Breite (Profil neben dem Baum) - fuer geteilte Links, die eine Person oeffnen (GeteilteLinks.kt). */
+    internal var layoutWide = false
 
     init {
         start()

@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 
 /** Handy kompakter: beim ersten Start nur 3 Ahnen-Generationen statt 4 (spaeter frei waehlbar). */
 fun AppViewModel.setWide(wide: Boolean) {
+    layoutWide = wide
     if (layoutKnown) return
     layoutKnown = true
     if (!wide) uiState.update { it.copy(ancestorGenerations = 3) }
