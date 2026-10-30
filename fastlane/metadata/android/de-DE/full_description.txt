@@ -11,6 +11,7 @@ Funktionen:
 * Dokumente: PDFs öffnen im eigenen Betrachter der App, Seite für Seite
 * Nachrichten: Posteingang aus dem Nachrichtensystem von webtrees direkt auf der Startseite – lesen, antworten, löschen, schreiben. Eine Person aus dem Profil an Mitforscher teilen; der Link öffnet beim Empfänger das Profil. wtAnd steht im Teilen-Menü anderer Apps und öffnet Links des eigenen Servers
 * Jahrestage: anstehende Geburtstage, Hochzeitstage und Todestage, auf Wunsch mit täglicher Erinnerung, die auch neue Nachrichten und wartende Freigaben meldet
+* Aufgaben: die Forschungsaufgaben des Baums ansehen, erledigen und im Profil neue anlegen
 * Moderation: ausstehende Änderungen in der App annehmen oder ablehnen
 * Kompakt am Handy, umfassend am Tablet; Deutsch, Englisch, Französisch, Niederländisch und Spanisch, in der App umschaltbar
 

@@ -13,6 +13,8 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), for testing"></a>
 </p>
 
+<p align="center"><b>New in 1.57: tasks on the phone.</b> The tree’s research tasks sit in the three-dot menu, due only or all, edit and mark done; a new task comes from the “+” menu on a profile. Sex is a line below the name in the event list and can be changed there. Android only, wtWin and wtTux stay on 1.55.</p>
+
 <p align="center"><b>New in 1.56: messages – wtAnd uses webtrees’ own messaging.</b> webtrees has always had an inbox; now it is in the app: read, reply, delete and write on the start page, share a person with fellow researchers straight from the profile – the link opens the profile in wtAnd for the recipient, the webtrees page in a browser, and e-mail carries both. wtAnd appears in other apps’ share menu and opens links of your own server. A red count on the Start tab shows what is new, and the daily reminder also reports new messages and pending approvals. No service in between, everything stays on your server. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.25.0">api4webtrees 1.25</a>; Android only, wtWin and wtTux stay on 1.55.</p>
 
 <p align="center"><img src="docs/screenshots/handy-nachrichten.png" alt="wtAnd start page with the Messages card: one new message from Test User, subject Georg Mohwinkel I130, red 1 on the Start tab" width="300"><br><b>Messages on the start page</b> (from 1.56) – webtrees’ inbox in the app, new items as a red count on the Start tab.</p>

@@ -13,6 +13,8 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), zum Testen"></a>
 </p>
 
+<p align="center"><b>Neu in 1.57: Aufgaben am Handy.</b> Die Forschungsaufgaben des Baums stehen im Drei-Punkte-Menü, nur fällige oder alle, bearbeiten und erledigen; eine neue Aufgabe legt das Plus-Menü im Profil an. Das Geschlecht steht als Zeile unter dem Namen in der Ereignisliste und lässt sich dort ändern. Nur Android, wtWin und wtTux bleiben auf 1.55.</p>
+
 <p align="center"><b>Neu in 1.56: Nachrichten – wtAnd nutzt das Nachrichtensystem von webtrees.</b> webtrees hat seit jeher einen Posteingang; jetzt ist er in der App: auf der Startseite lesen, antworten, löschen und schreiben, eine Person direkt aus dem Profil an Mitforscher teilen – der Link öffnet beim Empfänger das Profil in wtAnd, im Browser die webtrees-Seite, per Mail beides. wtAnd steht im Teilen-Menü anderer Apps und öffnet Links des eigenen Servers. Neues zeigt eine rote Zahl am Reiter Start, die tägliche Erinnerung meldet auch neue Nachrichten und wartende Freigaben. Kein Dienst dazwischen, alles bleibt auf deinem Server. Braucht <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.25.0">api4webtrees 1.25</a>; nur Android, wtWin und wtTux bleiben auf 1.55.</p>
 
 <p align="center"><img src="docs/screenshots/handy-nachrichten.png" alt="Startseite von wtAnd mit der Karte Nachrichten: eine neue Nachricht von Test User, Betreff Georg Mohwinkel I130, rote 1 am Reiter Start" width="300"><br><b>Nachrichten auf der Startseite</b> (ab 1.56) – der Posteingang von webtrees in der App, Neues als rote Zahl am Reiter Start.</p>

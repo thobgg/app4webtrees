@@ -1,0 +1,1 @@
+Tareas en el móvil: las tareas de investigación del árbol en el menú de tres puntos, solo pendientes, editar, marcar hechas; nueva tarea desde el menú «+» del perfil. Cambiar el sexo: línea «Sexo» bajo el nombre en la lista de eventos. Los mensajes se recargan al volver a la página de inicio.

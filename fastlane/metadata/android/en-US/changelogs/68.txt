@@ -1,0 +1,1 @@
+Tasks on the phone: the tree’s research tasks in the three-dot menu, due only, edit, mark done; new task from the “+” menu on a profile. Change sex: a “Sex” line below the name in the event list. Messages reload when you return to the start page.

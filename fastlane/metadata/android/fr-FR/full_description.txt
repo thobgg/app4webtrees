@@ -11,6 +11,7 @@ Fonctions :
 * Documents : les PDF s’ouvrent dans la visionneuse de l’application, page par page
 * Messages : boîte de réception de la messagerie de webtrees directement sur la page d’accueil – lire, répondre, supprimer, écrire. Partager une personne depuis le profil avec d’autres chercheurs ; le lien ouvre le profil chez le destinataire. wtAnd figure dans le menu de partage des autres applications et ouvre les liens de votre propre serveur
 * Anniversaires : anniversaires de naissance, de mariage et de décès à venir, avec rappel quotidien en option, qui signale aussi les nouveaux messages et les approbations en attente
+* Tâches : consulter les tâches de recherche de l’arbre, les terminer et en créer depuis un profil
 * Modération : accepter ou refuser les modifications en attente dans l’application
 * Compact sur téléphone, complet sur tablette ; allemand, anglais, français, néerlandais et espagnol, commutables dans l’application
 

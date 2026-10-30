@@ -11,6 +11,7 @@ Functies:
 * Documenten: pdf’s openen in de eigen viewer van de app, pagina voor pagina
 * Berichten: postvak uit het berichtensysteem van webtrees direct op de startpagina – lezen, beantwoorden, verwijderen, schrijven. Een persoon vanuit het profiel met medeonderzoekers delen; de link opent bij de ontvanger het profiel. wtAnd staat in het deelmenu van andere apps en opent links van uw eigen server
 * Jubilea: komende verjaardagen, trouwdagen en sterfdagen, desgewenst met dagelijkse herinnering, die ook nieuwe berichten en wachtende goedkeuringen meldt
+* Taken: de onderzoekstaken van de stamboom bekijken, afhandelen en vanuit een profiel nieuwe aanmaken
 * Moderatie: openstaande wijzigingen in de app goedkeuren of afwijzen
 * Compact op de telefoon, uitgebreid op de tablet; Duits, Engels, Frans, Nederlands en Spaans, in de app te wisselen
 

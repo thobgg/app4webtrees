@@ -1,0 +1,1 @@
+Aufgaben am Handy: die Forschungsaufgaben des Baums im Drei-Punkte-Menü, nur fällige, bearbeiten, erledigen; neue Aufgabe aus dem Plus-Menü im Profil. Geschlecht ändern: Zeile „Geschlecht“ unter dem Namen in der Ereignisliste. Nachrichten laden beim Wechsel auf die Startseite neu.

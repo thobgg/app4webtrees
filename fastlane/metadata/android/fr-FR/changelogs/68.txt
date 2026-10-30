@@ -1,0 +1,1 @@
+Tâches sur le téléphone : les tâches de recherche de l’arbre dans le menu à trois points, échues seulement, modifier, terminer ; nouvelle tâche via le menu « + » du profil. Modifier le sexe : ligne « Sexe » sous le nom dans la liste des événements. Les messages se rechargent au retour sur la page d’accueil.
