@@ -65,6 +65,7 @@ fun TreeTitleBar(state: UiState, viewModel: AppViewModel, openWeb: (String) -> U
                         Text(
                             stringResource(Res.string.tree_people_count, tree!!.individuals),
                             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }

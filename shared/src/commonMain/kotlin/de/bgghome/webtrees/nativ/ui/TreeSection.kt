@@ -88,7 +88,7 @@ fun TreeSection(state: UiState, viewModel: AppViewModel, wide: Boolean, openWeb:
                 if (home != null && home != state.root) IconButton(onClick = { viewModel.setRoot(home) }) {
                     Icon(Icons.Default.Person, contentDescription = stringResource(Res.string.tree_home))
                 }
-                GenerationsChip(state, viewModel)
+                GenerationsChip(state, viewModel, kurz = !wide)
                 TreeSettings(state, viewModel)
             }
             FindPersonField { viewModel.setSection(Section.Search) }
@@ -172,14 +172,15 @@ private fun TreeCanvas(state: UiState, viewModel: AppViewModel, wide: Boolean, a
 
 /** Wie viele Ahnen-Generationen der Baum zeigt (2 bis 6). */
 @Composable
-internal fun GenerationsChip(state: UiState, viewModel: AppViewModel) {
+internal fun GenerationsChip(state: UiState, viewModel: AppViewModel, kurz: Boolean = false) {
     var open by remember { mutableStateOf(false) }
 
     Box {
         TextButton(onClick = { open = true }) {
             // Einzeilig: bei Platzmangel (wtWin mit 125 % Skalierung) brach der Text sonst nach jedem Buchstaben um
-            // und machte die Symbolleiste ein Drittel des Fensters hoch.
-            Text(stringResource(Res.string.tree_generations, state.ancestorGenerations), maxLines = 1, softWrap = false)
+            // und machte die Symbolleiste ein Drittel des Fensters hoch. Am Handy nur die Zahl: mit Zurueck-Pfeil und
+            // "Zu mir" in der Leiste blieb dem Baumnamen sonst nur ein schmaler Streifen.
+            Text(if (kurz) state.ancestorGenerations.toString() else stringResource(Res.string.tree_generations, state.ancestorGenerations), maxLines = 1, softWrap = false)
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
