@@ -26,6 +26,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.Checkbox
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +50,10 @@ import de.bgghome.webtrees.nativ.api.PendingRecord
 fun HomeSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit) {
     val user = state.info?.user
     val tree = state.tree
+    var neueNachricht by remember { mutableStateOf(false) }
+    // Die Nachrichtenseite liegt im Nachschlage-Stapel (nur am Handy/Tablet gesetzt)
+    val oeffnen = LocalNachschlagen.current
+    if (neueNachricht) NachrichtDialog(state, viewModel, NachrichtEntwurf(), onDismiss = { neueNachricht = false })
 
     Column(Modifier.fillMaxSize()) {
         TreeTitleBar(state, viewModel, openWeb)
@@ -95,6 +103,34 @@ fun HomeSection(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Un
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { viewModel.moderate(null, true) }) { Text(stringResource(Res.string.pending_accept_all)) }
+                        }
+                    }
+                }
+            }
+            if (viewModel.messagesSupported) {
+                // Posteingang aus webtrees' Nachrichtensystem: die drei neuesten, "Alle" oeffnet die Seite im Stapel
+                val neue = viewModel.unreadMessages().size
+                val gesamt = viewModel.messagesTotal
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f)) { SectionHeading(stringResource(Res.string.messages_title) + if (gesamt > 0) " ($gesamt)" else "") }
+                        if (neue > 0) Text(stringResource(Res.string.messages_new_count, neue), Modifier.padding(top = 8.dp),
+                            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                item {
+                    HomeCard(padding = false) {
+                        if (state.messages.isEmpty()) {
+                            Text(stringResource(Res.string.messages_none), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        state.messages.take(3).forEachIndexed { index, m ->
+                            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            NachrichtZeile(m, neu = m.id > state.messagesSeen) { oeffnen?.invoke(Nachschlag.Nachrichten) }
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
+                            TextButton(onClick = { neueNachricht = true }) { Text(stringResource(Res.string.messages_new)) }
+                            if (oeffnen != null) TextButton(onClick = { oeffnen(Nachschlag.Nachrichten) }) { Text(stringResource(Res.string.messages_all)) }
                         }
                     }
                 }

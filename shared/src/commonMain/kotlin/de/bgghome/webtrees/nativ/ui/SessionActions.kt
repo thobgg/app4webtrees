@@ -255,6 +255,7 @@ fun AppViewModel.chooseTree(tree: TreeInfo) {
     loadAnniversaries()
     loadPending()
     loadBookmarks()
+    loadMessages()
     probeArchive()
 
     if (tree.canEdit) {

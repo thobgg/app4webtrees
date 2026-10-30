@@ -67,6 +67,8 @@ sealed interface Nachschlag {
     data class Quelle(val xref: String) : Nachschlag
     data object OrteListe : Nachschlag
     data class Ort(val name: String) : Nachschlag
+    /** Posteingang aus webtrees' Nachrichtensystem (Nachrichten.kt) */
+    data object Nachrichten : Nachschlag
 }
 
 /** Oeffnet eine Nachschlage-Seite (am Handy von AppRoot gesetzt, am Desktop null - dort gibt es eigene Fenster). */
@@ -80,10 +82,13 @@ val AppViewModel.orteNachschlagbar: Boolean get() = (uiState.value.info?.api ?: 
 fun NachschlagSeite(
     seite: Nachschlag, state: UiState, viewModel: AppViewModel,
     onOeffnen: (Nachschlag) -> Unit, onZurueck: () -> Unit, onPerson: (String) -> Unit,
+    /** Oeffnet eine webtrees-Seite im eingebetteten Browser (Links in Nachrichten auf Datensaetze ohne eigene Seite) */
+    onWeb: (String) -> Unit = {},
 ) {
     val tree = state.tree?.name ?: return
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         when (seite) {
+            Nachschlag.Nachrichten -> NachrichtenSeite(state, viewModel, onOeffnen, onZurueck, onPerson, onWeb)
             Nachschlag.QuellenListe -> QuellenListeSeite(tree, viewModel, onOeffnen, onZurueck)
             is Nachschlag.Quelle -> QuelleSeite(tree, seite.xref, viewModel, onZurueck, onPerson)
             Nachschlag.OrteListe -> OrteListeSeite(tree, viewModel, onOeffnen, onZurueck)
@@ -93,10 +98,11 @@ fun NachschlagSeite(
 }
 
 @Composable
-private fun Kopf(titel: String, onZurueck: () -> Unit) {
+internal fun Kopf(titel: String, onZurueck: () -> Unit, rechts: (@Composable () -> Unit)? = null) {
     Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 4.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onZurueck) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.action_back)) }
         Text(titel, style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        rechts?.invoke()
     }
 }
 

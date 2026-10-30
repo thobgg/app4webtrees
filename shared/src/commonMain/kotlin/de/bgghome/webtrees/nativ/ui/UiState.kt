@@ -9,6 +9,8 @@ import de.bgghome.webtrees.nativ.api.Descendants
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Info
 import de.bgghome.webtrees.nativ.api.MediaJson
+import de.bgghome.webtrees.nativ.api.MessageJson
+import de.bgghome.webtrees.nativ.api.MessageRecipient
 import de.bgghome.webtrees.nativ.api.Pedigree
 import de.bgghome.webtrees.nativ.api.PendingRecord
 import de.bgghome.webtrees.nativ.api.Person
@@ -127,6 +129,14 @@ data class UiState(
     val bookmarks: List<Person> = emptyList(),
     /** Favoriten des Stammbaums, die Verwalter fuer alle setzen (ab API-Stufe 30) */
     val treeBookmarks: List<Person> = emptyList(),
+
+    // ── Nachrichten (webtrees' eigenes Nachrichtensystem, ab API-Stufe 42) ──
+    val messages: List<MessageJson> = emptyList(),
+    val messagesNextPage: Int? = null,
+    /** An wen der Benutzer schreiben kann (Liste des webtrees-Blocks) */
+    val recipients: List<MessageRecipient> = emptyList(),
+    /** Hoechste Nachrichtennummer, die der Benutzer schon gesehen hat - lokal gemerkt, webtrees kennt kein Gelesen-Kennzeichen */
+    val messagesSeen: Int = 0,
 
     // ── Fotos ────────────────────────────────────────────────────────
     val media: List<MediaJson> = emptyList(),

@@ -51,6 +51,11 @@ fun explain(e: Exception): String = when (e) {
         "unknown-collection" -> Texte.t(Res.string.err_archive_unknown_collection)
         "bad-color" -> Texte.t(Res.string.err_archive_bad_color)
         "bad-regions" -> Texte.t(Res.string.err_archive_bad_regions)
+        // Nachrichten (Stufe 42)
+        "unknown-user", "missing-to" -> Texte.t(Res.string.err_message_recipient)
+        "contact-none" -> Texte.t(Res.string.err_message_contact_none)
+        "missing-body" -> Texte.t(Res.string.err_message_empty)
+        "send-failed" -> Texte.t(Res.string.err_message_send_failed)
         else -> Texte.t(Res.string.err_rejected, e.code)
     }
     // Keine JSON-Antwort: bei 404 fehlt das Modul auf dem Server, sonst hat der Webserver etwas anderes geliefert.

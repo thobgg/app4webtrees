@@ -409,6 +409,18 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     suspend fun setBookmark(tree: String, xref: String, add: Boolean, note: String? = null, forTree: Boolean = false): BookmarkList =
         post("Bookmarks", tree, emptyMap(), jsonBody(BookmarkRequest.serializer(), BookmarkRequest(xref, add, note, forTree)), BookmarkList.serializer())
 
+    /** Ab Stufe 42: Posteingang des Benutzers aus webtrees' Nachrichtensystem, 50 je Seite, dazu die moeglichen Empfaenger. */
+    suspend fun messages(tree: String, page: Int = 1): MessagePage =
+        get("Messages", tree, mapOf("page" to page.toString()), MessagePage.serializer())
+
+    /** Sendet ueber webtrees' Nachrichtendienst als angemeldeter Benutzer; intern, per Mail oder beides entscheidet der Empfaenger. */
+    suspend fun sendMessage(tree: String, r: MessageRequest): MessageSendResult =
+        post("Messages", tree, emptyMap(), jsonBody(MessageRequest.serializer(), r), MessageSendResult.serializer())
+
+    /** Loescht eigene Nachrichten; fremde Nummern uebergeht der Server. */
+    suspend fun deleteMessages(tree: String, ids: List<Int>): MessageDeleteResult =
+        post("MessageDelete", tree, emptyMap(), jsonBody(MessageDeleteRequest.serializer(), MessageDeleteRequest(ids)), MessageDeleteResult.serializer())
+
     /** Zwei vorhandene Personen verknuepfen (ab Stufe 8): als Kind, Partner, Vater oder Mutter. */
     suspend fun link(tree: String, r: LinkRequest): WriteResult =
         post("Link", tree, emptyMap(), jsonBody(LinkRequest.serializer(), r))

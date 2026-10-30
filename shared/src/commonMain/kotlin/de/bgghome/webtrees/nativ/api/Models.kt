@@ -25,6 +25,8 @@ data class UserInfo(
     val userName: String = "",
     val realName: String = "",
     val isAdmin: Boolean = false,
+    /** Ab Stufe 42: Zahl der Nachrichten im Posteingang (webtrees' eigenes Nachrichtensystem). */
+    val messages: Int = 0,
 )
 
 @Serializable
@@ -634,6 +636,58 @@ data class BookmarkList(val data: List<Person> = emptyList(), /** Ab Stufe 30: d
 
 @Serializable
 data class BookmarkRequest(val xref: String, val add: Boolean, val note: String? = null, val forTree: Boolean = false)
+
+/** Ab Stufe 42: Nachrichten ueber webtrees' eigenes Nachrichtensystem (Tabelle message, Block "Nachrichten" auf "Meine Seite"). */
+const val API_MESSAGES = 42
+
+/** Ein Datensatz dieses Servers, der in einer Nachricht genannt wird; xref null = fehlt oder darf nicht gesehen werden. */
+@Serializable
+data class MessageLink(val url: String = "", val type: String = "", val xref: String? = null)
+
+/**
+ * Eine Nachricht im Posteingang. webtrees speichert die fertige Mail-Fassung (body); text ist die Nachricht allein,
+ * url die Seite, von der aus gesendet wurde. senderName/senderUser fehlen, wenn das Konto des Absenders nicht mehr existiert.
+ */
+@Serializable
+data class MessageJson(
+    val id: Int = 0,
+    val created: String = "",
+    val sender: String = "",
+    val senderName: String? = null,
+    val senderUser: String? = null,
+    val subject: String = "",
+    val text: String = "",
+    val url: String = "",
+    val body: String = "",
+    val links: List<MessageLink> = emptyList(),
+) {
+    /** Anzeigename des Absenders: Name, sonst Benutzername, sonst die E-Mail-Adresse. */
+    val absender: String get() = senderName?.ifBlank { null } ?: senderUser?.ifBlank { null } ?: sender
+}
+
+/** An wen der Benutzer schreiben kann; contact: messaging, messaging2 (intern + Mail), messaging3 (nur Mail), mailto. */
+@Serializable
+data class MessageRecipient(val user: String = "", val name: String = "", val contact: String = "")
+
+@Serializable
+data class MessagePage(
+    val messages: List<MessageJson> = emptyList(),
+    val recipients: List<MessageRecipient> = emptyList(),
+    val page: Int = 1,
+    val nextPage: Int? = null,
+)
+
+@Serializable
+data class MessageRequest(val to: List<String>, val subject: String, val body: String, val url: String? = null)
+
+@Serializable
+data class MessageSendResult(val ok: Boolean = false, val delivered: List<String> = emptyList())
+
+@Serializable
+data class MessageDeleteRequest(val ids: List<Int>)
+
+@Serializable
+data class MessageDeleteResult(val ok: Boolean = false, val deleted: Int = 0)
 
 /** Ab Stufe 30: Forschungsaufgaben (webtrees _TODO), Reihenfolge, Aenderungsverlauf, Merkliste in den Favoriten. */
 const val API_TASKS = 30

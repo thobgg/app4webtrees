@@ -114,7 +114,8 @@ fun AppRoot(viewModel: AppViewModel) {
                 NachschlagSeite(nachschlag.last(), state, viewModel, onOeffnen = { nachschlag.add(it) },
                     onZurueck = { nachschlag.removeAt(nachschlag.lastIndex) },
                     // Person gewaehlt: zum Profil, die Nachschlage-Seiten schliessen
-                    onPerson = { xref -> nachschlag.clear(); viewModel.select(xref) })
+                    onPerson = { xref -> nachschlag.clear(); viewModel.select(xref) },
+                    onWeb = { webUrl = it })
             }
         }
         return

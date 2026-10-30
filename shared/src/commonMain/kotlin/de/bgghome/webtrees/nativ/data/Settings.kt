@@ -45,6 +45,11 @@ class Settings(private val prefs: Ablage) {
         get() = prefs.getString("tree", "").orEmpty()
         set(value) = prefs.putString("tree", value)
 
+    /** Hoechste gesehene Nachrichtennummer je Server und Benutzer - webtrees kennt kein Gelesen-Kennzeichen. */
+    var messagesSeen: Int
+        get() = prefs.getString("messagesSeen:$baseUrl|$userName", null)?.toIntOrNull() ?: 0
+        set(value) = prefs.putString("messagesSeen:$baseUrl|$userName", value.toString())
+
     /** Sprache der Oberflaeche ("de", "en", …); leer = wie das System (siehe Sprache). */
     var language: String
         get() = prefs.getString("language", "").orEmpty()

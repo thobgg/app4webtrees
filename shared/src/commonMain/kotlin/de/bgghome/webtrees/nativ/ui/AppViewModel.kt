@@ -81,6 +81,7 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
         loadAnniversaries()
         loadPending()
         loadBookmarks()
+        loadMessages()
     }
 
     fun messageShown() = uiState.update { it.copy(message = null) }
