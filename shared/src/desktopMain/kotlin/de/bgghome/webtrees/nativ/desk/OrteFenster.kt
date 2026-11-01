@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.layout.aspectRatio
 import de.bgghome.webtrees.nativ.ui.WtAlertDialog
 import androidx.compose.foundation.focusable
@@ -127,10 +128,10 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
         val scope = rememberCoroutineScope()
         var meldung by remember { mutableStateOf<String?>(null) }
         var verweisFortschritt by remember { mutableStateOf<String?>(null) }
-        val darf = state.tree?.canEdit == true && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_WRITE
-        val darfUmbenennen = state.tree?.canEdit == true && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_RENAME
+        val darf = state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_WRITE)
+        val darfUmbenennen = state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME)
         // Adressen zu Haeusern (ab Stufe 33): dafuer den ganzen Baum holen, sobald "Bereinigen" offen ist
-        val darfAdressen = darfUmbenennen && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ADDRESS
+        val darfAdressen = darfUmbenennen && state.info.hat(de.bgghome.webtrees.nativ.api.API_ADDRESS)
         var adressenOffen by remember { mutableStateOf(false) }
         var adressFortschritt by remember { mutableStateOf<String?>(null) }
         val vorschlaege by produceState<List<de.bgghome.webtrees.nativ.data.HausVorschlag>?>(null, tree, neu, bereinigenOffen && darfAdressen) {
@@ -187,7 +188,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
             if (bereinigenOffen && darfUmbenennen) liste?.getOrNull()?.let { l ->
                 OrteBereinigenDialog(tree.orEmpty(), l.places, onZeigen = { gewaehlt = it }, onZusammenfuehren = { von, nach -> vorschau(von, nach) },
                     onDismiss = { bereinigenOffen = false },
-                    onVerweise = if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_LINKS) ({ orte ->
+                    onVerweise = if (state.info.hat(de.bgghome.webtrees.nativ.api.API_LOC_LINKS)) ({ orte ->
                         // Ort fuer Ort "linkEvents" - jeder Aufruf verknuepft die Ereignisse dieses Orts mit seinem _LOC
                         scope.launch {
                             var summe = 0
@@ -222,7 +223,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                 }
             }
             bearbeiten?.let { o ->
-                OrtDialog(tree.orEmpty(), o, viewModel.client, state.info?.user?.isAdmin == true, openWeb, onDismiss = { bearbeiten = null }, apiStufe = state.info?.api ?: 0) { r ->
+                OrtDialog(tree.orEmpty(), o, viewModel.client, state.info?.user?.isAdmin == true, openWeb, onDismiss = { bearbeiten = null }, info = state.info) { r ->
                     meldung = listOfNotNull(
                         de.bgghome.webtrees.nativ.Texte.t(Res.string.msg_saved) + ".",
                         r.linked?.takeIf { it > 0 }?.let { de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_place_linked, it) },

@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.Info
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -134,7 +136,7 @@ private fun koordinatenPaarRoh(text: String): Pair<Double, Double>? {
 
 @Composable
 fun OrtDialog(tree: String, ort: PlaceDetail, client: WtClient, istAdmin: Boolean, openWeb: (String) -> Unit,
-              onDismiss: () -> Unit, apiStufe: Int = 0, onSaved: (WriteResult) -> Unit) {
+              onDismiss: () -> Unit, info: Info? = null, onSaved: (WriteResult) -> Unit) {
     val loc = ort.location
     val altGov = loc?.gov.orEmpty()
     val altNotiz = loc?.notes?.firstOrNull().orEmpty()
@@ -147,7 +149,7 @@ fun OrtDialog(tree: String, ort: PlaceDetail, client: WtClient, istAdmin: Boolea
     val altGovTyp = loc?.govType?.trim().orEmpty()
     var govTyp by remember { mutableStateOf(altGovTyp) }
     // Ab Stufe 32: Ereignisse am Ort ohne Verweis "3 _LOC" beim Speichern verknuepfen (vorgeschlagen, abwaehlbar)
-    val unverknuepft = if (apiStufe >= API_LOC_LINKS) ort.unlinked ?: 0 else 0
+    val unverknuepft = if (info.hat(API_LOC_LINKS)) ort.unlinked ?: 0 else 0
     var verknuepfen by remember { mutableStateOf(true) }
     var plz by remember { mutableStateOf(loc?.postalCode.orEmpty()) }
     var region by remember { mutableStateOf(loc?.region.orEmpty()) }
@@ -197,9 +199,9 @@ fun OrtDialog(tree: String, ort: PlaceDetail, client: WtClient, istAdmin: Boolea
                 }
                 // Art des Orts (TYPE am _LOC, ab Stufe 27) und daneben die GOV-Typnummer (2 _GOVTYPE, ab Stufe 32) - die Wahl
                 // fuellt eine leere oder automatisch gesetzte Art mit
-                if (apiStufe >= API_LOC_HIERARCHY) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (info.hat(API_LOC_HIERARCHY)) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(Modifier.weight(1f)) { Field(art, { art = it }, Res.string.desk_place_type, hint = Res.string.desk_place_type_hint) }
-                    if (apiStufe >= API_LOC_LINKS) Box(Modifier.weight(1f)) {
+                    if (info.hat(API_LOC_LINKS)) Box(Modifier.weight(1f)) {
                         GovTypWahl(govTyp) { nr ->
                             val sprache = Locale.getDefault().language
                             if (art.isBlank() || art == GovTypen.name(govTyp, sprache)) art = GovTypen.name(nr, sprache).orEmpty()

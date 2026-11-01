@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -134,7 +135,7 @@ fun GesichterFenster(
                 speichern = { liste -> viewModel.client.writeRegions(tree, eintrag.pfad.orEmpty(), liste).eintrag },
                 onPerson = { viewModel.setRoot(it) }, onGespeichert = onGespeichert, onSchliessen = schliessen,
                 // Bild an Personen haengen: nur mit Bearbeitungsrecht und api4webtrees ab Stufe 23 (Media verknuepfen)
-                anhaengen = if (viewModel.state.value.tree?.canEdit == true && (viewModel.state.value.info?.api ?: 0) >= 23) ({ xrefs ->
+                anhaengen = if (viewModel.state.value.tree?.canEdit == true && viewModel.state.value.info.hat(23)) ({ xrefs ->
                     val pfad = eintrag.pfad.orEmpty()
                     val medium = eintrag.xref ?: viewModel.client.mediaFromFile(tree, xrefs.first(), pfad,
                         eintrag.titel.ifBlank { eintrag.bildunterschrift.ifBlank { eintrag.datei.substringBeforeLast('.') } }, type = "photo").media

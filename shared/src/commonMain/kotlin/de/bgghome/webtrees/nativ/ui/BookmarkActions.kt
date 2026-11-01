@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -8,7 +9,7 @@ import kotlinx.coroutines.launch
 // Erweiterungen von AppViewModel.
 
 val AppViewModel.bookmarksSupported: Boolean
-    get() = (uiState.value.info?.api ?: 0) >= AppViewModel.API_BOOKMARKS && uiState.value.info?.user?.loggedIn == true
+    get() = uiState.value.info.hat(AppViewModel.API_BOOKMARKS) && uiState.value.info?.user?.loggedIn == true
 
 fun AppViewModel.isBookmarked(xref: String): Boolean = uiState.value.bookmarks.any { it.xref == xref }
 
@@ -35,7 +36,7 @@ fun AppViewModel.toggleBookmark(xref: String) {
 
 /** Ab API-Stufe 30: Aufgaben, Reihenfolge, Aenderungsverlauf, Favoriten des Stammbaums. */
 val AppViewModel.tasksSupported: Boolean
-    get() = (uiState.value.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_TASKS && uiState.value.info?.user?.loggedIn == true
+    get() = uiState.value.info.hat(de.bgghome.webtrees.nativ.api.API_TASKS) && uiState.value.info?.user?.loggedIn == true
 
 fun AppViewModel.isTreeBookmarked(xref: String): Boolean = uiState.value.treeBookmarks.any { it.xref == xref }
 
@@ -71,7 +72,7 @@ fun AppViewModel.reorder(xref: String, type: String, order: List<String>, reload
 // Startperson festlegen (ab API-Stufe 24): eigene Standardperson oder, fuer Verwalter, die des Stammbaums.
 
 val AppViewModel.startPersonSupported: Boolean
-    get() = (uiState.value.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_START_PERSON && uiState.value.info?.user?.loggedIn == true
+    get() = uiState.value.info.hat(de.bgghome.webtrees.nativ.api.API_START_PERSON) && uiState.value.info?.user?.loggedIn == true
 
 fun AppViewModel.setStartPerson(xref: String, forTree: Boolean, onDone: () -> Unit = {}) {
     val tree = uiState.value.tree ?: return

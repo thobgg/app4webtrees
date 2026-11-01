@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.res.*
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +10,7 @@ import kotlinx.coroutines.withContext
 
 // Fotos: die Fotouebersicht des Baums (seitenweise) und das Hochladen eines Bildes zu einer Person. Erweiterungen von AppViewModel.
 
-val AppViewModel.photosSupported: Boolean get() = (uiState.value.info?.api ?: 0) >= AppViewModel.API_PHOTOS
+val AppViewModel.photosSupported: Boolean get() = uiState.value.info.hat(AppViewModel.API_PHOTOS)
 
 fun AppViewModel.loadMoreMedia() {
     if (uiState.value.mediaNextPage != null && !uiState.value.loadingMedia) loadMedia(reset = false)

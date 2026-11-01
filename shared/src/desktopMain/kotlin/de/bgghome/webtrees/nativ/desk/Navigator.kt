@@ -681,7 +681,7 @@ private fun PersonBox(
             if (art != Art.Zentral) ContextMenuItem(asCentre) { viewModel.setRoot(person.xref) } else null,
             ContextMenuItem(edit) { onOpenSheet(person.xref) },
             if (viewModel.bookmarksSupported) ContextMenuItem(if (viewModel.isBookmarked(person.xref)) merkWeg else merken) { viewModel.toggleBookmark(person.xref) } else null,
-            ContextMenuItem(web) { openWeb(person.url) },
+            if (person.url.isNotBlank()) ContextMenuItem(web) { openWeb(person.url) } else null,
             ContextMenuItem(Texte.t(Res.string.desk_copy_text)) { personentextKopieren(viewModel, person.xref) },
             ContextMenuItem(Texte.t(Res.string.desk_meta_menu)) { MetaSuche.fuer(viewModel, person.xref) },
             if (darfLoeschen) ContextMenuItem(anfuegen) { Anfuegewahl.person = person } else null,

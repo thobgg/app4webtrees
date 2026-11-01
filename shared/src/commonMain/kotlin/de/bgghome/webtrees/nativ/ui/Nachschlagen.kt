@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,8 +78,8 @@ sealed interface Nachschlag {
 val LocalNachschlagen = staticCompositionLocalOf<((Nachschlag) -> Unit)?> { null }
 
 /** Ob der Server Quellen bzw. Orte zum Nachschlagen anbietet. */
-val AppViewModel.quellenNachschlagbar: Boolean get() = (uiState.value.info?.api ?: 0) >= API_SOURCES
-val AppViewModel.orteNachschlagbar: Boolean get() = (uiState.value.info?.api ?: 0) >= API_PLACE_LIST
+val AppViewModel.quellenNachschlagbar: Boolean get() = uiState.value.info.hat(API_SOURCES)
+val AppViewModel.orteNachschlagbar: Boolean get() = uiState.value.info.hat(API_PLACE_LIST)
 
 @Composable
 fun NachschlagSeite(

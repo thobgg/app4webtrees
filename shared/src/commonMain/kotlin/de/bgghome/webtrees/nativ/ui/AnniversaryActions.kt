@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -7,7 +8,7 @@ import kotlinx.coroutines.launch
 // Jahrestage: die naechsten Geburts-, Heirats- und Todestage fuer die Startseite und die taegliche Erinnerung.
 // Erweiterungen von AppViewModel.
 
-val AppViewModel.anniversariesSupported: Boolean get() = (uiState.value.info?.api ?: 0) >= AppViewModel.API_ANNIVERSARIES
+val AppViewModel.anniversariesSupported: Boolean get() = uiState.value.info.hat(AppViewModel.API_ANNIVERSARIES)
 
 internal fun AppViewModel.loadAnniversaries() {
     val tree = uiState.value.tree ?: return

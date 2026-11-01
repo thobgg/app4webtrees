@@ -2,6 +2,7 @@
 
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.data.Ortsanzeige
 import kotlinx.coroutines.launch
 import de.bgghome.webtrees.nativ.ui.StartpersonDialog
@@ -153,13 +154,13 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     var tabelle by remember { mutableStateOf(false) }
     // Quellenverwaltung: null = zu, "" = offen ohne Auswahl, sonst die Quelle, mit der sie oeffnet
     var quellen by remember { mutableStateOf<String?>(null) }
-    val quellenApi = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_SOURCES
+    val quellenApi = state.info.hat(de.bgghome.webtrees.nativ.api.API_SOURCES)
     var orte by remember { mutableStateOf<String?>(null) }
     // Orte bereinigen sofort oeffnen (aus der Pruefung)
     var orteBereinigen by remember { mutableStateOf(false) }
-    val orteApi = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_LIST
+    val orteApi = state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_LIST)
     // Personen zusammenfuehren: nur Verwalter des Stammbaums, wie in webtrees selbst
-    val mergeApi = state.tree?.role == "manager" && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_MERGE
+    val mergeApi = state.tree?.role == "manager" && state.info.hat(de.bgghome.webtrees.nativ.api.API_MERGE)
     var zusammen by remember { mutableStateOf<String?>(null) }
     // Stufe 30: Aufgaben, Letzte Aenderungen, Aufgabe aus Pruefung/Menue
     val stufe30 = viewModel.tasksSupported
@@ -234,7 +235,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         onOrtsanzeige = { ortsanzeige = true },
         onOrte = if (orteApi) ({ orte = "" }) else null,
         onZusammenfuehren = if (mergeApi) ({ zusammen = "" }) else null,
-        onOrteBereinigen = if (orteApi && state.tree?.canEdit == true && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_RENAME) ({ orteBereinigen = true; orte = "" }) else null,
+        onOrteBereinigen = if (orteApi && state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME)) ({ orteBereinigen = true; orte = "" }) else null,
         onAufgaben = if (stufe30) ({ aufgaben = true }) else null,
         onAenderungen = if (stufe30) ({ aenderungen = true }) else null,
         onAufgabeNeu = if (stufe30 && state.tree?.canEdit == true) ({ aufgabeNeu = it }) else null,
@@ -421,7 +422,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         tafel?.let { art -> if (state.root != null) TafelFenster(state, viewModel, art, onClose = { tafel = null }) }
         if (buch && state.root != null) BuchFenster(state, viewModel, onClose = { buch = false })
         if (pruefung && state.tree != null) PruefFenster(state, viewModel, openSheet, onClose = { pruefung = false },
-            onOrteBereinigen = if (orteApi && state.tree?.canEdit == true && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_RENAME) ({ orteBereinigen = true; orte = "" }) else null,
+            onOrteBereinigen = if (orteApi && state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME)) ({ orteBereinigen = true; orte = "" }) else null,
             onZusammenfuehren = if (mergeApi) ({ zusammenPaar = it }) else null,
             onAufgabe = if (stufe30 && state.tree?.canEdit == true) ({ aufgabeNeu = it }) else null)
         if (aufgaben && state.tree != null) AufgabenFenster(state, viewModel, openSheet, onClose = { aufgaben = false })
@@ -533,7 +534,7 @@ private fun FrameWindowScope.DeskMenuBar(
                     onClick = { selected?.let { Loeschwahl.person = it.person.xref to it.person.name } })
                 Separator()
                 // Sonstiges
-                Item(stringResource(Res.string.chip_open_web), enabled = selected != null, onClick = { selected?.let { openWeb(it.person.url) } })
+                Item(stringResource(Res.string.chip_open_web), enabled = selected?.person?.url?.isNotBlank() == true, onClick = { selected?.let { openWeb(it.person.url) } })
                 Item(stringResource(Res.string.desk_copy_text), enabled = state.detail != null, shortcut = KeyShortcut(Key.C, ctrl = true, shift = true), onClick = { state.detail?.let(::personentextKopieren) })
                 Item(stringResource(Res.string.desk_meta_menu), enabled = state.detail != null && state.detail?.person?.isPrivate == false, onClick = { state.detail?.let(MetaSuche::fuer) })
             }
@@ -1127,7 +1128,7 @@ private fun IndexRow(person: Person, selected: Boolean, root: Boolean, viewModel
             ContextMenuItem(makeRoot) { viewModel.setRoot(person.xref) },
             ContextMenuItem(profile) { viewModel.select(person.xref) },
             if (viewModel.bookmarksSupported) ContextMenuItem(if (viewModel.isBookmarked(person.xref)) merkWeg else merken) { viewModel.toggleBookmark(person.xref) } else null,
-            ContextMenuItem(web) { openWeb(person.url) },
+            if (person.url.isNotBlank()) ContextMenuItem(web) { openWeb(person.url) } else null,
             ContextMenuItem(kopieren) { personentextKopieren(viewModel, person.xref) },
             ContextMenuItem(meta) { MetaSuche.fuer(viewModel, person.xref) },
             if (viewModel.uiState.value.tree?.canEdit == true) ContextMenuItem(anfuegen) { Anfuegewahl.person = person } else null,
@@ -1224,7 +1225,7 @@ private fun DeskTree(state: UiState, viewModel: AppViewModel, openWeb: (String) 
                     if (canEdit) {
                         DropdownMenuItem(text = { Text(stringResource(Res.string.action_add_relative)) }, onClick = { menu = null; viewModel.requestAddRelative(person.xref) })
                     }
-                    DropdownMenuItem(text = { Text(stringResource(Res.string.chip_open_web)) }, onClick = { menu = null; openWeb(person.url) })
+                    if (person.url.isNotBlank()) DropdownMenuItem(text = { Text(stringResource(Res.string.chip_open_web)) }, onClick = { menu = null; openWeb(person.url) })
                 }
             }
         }

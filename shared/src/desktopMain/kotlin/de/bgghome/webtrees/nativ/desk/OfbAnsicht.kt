@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -120,7 +121,7 @@ fun DeskOfb(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, 
         if (tree == null) return@produceState
         value = withContext(Dispatchers.IO) {
             runCatching {
-                val haeuser = (state.info?.api ?: 0) >= API_LOC_HIERARCHY
+                val haeuser = state.info.hat(API_LOC_HIERARCHY)
                 val d = familienbuchLaden(viewModel.client, tree, bilder = false, haeuser = haeuser, fortschritt = { fortschritt = it })
                 OrtsKurznamen.laden(viewModel.client, tree)
                 val o = BuchOptionen(bilder = false, ortFilter = ort, familienChronologisch = chrono, haeuser = haeuser, quellen = quellen, paten = paten)

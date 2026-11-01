@@ -17,7 +17,47 @@ data class Info(
     val maxUpload: Long = 0,
     val user: UserInfo = UserInfo(),
     val trees: List<TreeInfo> = emptyList(),
+    /**
+     * Faehigkeiten, die der Server vollstaendig anbietet (z. B. "read", "photos"). Nennt er sie, zaehlt nur diese
+     * Liste und nicht die Stufe in [api]; null, wenn der Server das Feld nicht kennt.
+     */
+    val features: List<String>? = null,
 )
+
+/** Die Faehigkeit, die eine API-Stufe freischaltet; null, wenn es dafuer keine eigene Faehigkeit gibt. */
+internal fun faehigkeitFuerStufe(stufe: Int): String? = when (stufe) {
+    1 -> "read"            // MIN_API
+    2 -> "photos"          // API_PHOTOS
+    4 -> "anniversaries"   // API_ANNIVERSARIES
+    11 -> "bookmarks"      // API_BOOKMARKS
+    API_EXPORT -> "export"
+    else -> null
+}
+
+/**
+ * Bietet der Server, was ab dieser API-Stufe dazukommt? Mit [Info.features] entscheidet die Liste: Eine Stufe ohne
+ * eigene Faehigkeit gilt dann als nicht angeboten. Ohne die Liste gilt wie bisher `api >= stufe`.
+ */
+/**
+ * Rechte je Baum, beschraenkt auf die gemeldeten Faehigkeiten: Bearbeiten nur mit "write", Hochladen nur mit
+ * "photos", Freigeben nur mit "moderation". Ohne [Info.features] bleibt alles, wie der Server es meldet.
+ */
+internal fun Info.nachFaehigkeiten(): Info {
+    val liste = features ?: return this
+    return copy(trees = trees.map {
+        it.copy(
+            canEdit = it.canEdit && "write" in liste,
+            canUpload = it.canUpload && "photos" in liste,
+            canModerate = it.canModerate && "moderation" in liste,
+        )
+    })
+}
+
+fun Info?.hat(stufe: Int): Boolean {
+    val info = this ?: return false
+    val liste = info.features ?: return info.api >= stufe
+    return faehigkeitFuerStufe(stufe)?.let { it in liste } ?: false
+}
 
 @Serializable
 data class UserInfo(

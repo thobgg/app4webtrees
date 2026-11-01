@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.data.Ortsanzeige
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.height
@@ -234,7 +235,7 @@ private fun SheetTabs(state: UiState, detail: IndividualDetail, viewModel: AppVi
                 1 -> ParentsTab(detail, viewModel)
                 2 -> PartnersTab(detail, viewModel, onNewFact = { family -> dialog = ProfileDialog.NewFamilyFact(family) },
                     onEdit = { r -> dialog = ProfileDialog.EditFact(r.fact, r.record) }, onDelete = { r -> dialog = ProfileDialog.DeleteFact(r.fact, r.record) })
-                3 -> NotesTab(detail, openWeb, darfSchreiben = canEdit && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_RENAME,
+                3 -> NotesTab(detail, openWeb, darfSchreiben = canEdit && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME),
                     viewModel = viewModel, onLoeschen = { f -> dialog = ProfileDialog.DeleteFact(f, null) })
                 4 -> SourcesTab(detail, openWeb)
                 6 -> Timeline(
@@ -243,7 +244,7 @@ private fun SheetTabs(state: UiState, detail: IndividualDetail, viewModel: AppVi
                     onDelete = { fact, record -> dialog = ProfileDialog.DeleteFact(fact, record) },
                     onPerson = viewModel::select,
                 )
-                5 -> PersonMedien(detail, viewModel, state, openWeb, darfSchreiben = canEdit && (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_RENAME)
+                5 -> PersonMedien(detail, viewModel, state, openWeb, darfSchreiben = canEdit && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME))
                 else -> LifeMap(mapFacts(detail))
             }
         }
@@ -373,7 +374,7 @@ private fun PartnersTab(
         TrennerWaagrecht(partnerHoehe, "blatt_partner_hoehe", 110f, 600f)
         // ── Ereignisse der Partnerschaft ──
         // Familienstand nach GEDCOM-L (1 _STAT) als Auswahl, ab API-Stufe 35 mit Bearbeitungsrecht; dann nicht noch einmal in der Tabelle
-        val standWaehlbar = familie != null && canEdit && (viewModel.state.value.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_GEDCOML_WRITE
+        val standWaehlbar = familie != null && canEdit && viewModel.state.value.info.hat(de.bgghome.webtrees.nativ.api.API_GEDCOML_WRITE)
         if (familie != null && standWaehlbar) Familienstand(familie, viewModel)
         if (familie != null) {
             val rows = familie.facts.filter { it.known && !(standWaehlbar && it.tag == "_STAT") }.map { FactRow(it, familie.xref, faktLabelMitArt(it)) }
@@ -480,7 +481,7 @@ private fun NotesTab(detail: IndividualDetail, openWeb: (String) -> Unit, darfSc
         }
         Row(Modifier.padding(4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (darfSchreiben) OutlinedButton(onClick = { neu = true }, shape = MaterialTheme.shapes.small) { Text("+ " + stringResource(Res.string.desk_note_new)) }
-            TextButton(onClick = { openWeb(detail.person.url) }) { Text(stringResource(Res.string.desk_edit_in_web)) }
+            if (detail.person.url.isNotBlank()) TextButton(onClick = { openWeb(detail.person.url) }) { Text(stringResource(Res.string.desk_edit_in_web)) }
         }
     }
     if (viewModel != null && (neu || bearbeiten != null)) {
@@ -596,7 +597,7 @@ private fun SourcesTab(detail: IndividualDetail, openWeb: (String) -> Unit) {
             }
             ListenLeiste(list)
         }
-        TextButton(onClick = { openWeb(detail.person.url) }, modifier = Modifier.padding(4.dp)) { Text(stringResource(Res.string.desk_edit_in_web)) }
+        if (detail.person.url.isNotBlank()) TextButton(onClick = { openWeb(detail.person.url) }, modifier = Modifier.padding(4.dp)) { Text(stringResource(Res.string.desk_edit_in_web)) }
     }
 }
 
@@ -790,8 +791,7 @@ private fun EreignisDetail(row: FactRow?, geburtJd: Int, modifier: Modifier, can
                         // Paten und Trauzeugen (ab API-Stufe 19): anklickbar, mit Notiz (i) und Quelle; "an der Person erfasst" nur fuer Redakteure
                         PatenZeilen(f, onPerson = { x -> viewModel?.select(x) }, zeigeLevel1 = canEdit, modifier = Modifier.padding(top = 4.dp))
                         // Paten/Trauzeugen bearbeiten (Server ab API-Stufe 20): bei Taufe und Heirat immer, sonst wenn es schon Beteiligte gibt
-                        val apiStufe = viewModel?.state?.value?.info?.api ?: 0
-                        if (canEdit && viewModel != null && apiStufe >= de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE &&
+                        if (canEdit && viewModel != null && viewModel.state.value.info.hat(de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE) &&
                             (f.tag in setOf("CHR", "BAPM", "MARR") || f.associates.isNotEmpty() || f.freeAssociates.isNotEmpty())) {
                             TextButton(onClick = { patenFuer = f }, contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 0.dp)) {
                                 Text(patenKnopfText(f.tag))

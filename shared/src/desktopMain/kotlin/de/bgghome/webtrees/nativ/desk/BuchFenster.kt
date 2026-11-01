@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.Texte
 
 import androidx.compose.foundation.Image
@@ -154,15 +155,15 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
         value = if (tree == null || root == null) null else withContext(Dispatchers.IO) {
             runCatching {
                 // Kurznamen der Orte fuer "Orte kuerzen" (Server ab API-Stufe 21; sonst bleibt es beim ersten Namensteil)
-                if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_PLACE_LIST) OrtsKurznamen.laden(viewModel.client, tree.name)
-                if (familien) familienbuchLaden(viewModel.client, tree.name, o.bilder, haeuser = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY, fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
+                if (state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_LIST)) OrtsKurznamen.laden(viewModel.client, tree.name)
+                if (familien) familienbuchLaden(viewModel.client, tree.name, o.bilder, haeuser = state.info.hat(de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY), fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
                 else if (nachfahren) nachfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder, fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
                 else vorfahrenbuchLaden(viewModel.client, tree.name, root, o.generationen, o.bilder, fortschritt = { fortschritt = it }, abbruch = { bilderAbbruch })
             }
         }
     }
     // Nur, was Besucher sehen duerfen (Issue 21): der Server meldet es ab API-Stufe 36
-    val zugangBekannt = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ACCESS
+    val zugangBekannt = state.info.hat(de.bgghome.webtrees.nativ.api.API_ACCESS)
     fun bauen(daten: Any?, opt: BuchOptionen): Buch? {
         val s = if (zugangBekannt) opt.sicht else Sichtbarkeit.Alle
         val d = when (daten) {
@@ -235,9 +236,9 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                             Auswahl(werte[if (o.familienChronologisch) 1 else 0], werte) { w -> o = o.copy(familienChronologisch = werte.indexOf(w) == 1) }
                         }
                         OutlinedTextField(o.ortFilter, { o = o.copy(ortFilter = it) }, label = { Text(stringResource(Res.string.desk_book_place_filter)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY)
+                        if (state.info.hat(de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY))
                             Haken(stringResource(Res.string.desk_book_houses_option), o.haeuser, stringResource(Res.string.tipp_book_houses)) { o = o.copy(haeuser = it) }
-                        if ((state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY && o.haeuser) {
+                        if (state.info.hat(de.bgghome.webtrees.nativ.api.API_LOC_HIERARCHY) && o.haeuser) {
                             Haken(stringResource(Res.string.desk_book_houses_only_type), o.haeuserNurTyp, stringResource(Res.string.tipp_book_houses_only_type)) { o = o.copy(haeuserNurTyp = it) }
                             if (o.haeuserNurTyp) Haken(stringResource(Res.string.desk_book_houses_untyped), o.haeuserOhneTyp, stringResource(Res.string.tipp_book_houses_untyped)) { o = o.copy(haeuserOhneTyp = it) }
                         }

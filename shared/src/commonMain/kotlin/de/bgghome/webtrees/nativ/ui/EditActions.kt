@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import org.jetbrains.compose.resources.StringResource
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.res.*
@@ -22,7 +23,7 @@ fun AppViewModel.placeSuggestions(): PlaceSuggest? {
     val state = uiState.value
     val tree = state.tree?.takeIf { it.canEdit } ?: return null
 
-    if ((state.info?.api ?: 0) < AppViewModel.API_PLACES) return null
+    if (!state.info.hat(AppViewModel.API_PLACES)) return null
 
     val lookup: PlaceSuggest = { query ->
         try {

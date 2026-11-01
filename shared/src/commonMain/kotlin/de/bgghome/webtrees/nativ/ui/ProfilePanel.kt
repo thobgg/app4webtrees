@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.data.Ortsanzeige
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -136,14 +137,14 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                 if (desk) {
                     DeskProfileHeader(
                         detail, isRoot = state.root == person.xref, canEdit = canEdit, canUpload = canUpload,
-                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick, onShowPhoto = onShowPhoto,
+                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = person.url.takeIf { it.isNotBlank() }?.let { u -> { openWeb(u) } }, onPickPhoto = photos.pick, onShowPhoto = onShowPhoto,
                         addMenu = addMenu, onAddMenu = { addMenu = it }, addMenuItems = addMenuItems,
                         onDelete = { dialog = ProfileDialog.DeletePerson },
                     )
                 } else Box(Modifier.fillMaxWidth()) {
                     ProfileHeader(
                         detail, isRoot = state.root == person.xref, canUpload = canUpload,
-                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = { openWeb(person.url) }, onPickPhoto = photos.pick, onShowPhoto = onShowPhoto,
+                        onMakeRoot = { viewModel.setRoot(person.xref) }, onOpenWeb = person.url.takeIf { it.isNotBlank() }?.let { u -> { openWeb(u) } }, onPickPhoto = photos.pick, onShowPhoto = onShowPhoto,
                         onStartperson = if (viewModel.startPersonSupported && !person.isPrivate) ({ startperson = true }) else null,
                     )
                     if (startperson) StartpersonDialog(state, viewModel, onClose = { startperson = false }, xref = person.xref)
@@ -211,7 +212,7 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                                 when {
                                     item.isImage -> viewModel.openMediaViewer(ViewerSource.Profile, detail.media, item, owner = detail.person.name)
                                     item.mime == "application/pdf" -> viewModel.openPdf(item.file, item.title, item.url)
-                                    else -> openWeb(item.url)
+                                    item.url.isNotBlank() -> openWeb(item.url)
                                 }
                             })
                         }
@@ -250,7 +251,8 @@ private fun ProfileHeader(
     isRoot: Boolean,
     canUpload: Boolean,
     onMakeRoot: () -> Unit,
-    onOpenWeb: () -> Unit,
+    /** Datensatz im Browser oeffnen; null, wenn der Server keine Adresse nennt. */
+    onOpenWeb: (() -> Unit)?,
     onPickPhoto: () -> Unit,
     /** Bild gross zeigen; null, wenn die Person kein Bild hat. */
     onShowPhoto: (() -> Unit)? = null,
@@ -279,7 +281,7 @@ private fun ProfileHeader(
         @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
         androidx.compose.foundation.layout.FlowRow(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
             if (!isRoot) OutlinedButton(onClick = onMakeRoot) { Text(stringResource(Res.string.action_make_root), maxLines = 1, softWrap = false) }
-            OutlinedButton(onClick = onOpenWeb) { Text(stringResource(Res.string.chip_open_web), maxLines = 1, softWrap = false) }
+            onOpenWeb?.let { OutlinedButton(onClick = it) { Text(stringResource(Res.string.chip_open_web), maxLines = 1, softWrap = false) } }
         }
         // Startperson festlegen (ab API-Stufe 24) - gilt auf dem Server, also auch im Browser und am PC
         onStartperson?.let { TextButton(onClick = it) { Text(stringResource(Res.string.desk_set_start_person)) } }
@@ -301,7 +303,8 @@ private fun DeskProfileHeader(
     canEdit: Boolean,
     canUpload: Boolean,
     onMakeRoot: () -> Unit,
-    onOpenWeb: () -> Unit,
+    /** Datensatz im Browser oeffnen; null, wenn der Server keine Adresse nennt. */
+    onOpenWeb: (() -> Unit)?,
     onPickPhoto: () -> Unit,
     onShowPhoto: (() -> Unit)? = null,
     addMenu: Boolean,
@@ -335,7 +338,7 @@ private fun DeskProfileHeader(
                 }
             }
             if (!isRoot) TextButton(onClick = onMakeRoot) { Text(stringResource(Res.string.action_make_root)) }
-            TextButton(onClick = onOpenWeb) { Text(stringResource(Res.string.chip_open_web)) }
+            onOpenWeb?.let { TextButton(onClick = it) { Text(stringResource(Res.string.chip_open_web)) } }
             if (canEdit) {
                 var more by remember { mutableStateOf(false) }
                 Box {
@@ -407,7 +410,7 @@ internal fun ProfileDialogs(
         is ProfileDialog.NewFamilyFact -> FactDialog(
             fact = null, tags = state.familyTags, suggestPlaces = places, onDismiss = onDismiss,
             onSave = { onDismiss(); viewModel.saveFact(it, record = dialog.family) },
-            typErlaubt = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE,
+            typErlaubt = state.info.hat(de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE),
             quellen = quellen, onSaveMitZitat = { r, z -> onDismiss(); viewModel.saveFactMitZitat(r, dialog.family, z) },
         )
 
@@ -421,7 +424,7 @@ internal fun ProfileDialogs(
         is ProfileDialog.EditFact -> FactDialog(
             fact = dialog.fact, tags = state.tags, suggestPlaces = places, onDismiss = onDismiss,
             onSave = { onDismiss(); viewModel.saveFact(it, dialog.record) },
-            typErlaubt = (state.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE,
+            typErlaubt = state.info.hat(de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE),
             quellen = quellen, onSaveMitZitat = { r, z -> onDismiss(); viewModel.saveFactMitZitat(r, dialog.record, z) },
         )
 

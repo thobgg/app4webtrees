@@ -250,9 +250,13 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         // etwas anderem vor webtrees - meist einer SSO-Anmeldung.
         if (info.api == 0 && info.module.isEmpty()) throw LoginWallException(200)
         csrf = info.csrf
+        schreiben = info.features?.let { "write" in it } ?: true
 
-        return info
+        return info.nachFaehigkeiten()
     }
+
+    /** false, wenn der Server Faehigkeiten nennt und "write" nicht dabei ist; dann gilt kein canEdit. */
+    private var schreiben = true
 
     suspend fun individuals(tree: String, query: String, page: Int): PersonPage =
         get("Individuals", tree, mapOf("q" to query, "page" to page.toString()), PersonPage.serializer())
@@ -260,6 +264,7 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     /** relativeTo: Bezugsperson fuer die Verwandtschaftsangabe ("Urgrossmutter"); leer = eigene Person des Benutzers. */
     suspend fun individual(tree: String, xref: String, relativeTo: String = ""): IndividualDetail =
         get("Individual", tree, mapOf("xref" to xref, "relativeTo" to relativeTo), IndividualDetail.serializer())
+            .let { if (schreiben) it else it.copy(canEdit = false) }
 
     suspend fun mediaList(tree: String, page: Int): MediaPage =
         get("MediaList", tree, mapOf("page" to page.toString()), MediaPage.serializer())

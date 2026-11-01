@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.BasicAuth
@@ -185,7 +186,7 @@ fun AppViewModel.logout() {
 
 internal fun AppViewModel.applyInfo(info: Info) {
     // Aelteres Modul als diese App braucht: klare Ansage statt spaeter raetselhafter Fehler.
-    if (info.api < AppViewModel.MIN_API) {
+    if (!info.hat(AppViewModel.MIN_API)) {
         uiState.update {
             it.copy(info = info, busy = false, screen = Screen.Setup, error = text(Res.string.err_module_too_old, info.module))
         }

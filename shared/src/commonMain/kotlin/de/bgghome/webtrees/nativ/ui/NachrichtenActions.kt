@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.lifecycle.viewModelScope
 import de.bgghome.webtrees.nativ.api.API_MESSAGES
 import de.bgghome.webtrees.nativ.api.MessageJson
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 // Erweiterungen von AppViewModel.
 
 val AppViewModel.messagesSupported: Boolean
-    get() = (uiState.value.info?.api ?: 0) >= API_MESSAGES && uiState.value.info?.user?.loggedIn == true
+    get() = uiState.value.info.hat(API_MESSAGES) && uiState.value.info?.user?.loggedIn == true
 
 /** Zahl der Nachrichten im Posteingang: aus der geladenen Liste, solange sie vollstaendig ist, sonst aus Info. */
 val AppViewModel.messagesTotal: Int

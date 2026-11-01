@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -173,7 +174,7 @@ fun AufgabeDialog(ziel: AufgabeZiel, viewModel: AppViewModel, tree: String, onCl
     var notiz by remember { mutableStateOf(ziel.vorhanden?.note.orEmpty()) }
     // GEDCOM-L (ab API-Stufe 35): gesendet wird nur, was sich gegenueber der vorhandenen Aufgabe aendert
     val v = ziel.vorhanden
-    val glFelder = (viewModel.state.value.info?.api ?: 0) >= de.bgghome.webtrees.nativ.api.API_GEDCOML_WRITE
+    val glFelder = viewModel.state.value.info.hat(de.bgghome.webtrees.nativ.api.API_GEDCOML_WRITE)
     var beschreibung by remember { mutableStateOf(v?.description.orEmpty()) }
     var kategorie by remember { mutableStateOf(v?.category.orEmpty()) }
     var prioritaet by remember { mutableStateOf(v?.priority.orEmpty()) }

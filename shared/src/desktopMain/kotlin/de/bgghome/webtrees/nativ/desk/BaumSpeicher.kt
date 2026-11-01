@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.Desktop
 import de.bgghome.webtrees.nativ.api.API_EXPORT
 import de.bgghome.webtrees.nativ.api.ExportCache
@@ -29,7 +30,7 @@ object BaumSpeicher {
         val info = runCatching { client.info() }.getOrNull() ?: return null
         val t = info.trees.firstOrNull { it.name == tree } ?: return null
         val stand = t.lastChange
-        if (info.api < API_EXPORT || stand == null) return null
+        if (!info.hat(API_EXPORT) || stand == null) return null
         val c = cache
         val key = c?.schluessel(client.baseUrl, tree, info.user.userName, t.role)
         if (c != null && key != null) c.laden(key, stand)?.let { return it }
