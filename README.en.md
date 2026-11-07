@@ -7,6 +7,7 @@
 </p>
 
 <p align="center">
+  <a href="https://play.google.com/store/apps/details?id=de.bgghome.webtrees.nativ"><img src="https://img.shields.io/badge/Google%20Play-wtAnd-3DDC84?style=for-the-badge&logo=googleplay&logoColor=white" alt="Android: wtAnd on Google Play"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Android-wtAnd%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android: wtAnd (APK)"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Windows-wtWin%20.exe-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows: wtWin (.exe)"></a>
@@ -125,7 +126,7 @@
 
 <p align="center"><sub>All pictures: fictitious demo tree <a href="https://github.com/thobgg/falkenrath-demo-tree">Familie Falkenrath</a> (CC0), photos of unknown people from the Rijksmuseum Amsterdam (CC0).</sub></p>
 
-**Android:** the APK is signed. To install outside the Play Store, Android asks once to allow your browser to install apps.  
+**Android:** wtAnd is on [Google Play](https://play.google.com/store/apps/details?id=de.bgghome.webtrees.nativ) or as an APK here. The Play version is signed by Google, the APK with our own key; switching between them means uninstalling first. For the APK, Android asks once to allow your browser to install apps.  
 **Linux:** install the package with `sudo apt install ./wttux_…_amd64.deb`.  
 **Windows:** run `wtWin-….exe`. The installer first asks for the language (English, German, French, Dutch, Spanish) and installs for the current user without admin rights; from 1.42 it also replaces an older version by itself. The file is not signed, so Windows warns about an unknown publisher on first start: choose "More info", then "Run anyway".  
 **macOS (for testing):** `wtMac-…-arm64.dmg` for Apple silicon, `…-x64.dmg` for Intel Macs; open it and drag wtMac to Applications. The file is not signed: on first start choose System Settings › Privacy & Security › "Open Anyway". Not yet tested on a real Mac – feedback welcome as an issue.

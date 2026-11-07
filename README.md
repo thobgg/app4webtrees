@@ -7,6 +7,7 @@
 </p>
 
 <p align="center">
+  <a href="https://play.google.com/store/apps/details?id=de.bgghome.webtrees.nativ"><img src="https://img.shields.io/badge/Google%20Play-wtAnd-3DDC84?style=for-the-badge&logo=googleplay&logoColor=white" alt="Android: wtAnd bei Google Play"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Android-wtAnd%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android: wtAnd (APK)"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Linux-wtTux%20.deb-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: wtTux (.deb)"></a>
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/Windows-wtWin%20.exe-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows: wtWin (.exe)"></a>
@@ -125,7 +126,7 @@
 
 <p align="center"><sub>Alle Bilder: frei erfundener Demo-Stammbaum <a href="https://github.com/thobgg/falkenrath-demo-tree">Familie Falkenrath</a> (CC0), Fotos unbekannter Personen aus dem Rijksmuseum Amsterdam (CC0).</sub></p>
 
-**Android:** Die APK ist signiert. Außerhalb des Play Store muss Android einmalig erlauben, dass der Browser Apps installiert.  
+**Android:** wtAnd gibt es bei [Google Play](https://play.google.com/store/apps/details?id=de.bgghome.webtrees.nativ) oder als APK hier. Die Play-Fassung ist von Google signiert, die APK mit unserem Schlüssel; zwischen beiden wechseln geht nur nach Deinstallieren. Für die APK muss Android einmalig erlauben, dass der Browser Apps installiert.  
 **Linux:** Das Paket mit `sudo apt install ./wttux_…_amd64.deb` installieren.  
 **Windows:** `wtWin-….exe` starten. Der Installer fragt zuerst nach der Sprache (Deutsch, Englisch, Französisch, Niederländisch, Spanisch) und installiert pro Benutzer ohne Adminrechte; ab 1.42 ersetzt er auch eine ältere Fassung von selbst. Die Datei ist nicht signiert, darum warnt Windows beim ersten Start vor einem unbekannten Herausgeber: „Weitere Informationen" und dann „Trotzdem ausführen".  
 **macOS (zum Testen):** `wtMac-…-arm64.dmg` für Macs mit Apple-Chip, `…-x64.dmg` für Intel-Macs; öffnen und wtMac in „Programme“ ziehen. Die Datei ist nicht signiert: beim ersten Start unter Systemeinstellungen › Datenschutz & Sicherheit „Trotzdem öffnen“. Noch nicht auf einem echten Mac getestet – Rückmeldungen gern als Issue.
