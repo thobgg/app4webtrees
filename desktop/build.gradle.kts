@@ -84,7 +84,17 @@ val lokalPaket by tasks.registering {
             val f = File(cache, name)
             if (f.isFile && sha256(f) == sha) return f
             logger.lifecycle("Lade $url")
-            URI(url).toURL().openStream().use { i -> f.outputStream().use { i.copyTo(it) } }
+            // GitHub antwortet zeitweise mit 504: bis zu sechs Versuche mit wachsender Pause
+            for (versuch in 1..6) {
+                try {
+                    URI(url).toURL().openStream().use { i -> f.outputStream().use { i.copyTo(it) } }
+                    break
+                } catch (e: java.io.IOException) {
+                    if (versuch == 6) throw e
+                    logger.lifecycle("Download fehlgeschlagen ($versuch/6): ${e.message} - neuer Versuch")
+                    Thread.sleep(versuch * 10_000L)
+                }
+            }
             val ist = sha256(f)
             check(sha.isNotBlank() && ist == sha) { "Pruefsumme passt nicht: $name ist $ist, erwartet '$sha' (gradle.properties)" }
             return f
