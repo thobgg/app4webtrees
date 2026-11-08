@@ -209,19 +209,20 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
 
             val ortOeffnen = LocalPlaceOpener.current
             val ort = fact.place?.name?.takeIf(String::isNotBlank)
+            val datumText = fact.date?.let { datumMitKalender(it) }
             if (ortOeffnen != null && ort != null) {
                 // Datum und Ort als EIN Text, der Ort darin anklickbar (oeffnet die Ortsverwaltung). Zwei Texte nebeneinander
                 // liessen bei langem Datum ("Monday 12 October 1845") dem Ort nur einen schmalen Streifen (Issue 26).
                 val linkFarbe = MaterialTheme.colorScheme.primary
                 Text(
                     buildAnnotatedString {
-                        fact.date?.text?.let { append("$it · ") }
+                        datumText?.let { append("$it · ") }
                         withLink(LinkAnnotation.Clickable("ort", TextLinkStyles(SpanStyle(color = linkFarbe))) { ortOeffnen(ort) }) { append(Ortsanzeige.text(ort)) }
                     },
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                val sub = listOfNotNull(fact.date?.text, Ortsanzeige.text(fact.place?.name).takeIf(String::isNotBlank)).joinToString(" · ")
+                val sub = listOfNotNull(datumText, Ortsanzeige.text(fact.place?.name).takeIf(String::isNotBlank)).joinToString(" · ")
                 if (sub.isNotEmpty()) Text(sub, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 

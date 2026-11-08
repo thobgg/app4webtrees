@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.Anniversary
+import de.bgghome.webtrees.nativ.api.DateJson
 import de.bgghome.webtrees.nativ.api.PendingRecord
 
 /**
@@ -263,4 +264,12 @@ internal fun kalenderName(calendar: String): String? = when (calendar) {
     "jalali" -> stringResource(Res.string.calendar_jalali)
     "roman" -> stringResource(Res.string.calendar_roman)
     else -> null
+}
+
+/** Datumstext; liegt das Datum in einem anderen als dem gregorianischen Kalender, steht dessen Name dahinter. */
+@Composable
+internal fun datumMitKalender(datum: DateJson): String? {
+    val text = datum.text.takeIf { it.isNotBlank() } ?: return null
+    val kalender = kalenderName(datum.calendar) ?: return text
+    return stringResource(Res.string.calendar_date_line, text, kalender)
 }
