@@ -1,0 +1,1 @@
+Family tree chart: spouses as their own boxes beside the person, with siblings of the root person. Option “Show cousins’ partners” in the tree. Everything else is for the PC programs.

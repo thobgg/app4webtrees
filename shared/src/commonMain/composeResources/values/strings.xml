@@ -894,6 +894,13 @@
     <string name="desk_chart_generations_desc">Generations of descendants</string>
     <string name="desk_chart_name_bearers">Only name bearers (children of sons)</string>
     <string name="desk_chart_spouses">Show spouses</string>
+    <string name="desk_chart_spouses_no">no</string>
+    <string name="desk_chart_spouses_line">As a line in the box</string>
+    <string name="desk_chart_spouses_box">As a separate box</string>
+    <string name="desk_chart_childless">Mark childless marriages</string>
+    <string name="desk_chart_siblings_proband">Siblings of the root person</string>
+    <string name="tipp_spouses_box">Spouses can be left out, written as a small line in the person’s box, or drawn as a box of their own beside the person with a marriage line; the children hang below it.</string>
+    <string name="tipp_siblings_proband">Puts the brothers and sisters of the root person beside them in the top row.</string>
     <string name="desk_chart_both_parents">Show both parents</string>
     <string name="desk_chart_places">Show places</string>
     <string name="desk_chart_full_dates">Full dates</string>

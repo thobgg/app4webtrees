@@ -44,7 +44,22 @@ class TafelPerson(
     val geschwister: List<Person> = emptyList(), val geschwisterLinks: Boolean = false,
     /** Hat einen Ehepartner (fuer den Filter "nur Verheiratete oder mit Kindern", auch wenn Partner nicht gedruckt werden). */
     val verheiratet: Boolean = false,
-)
+    /** Stammtafel mit Partnerkasten: die Ehen (hoechstens zwei) mit eigenem Kasten fuer den Partner und den Kindern je Ehe. */
+    val ehen: List<TafelEhe> = emptyList(),
+) {
+    /** Partnerkaesten links bzw. rechts: bei zwei Ehen je einer, bei einer die Frau mit dem Partner links, sonst rechts. */
+    val ehenLinks: Int get() = if (ehen.size >= 2 || (ehen.size == 1 && person.sex == "F")) 1 else 0
+    val ehenRechts: Int get() = ehen.size - ehenLinks
+    /** Ehe, deren Partnerkasten links steht (null: keiner). */
+    val eheLinks: TafelEhe? get() = if (ehenLinks == 1) ehen.first() else null
+    val eheRechts: TafelEhe? get() = if (ehenRechts == 1) ehen.last() else null
+    /** Kopie mit Geschwistern neben der Person (Stammtafel: die des Probanden, rechts). */
+    fun mitGeschwister(liste: List<Person>, links: Boolean = false) =
+        TafelPerson(person, kinder, nummer, partner, verweis, hinweis, aufLinie, liste, links, verheiratet, ehen)
+}
+
+/** Eine Ehe der Stammtafel mit Partnerkasten: der Partner (ohne Vorfahren) und die gemeinsamen [kinder] (Teil von [TafelPerson.kinder]). */
+class TafelEhe(val partner: TafelPerson, val kinder: List<TafelPerson>)
 
 /**
  * Stammtafel: Ausgangsperson oben, Nachfahren darunter. Ahnentafel: Ausgangsperson unten, Vorfahren darueber.
@@ -75,6 +90,10 @@ data class TafelOptionen(
     val namenstraeger: Boolean = false,
     /** Stammtafel, Sanduhr: Ehepartner im Kasten. Linien: beide Eltern statt nur der Linie. */
     val partner: Boolean = true,
+    /** Stammtafel: der Ehepartner als eigener Kasten neben der Person (statt einer Zeile im Kasten), mit Heiratslinie. */
+    val partnerKasten: Boolean = false,
+    /** Mit Partnerkasten: Ehen ohne Kinder durch einen kleinen Strich unter der Heiratslinie kennzeichnen. */
+    val kinderlos: Boolean = false,
     val orte: Boolean = false,
     val volleDaten: Boolean = false,
     /** Generationen als Spalten von links nach rechts statt als Reihen. */
@@ -191,6 +210,7 @@ class TafelMasse(
     val kastenH = (schriftKlein * (3 + zusatz) * 1.3f + schriftName * 1.3f + rahmen * 0.12f) * (if (schildForm) 1.22f else 1f)
     val spalt = maxOf(rahmen * 0.12f, 6f)
     val verbinder = maxOf(rahmen * 0.36f, 18f)
+    /** Abstand der Kastenmitten zweier Eheleute: etwas mehr als Geschwister, dazwischen die Heiratslinie. */
     /** Das Foto steht links neben dem Kasten (waagerechte Tafeln immer). */
     val bildLinks = bilder && (waagerecht || fotoLinks)
     /** Eine Karte (Bild und Kasten) in Blattrichtung. */
@@ -201,6 +221,8 @@ class TafelMasse(
     val laengeQ = if (waagerecht) karteH else karteB
     val ebeneH = laengeG + verbinder
     val slot = laengeQ + spalt
+    /** Abstand der Kastenmitten zweier Eheleute: etwas mehr als Geschwister, dazwischen die Heiratslinie. */
+    val ehe = slot * 1.3f
 }
 
 class TafelLayout(val plaetze: List<TafelPlatz>, val breite: Float, val hoehe: Float, val masse: TafelMasse, val paare: List<TafelPaar> = emptyList())
@@ -215,8 +237,11 @@ fun stammtafelLayout(wurzel: TafelPerson, masse: TafelMasse, buendig: Int = 0): 
     class Teil(val kinderVersatz: List<Float>, val links: MutableList<Float>, val rechts: MutableList<Float>)
     val teile = HashMap<TafelPerson, Teil>()
     // Geschwister verbreitern die Person nach einer Seite (Mitte der aeussersten Geschwisterkarte)
-    fun lw(k: TafelPerson) = if (k.geschwisterLinks) k.geschwister.size * masse.slot else 0f
-    fun rw(k: TafelPerson) = if (k.geschwisterLinks) 0f else k.geschwister.size * masse.slot
+    // Partnerkaesten stehen zwischen Person und Geschwistern, die Geschwister dahinter
+    fun lw(k: TafelPerson) = (if (k.geschwisterLinks) k.geschwister.size * masse.slot else 0f) + k.ehenLinks * masse.ehe
+    fun rw(k: TafelPerson) = (if (k.geschwisterLinks) 0f else k.geschwister.size * masse.slot) + k.ehenRechts * masse.ehe
+    // Mit einer Ehe haengen die Kinder mittig unter der Heiratslinie, sonst unter der Person
+    fun anker(k: TafelPerson) = if (k.ehen.size == 1) (if (k.ehenLinks == 1) -masse.ehe / 2 else masse.ehe / 2) else 0f
     fun rechnen(k: TafelPerson): Teil {
         val kinder = k.kinder.map(::rechnen)
         if (kinder.isEmpty()) return Teil(emptyList(), mutableListOf(-lw(k)), mutableListOf(rw(k))).also { teile[k] = it }
@@ -236,7 +261,7 @@ fun stammtafelLayout(wurzel: TafelPerson, masse: TafelMasse, buendig: Int = 0): 
             }
         }
         // Ueber den Kindern: mittig, oder buendig ueber dem ersten bzw. letzten Kind
-        val mitte = when (buendig) { 1 -> versatz.first(); 2 -> versatz.last(); else -> (versatz.first() + versatz.last()) / 2 }
+        val mitte = when (buendig) { 1 -> versatz.first(); 2 -> versatz.last(); else -> (versatz.first() + versatz.last()) / 2 } - anker(k)
         val teil = Teil(versatz.map { it - mitte }, mutableListOf(-lw(k)).apply { addAll(accL.map { it - mitte }) }, mutableListOf(rw(k)).apply { addAll(accR.map { it - mitte }) })
         teile[k] = teil
         return teil

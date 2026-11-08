@@ -881,6 +881,13 @@
     <string name="desk_chart_generations_desc">Generaties nakomelingen</string>
     <string name="desk_chart_name_bearers">Alleen naamdragers (kinderen van zonen)</string>
     <string name="desk_chart_spouses">Echtgenoten tonen</string>
+    <string name="desk_chart_spouses_no">nee</string>
+    <string name="desk_chart_spouses_line">als regel in het vak</string>
+    <string name="desk_chart_spouses_box">als eigen vak</string>
+    <string name="desk_chart_childless">Kinderloze huwelijken markeren</string>
+    <string name="desk_chart_siblings_proband">Broers en zussen van de proband</string>
+    <string name="tipp_spouses_box">Echtgenoten weglaten, als kleine regel in het vak van de persoon zetten of als eigen vak naast de persoon tekenen met een huwelijkslijn; de kinderen hangen eronder.</string>
+    <string name="tipp_siblings_proband">Zet de broers en zussen van de proband naast hem in de bovenste rij.</string>
     <string name="desk_chart_both_parents">Beide ouders tonen</string>
     <string name="desk_chart_places">Plaatsen tonen</string>
     <string name="desk_chart_full_dates">Volledige datums</string>

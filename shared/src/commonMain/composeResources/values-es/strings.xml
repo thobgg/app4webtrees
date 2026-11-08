@@ -889,6 +889,13 @@
     <string name="desk_chart_generations_desc">Generaciones de descendientes</string>
     <string name="desk_chart_name_bearers">Solo portadores del apellido (hijos de los hijos varones)</string>
     <string name="desk_chart_spouses">Mostrar cónyuges</string>
+    <string name="desk_chart_spouses_no">no</string>
+    <string name="desk_chart_spouses_line">como línea en el recuadro</string>
+    <string name="desk_chart_spouses_box">como recuadro propio</string>
+    <string name="desk_chart_childless">Marcar matrimonios sin hijos</string>
+    <string name="desk_chart_siblings_proband">Hermanos de la persona de partida</string>
+    <string name="tipp_spouses_box">Omitir a los cónyuges, escribirlos como una línea pequeña en el recuadro de la persona o dibujarlos en un recuadro propio junto a la persona, con una línea de matrimonio; los hijos cuelgan debajo.</string>
+    <string name="tipp_siblings_proband">Coloca a los hermanos de la persona de partida a su lado en la fila superior.</string>
     <string name="desk_chart_both_parents">Mostrar ambos progenitores</string>
     <string name="desk_chart_places">Mostrar lugares</string>
     <string name="desk_chart_full_dates">Fechas completas</string>

@@ -1,0 +1,1 @@
+Tabla de descendientes: cónyuges en recuadros propios junto a la persona, con los hermanos de la persona de partida. Opción «Mostrar las parejas de los primos» en el árbol. Lo demás es para los programas de PC.

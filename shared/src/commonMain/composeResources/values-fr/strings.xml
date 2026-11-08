@@ -889,6 +889,13 @@
     <string name="desk_chart_generations_desc">Générations de descendants</string>
     <string name="desk_chart_name_bearers">Seulement les porteurs du nom (enfants des fils)</string>
     <string name="desk_chart_spouses">Afficher les conjoints</string>
+    <string name="desk_chart_spouses_no">non</string>
+    <string name="desk_chart_spouses_line">en ligne dans la case</string>
+    <string name="desk_chart_spouses_box">en case séparée</string>
+    <string name="desk_chart_childless">Marquer les mariages sans enfants</string>
+    <string name="desk_chart_siblings_proband">Fratrie de la personne de départ</string>
+    <string name="tipp_spouses_box">Omettre les conjoints, les écrire en petite ligne dans la case de la personne ou les dessiner dans une case à part à côté de la personne, avec un trait de mariage ; les enfants sont dessous.</string>
+    <string name="tipp_siblings_proband">Place la fratrie de la personne de départ à côté d’elle sur la première rangée.</string>
     <string name="desk_chart_both_parents">Afficher les deux parents</string>
     <string name="desk_chart_places">Afficher les lieux</string>
     <string name="desk_chart_full_dates">Dates complètes</string>

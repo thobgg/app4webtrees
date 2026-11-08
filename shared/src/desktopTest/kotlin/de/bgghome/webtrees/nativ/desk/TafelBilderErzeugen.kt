@@ -60,7 +60,8 @@ class TafelBilderErzeugen {
             val art = TafelArt.valueOf(artName)
             val o0 = TafelOptionen(
                 generationen = gen.toInt(), stil = TafelStil.valueOf(stilName), orte = "orte" in schalter, volleDaten = "voll" in schalter,
-                partner = "partner" in schalter || (art in setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester) && "allein" !in schalter),
+                partnerKasten = "kasten" in schalter, kinderlos = "kinderlos" in schalter,
+                partner = "partner" in schalter || "kasten" in schalter || (art in setOf(TafelArt.Stammlinie, TafelArt.Mutterstamm, TafelArt.Aeltester) && "allein" !in schalter),
                 ausgangOben = "oben" in schalter, waagerecht = "quer" in schalter, bilder = "ohnebild" !in schalter, gitter = "gitter" in schalter, verzeichnis = "verz" in schalter, kurven = "kurven" in schalter, geschwister = if ("geschwalle" in schalter) 2 else if ("geschw" in schalter) 1 else 0, namenstraeger = "namen" in schalter, nummern = "ohnenr" !in schalter,
                 nachfahren = schalter.firstOrNull { it.startsWith("nach") }?.drop(4)?.toInt() ?: 3,
                 rahmenMm = schalter.firstOrNull { it.startsWith("rahmen") }?.drop(6)?.toInt() ?: 30,

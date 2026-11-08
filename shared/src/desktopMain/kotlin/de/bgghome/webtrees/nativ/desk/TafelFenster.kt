@@ -92,6 +92,7 @@ private object TafelBilder {
 }
 
 private fun nachfahrenPersonen(k: DescendantNode): List<Person> = listOf(k.person) + k.families.flatMap { it.children }.flatMap(::nachfahrenPersonen)
+private fun nachfahrenPartner(k: DescendantNode): List<Person> = k.families.mapNotNull { it.spouse } + k.families.flatMap { it.children }.flatMap(::nachfahrenPartner)
 
 /** Datei fuer eine Tafel-Vorlage waehlen: [speichern] mit Vorschlag [name], sonst oeffnen; null bei Abbruch. */
 private fun vorlageDatei(speichern: Boolean, name: String): java.io.File? {
@@ -116,6 +117,8 @@ private fun bildWaehlen(): String? {
 /** Alle geladenen Personen einer Tafel (fuer Bilder und Karteikarten). */
 private fun datenPersonen(d: TafelDaten): List<Person> =
     d.ahnen.values.map { it.person } + (d.nachfahren?.let(::nachfahrenPersonen) ?: emptyList()) + (d.mutterseite?.let(::nachfahrenPersonen) ?: emptyList()) +
+        // Partner stehen auch als eigene Kaesten mit Bild auf der Tafel
+        (d.nachfahren?.let(::nachfahrenPartner) ?: emptyList()) +
         d.partnerAhnen.values.map { it.person } + d.stammpaare.flatMap { nachfahrenPersonen(it.baum) } + d.geschwister.values.flatten()
 
 private val stilNamen: Map<TafelStil, StringResource> = mapOf(
@@ -218,6 +221,8 @@ private object TafelWahl {
             else (prefs.getString(k(art, "nach"), null)?.toIntOrNull() ?: 3).coerceIn(1, 9),
         namenstraeger = prefs.getBoolean(k(art, "namen"), false),
         partner = prefs.getBoolean(k(art, "partner"), art in linien || art == TafelArt.Cousins || art == TafelArt.Paar || art == TafelArt.Verwandt),
+        partnerKasten = art == TafelArt.Stamm && prefs.getBoolean(k(art, "partnerkasten"), false),
+        kinderlos = prefs.getBoolean(k(art, "kinderlos"), false),
         orte = prefs.getBoolean(k(art, "orte"), false),
         volleDaten = prefs.getBoolean(k(art, "voll"), false),
         waagerecht = art in waagerechtMoeglich && prefs.getBoolean(k(art, "waagerecht"), art == TafelArt.Sanduhr),
@@ -253,7 +258,7 @@ private object TafelWahl {
         prefs.putString(k(art, "rahmen"), o.rahmenMm.toString()); prefs.putBoolean(k(art, "bilder"), o.bilder)
         prefs.putBoolean(k(art, "nummern"), o.nummern); prefs.putBoolean(k(art, "oben"), o.ausgangOben)
         prefs.putString(k(art, "nach"), o.nachfahren.toString()); prefs.putBoolean(k(art, "namen"), o.namenstraeger)
-        prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
+        prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "partnerkasten"), o.partnerKasten); prefs.putBoolean(k(art, "kinderlos"), o.kinderlos); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
         prefs.putBoolean(k(art, "waagerecht"), o.waagerecht); prefs.putString(k(art, "geschw"), o.geschwister.toString())
         prefs.putBoolean(k(art, "gitter"), o.gitter); prefs.putBoolean(k(art, "verz"), o.verzeichnis); prefs.putBoolean(k(art, "kurven"), o.kurven)
         prefs.putString(k(art, "farbe"), o.farbe.name)
@@ -302,7 +307,7 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
     // Daten: Nachfahren einmal in voller Tiefe (Umstellen der Generationen kuerzt nur); Vorfahren so tief wie
     // eingestellt, weil jede Generation ueber sieben weitere Anfragen kostet.
     val ladeTiefe = if (art == TafelArt.Stamm || art == TafelArt.StammSeiten || art == TafelArt.Cousins) maxGen(art) else o.generationen
-    val geschwisterLaden = if (art == TafelArt.Ahnen) o.geschwister else 0
+    val geschwisterLaden = if (art == TafelArt.Ahnen || art == TafelArt.Stamm) o.geschwister else 0
     val paarLaden = if (art == TafelArt.Paar) paarFamilie else 0
     val nachLaden = if (art == TafelArt.Verwandt) o.nachfahren else 0
     // Verwandtschaftsweg: die zweite Person, vorbelegt mit der Bezugsperson des Benutzers
@@ -456,7 +461,17 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
                             Auswahl(werte[o.geschwister], werte) { w -> o = o.copy(geschwister = werte.indexOf(w)) }
                         }
                         if (art == TafelArt.Stamm || art == TafelArt.StammSeiten || art == TafelArt.Sanduhr) Haken(stringResource(Res.string.desk_chart_name_bearers), o.namenstraeger, stringResource(Res.string.tipp_name_bearers)) { o = o.copy(namenstraeger = it) }
-                        if (art == TafelArt.Stamm || art == TafelArt.StammSeiten || art == TafelArt.Sanduhr || art == TafelArt.Cousins || art == TafelArt.Paar || art == TafelArt.Verwandt) Haken(stringResource(Res.string.desk_chart_spouses), o.partner) { o = o.copy(partner = it) }
+                        if (art == TafelArt.Stamm) {
+                            // Ehepartner: keine, als Zeile im Kasten (bisher der Haken) oder als eigener Kasten neben der Person
+                            Einstellung(stringResource(Res.string.desk_chart_spouses), stringResource(Res.string.tipp_spouses_box)) {
+                                val werte = listOf(Res.string.desk_chart_spouses_no, Res.string.desk_chart_spouses_line, Res.string.desk_chart_spouses_box).map { stringResource(it) }
+                                val jetzt = if (!o.partner) 0 else if (o.partnerKasten) 2 else 1
+                                Auswahl(werte[jetzt], werte) { w -> o = when (werte.indexOf(w)) { 0 -> o.copy(partner = false, partnerKasten = false); 1 -> o.copy(partner = true, partnerKasten = false); else -> o.copy(partner = true, partnerKasten = true) } }
+                            }
+                            if (o.partner && o.partnerKasten) Haken(stringResource(Res.string.desk_chart_childless), o.kinderlos) { o = o.copy(kinderlos = it) }
+                            Haken(stringResource(Res.string.desk_chart_siblings_proband), o.geschwister > 0, stringResource(Res.string.tipp_siblings_proband)) { o = o.copy(geschwister = if (it) 1 else 0) }
+                        }
+                        else if (art == TafelArt.StammSeiten || art == TafelArt.Sanduhr || art == TafelArt.Cousins || art == TafelArt.Paar || art == TafelArt.Verwandt) Haken(stringResource(Res.string.desk_chart_spouses), o.partner) { o = o.copy(partner = it) }
                         if (art in linien) Haken(stringResource(Res.string.desk_chart_both_parents), o.partner, stringResource(Res.string.tipp_both_parents)) { o = o.copy(partner = it) }
                         Haken(stringResource(Res.string.desk_chart_living_names), o.lebendeNurNamen, stringResource(Res.string.tipp_living_names)) { o = o.copy(lebendeNurNamen = it) }
                         if (art !in ohneKaesten) {

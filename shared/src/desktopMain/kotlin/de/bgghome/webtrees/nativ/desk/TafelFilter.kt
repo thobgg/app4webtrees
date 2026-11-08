@@ -18,9 +18,15 @@ internal fun gefiltert(k: TafelPerson, o: TafelOptionen, nachfahren: Boolean): T
     if (o.ausgeblendet.isEmpty() && (!nachfahren || (!o.nurMitPartner && o.mindestalter <= 0))) return k
     fun bleibt(c: TafelPerson) = c.person.xref !in o.ausgeblendet &&
         (!nachfahren || ((!o.nurMitPartner || c.verheiratet || c.kinder.isNotEmpty()) && !fruehVerstorben(c, o.mindestalter)))
-    fun neu(n: TafelPerson): TafelPerson = TafelPerson(
-        n.person, n.kinder.filter(::bleibt).map(::neu), n.nummer, n.partner, n.verweis, n.hinweis, n.aufLinie,
-        n.geschwister.filter { it.xref !in o.ausgeblendet }, n.geschwisterLinks, n.verheiratet,
-    )
+    fun neu(n: TafelPerson): TafelPerson {
+        // Alte Kinder -> neue, damit die Ehen mit Partnerkasten auf die gefilterten Kinder zeigen
+        val neueKinder = java.util.IdentityHashMap<TafelPerson, TafelPerson>()
+        val kinder = n.kinder.filter(::bleibt).map { k -> neu(k).also { neueKinder[k] = it } }
+        return TafelPerson(
+            n.person, kinder, n.nummer, n.partner, n.verweis, n.hinweis, n.aufLinie,
+            n.geschwister.filter { it.xref !in o.ausgeblendet }, n.geschwisterLinks, n.verheiratet,
+            n.ehen.map { e -> TafelEhe(e.partner, e.kinder.mapNotNull { neueKinder[it] }) },
+        )
+    }
     return neu(k)
 }

@@ -889,6 +889,13 @@
     <string name="desk_chart_generations_desc">Generationen Nachfahren</string>
     <string name="desk_chart_name_bearers">Nur Namensträger (Kinder der Söhne)</string>
     <string name="desk_chart_spouses">Ehepartner zeigen</string>
+    <string name="desk_chart_spouses_no">nein</string>
+    <string name="desk_chart_spouses_line">als Zeile im Kasten</string>
+    <string name="desk_chart_spouses_box">als eigener Kasten</string>
+    <string name="desk_chart_childless">Kinderlose Ehen kennzeichnen</string>
+    <string name="desk_chart_siblings_proband">Geschwister des Probanden</string>
+    <string name="tipp_spouses_box">Ehepartner weglassen, als kleine Zeile im Kasten der Person schreiben oder als eigenen Kasten neben der Person mit Heiratslinie zeichnen; die Kinder hängen darunter.</string>
+    <string name="tipp_siblings_proband">Setzt die Geschwister des Probanden neben ihn in die oberste Reihe.</string>
     <string name="desk_chart_both_parents">Beide Eltern zeigen</string>
     <string name="desk_chart_places">Orte zeigen</string>
     <string name="desk_chart_full_dates">Vollständige Daten</string>
