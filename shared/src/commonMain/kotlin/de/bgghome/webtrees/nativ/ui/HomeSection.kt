@@ -226,7 +226,17 @@ private fun AnniversaryRow(anniversary: Anniversary, onOpen: (String) -> Unit) {
         leadingContent = whoToOpen?.let { { Avatar(it, 44.dp) } },
         overlineContent = { Text(whenText, color = whenColor) },
         headlineContent = { Text(anniversary.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        supportingContent = { Text(stringResource(Res.string.anniv_line, anniversary.label, anniversary.years)) },
+        supportingContent = {
+            val zeile = stringResource(Res.string.anniv_line, anniversary.label, anniversary.years)
+            val kalender = anniversary.date?.let { kalenderName(it.calendar) }
+            val original = anniversary.date?.text.orEmpty()
+            if (kalender != null && original.isNotBlank()) {
+                Column {
+                    Text(zeile)
+                    Text(stringResource(Res.string.calendar_date_line, original, kalender), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else Text(zeile)
+        },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = if (whoToOpen != null && !whoToOpen.isPrivate) Modifier.clickable { onOpen(whoToOpen.xref) } else Modifier,
     )
@@ -241,4 +251,16 @@ private fun HomeCard(padding: Boolean = true, content: @Composable () -> Unit) {
     ) {
         Column(if (padding) Modifier.padding(16.dp) else Modifier) { content() }
     }
+}
+
+/** Name des Kalenders, wenn er vom gregorianischen abweicht; sonst null (auch bei älteren Servern ohne Angabe). */
+@Composable
+internal fun kalenderName(calendar: String): String? = when (calendar) {
+    "julian" -> stringResource(Res.string.calendar_julian)
+    "jewish" -> stringResource(Res.string.calendar_jewish)
+    "french" -> stringResource(Res.string.calendar_french)
+    "hijri" -> stringResource(Res.string.calendar_hijri)
+    "jalali" -> stringResource(Res.string.calendar_jalali)
+    "roman" -> stringResource(Res.string.calendar_roman)
+    else -> null
 }

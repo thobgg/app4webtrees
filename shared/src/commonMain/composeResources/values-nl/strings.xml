@@ -274,6 +274,13 @@
     <string name="anniv_tomorrow">Morgen</string>
     <string name="anniv_in_days">Over %1$d dagen</string>
     <string name="anniv_line">%1$s · %2$d jaar geleden</string>
+    <string name="calendar_julian">Juliaanse kalender</string>
+    <string name="calendar_jewish">Joodse kalender</string>
+    <string name="calendar_french">Franse republikeinse kalender</string>
+    <string name="calendar_hijri">Hidjra-kalender</string>
+    <string name="calendar_jalali">Jalali-kalender</string>
+    <string name="calendar_roman">Romeinse kalender</string>
+    <string name="calendar_date_line">%1$s (%2$s)</string>
     <string name="anniv_none">Geen gedenkdagen in de komende twee weken.</string>
     <string name="anniv_living_only">Alleen levenden</string>
     <string name="anniv_notification_title">Gedenkdagen vandaag</string>

@@ -99,6 +99,8 @@ data class DateJson(
     val jd: Int = 0,
     /** Das Datum, wie es im GEDCOM steht ("ABT 1850") - nur bei Ereignissen und erst ab API-Stufe 8, sonst leer. */
     val gedcom: String = "",
+    /** Kalender des Datums (gregorian, julian, jewish, french, hijri, jalali, roman); leer bei älteren Servern. */
+    val calendar: String = "",
 )
 
 @Serializable

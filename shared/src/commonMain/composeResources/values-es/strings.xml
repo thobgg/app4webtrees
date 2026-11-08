@@ -279,6 +279,13 @@
     <string name="anniv_tomorrow">Mañana</string>
     <string name="anniv_in_days">Dentro de %1$d días</string>
     <string name="anniv_line">%1$s · hace %2$d años</string>
+    <string name="calendar_julian">Calendario juliano</string>
+    <string name="calendar_jewish">Calendario judío</string>
+    <string name="calendar_french">Calendario republicano francés</string>
+    <string name="calendar_hijri">Calendario hegiriano</string>
+    <string name="calendar_jalali">Calendario yalali</string>
+    <string name="calendar_roman">Calendario romano</string>
+    <string name="calendar_date_line">%1$s (%2$s)</string>
     <string name="anniv_none">No hay aniversarios en las próximas dos semanas.</string>
     <string name="anniv_living_only">Solo vivos</string>
     <string name="anniv_notification_title">Aniversarios de hoy</string>
