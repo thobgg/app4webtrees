@@ -416,6 +416,17 @@ private class TafelZeichner(
                 // Geschwister haengen an derselben Linie wie die Person
                 val gs = geschwisterVon[eltern].orEmpty().map { t.x(it) }
                 gs.forEach { q -> linie(start, q, mitte, q) }
+                if (o.elternPaar && kinder.size == 2) {
+                    // Eltern als Paar: Heiratslinie zwischen Vater und Mutter auf halber Kastenhoehe, das Kind haengt an ihrer Mitte
+                    val (links, rechts) = kinder.sortedBy { t.x(it) }
+                    val gm = t.oberkante(links) + if (m.bildLinks || w) m.laengeG / 2 else m.bild + m.bildAbstand + m.kastenH / 2
+                    val q1 = t.x(links) + m.laengeQ / 2; val q2 = t.x(rechts) - m.laengeQ / 2; val qm = (q1 + q2) / 2
+                    linie(gm, q1, gm, q2)
+                    linie(mitte, qm, gm, qm)
+                    linie(mitte, minOf(ex, gs.minOrNull() ?: ex, qm), mitte, maxOf(ex, gs.maxOrNull() ?: ex, qm))
+                    cs.stroke()
+                    return@forEach
+                }
                 if (o.geschwungen) {
                     // Geschwungen: von der Mitte unter der Person je ein Bogen zu jedem Kind; Geschwister weiter am Querstrich
                     if (gs.isNotEmpty()) linie(mitte, minOf(ex, gs.min()), mitte, maxOf(ex, gs.max()))

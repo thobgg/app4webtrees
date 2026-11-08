@@ -92,6 +92,8 @@ data class TafelOptionen(
     val partner: Boolean = true,
     /** Stammtafel: der Ehepartner als eigener Kasten neben der Person (statt einer Zeile im Kasten), mit Heiratslinie. */
     val partnerKasten: Boolean = false,
+    /** Ahnentafel: Vater und Mutter durch eine Heiratslinie verbinden, das Kind haengt an deren Mitte. */
+    val elternPaar: Boolean = false,
     /** Mit Partnerkasten: Ehen ohne Kinder durch einen kleinen Strich unter der Heiratslinie kennzeichnen. */
     val kinderlos: Boolean = false,
     val orte: Boolean = false,

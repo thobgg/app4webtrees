@@ -223,6 +223,7 @@ private object TafelWahl {
         partner = prefs.getBoolean(k(art, "partner"), art in linien || art == TafelArt.Cousins || art == TafelArt.Paar || art == TafelArt.Verwandt),
         partnerKasten = art == TafelArt.Stamm && prefs.getBoolean(k(art, "partnerkasten"), false),
         kinderlos = prefs.getBoolean(k(art, "kinderlos"), false),
+        elternPaar = art == TafelArt.Ahnen && prefs.getBoolean(k(art, "elternpaar"), false),
         orte = prefs.getBoolean(k(art, "orte"), false),
         volleDaten = prefs.getBoolean(k(art, "voll"), false),
         waagerecht = art in waagerechtMoeglich && prefs.getBoolean(k(art, "waagerecht"), art == TafelArt.Sanduhr),
@@ -258,7 +259,7 @@ private object TafelWahl {
         prefs.putString(k(art, "rahmen"), o.rahmenMm.toString()); prefs.putBoolean(k(art, "bilder"), o.bilder)
         prefs.putBoolean(k(art, "nummern"), o.nummern); prefs.putBoolean(k(art, "oben"), o.ausgangOben)
         prefs.putString(k(art, "nach"), o.nachfahren.toString()); prefs.putBoolean(k(art, "namen"), o.namenstraeger)
-        prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "partnerkasten"), o.partnerKasten); prefs.putBoolean(k(art, "kinderlos"), o.kinderlos); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
+        prefs.putBoolean(k(art, "partner"), o.partner); prefs.putBoolean(k(art, "partnerkasten"), o.partnerKasten); prefs.putBoolean(k(art, "kinderlos"), o.kinderlos); prefs.putBoolean(k(art, "elternpaar"), o.elternPaar); prefs.putBoolean(k(art, "orte"), o.orte); prefs.putBoolean(k(art, "voll"), o.volleDaten)
         prefs.putBoolean(k(art, "waagerecht"), o.waagerecht); prefs.putString(k(art, "geschw"), o.geschwister.toString())
         prefs.putBoolean(k(art, "gitter"), o.gitter); prefs.putBoolean(k(art, "verz"), o.verzeichnis); prefs.putBoolean(k(art, "kurven"), o.kurven)
         prefs.putString(k(art, "farbe"), o.farbe.name)
@@ -456,6 +457,7 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
                             Auswahl(namen[jetzt], namen) { w -> val i = namen.indexOf(w); o = if (i == 0) o.copy(nummern = false) else o.copy(nummern = true, nummernArt = i - 1) }
                         }
                         if (art == TafelArt.Ahnen) Haken(stringResource(if (o.waagerecht) Res.string.desk_chart_root_right else Res.string.desk_chart_root_top), o.ausgangOben, stringResource(Res.string.tipp_root_top)) { o = o.copy(ausgangOben = it) }
+                        if (art == TafelArt.Ahnen) Haken(stringResource(Res.string.desk_chart_parents_pair), o.elternPaar, stringResource(Res.string.tipp_parents_pair)) { o = o.copy(elternPaar = it) }
                         if (art == TafelArt.Ahnen) Einstellung(stringResource(Res.string.desk_chart_siblings), stringResource(Res.string.tipp_siblings)) {
                             val werte = listOf(Res.string.desk_chart_siblings_none, Res.string.desk_chart_siblings_root, Res.string.desk_chart_siblings_all).map { stringResource(it) }
                             Auswahl(werte[o.geschwister], werte) { w -> o = o.copy(geschwister = werte.indexOf(w)) }

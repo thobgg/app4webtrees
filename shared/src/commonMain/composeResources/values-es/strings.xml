@@ -895,6 +895,8 @@
     <string name="desk_chart_childless">Marcar matrimonios sin hijos</string>
     <string name="desk_chart_siblings_proband">Hermanos de la persona de partida</string>
     <string name="tipp_spouses_box">Omitir a los cónyuges, escribirlos como una línea pequeña en el recuadro de la persona o dibujarlos en un recuadro propio junto a la persona, con una línea de matrimonio; los hijos cuelgan debajo.</string>
+    <string name="desk_chart_parents_pair">Unir a los padres como pareja</string>
+    <string name="tipp_parents_pair">Dibuja una línea de matrimonio entre padre y madre; la persona cuelga de su centro.</string>
     <string name="tipp_siblings_proband">Coloca a los hermanos de la persona de partida a su lado en la fila superior.</string>
     <string name="desk_chart_both_parents">Mostrar ambos progenitores</string>
     <string name="desk_chart_places">Mostrar lugares</string>
