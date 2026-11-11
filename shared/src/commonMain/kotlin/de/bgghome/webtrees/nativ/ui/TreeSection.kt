@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.res.*
@@ -180,7 +181,7 @@ internal fun GenerationsChip(state: UiState, viewModel: AppViewModel, kurz: Bool
             // Einzeilig: bei Platzmangel (wtWin mit 125 % Skalierung) brach der Text sonst nach jedem Buchstaben um
             // und machte die Symbolleiste ein Drittel des Fensters hoch. Am Handy nur die Zahl: mit Zurueck-Pfeil und
             // "Zu mir" in der Leiste blieb dem Baumnamen sonst nur ein schmaler Streifen.
-            Text(if (kurz) state.ancestorGenerations.toString() else stringResource(Res.string.tree_generations, state.ancestorGenerations), maxLines = 1, softWrap = false)
+            Text(if (kurz) state.ancestorGenerations.toString() else pluralStringResource(Res.plurals.tree_generations_n, state.ancestorGenerations, state.ancestorGenerations), maxLines = 1, softWrap = false)
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
@@ -188,7 +189,7 @@ internal fun GenerationsChip(state: UiState, viewModel: AppViewModel, kurz: Bool
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             (2..6).forEach { n ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.tree_generations, n)) },
+                    text = { Text(pluralStringResource(Res.plurals.tree_generations_n, n, n)) },
                     leadingIcon = { RadioButton(selected = state.ancestorGenerations == n, onClick = null) },
                     onClick = { open = false; viewModel.setAncestorGenerations(n) },
                 )
@@ -198,7 +199,7 @@ internal fun GenerationsChip(state: UiState, viewModel: AppViewModel, kurz: Bool
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             (0..4).forEach { n ->
                 DropdownMenuItem(
-                    text = { Text(if (n == 0) stringResource(Res.string.tree_descendants_none) else stringResource(Res.string.tree_generations, n)) },
+                    text = { Text(if (n == 0) stringResource(Res.string.tree_descendants_none) else pluralStringResource(Res.plurals.tree_generations_n, n, n)) },
                     leadingIcon = { RadioButton(selected = state.descendantRows == n, onClick = null) },
                     onClick = { open = false; viewModel.setDescendantRows(n) },
                 )

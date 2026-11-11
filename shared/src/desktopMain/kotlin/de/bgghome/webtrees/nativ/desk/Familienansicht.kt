@@ -84,6 +84,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource as StringResourceRef
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /*
@@ -248,9 +249,9 @@ private fun Familie(
             Spacer(Modifier.width(12.dp))
             var genOffen by remember { mutableStateOf(false) }
             Box {
-                TextButton(onClick = { genOffen = true }) { Text(stringResource(Res.string.tree_generations, generationen) + " ▾") }
+                TextButton(onClick = { genOffen = true }) { Text(pluralStringResource(Res.plurals.tree_generations_n, generationen, generationen) + " ▾") }
                 androidx.compose.material3.DropdownMenu(expanded = genOffen, onDismissRequest = { genOffen = false }) {
-                    (GEN_MIN..GEN_MAX).forEach { g -> androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(Res.string.tree_generations, g)) }, onClick = { genOffen = false; onGenerationen(g) }) }
+                    (GEN_MIN..GEN_MAX).forEach { g -> androidx.compose.material3.DropdownMenuItem(text = { Text(pluralStringResource(Res.plurals.tree_generations_n, g, g)) }, onClick = { genOffen = false; onGenerationen(g) }) }
                 }
             }
         }

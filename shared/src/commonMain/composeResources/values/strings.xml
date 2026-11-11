@@ -1900,4 +1900,8 @@
     <string name="tree_ancestors_head">Ancestors</string>
     <string name="tree_descendants_head">Descendants</string>
     <string name="tree_descendants_none">Couple only</string>
+    <plurals name="tree_generations_n">
+        <item quantity="one">%1$d generation</item>
+        <item quantity="other">%1$d generations</item>
+    </plurals>
 </resources>

@@ -85,6 +85,7 @@ import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.ui.*
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /*
@@ -297,12 +298,12 @@ private fun TafelRegler(generationen: Int, onGenerationen: (Int) -> Unit, zoom: 
         var open by remember { mutableStateOf(false) }
         Box {
             Row(Modifier.clickable { open = true }.padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.tree_generations, generationen), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, softWrap = false)
+                Text(pluralStringResource(Res.plurals.tree_generations_n, generationen, generationen), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1, softWrap = false)
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
             DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
                 (2..7).forEach { n ->
-                    DropdownMenuItem(text = { Text(stringResource(Res.string.tree_generations, n), fontWeight = if (n == generationen) FontWeight.SemiBold else FontWeight.Normal) },
+                    DropdownMenuItem(text = { Text(pluralStringResource(Res.plurals.tree_generations_n, n, n), fontWeight = if (n == generationen) FontWeight.SemiBold else FontWeight.Normal) },
                         onClick = { open = false; onGenerationen(n) })
                 }
             }

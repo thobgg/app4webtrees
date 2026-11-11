@@ -1895,4 +1895,8 @@
     <string name="tree_ancestors_head">Vorfahren</string>
     <string name="tree_descendants_head">Nachkommen</string>
     <string name="tree_descendants_none">Nur das Paar</string>
+    <plurals name="tree_generations_n">
+        <item quantity="one">%1$d Generation</item>
+        <item quantity="other">%1$d Generationen</item>
+    </plurals>
 </resources>

@@ -122,6 +122,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /*
@@ -600,14 +601,14 @@ private fun FrameWindowScope.DeskMenuBar(
                 if (onArchiv != null) Item(stringResource(Res.string.desk_archive_window), enabled = state.tree != null, shortcut = KeyShortcut(Key.Nine, ctrl = true), onClick = onArchiv)
                 Separator()
                 // Die vier Einstellungen wirken nur in bestimmten Aufbauten; anderswo sind sie grau (die Familienansicht hat eigene Generationen)
-                Menu(stringResource(Res.string.tree_generations, state.ancestorGenerations), enabled = layout == DeskLayout.Navigator || layout == DeskLayout.TreeCentre) {
+                Menu(pluralStringResource(Res.plurals.tree_generations_n, state.ancestorGenerations, state.ancestorGenerations), enabled = layout == DeskLayout.Navigator || layout == DeskLayout.TreeCentre) {
                     (2..7).forEach { n ->
-                        CheckboxItem(stringResource(Res.string.tree_generations, n), checked = state.ancestorGenerations == n, onCheckedChange = { viewModel.setAncestorGenerations(n) })
+                        CheckboxItem(pluralStringResource(Res.plurals.tree_generations_n, n, n), checked = state.ancestorGenerations == n, onCheckedChange = { viewModel.setAncestorGenerations(n) })
                     }
                 }
                 Menu(stringResource(Res.string.tree_descendants_head), enabled = layout == DeskLayout.TreeCentre) {
                     (0..4).forEach { n ->
-                        CheckboxItem(if (n == 0) stringResource(Res.string.tree_descendants_none) else stringResource(Res.string.tree_generations, n),
+                        CheckboxItem(if (n == 0) stringResource(Res.string.tree_descendants_none) else pluralStringResource(Res.plurals.tree_generations_n, n, n),
                             checked = state.descendantRows == n, onCheckedChange = { viewModel.setDescendantRows(n) })
                     }
                 }
