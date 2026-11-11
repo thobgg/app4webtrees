@@ -1,0 +1,1 @@
+Los aniversarios y eventos en otros calendarios (judío, juliano, republicano francés …) muestran la fecha original con el nombre del calendario – requiere api4webtrees 1.26. «1 generación» en lugar de «1 generaciones».

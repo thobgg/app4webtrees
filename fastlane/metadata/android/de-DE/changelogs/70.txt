@@ -1,0 +1,1 @@
+Jahrestage und Ereignisse in anderen Kalendern (jüdisch, julianisch, Revolutionskalender …) zeigen das Originaldatum mit dem Namen des Kalenders – braucht api4webtrees 1.26. „1 Generation“ statt „1 Generationen“.

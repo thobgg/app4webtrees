@@ -1,0 +1,1 @@
+Jubilea en gebeurtenissen in andere kalenders (joods, juliaans, Franse republikeinse …) tonen de oorspronkelijke datum met de naam van de kalender – vereist api4webtrees 1.26. „1 generatie” in plaats van „1 generaties”.

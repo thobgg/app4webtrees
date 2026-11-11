@@ -1,0 +1,1 @@
+Les anniversaires et événements dans d'autres calendriers (juif, julien, républicain …) affichent la date d'origine avec le nom du calendrier – nécessite api4webtrees 1.26. « 1 génération » au lieu de « 1 générations ».
