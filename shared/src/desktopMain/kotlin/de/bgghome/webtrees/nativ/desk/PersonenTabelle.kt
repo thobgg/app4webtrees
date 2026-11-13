@@ -177,7 +177,7 @@ private fun csv(zeilen: List<TabellenZeile>, titel: List<String>): String = buil
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PersonenTabelle(state: UiState, viewModel: AppViewModel, openSheet: (String) -> Unit, openWeb: (String) -> Unit, onClose: () -> Unit,
-    onZusammenfuehren: ((String) -> Unit)? = null) {
+    onZusammenfuehren: ((String) -> Unit)? = null, vorauswahl: Set<String>? = null) {
     // Die Tasten (Pfeile, Enter) gehoeren zum Fenster, ihr Ziel (die Zeilen) zum Inhalt: der Inhalt reicht seinen Handler herauf.
     val tasten = remember { mutableStateOf<(KeyEvent) -> Boolean>({ false }) }
     androidx.compose.ui.window.Window(
@@ -191,14 +191,15 @@ fun PersonenTabelle(state: UiState, viewModel: AppViewModel, openSheet: (String)
             }
         },
     ) {
-        DeskTheme { PersonenTabelleInhalt(state, viewModel, openSheet, openWeb, onZusammenfuehren) { tasten.value = it } }
+        DeskTheme { PersonenTabelleInhalt(state, viewModel, openSheet, openWeb, onZusammenfuehren, vorauswahl) { tasten.value = it } }
     }
 }
 
 /** Der Inhalt des Tabellenfensters, ohne das Fenster - so laesst er sich auch ohne Bildschirm zeichnen. */
 @Composable
 internal fun PersonenTabelleInhalt(state: UiState, viewModel: AppViewModel, openSheet: (String) -> Unit, openWeb: (String) -> Unit,
-    onZusammenfuehren: ((String) -> Unit)? = null, tastenSetzen: ((KeyEvent) -> Boolean) -> Unit) {
+    /** Nur diese Personen zeigen (Treffer aus dem Suchfenster); null = alle. */
+    onZusammenfuehren: ((String) -> Unit)? = null, vorauswahl: Set<String>? = null, tastenSetzen: ((KeyEvent) -> Boolean) -> Unit) {
     var fortschritt by remember { mutableStateOf(0 to 0) }
     var neu by remember { mutableStateOf(0) }
     val baum by produceState<Result<List<TabellenZeile>>?>(null, state.tree?.name, neu) {
@@ -216,8 +217,8 @@ internal fun PersonenTabelleInhalt(state: UiState, viewModel: AppViewModel, open
     var sortierung by remember { mutableStateOf(Spalte.Name) }
     var absteigend by remember { mutableStateOf(false) }
     var gewaehlt by remember { mutableStateOf<String?>(state.root) }
-    val zeilen by produceState(emptyList(), baum, filter, sortierung, absteigend) {
-        val alle = baum?.getOrNull() ?: run { value = emptyList(); return@produceState }
+    val zeilen by produceState(emptyList(), baum, filter, sortierung, absteigend, vorauswahl) {
+        val alle = baum?.getOrNull()?.let { z -> if (vorauswahl == null) z else z.filter { it.xref in vorauswahl } } ?: run { value = emptyList(); return@produceState }
         value = withContext(Dispatchers.Default) { tabelleAnwenden(alle, filter, sortierung, absteigend) }
     }
     val liste = rememberLazyListState()

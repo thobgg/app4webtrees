@@ -6,7 +6,8 @@
 | - | - |
 | F1 | Help |
 | F5 | Stamboom opnieuw laden |
-| Ctrl+F | Ga naar (persoon zoeken) |
+| Ctrl+F | Zoeken (alle velden, vervangen, kenmerken) |
+| Ctrl+G | Ga naar (persoon zoeken) |
 | Ctrl+E | Persoonsblad |
 | Ctrl+N | Verwant toevoegen |
 | Ctrl+Enter | Geselecteerde persoon als proband |

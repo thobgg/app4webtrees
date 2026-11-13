@@ -703,7 +703,8 @@ private fun PersonBox(
     val stil = LocalNavStil.current
     val linie = LocalFarben.current[person.xref]
     val fill = if (stil.kante) MaterialTheme.colorScheme.surface else c.fill
-    val rand = when { art == Art.Zentral -> onSurface; stil.kante -> MaterialTheme.colorScheme.outlineVariant; else -> c.border }
+    // Die Zentralperson hebt sich durch den etwas staerkeren Rahmen in ihrer Geschlechtsfarbe ab, nicht durch Schwarz
+    val rand = if (stil.kante && art != Art.Zentral) MaterialTheme.colorScheme.outlineVariant else c.border
     val klick: () -> Unit = if (art == Art.Zentral) ({ onOpenSheet(person.xref) }) else ({ viewModel.setRoot(person.xref) })
     // Die Lage (offset) gehoert an die aeussere Box: ContextMenuArea ist selbst eine Box mit Zeigerabfrage. Saesse der offset nur
     // am Kasten darin, laegen die Menuebereiche aller Kinder oben in der Spalte uebereinander, und der des letzten Kindes
@@ -724,7 +725,7 @@ private fun PersonBox(
         Row(
             Modifier.size(breite, hoehe)
                 .background(fill)
-                .border(if (art == Art.Zentral) 3.dp else 1.5.dp, rand)
+                .border(if (art == Art.Zentral) 2.5.dp else 1.5.dp, rand)
                 .fokusRahmen()
                 .combinedClickable(enabled = !person.isPrivate, onClick = klick, onDoubleClick = { onOpenSheet(person.xref) }),
             verticalAlignment = Alignment.CenterVertically,

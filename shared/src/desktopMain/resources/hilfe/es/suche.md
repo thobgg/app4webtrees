@@ -1,9 +1,19 @@
 # Buscar, ir a, marcadores
 
+## Buscar (Ctrl+F)
+
+**Ctrl+F** (o el símbolo **Buscar**) abre la ventana de búsqueda con cuatro pestañas. Trabaja sobre todo el árbol, cargado como para la tabla de personas y la comprobación – después la búsqueda no necesita servidor.
+
+- **Buscar:** un término, leído como texto exacto, como todas las palabras (Y) o como alguna de las palabras (O); además **campo completo**, **distinguir mayúsculas** y **fonética** (fonética de Colonia: Meyer encuentra Maier y Mayer). En **Campos** elige dónde buscar: nombres, profesión, fechas, lugares, fuentes, notas y los nombres de padres, cónyuges, hermanos e hijos.
+- **Lista de búsqueda:** guardar la lista de resultados como archivo (`.wtliste`) y cargarla más tarde.
+- **Reemplazar:** buscar / reemplazar por en lugares, profesiones, notas y valores de eventos – nunca en nombres. Primero **Vista previa**: cada hallazgo con el texto antiguo y el nuevo, marcable; después **Reemplazar** escribe a través de la interfaz, evento por evento. Sin aceptación automática los cambios esperan la aprobación en webtrees. Requiere permiso de edición.
+- **Identificadores:** búsqueda por identificador (I123), referencia propia (REFN) o identificador único (_UID) – en cualquier parte, al principio, al final o completo.
+
+La lista de resultados de abajo es común a las pestañas: un clic convierte a la persona en persona central, doble clic abre la ficha. **Buscar solo en los resultados actuales** limita la siguiente búsqueda a la lista. **Añadir a favoritos** guarda todos los resultados, **Mostrar en la tabla de personas** abre la tabla solo con ellos.
+
 ## Ir a
 
-**Ctrl+F** (o el icono **Ir a**) abre la búsqueda: escriba un nombre, elija la coincidencia y la persona pasa a ser la persona central. Vale para todas las disposiciones; la lista de personas de la izquierda también busca directamente.
-
+**Ctrl+G** (o **Persona › Ir a**) abre la búsqueda rápida por nombre: escriba un nombre, elija el resultado y la persona pasa a ser la persona central. En las otras disposiciones la lista de personas de la izquierda también busca directamente.
 ## Persona de inicio
 
 **Alt+Home** salta a la persona de inicio: la persona que webtrees conoce para su cuenta (su propio registro o la persona predeterminada del árbol). También es la referencia del código de colores.

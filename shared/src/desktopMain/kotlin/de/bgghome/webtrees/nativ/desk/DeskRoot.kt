@@ -146,6 +146,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     var layout by remember { mutableStateOf(DeskLayout.load()) }
     var sheetOpen by remember { mutableStateOf(false) }
     var goTo by remember { mutableStateOf(false) }
+    var suche by remember { mutableStateOf(false) }
+    var tabelleAuswahl by remember { mutableStateOf<Set<String>?>(null) }
     var liste by remember { mutableStateOf<ListenArt?>(null) }
     var merkliste by remember { mutableStateOf(false) }
     // Tafelfenster: null = zu, sonst die Tafelart, mit der es oeffnet
@@ -225,7 +227,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
 
     DeskMenuBar(
         state, viewModel, openWeb, layout = layout, onLayout = { layout = it; DeskLayout.save(it) },
-        onSearch = { goTo = true },
+        onSearch = { goTo = true }, onSuche = { suche = true },
         onSheet = { (state.detail?.person?.xref ?: state.root)?.let(openSheet) },
         onAbout = { about = true }, onQuit = beenden,
         nav = nav, drucke = drucke, onListe = { liste = it }, onHilfe = { Hilfe.oeffnen(if (state.screen == Screen.Main) "hauptfenster" else HilfeTexte.START) },
@@ -312,7 +314,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
                 Column(Modifier.fillMaxSize()) {
                     // Eine Symbolleiste fuer alle vier Aufbauten; "Gehe zu" springt im Navigator in den Dialog, sonst ins Suchfeld.
                     // Personenblatt: die in der Personentafel gewaehlte Person, sonst der Proband - wie im Menue.
-                    ClassicToolbar(state, viewModel, openWeb, onGoTo = { goTo = true },
+                    ClassicToolbar(state, viewModel, openWeb, onGoTo = { suche = true },
                         onSheet = { (state.detail?.person?.xref ?: state.root)?.let(openSheet) }, nav = nav, drucke = drucke,
                         symboltexte = symboltexte, onMerkliste = { merkliste = true }, onListe = { liste = it }, onTabelle = { tabelle = true }, onTafel = { tafel = it }, onPruefung = { pruefung = true },
                         onQuellen = if (quellenApi) ({ quellen = "" }) else null, onOrte = if (orteApi) ({ orte = "" }) else null,
@@ -437,7 +439,8 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         if (kirchenjahr) KirchenjahrFenster(onClose = { kirchenjahr = false })
         if (gedcomPruefen) GedcomPruefenFenster(onClose = { gedcomPruefen = false })
         aufgabeNeu?.let { z -> state.tree?.let { t -> AufgabeDialog(z, viewModel, t.name, onClose = { ok -> aufgabeNeu = null; if (ok) viewModel.setRoot(z.xref, remember = false) }) } }
-        if (tabelle && state.tree != null) PersonenTabelle(state, viewModel, openSheet, openWeb, onClose = { tabelle = false },
+        if (suche && state.tree != null) SuchFenster(state, viewModel, openSheet, onTabelle = { tabelleAuswahl = it; tabelle = true }, onClose = { suche = false })
+        if (tabelle && state.tree != null) PersonenTabelle(state, viewModel, openSheet, openWeb, onClose = { tabelle = false; tabelleAuswahl = null }, vorauswahl = tabelleAuswahl,
             onZusammenfuehren = if (mergeApi) ({ zusammen = it }) else null)
         zusammen?.let { s -> if (state.tree != null) ZusammenfuehrenFenster(state, viewModel, s, openSheet, onClose = { zusammen = null }) }
         zusammenPaar?.let { p -> state.tree?.let { t -> ZusammenfuehrenDialog(p, viewModel, t.name, onClose = { geaendert -> zusammenPaar = null; if (geaendert) viewModel.refresh() }) } }
@@ -455,7 +458,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
 private fun FrameWindowScope.DeskMenuBar(
     state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit,
     layout: DeskLayout, onLayout: (DeskLayout) -> Unit,
-    onSearch: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, onQuit: () -> Unit,
+    onSearch: () -> Unit, onSuche: () -> Unit, onSheet: () -> Unit, onAbout: () -> Unit, onQuit: () -> Unit,
     nav: DeskNav, drucke: DeskDruck, onListe: (ListenArt) -> Unit, onHilfe: () -> Unit,
     farbkodierung: Boolean, onFarbkodierung: (Boolean) -> Unit,
     symboltexte: Boolean, onSymboltexte: (Boolean) -> Unit,
@@ -503,7 +506,8 @@ private fun FrameWindowScope.DeskMenuBar(
             }
             Menu(stringResource(Res.string.desk_menu_person), enabled = main) {
                 // Finden und Springen
-                Item(stringResource(Res.string.desk_goto), shortcut = KeyShortcut(Key.F, ctrl = true), onClick = onSearch)
+                Item(stringResource(Res.string.desk_search_menu), shortcut = KeyShortcut(Key.F, ctrl = true), onClick = onSuche)
+                Item(stringResource(Res.string.desk_goto), shortcut = KeyShortcut(Key.G, ctrl = true), onClick = onSearch)
                 state.home?.let { home -> Item(stringResource(Res.string.home_start_person), shortcut = KeyShortcut(Key.MoveHome, alt = true), onClick = { viewModel.setRoot(home) }) }
                 onStartperson?.let { Item(stringResource(Res.string.desk_set_start_person), enabled = state.root != null, onClick = it) }
                 Item(stringResource(Res.string.action_make_root), enabled = selected != null && selected.person.xref != state.root,
@@ -772,7 +776,7 @@ internal fun ClassicToolbar(
     val t = state.tree?.name.orEmpty()
     fun web(route: String) = runCatching { viewModel.client.url(route, emptyMap()).toString() }.getOrNull()?.let(openWeb)
     val eintraege: List<LeistenEintrag> = buildList {
-        add(Knopf(Icons.Default.Search, stringResource(Res.string.desk_goto), onClick = onGoTo))
+        add(Knopf(Icons.Default.Search, stringResource(Res.string.desk_search_window), onClick = onGoTo))
         add(Knopf(Icons.Default.Edit, stringResource(Res.string.desk_sheet), enabled = state.root != null, onClick = onSheet))
         add(Knopf(Icons.Default.Add, stringResource(Res.string.desk_tb_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) })
         if (viewModel.bookmarksSupported) add(Knopf(Icons.Default.Star, stringResource(Res.string.desk_bookmarks), onClick = onMerkliste))

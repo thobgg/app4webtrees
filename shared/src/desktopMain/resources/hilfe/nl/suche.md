@@ -1,9 +1,19 @@
 # Zoeken, ga naar, bladwijzers
 
+## Zoeken (Ctrl+F)
+
+**Ctrl+F** (of het symbool **Zoeken**) opent het zoekvenster met vier tabbladen. Het werkt op de hele stamboom, geladen zoals voor de personentabel en de controle – daarna heeft het zoeken geen server meer nodig.
+
+- **Zoeken:** een term, gelezen als exacte tekst, als alle woorden (EN) of als een van de woorden (OF); daarbij **heel veld**, **hoofdlettergevoelig** en **fonetisch** (Keulse fonetiek: Meyer vindt Maier en Mayer). Onder **Velden** kiest u waar wordt gezocht: namen, beroep, datums, plaatsen, bronnen, notities en de namen van ouders, partners, broers en zussen en kinderen.
+- **Zoeklijst:** de resultatenlijst als bestand (`.wtliste`) opslaan en later weer laden.
+- **Vervangen:** zoeken naar / vervangen door in plaatsen, beroepen, notities en gebeurteniswaarden – nooit in namen. Eerst **Voorbeeld**: elke vindplaats met oude en nieuwe tekst, aan te vinken; dan schrijft **Vervangen** via de koppeling, gebeurtenis voor gebeurtenis. Zonder automatische goedkeuring wachten de wijzigingen in webtrees op goedkeuring. Vereist bewerkingsrechten.
+- **Kenmerken:** zoeken op kenmerk (I123), eigen referentie (REFN) of uniek kenmerk (_UID) – overal, aan het begin, aan het einde of volledig.
+
+De resultatenlijst onderaan is voor alle tabbladen dezelfde: klik maakt de persoon de centrale persoon, dubbelklik opent het persoonsblad. **Alleen in de huidige resultaten zoeken** beperkt de volgende zoekopdracht tot de lijst. **Aan favorieten toevoegen** bewaart alle resultaten, **In de personentabel tonen** opent de tabel met alleen deze personen.
+
 ## Ga naar
 
-**Ctrl+F** (of het symbool **Ga naar**) opent het zoeken: typ een naam, kies de treffer, en de persoon wordt de proband. Dat geldt in alle indelingen; de personenlijst links zoekt daarnaast direct.
-
+**Ctrl+G** (of **Persoon › Ga naar**) opent de snelle naamzoeker: naam typen, resultaat kiezen, en de persoon wordt de centrale persoon. In de andere indelingen zoekt de personenlijst links ook direct.
 ## Startpersoon
 
 **Alt+Home** springt naar de startpersoon: de persoon die webtrees voor uw account kent (uw eigen record of de standaardpersoon van de stamboom). Hij of zij is ook het uitgangspunt voor de kleurcodering.

@@ -6,7 +6,8 @@
 | - | - |
 | F1 | Help |
 | F5 | Reload tree |
-| Ctrl+F | Go to (find person) |
+| Ctrl+F | Search (all fields, replace, identifiers) |
+| Ctrl+G | Go to (find person) |
 | Ctrl+E | Person sheet |
 | Ctrl+N | Add relative |
 | Ctrl+Enter | Selected person as central person |

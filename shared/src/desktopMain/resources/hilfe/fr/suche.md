@@ -1,9 +1,19 @@
 # Rechercher, aller à, favoris
 
+## Rechercher (Ctrl+F)
+
+**Ctrl+F** (ou l’icône **Rechercher**) ouvre la fenêtre de recherche avec quatre onglets. Elle travaille sur tout l’arbre, chargé comme pour le tableau des personnes et la vérification – ensuite la recherche ne demande plus de serveur.
+
+- **Rechercher :** un terme, lu comme texte exact, comme tous les mots (ET) ou comme un des mots (OU) ; en plus **champ entier**, **respecter la casse** et **phonétique** (phonétique de Cologne : Meyer trouve Maier et Mayer). Sous **Champs** vous choisissez où chercher : noms, profession, dates, lieux, sources, notes et les noms des parents, conjoints, frères et sœurs et enfants.
+- **Liste de recherche :** enregistrer la liste des résultats dans un fichier (`.wtliste`) et la recharger plus tard.
+- **Remplacer :** rechercher / remplacer par dans les lieux, professions, notes et valeurs d’événements – jamais dans les noms. D’abord **Aperçu** : chaque occurrence avec l’ancien et le nouveau texte, à cocher ; puis **Remplacer** écrit par l’interface, événement par événement. Sans validation automatique, les modifications attendent la validation dans webtrees. Demande le droit de modifier.
+- **Identifiants :** recherche par identifiant (I123), référence utilisateur (REFN) ou identifiant unique (_UID) – n’importe où, au début, à la fin ou complet.
+
+La liste des résultats en bas est commune aux onglets : un clic fait de la personne la personne centrale, un double-clic ouvre la fiche. **Chercher seulement dans les résultats actuels** restreint la recherche suivante à la liste. **Ajouter aux favoris** retient tous les résultats, **Afficher dans le tableau des personnes** ouvre le tableau avec ces seules personnes.
+
 ## Aller à
 
-**Ctrl+F** (ou l'icône **Aller à**) ouvre la recherche : tapez un nom, choisissez le résultat, et la personne devient la personne centrale. C’est valable dans toutes les dispositions ; la liste des personnes à gauche permet aussi de chercher directement.
-
+**Ctrl+G** (ou **Personne › Aller à**) ouvre la recherche rapide par nom : tapez un nom, choisissez le résultat, et la personne devient la personne centrale. Dans les autres dispositions, la liste des personnes à gauche cherche aussi directement.
 ## Personne de départ
 
 **Alt+Home** saute à la personne de départ : la personne que webtrees connaît pour votre compte (votre propre enregistrement ou la personne par défaut de l'arbre). Elle sert aussi de référence pour le code couleur.

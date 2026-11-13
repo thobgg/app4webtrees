@@ -6,7 +6,8 @@
 | - | - |
 | F1 | Hilfe |
 | F5 | Stammbaum neu laden |
-| Strg+F | Gehe zu (Person suchen) |
+| Strg+F | Suchen (alle Felder, Ersetzen, Kennzeichen) |
+| Strg+G | Gehe zu (Person suchen) |
 | Strg+E | Personenblatt |
 | Strg+N | Verwandte hinzufügen |
 | Strg+Eingabe | Gewählte Person als Proband |

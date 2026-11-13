@@ -6,7 +6,8 @@
 | - | - |
 | F1 | Aide |
 | F5 | Recharger l'arbre |
-| Ctrl+F | Aller à (chercher une personne) |
+| Ctrl+F | Rechercher (tous les champs, remplacer, identifiants) |
+| Ctrl+G | Aller à (chercher une personne) |
 | Ctrl+E | Fiche individuelle |
 | Ctrl+N | Ajouter un parent |
 | Ctrl+Enter | Personne sélectionnée comme personne centrale |
