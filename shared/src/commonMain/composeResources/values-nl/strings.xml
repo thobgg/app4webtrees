@@ -632,6 +632,8 @@
     <string name="desk_unknown_partner">Partner onbekend</string>
     <string name="desk_toolbar_labels">Knopteksten</string>
     <string name="desk_more">Meer</string>
+    <string name="desk_tb_add_relative">Familielid</string>
+    <string name="desk_tb_changes">Wijzigingen</string>
     <string name="desk_chart_window">Schema maken</string>
     <string name="desk_chart_group_descendants">Nakomelingen</string>
     <string name="desk_chart_descendants">Parenteel</string>

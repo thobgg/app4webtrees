@@ -640,6 +640,8 @@
     <string name="desk_unknown_partner">Conjoint inconnu</string>
     <string name="desk_toolbar_labels">Libellés de la barre d’outils</string>
     <string name="desk_more">Plus</string>
+    <string name="desk_tb_add_relative">Proche</string>
+    <string name="desk_tb_changes">Modifications</string>
     <string name="desk_chart_window">Créer un tableau</string>
     <string name="desk_chart_group_descendants">Descendance</string>
     <string name="desk_chart_descendants">Tableau de descendance</string>

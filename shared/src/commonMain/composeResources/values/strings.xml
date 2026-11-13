@@ -645,6 +645,8 @@
     <string name="desk_unknown_partner">Partner unknown</string>
     <string name="desk_toolbar_labels">Toolbar labels</string>
     <string name="desk_more">More</string>
+    <string name="desk_tb_add_relative">Relative</string>
+    <string name="desk_tb_changes">Changes</string>
     <string name="desk_chart_window">Create chart</string>
     <string name="desk_chart_group_descendants">Descendants</string>
     <string name="desk_chart_descendants">Descendant chart</string>

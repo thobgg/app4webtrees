@@ -640,6 +640,8 @@
     <string name="desk_unknown_partner">Pareja desconocida</string>
     <string name="desk_toolbar_labels">Etiquetas de la barra de herramientas</string>
     <string name="desk_more">Más</string>
+    <string name="desk_tb_add_relative">Pariente</string>
+    <string name="desk_tb_changes">Cambios</string>
     <string name="desk_chart_window">Crear gráfico</string>
     <string name="desk_chart_group_descendants">Descendientes</string>
     <string name="desk_chart_descendants">Gráfico de descendientes</string>

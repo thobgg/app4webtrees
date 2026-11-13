@@ -103,7 +103,7 @@ private val GAP = 10.dp
  *  laeuft hinter dem Kasten des Kindes bei zwei Dritteln seiner Breite. */
 private val COL = 245.dp
 private val LINE_X = 222.dp
-private val INFO_H = 236.dp
+private val INFO_H = 256.dp
 /** Breite des Infokastens - schmal genug, dass die Grosseltern-Spalte nicht unter ihn ausweichen muss. */
 private val INFO_W = 620.dp
 /** Zoom gegenueber dem Einpassen: bis 300 Prozent, damit auch die kleinen aeusseren Generationen lesbar werden. */
@@ -150,9 +150,9 @@ private data class BoxColors(val fill: Color, val border: Color)
 private fun boxColors(sex: String): BoxColors {
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     return when (sex) {
-        "M" -> if (dark) BoxColors(Color(0xFF244B6B), Color(0xFF7FB2DA)) else BoxColors(Color(0xFFA9C3E2), Color(0xFF41709F))
-        "F" -> if (dark) BoxColors(Color(0xFF5E2F36), Color(0xFFE09AA2)) else BoxColors(Color(0xFFF1B5AD), Color(0xFFB45F58))
-        else -> if (dark) BoxColors(Color(0xFF3A4242), Color(0xFF8E9998)) else BoxColors(Color(0xFFDDE2E2), Color(0xFF8A9493))
+        "M" -> if (dark) BoxColors(Color(0xFF244B6B), Color(0xFF7FB2DA)) else BoxColors(Color(0xFFA2BCDE), Color(0xFF35598A))
+        "F" -> if (dark) BoxColors(Color(0xFF5E2F36), Color(0xFFE09AA2)) else BoxColors(Color(0xFFF0ACA1), Color(0xFFA34E47))
+        else -> if (dark) BoxColors(Color(0xFF3A4242), Color(0xFF8E9998)) else BoxColors(Color(0xFFD9DFDF), Color(0xFF6E7978))
     }
 }
 
@@ -245,27 +245,36 @@ fun Navigator(
         var slotH = if (hoeheFrei > 0.dp) minOf(slotMin + hoeheFrei / eng.slots, slotMax) else slotMin
         // Bleibt Breite uebrig, ruecken die ueberlappenden Spalten auseinander, bis die Tafel das Fenster ausfuellt
         // (welche ueberlappen duerfen, haengt vom Zeilenabstand ab - darum erst mit dem endgueltigen).
-        val ohne = chartMasse(g, familie, familien.isNotEmpty(), slotH, info = 1f / skala, zick = zick, t = t)
+        var ohne = chartMasse(g, familie, familien.isNotEmpty(), slotH, info = 1f / skala, zick = zick, t = t)
+        // Bleibt Breite frei, werden zuerst alle Kaesten breiter (bis 30 Prozent): die Tafel fuellt das Fenster wie eine
+        // Ahnentafel, statt schmale Kaesten mit viel Luft dazwischen zu zeigen. Erst danach ruecken die Spalten auseinander.
+        var breit = 1f
+        if (!zick) repeat(3) {
+            val neu = (breit * ((maxWidth - rand) / skala / ohne.breite)).coerceIn(1f, 1.3f)
+            if (kotlin.math.abs(neu - breit) < 0.01f) return@repeat
+            breit = neu
+            ohne = chartMasse(g, familie, familien.isNotEmpty(), slotH, info = 1f / skala, zick = zick, t = t, breit = breit)
+        }
         val frei = (maxWidth - rand) / skala - ohne.breite
         val extra = if (ohne.ueberlappend > 0 && frei > 0.dp) frei / ohne.ueberlappend else 0.dp
-        var masse = chartMasse(g, familie, familien.isNotEmpty(), slotH, extra, info = 1f / skala, zick = zick, t = t)
+        var masse = chartMasse(g, familie, familien.isNotEmpty(), slotH, extra, info = 1f / skala, zick = zick, t = t, breit = breit)
         // Rutscht die Tafel wegen des Infokastens nach unten, die Zeilen wieder etwas enger ziehen.
         val zuviel = masse.hoeheFit - (maxHeight - rand) / skala
         if (zuviel > 0.dp && slotH > slotMin) {
             slotH = maxOf(slotMin, slotH - zuviel / eng.slots)
-            masse = chartMasse(g, familie, familien.isNotEmpty(), slotH, extra, info = 1f / skala, zick = zick, t = t)
+            masse = chartMasse(g, familie, familien.isNotEmpty(), slotH, extra, info = 1f / skala, zick = zick, t = t, breit = breit)
         }
         // Was dann noch an Breite frei ist, bekommen die Kaesten der aeussersten Generation (lange Namen passen)
         val rest = (maxWidth - rand) / skala - masse.breite
         val zusatz = if (rest > 0.dp) minOf(rest / (if (zick) 2 else 1), kastenW(g - 1, t)) else 0.dp
-        if (zusatz > 0.dp) masse = chartMasse(g, familie, familien.isNotEmpty(), slotH, extra, info = 1f / skala, zick = zick, aussenZusatz = zusatz, t = t)
+        if (zusatz > 0.dp) masse = chartMasse(g, familie, familien.isNotEmpty(), slotH, extra, info = 1f / skala, zick = zick, aussenZusatz = zusatz, t = t, breit = breit)
         // Begrenzt die Breite, bleibt unten Hoehe frei: dann werden die Kaesten hoeher und die Schrift waechst mit (Kaesten bis
         // zur Hoehe der Zentralperson, Schrift bis ein Viertel) - so fuellt die Tafel das Fenster wie eine Ahnentafel, statt unten leer zu bleiben.
         val raum = (maxHeight - rand) / skala
         if (!zick && masse.hoeheFit < raum * 0.97f) {
             var hoch = (raum / masse.hoeheFit * 0.98f).coerceAtMost(1.45f)
             repeat(3) {
-                val probe = chartMasse(g, familie, familien.isNotEmpty(), slotH * hoch, extra, info = 1f / skala, zick = zick, aussenZusatz = zusatz, t = t, hoch = hoch)
+                val probe = chartMasse(g, familie, familien.isNotEmpty(), slotH * hoch, extra, info = 1f / skala, zick = zick, aussenZusatz = zusatz, t = t, hoch = hoch, breit = breit)
                 if (probe.hoeheFit <= raum || hoch <= 1.02f) { masse = probe; return@repeat }
                 hoch = maxOf(1f, hoch * (raum / probe.hoeheFit) * 0.99f)
             }
@@ -395,6 +404,8 @@ private class ChartMasse(
     val t: Float = 1f,
     /** Hoehenfaktor der Kaesten (siehe [grundH]). */
     val hoch: Float = 1f,
+    /** Breitenfaktor aller Kaesten: bleibt im Fenster Breite uebrig, werden die Kaesten breiter (bis 1,3). */
+    val breit: Float = 1f,
 )
 
 /**
@@ -422,28 +433,29 @@ private fun slotGross(g: Int, zick: Boolean, t: Float = 1f): Dp = if (zick) kast
  * Eltern passt; sonst steht sie ganz daneben. Im Zickzack ([zick]) stehen die Muetter der aeussersten Generation um
  * [ChartMasse.mutterVersatz] weiter rechts, dafuer duerfen sich die Zeilen dort zur Haelfte ueberlappen.
  */
-private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, hatFamilien: Boolean, slotH: Dp, extra: Dp = 0.dp, info: Float = 1f, zick: Boolean = false, aussenZusatz: Dp = 0.dp, t: Float = 1f, hoch: Float = 1f): ChartMasse {
+private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson?, hatFamilien: Boolean, slotH: Dp, extra: Dp = 0.dp, info: Float = 1f, zick: Boolean = false, aussenZusatz: Dp = 0.dp, t: Float = 1f, hoch: Float = 1f, breit: Float = 1f): ChartMasse {
     // Der Infokasten zoomt nicht mit: in Tafel-Massen braucht er bei kleiner Skala entsprechend mehr Platz ([info] = 1 / Skala)
     val infoH = INFO_H * info
     val slots = 1 shl (g - 1)
     val ancH = slotH * slots
     val kinder = familie?.children?.size ?: 0
     val partner = if (hatFamilien) 1 else 0
-    val xZentral = BOX_W + 56.dp
+    val bw = BOX_W * breit
+    val xZentral = bw + 56.dp
     val xs = mutableListOf(xZentral)
     var ueberlappend = 0
     for (k in 1 until g) {
-        val wVor = kastenW(k - 1, t)
+        val wVor = kastenW(k - 1, t) * breit
         val elternAbstand = slotH * (slots shr k)
         // Die Mutter der Zentralperson darf zudem nicht in den Partner (unter der Zentralperson) ragen
         val unterPartner = k != 1 || slotH * slots / 4 - kastenH(1, t, hoch) / 2 >= BOX_H * 1.5f + GAP + 24.dp
         val darf = !(zick && k == g - 1) && unterPartner && elternAbstand / 2 >= (kastenH(k, t, hoch) + kastenH(k - 1, t, hoch)) / 2 + 4.dp
         var schritt = if (darf) { ueberlappend++; minOf(wVor * (COL / BOX_W) + extra, wVor + 40.dp * stufe(k - 1, t)) } else wVor + 36.dp * stufe(k - 1, t)
         // Steht die Elternspalte ganz daneben, dann auch rechts vom Partner (der um 40 dp eingerueckt ist)
-        if (k == 1 && !darf) schritt = maxOf(schritt, BOX_W + 40.dp + 16.dp)
+        if (k == 1 && !darf) schritt = maxOf(schritt, bw + 40.dp + 16.dp)
         xs += xs.last() + schritt
     }
-    val aussenW = kastenW(g - 1, t) + aussenZusatz
+    val aussenW = kastenW(g - 1, t) * breit + aussenZusatz
     val mutterVersatz = if (zick) aussenW + 36.dp * stufe(g - 1, t) else 0.dp
     // Die Zentralperson sitzt in der Mitte der Vorfahren; nur wenn ihr Kasten in den Infokasten ragt, rutscht alles nach unten.
     var centerY = maxOf(ancH / 2, infoH + ICON_ROW + BOX_H / 2)
@@ -463,7 +475,7 @@ private fun chartMasse(g: Int, familie: de.bgghome.webtrees.nativ.api.FamilyJson
     // Die Kinderspalte rollt in ihrem eigenen Bereich; die Tafel wird durch sie nicht hoeher.
     val hoehe = hoeheFit
     val breite = xs.last() + mutterVersatz + aussenW + 24.dp
-    return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe, hoeheFit, xs, zick, mutterVersatz, ueberlappend, aussenW, t, hoch)
+    return ChartMasse(slots, slotH, ancH, kinder, partner, xZentral, centerY, kinderTop, breite, hoehe, hoeheFit, xs, zick, mutterVersatz, ueberlappend, aussenW, t, hoch, breit)
 }
 
 /** Inhalt in der Groessenstufe [f] zeichnen: Kasten, Schrift und Bild schrumpfen gemeinsam. */
@@ -484,33 +496,36 @@ private fun Chart(
     val partner = listOfNotNull(familie?.spouse)
     val xZentral = m.xZentral; val centerY = m.centerY
     val hoehe = m.hoehe; val breite = m.breite
-    val line = MaterialTheme.colorScheme.outline
+    // Linien kraeftig und dunkel (hell: Textfarbe mit etwas Luft), damit das Gitter der Tafel traegt
+    val dunkel = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val line = if (dunkel) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
     val weich = LocalNavStil.current.weich
+    val bw = BOX_W * m.breit
 
     fun top(n: Int): Dp { val gg = gen(n); val span = slots shr gg; val i = n - (1 shl gg); return centerY - ancH / 2 + slotH * (i * span) + (slotH * span - kastenH(gg, m.t, m.hoch)) / 2 }
     // Im Zickzack stehen die Muetter der aeussersten Generation eine Spalte weiter rechts
     fun left(n: Int): Dp = m.xs[gen(n)] + if (m.zick && gen(n) == g - 1 && n % 2 == 1) m.mutterVersatz else 0.dp
     fun mitte(n: Int): Dp = top(n) + kastenH(gen(n), m.t, m.hoch) / 2
     // Kastenbreite in ungestuften dp (der Kasten wird in seiner Stufe gezeichnet); aussen mit der Restbreite
-    fun breiteIn(n: Int): Dp = if (gen(n) == g - 1) m.aussenW / stufe(gen(n), m.t) else BOX_W
+    fun breiteIn(n: Int): Dp = if (gen(n) == g - 1) m.aussenW / stufe(gen(n), m.t) else bw
     val kinderTop = m.kinderTop
     val kinderBereich = hoehe - kinderTop - 12.dp
 
     Box(Modifier.size(breite, hoehe)) {
         Canvas(Modifier.fillMaxSize()) {
-            val w = 1.2.dp.toPx()
+            val w = 2.dp.toPx()
             // Vorfahren: senkrechte Linie hinter dem Kasten des Kindes (bei zwei Dritteln), von Vater zu Mutter,
             // von dort waagerecht zu den Elternkaesten - auch zu leeren. Weich: je Elternteil ein Bogen, der hinter dem
             // Kasten des Kindes senkrecht startet und waagerecht in den Elternkasten muendet.
             for (n in 1 until (1 shl (g - 1))) {
                 if (n !in ahnen) continue
-                val xm = minOf(left(n) + LINE_X * stufe(gen(n), m.t), left(2 * n) - 12.dp).toPx()
+                val xm = minOf(left(n) + LINE_X * m.breit * stufe(gen(n), m.t), left(2 * n) - 12.dp).toPx()
                 val yV = mitte(2 * n).toPx(); val yM = mitte(2 * n + 1).toPx()
                 if (weich) {
                     val yK = mitte(n).toPx()
                     for ((xe, ye) in listOf(left(2 * n).toPx() to yV, left(2 * n + 1).toPx() to yM)) {
                         val pfad = Path().apply { moveTo(xm, yK); cubicTo(xm, ye, xm, ye, xe, ye) }
-                        drawPath(pfad, line, style = Stroke(w * 1.25f, cap = StrokeCap.Round))
+                        drawPath(pfad, line, style = Stroke(w, cap = StrokeCap.Round))
                     }
                 } else {
                     drawLine(line, Offset(xm, yV), Offset(xm, yM), w)
@@ -519,13 +534,13 @@ private fun Chart(
             }
             // Kinder: von der Klammer waagerecht zur Zentralperson (die Klammer selbst liegt im rollbaren Kinderbereich)
             if (kinder.isNotEmpty()) {
-                val xb = (BOX_W + 16.dp).toPx(); val yc = centerY.toPx()
+                val xb = (bw + 16.dp).toPx(); val yc = centerY.toPx()
                 drawLine(line, Offset(xb, yc), Offset(xZentral.toPx(), yc), w)
             }
             // Partner: senkrecht unter der Zentralperson
             if (familie != null) {
                 val x = (xZentral + 40.dp).toPx()
-                drawLine(line, Offset(x, (centerY + BOX_H / 2).toPx()), Offset(x, (centerY + BOX_H / 2 + GAP).toPx()), w * 2)
+                drawLine(line, Offset(x, (centerY + BOX_H / 2).toPx()), Offset(x, (centerY + BOX_H / 2 + GAP).toPx()), w * 1.5f)
             }
         }
 
@@ -541,18 +556,18 @@ private fun Chart(
             val roll = rememberScrollState()
             val kslot = BOX_H + GAP
             val innen = kslot * kinder.size
-            Box(Modifier.offset(0.dp, kinderTop).size(BOX_W + 32.dp, minOf(innen, kinderBereich))) {
+            Box(Modifier.offset(0.dp, kinderTop).size(bw + 32.dp, minOf(innen, kinderBereich))) {
                 Box(Modifier.fillMaxSize().verticalScroll(roll)) {
-                    Box(Modifier.size(BOX_W + 32.dp, innen)) {
+                    Box(Modifier.size(bw + 32.dp, innen)) {
                         Canvas(Modifier.fillMaxSize()) {
-                            val w = 1.2.dp.toPx(); val xb = (BOX_W + 16.dp).toPx()
+                            val w = 2.dp.toPx(); val xb = (bw + 16.dp).toPx()
                             val y0 = (BOX_H / 2).toPx(); val y1 = (kslot * (kinder.size - 1) + BOX_H / 2).toPx()
                             val yc = (centerY - kinderTop).toPx().coerceIn(y0, y1)
                             drawLine(line, Offset(xb, minOf(y0, yc)), Offset(xb, maxOf(y1, yc)), w)
-                            kinder.indices.forEach { i -> val y = (kslot * i + BOX_H / 2).toPx(); drawLine(line, Offset(BOX_W.toPx(), y), Offset(xb, y), w) }
+                            kinder.indices.forEach { i -> val y = (kslot * i + BOX_H / 2).toPx(); drawLine(line, Offset(bw.toPx(), y), Offset(xb, y), w) }
                         }
                         kinder.forEachIndexed { i, k ->
-                            PersonBox(k, Art.Kind, viewModel, onOpenSheet, openWeb, Modifier.offset(0.dp, kslot * i), pfeilLinks = k.xref in mitNachkommen)
+                            PersonBox(k, Art.Kind, viewModel, onOpenSheet, openWeb, Modifier.offset(0.dp, kslot * i), pfeilLinks = k.xref in mitNachkommen, breite = bw)
                         }
                     }
                 }
@@ -566,12 +581,12 @@ private fun Chart(
                 KleinKnopf(Icons.Default.Add, stringResource(Res.string.action_add_relative)) { viewModel.requestAddRelative(zentral.xref) }
             }
         }
-        PersonBox(zentral, Art.Zentral, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral, centerY - BOX_H / 2))
+        PersonBox(zentral, Art.Zentral, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral, centerY - BOX_H / 2), breite = bw)
         val partnerY = centerY + BOX_H / 2 + GAP
         if (familie != null) {
             val p = familie.spouse
-            if (p != null) PersonBox(p, Art.Partner, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral + 40.dp, partnerY))
-            else LeerBox(if (zentral.sex == "F") "M" else "F", Modifier.offset(xZentral + 40.dp, partnerY), onClick = if (canEdit) ({ viewModel.requestAddRelative(zentral.xref) }) else null, text = unbekannterPartner(zentral.sex))
+            if (p != null) PersonBox(p, Art.Partner, viewModel, onOpenSheet, openWeb, Modifier.offset(xZentral + 40.dp, partnerY), breite = bw)
+            else LeerBox(if (zentral.sex == "F") "M" else "F", Modifier.offset(xZentral + 40.dp, partnerY), onClick = if (canEdit) ({ viewModel.requestAddRelative(zentral.xref) }) else null, text = unbekannterPartner(zentral.sex), breite = bw)
             // Mehrere Partnerschaften: Pfeil wechselt zur naechsten, mit Zaehler
             if (anzahlFamilien > 1) {
                 Row(Modifier.offset(xZentral + 40.dp, partnerY + BOX_H + 4.dp).clickable(onClick = onNaechste).padding(2.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -599,39 +614,56 @@ private fun Chart(
     }
 }
 
-/** Infokasten: grosses Portraet, Name in Registerform, Geburt, Ehen mit roemischer Nummer, Tod, Beruf. */
+/** Infokasten: Portraet (ohne Bild nur eine kleine Silhouette), Name in Registerform, Beruf, alle datierten Ereignisse in der
+ *  Reihenfolge des Lebens, Ehen (roemische Nummer nur bei mehreren), Geschwister. */
 @Composable
 private fun InfoBox(detail: IndividualDetail, gewaehlt: Int, modifier: Modifier, onOpen: () -> Unit, onPerson: (String) -> Unit) {
     val p = detail.person
     val colors = MaterialTheme.colorScheme
     fun ort(f: FactJson?) = f?.let { listOfNotNull(it.date?.text?.takeIf(String::isNotBlank), Ortsanzeige.kurz(it.place?.name, it.place?.short).takeIf(String::isNotBlank)).joinToString(" ") }.orEmpty()
-    val geburt = ort(detail.facts.firstOrNull { it.tag == "BIRT" } ?: detail.facts.firstOrNull { it.tag == "CHR" })
-    val tod = ort(detail.facts.firstOrNull { it.tag == "DEAT" } ?: detail.facts.firstOrNull { it.tag == "BURI" })
+    fun fakt(vararg tags: String) = tags.firstNotNullOfOrNull { tag -> detail.facts.firstOrNull { it.tag == tag } }
+    val geburt = ort(fakt("BIRT"))
+    val taufe = fakt("CHR", "BAPM")?.let { f ->
+        // Taufpaten in Klammern, wie auf einem Personenblatt
+        val paten = f.associates.mapNotNull { a -> if (a.isPrivate) null else a.name?.takeIf(String::isNotBlank) }
+        ort(f) + if (paten.isNotEmpty()) "  (${paten.joinToString(", ")})" else ""
+    }.orEmpty()
+    val tod = ort(fakt("DEAT"))
+    val grab = ort(fakt("BURI", "CREM"))
+    // Weitere datierte Ereignisse (Bildung, Wohnort, Religion ...) mit dem Namen, den der Server in der Sprache der Oberflaeche liefert
+    val lebensweg = setOf("BIRT", "CHR", "BAPM", "DEAT", "BURI", "CREM", "OCCU", "TITL", "NAME", "SEX", "FAMS", "FAMC", "CHAN", "NOTE", "SOUR", "OBJE", "RESN", "_UID")
+    val weitere = detail.facts.filter { it.known && it.tag !in lebensweg && it.label.isNotBlank() && (it.date?.text?.isNotBlank() == true || it.place?.name?.isNotBlank() == true) }
     val beruf = listOfNotNull(detail.facts.firstOrNull { it.tag == "TITL" }?.value, detail.facts.firstOrNull { it.tag == "OCCU" }?.value).filter(String::isNotBlank).joinToString(" · ")
     val roemisch = listOf("I", "II", "III", "IV", "V", "VI", "VII", "VIII")
     val priv = stringResource(Res.string.person_private); val none = stringResource(Res.string.person_no_name)
     Row(modifier.background(colors.surface).border(1.dp, colors.outline).combinedClickable(onClick = onOpen).padding(8.dp)) {
-        Box(Modifier.width(160.dp).fillMaxHeight().border(1.dp, colors.outlineVariant)) {
-            Portrait(p, Modifier.fillMaxSize())
+        // Ohne Bild bleibt die Flaeche klein: eine Silhouette im Daumennagelformat statt eines grossen Platzhalters
+        val mitBild = p.thumb != null
+        Box(Modifier.width(if (mitBild) 160.dp else 96.dp).fillMaxHeight().background(colors.surfaceVariant.copy(alpha = 0.35f)).border(1.dp, colors.outlineVariant), contentAlignment = Alignment.Center) {
+            if (mitBild) Portrait(p, Modifier.fillMaxSize()) else Portrait(p, Modifier.size(64.dp).clip(CircleShape))
         }
-        Column(Modifier.padding(start = 12.dp).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Column(Modifier.padding(start = 12.dp).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(registerName(p, priv, none), fontSize = 17.sp, fontWeight = FontWeight.Bold, lineHeight = 22.sp)
             if (beruf.isNotBlank()) Text(beruf, fontSize = 14.sp, color = colors.onSurfaceVariant)
-            if (geburt.isNotBlank()) Text("*  $geburt", fontSize = 14.sp)
+            if (geburt.isNotBlank()) Text("*  $geburt", fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (taufe.isNotBlank()) Text("~  $taufe", fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            weitere.forEach { f -> Text(f.label + ": " + listOf(f.value, ort(f)).filter(String::isNotBlank).joinToString(", "), fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+            val mehrere = detail.spouseFamilies.size > 1
             detail.spouseFamilies.forEachIndexed { i, fam ->
                 val wann = ort(fam.facts.hauptHeirat())
                 val sp = fam.spouse
-                val nummer = "⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  "
+                val nummer = if (mehrere) "⚭ ${roemisch.getOrElse(i) { "${i + 1}." }}  " else "⚭  "
                 val zusatz = if (wann.isNotBlank()) "  ($wann)" else ""
-                val gewicht = if (i == gewaehlt) FontWeight.SemiBold else FontWeight.Normal
-                if (sp != null) Text(nummer + klarName(sp) + zusatz, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = gewicht)
+                val gewicht = if (mehrere && i == gewaehlt) FontWeight.SemiBold else FontWeight.Normal
+                if (sp != null) Text(nummer + klarName(sp) + zusatz, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = gewicht)
                 else Text(androidx.compose.ui.text.buildAnnotatedString {
                     append(nummer)
                     pushStyle(androidx.compose.ui.text.SpanStyle(color = colors.onSurfaceVariant, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic))
                     append(unbekannterPartner(p.sex)); pop(); append(zusatz)
-                }, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = gewicht)
+                }, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = gewicht)
             }
-            if (tod.isNotBlank()) Text("†  $tod", fontSize = 14.sp)
+            if (tod.isNotBlank()) Text("†  $tod", fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (grab.isNotBlank()) Text("▭  $grab", fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             // Geschwister (Halbgeschwister mit ½): ein Klick macht sie zur Zentralperson
             val voll = detail.parentFamilies.flatMap { it.children }.filter { it.xref != p.xref }.distinctBy { it.xref }
             val halb = detail.halfSiblings().map { it.person }.filter { h -> voll.none { it.xref == h.xref } }
@@ -692,7 +724,7 @@ private fun PersonBox(
         Row(
             Modifier.size(breite, hoehe)
                 .background(fill)
-                .border(if (art == Art.Zentral) 2.5.dp else 1.dp, rand)
+                .border(if (art == Art.Zentral) 3.dp else 1.5.dp, rand)
                 .fokusRahmen()
                 .combinedClickable(enabled = !person.isPrivate, onClick = klick, onDoubleClick = { onOpenSheet(person.xref) }),
             verticalAlignment = Alignment.CenterVertically,
@@ -704,10 +736,10 @@ private fun PersonBox(
             else Portrait(person, Modifier.padding(1.dp).size(hoehe - 2.dp))
             Column(Modifier.weight(1f).padding(start = 6.dp, end = 4.dp)) {
                 // Name und Lebensdaten fuellen den Kasten: grosse Schrift, kaum Rand, kraeftiges Schwarz
-                Text(name, fontSize = (if (flach) 16.sp else 19.sp) * schrift, fontWeight = if (art == Art.Zentral) FontWeight.Bold else FontWeight.Medium,
-                    lineHeight = (if (flach) 18.sp else 22.sp) * schrift, maxLines = 1, overflow = TextOverflow.Ellipsis, color = onSurface)
-                Text(lebensdaten(person).ifBlank { " " }, fontSize = (if (flach) 12.5.sp else 15.sp) * schrift, lineHeight = (if (flach) 14.sp else 18.sp) * schrift,
-                    color = onSurface.copy(alpha = 0.9f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(name, fontSize = (if (flach) 17.sp else 19.sp) * schrift, fontWeight = if (art == Art.Zentral) FontWeight.Bold else FontWeight.SemiBold,
+                    lineHeight = (if (flach) 19.sp else 22.sp) * schrift, maxLines = 1, overflow = TextOverflow.Ellipsis, color = onSurface)
+                Text(lebensdaten(person).ifBlank { " " }, fontSize = (if (flach) 13.5.sp else 15.sp) * schrift, lineHeight = (if (flach) 15.sp else 18.sp) * schrift,
+                    color = onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (!stil.kante) linie?.let { farbe -> Box(Modifier.width(6.dp).fillMaxHeight().background(farbe)) }
             if (pfeilRechts) Text("▶", fontSize = 11.sp, color = onSurface, modifier = Modifier.padding(end = 2.dp))
@@ -725,7 +757,7 @@ private fun LeerBox(sex: String, modifier: Modifier, onClick: (() -> Unit)?, tex
     Box(
         modifier.size(breite, hoehe)
             .background(if (kante) MaterialTheme.colorScheme.surface.copy(alpha = 0.7f) else c.fill.copy(alpha = 0.55f))
-            .border(1.dp, if (kante) MaterialTheme.colorScheme.outlineVariant else c.border.copy(alpha = 0.6f))
+            .border(1.5.dp, if (kante) MaterialTheme.colorScheme.outlineVariant else c.border.copy(alpha = 0.6f))
             .let { if (onClick != null) it.clickable(onClick = onClick) else it },
         contentAlignment = Alignment.CenterStart,
     ) {

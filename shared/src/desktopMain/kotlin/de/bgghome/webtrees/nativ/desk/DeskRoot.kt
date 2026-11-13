@@ -106,7 +106,9 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
@@ -772,7 +774,7 @@ internal fun ClassicToolbar(
     val eintraege: List<LeistenEintrag> = buildList {
         add(Knopf(Icons.Default.Search, stringResource(Res.string.desk_goto), onClick = onGoTo))
         add(Knopf(Icons.Default.Edit, stringResource(Res.string.desk_sheet), enabled = state.root != null, onClick = onSheet))
-        add(Knopf(Icons.Default.Add, stringResource(Res.string.action_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) })
+        add(Knopf(Icons.Default.Add, stringResource(Res.string.desk_tb_add_relative), enabled = canEdit && state.root != null) { state.root?.let(viewModel::requestAddRelative) })
         if (viewModel.bookmarksSupported) add(Knopf(Icons.Default.Star, stringResource(Res.string.desk_bookmarks), onClick = onMerkliste))
         add(Trenner)
         add(Knopf(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.action_back), enabled = nav.kannZurueck, onClick = nav.zurueck))
@@ -809,16 +811,23 @@ internal fun ClassicToolbar(
         add(Knopf(Icons.Default.Place, stringResource(Res.string.desk_web_places), enabled = state.tree != null) { onOrte?.invoke() ?: web("/tree/$t/place-list") })
         add(Knopf(SourceIcon, stringResource(Res.string.desk_web_sources), enabled = state.tree != null) { onQuellen?.invoke() ?: web("/tree/$t/source-list") })
         if (onAufgaben != null) add(Knopf(de.bgghome.webtrees.nativ.ui.TaskIcon, stringResource(Res.string.desk_tasks_window), enabled = state.tree != null, onClick = onAufgaben))
-        if (onAenderungen != null) add(Knopf(de.bgghome.webtrees.nativ.ui.HistoryIcon, stringResource(Res.string.desk_changes_window), enabled = state.tree != null, onClick = onAenderungen))
+        if (onAenderungen != null) add(Knopf(de.bgghome.webtrees.nativ.ui.HistoryIcon, stringResource(Res.string.desk_tb_changes), enabled = state.tree != null, onClick = onAenderungen))
         add(Knopf(Icons.AutoMirrored.Filled.ExitToApp, "webtrees") { openWeb(state.detail?.person?.url ?: state.baseUrl) })
     }
     Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
             TreePicker(state, viewModel)
             ToolSeparator()
+            // Jeder Knopf ist so breit wie seine Beschriftung (mindestens KNOPF_TEXT) - nichts wird abgeschnitten.
+            val messer = rememberTextMeasurer()
+            val schrift = MaterialTheme.typography.labelSmall
+            val dichte = LocalDensity.current
+            val textBreiten = remember(eintraege.map { (it as? Knopf)?.label }, schrift) {
+                eintraege.filterIsInstance<Knopf>().associate { k -> k.label to maxOf(KNOPF_TEXT, with(dichte) { messer.measure(k.label, schrift, softWrap = false).size.width.toDp().value } + 12f) }
+            }
             BoxWithConstraints(Modifier.weight(1f)) {
                 val platz = maxWidth.value
-                fun breite(e: LeistenEintrag, text: Boolean) = if (e is Knopf) (if (text) KNOPF_TEXT else KNOPF_SYMBOL) else TRENNER
+                fun breite(e: LeistenEintrag, text: Boolean) = if (e is Knopf) (if (text) textBreiten.getValue(e.label) else KNOPF_SYMBOL) else TRENNER
                 val mitText = symboltexte && eintraege.sumOf { breite(it, true).toDouble() } <= platz
                 // Passt es auch ohne Texte nicht, bleibt vorne, was neben "Mehr" Platz hat; der Rest geht ins Menue.
                 var sichtbar = eintraege
@@ -833,7 +842,7 @@ internal fun ClassicToolbar(
                     sichtbar.forEach { e ->
                         when (e) {
                             is Trenner -> ToolSeparator()
-                            is Knopf -> LeistenKnopf(e, mitText)
+                            is Knopf -> LeistenKnopf(e, mitText, (textBreiten.getValue(e.label) - 8f).dp)
                         }
                     }
                     if (rest.isNotEmpty()) MehrKnopf(rest)
@@ -846,11 +855,11 @@ internal fun ClassicToolbar(
 /** Ein Knopf der Symbolleiste, bei Bedarf mit Aufklappmenue; ohne Text zeigt er seinen Namen beim Ueberfahren. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun LeistenKnopf(k: Knopf, mitText: Boolean) {
+private fun LeistenKnopf(k: Knopf, mitText: Boolean, breite: Dp) {
     var open by remember { mutableStateOf(false) }
     val knopf = @Composable {
         Box {
-            ToolItem(k.icon, k.label, enabled = k.enabled, active = k.active, mitText = mitText) { if (k.menu != null) open = true else k.onClick() }
+            ToolItem(k.icon, k.label, enabled = k.enabled, active = k.active, mitText = mitText, breite = breite) { if (k.menu != null) open = true else k.onClick() }
             k.menu?.let { inhalt -> DropdownMenu(expanded = open, onDismissRequest = { open = false }) { inhalt { open = false } } }
         }
     }
@@ -944,7 +953,7 @@ private fun MerklisteFenster(state: UiState, viewModel: AppViewModel, openSheet:
 }
 
 @Composable
-private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, active: Boolean = false, mitText: Boolean = true, onClick: () -> Unit) {
+private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, active: Boolean = false, mitText: Boolean = true, breite: Dp = 54.dp, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val tint = if (!enabled) colors.onSurfaceVariant.copy(alpha = 0.4f) else if (active) colors.primary else colors.onSurface
     Column(
@@ -953,7 +962,7 @@ private fun ToolItem(icon: ImageVector, label: String, enabled: Boolean = true, 
             .fokusRahmen()
             .clickable(enabled = enabled, onClickLabel = label, onClick = onClick)
             .padding(horizontal = 4.dp, vertical = 4.dp)
-            .width(if (mitText) 54.dp else 28.dp),
+            .width(if (mitText) breite else 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, contentDescription = if (mitText) null else label, Modifier.size(22.dp), tint = tint)
