@@ -6,7 +6,9 @@ import de.bgghome.webtrees.nativ.api.LifespanGedcom
  * Lebensjahre mit Kennzeichen fuer ungenaue Daten (Issue #44). webtrees bildet "1865–1918" aus dem fruehesten Geburts- und
  * dem spaetesten Sterbejahr und verliert dabei den Zusatz des Datums; api4webtrees liefert ab Stufe 44 beide Daten in
  * GEDCOM-Form mit (lifespanGedcom). Daraus:
- *   ABT, EST, CAL -> ~1918    BEF -> <1918    AFT -> >1918    BET 1915 AND 1918, FROM 1915 TO 1918 -> 1915/1918
+ *   ABT, EST, CAL -> ~1918    BEF -> <1918    AFT -> >1918
+ *   BET 1915 AND 1918, FROM 1915 TO 1918 -> ~1918 (das Jahr, das webtrees zeigt; der genaue Zeitraum steht im Profil).
+ * Kein Schraegstrich: "1750/51" ist in der Genealogie ein Doppeljahr und wuerde so gelesen.
  * Genaue Daten, INT und Datumstexte bleiben, wie webtrees sie zeigt. Ohne lifespanGedcom (aeltere Server) oder bei
  * unerwarteter Form des Textes bleibt er unveraendert.
  */
@@ -27,7 +29,7 @@ object Lebensjahre {
         Regex("^(?:BET|FROM) (.+) (?:AND|TO) (.+)$").find(d)?.let { m ->
             val a = jahrAus(m.groupValues[1])
             val b = jahrAus(m.groupValues[2])
-            return if (a != null && b != null && a != b) "$a/$b" else jahr
+            return if (a != null && b != null && a != b) "~" + jahr.trim() else jahr
         }
         val j = jahr.trim()
         return when (d.substringBefore(' ')) {
