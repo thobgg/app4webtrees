@@ -1,0 +1,1 @@
+Naamdelen: voorvoegsel, bijnaam, tussenvoegsel, naamtoevoegsel en roepnaam staan onder elke naam, ook bij de huwelijksnaam. Onzekere levensjaren zijn gemarkeerd: ~1865 omstreeks, <1918 voor, >1918 na, 1915/1918 tussen. Beide vereisen api4webtrees 1.28. De datuminvoer begrijpt geschat, berekend en van … tot.

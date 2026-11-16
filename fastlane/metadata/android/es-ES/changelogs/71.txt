@@ -1,0 +1,1 @@
+Partes del nombre: prefijo, apodo, partícula del apellido, sufijo y nombre usual aparecen bajo cada nombre, también el de casada. Los años de vida inciertos se marcan: ~1865 hacia, <1918 antes, >1918 después, 1915/1918 entre. Ambos requieren api4webtrees 1.28. La entrada de fechas entiende estimado, calculado y de … a.

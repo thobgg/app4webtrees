@@ -1,0 +1,1 @@
+Parties du nom : préfixe, surnom, particule, suffixe et prénom usuel apparaissent sous chaque nom, y compris le nom d’épouse. Les années de vie incertaines sont signalées : ~1865 vers, <1918 avant, >1918 après, 1915/1918 entre. Les deux nécessitent api4webtrees 1.28. La saisie des dates comprend estimé, calculé et de … à.

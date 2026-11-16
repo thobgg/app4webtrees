@@ -1,0 +1,1 @@
+Namensteile: Präfix, Spitzname, Vorsatzwort, Namenszusatz und Rufname stehen unter jedem Namen, auch beim Ehenamen. Ungenaue Lebensjahre sind gekennzeichnet: ~1865 etwa, <1918 vor, >1918 nach, 1915/1918 zwischen. Beides braucht api4webtrees 1.28. Die Datumseingabe versteht geschätzt, berechnet und von … bis.

@@ -1,0 +1,1 @@
+Name parts: prefix, nickname, surname prefix, suffix and call name appear under every name, married names included. Uncertain years of life are marked: ~1865 about, <1918 before, >1918 after, 1915/1918 between. Both need api4webtrees 1.28. Date entry understands estimated, calculated and from … to.
