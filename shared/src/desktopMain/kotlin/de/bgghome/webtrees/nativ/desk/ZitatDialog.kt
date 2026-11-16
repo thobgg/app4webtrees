@@ -82,7 +82,7 @@ fun ZitatDialog(ziel: ZitatZiel, tree: String, viewModel: AppViewModel, onDismis
     var suche by remember { mutableStateOf("") }
     var seite by remember { mutableStateOf(alt?.page.orEmpty()) }
     var qual by remember { mutableStateOf(alt?.quality) }
-    var datum by remember { mutableStateOf(alt?.date?.text.orEmpty()) }
+    var datum by remember { mutableStateOf(datumVorbelegen(alt?.date)) }
     var zitat by remember { mutableStateOf(alt?.text.orEmpty()) }
     var notiz by remember { mutableStateOf(alt?.notes?.firstOrNull().orEmpty()) }
     var speichert by remember { mutableStateOf(false) }
@@ -104,7 +104,7 @@ fun ZitatDialog(ziel: ZitatZiel, tree: String, viewModel: AppViewModel, onDismis
             source = neuQuelle.takeIf { alt == null || it != altQuelle },
             page = seite.trim().takeIf { alt == null || it != alt.page },
             quality = qual?.toString().orEmpty().takeIf { alt == null || qual != alt.quality },
-            date = datumGedcom(datum).takeIf { alt == null || datum != alt.date?.text.orEmpty() },
+            date = datumGedcom(datum).takeIf { alt == null || datum != datumVorbelegen(alt.date) },
             text = zitat.trim().takeIf { alt == null || it != alt.text },
             note = notiz.trim().takeIf { alt == null || it != alt.notes.firstOrNull().orEmpty() },
             media = medien.map { it.xref }.distinct().takeIf { alt == null && it.isNotEmpty() || alt != null && medienGeaendert },

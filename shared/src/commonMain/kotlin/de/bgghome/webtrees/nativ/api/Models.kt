@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.api
 
+import de.bgghome.webtrees.nativ.data.Lebensjahre
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -125,7 +126,10 @@ data class Person(
     val sex: String = "U",
     val isDead: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
-    val lifespan: String = "",
+    /** Lebensjahre, wie webtrees sie bildet ("1865–1918"); angezeigt wird [lifespan] mit Kennzeichen. */
+    @SerialName("lifespan") val lifespanServer: String = "",
+    /** Ab API-Stufe 44: Geburts- und Sterbedatum der Lebensjahre in GEDCOM-Form ("ABT 1865"), sonst null. */
+    val lifespanGedcom: LifespanGedcom? = null,
     val birth: EventJson? = null,
     val death: EventJson? = null,
     val thumb: String? = null,
@@ -144,7 +148,14 @@ data class Person(
     val restricted: List<String> = emptyList(),
     /** Ab API-Stufe 36: wer den Namen sehen darf (bei Lebenden nach der Baumeinstellung "Namen Lebender zeigen"). */
     val nameAccess: String? = null,
-)
+) {
+    /** Lebensjahre zur Anzeige, ungenaue Daten gekennzeichnet ("1865–~1918", Issue #44). */
+    val lifespan: String get() = Lebensjahre.markiert(lifespanServer, lifespanGedcom)
+}
+
+/** Geburts- und Sterbedatum der Lebensjahre in GEDCOM-Form (api4webtrees ab Stufe 44), null wo keins ist. */
+@Serializable
+data class LifespanGedcom(val birth: String? = null, val death: String? = null)
 
 /** Eine Heirat eines Kindes: Partner (leer, wenn privat), Datum und Ort (beides kann fehlen). */
 @Serializable
@@ -521,12 +532,15 @@ data class PlaceUsePerson(
     val sex: String = "U",
     val isDead: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
-    val lifespan: String = "",
+    @SerialName("lifespan") val lifespanServer: String = "",
+    val lifespanGedcom: LifespanGedcom? = null,
     val thumb: String? = null,
     val url: String = "",
     val facts: List<PlaceEvent> = emptyList(),
 ) {
-    fun person() = Person(xref = xref, name = name, sex = sex, isDead = isDead, isPrivate = isPrivate, lifespan = lifespan, thumb = thumb, url = url)
+    val lifespan: String get() = Lebensjahre.markiert(lifespanServer, lifespanGedcom)
+
+    fun person() = Person(xref = xref, name = name, sex = sex, isDead = isDead, isPrivate = isPrivate, lifespanServer = lifespanServer, lifespanGedcom = lifespanGedcom, thumb = thumb, url = url)
 }
 
 @Serializable
@@ -971,12 +985,15 @@ data class SourceUsePerson(
     val sex: String = "U",
     val isDead: Boolean = false,
     @SerialName("private") val isPrivate: Boolean = false,
-    val lifespan: String = "",
+    @SerialName("lifespan") val lifespanServer: String = "",
+    val lifespanGedcom: LifespanGedcom? = null,
     val thumb: String? = null,
     val url: String = "",
     val facts: List<String> = emptyList(),
 ) {
-    fun person() = Person(xref = xref, name = name, sex = sex, isDead = isDead, isPrivate = isPrivate, lifespan = lifespan, thumb = thumb, url = url)
+    val lifespan: String get() = Lebensjahre.markiert(lifespanServer, lifespanGedcom)
+
+    fun person() = Person(xref = xref, name = name, sex = sex, isDead = isDead, isPrivate = isPrivate, lifespanServer = lifespanServer, lifespanGedcom = lifespanGedcom, thumb = thumb, url = url)
 }
 
 @Serializable

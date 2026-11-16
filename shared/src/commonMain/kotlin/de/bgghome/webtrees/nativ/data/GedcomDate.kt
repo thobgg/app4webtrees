@@ -37,11 +37,14 @@ object GedcomDate {
     )
 
     private val qualifiers = listOf(
-        listOf("um ", "ca. ", "ca ", "circa ", "etwa ", "about ", "around ", "abt. ", "vers ", "env. ", "environ ", "rond ", "omstreeks ", "ongeveer ", "hacia ", "aprox. ", "aproximadamente ") to "ABT",
+        // geschaetzt und berechnet, auch in der Form, in der webtrees sie anzeigt (sonst ginge EST/CAL beim Bearbeiten verloren)
+        listOf("geschätzt ", "geschaetzt ", "estimated ", "est. ", "estimé ", "estime ", "geschat ", "estimado ", "estimada ", "estimadas ", "estimados ") to "EST",
+        listOf("berechnet ", "errechnet ", "calculated ", "calc. ", "calculé ", "calcule ", "berekend ", "calculado ", "calculada ", "calculadas ", "calculados ") to "CAL",
+        listOf("um ", "ca. ", "ca ", "circa ", "etwa ", "about ", "around ", "abt. ", "vers ", "env. ", "environ ", "rond ", "omstreeks ", "ongeveer ", "hacia ", "sobre ", "aprox. ", "aproximadamente ") to "ABT",
         listOf("vor ", "before ", "avant ", "voor ", "vóór ", "antes de ", "antes ") to "BEF",
         listOf("nach ", "after ", "après ", "apres ", "na ", "después de ", "despues de ", "después ") to "AFT",
-        listOf("ab ", "seit ", "since ") to "FROM",
-        listOf("bis ", "until ") to "TO",
+        listOf("ab ", "seit ", "since ", "von ", "from ", "vanaf ", "desde ", "de ") to "FROM",
+        listOf("bis ", "until ", "to ", "tot ", "hasta ", "à ") to "TO",
     )
 
     fun fromInput(input: String): String {
@@ -49,7 +52,17 @@ object GedcomDate {
 
         if (text.isEmpty()) return ""
 
+        alsGedcom(text)?.let { return it }
+
         val lower = text.lowercase()
+
+        // "von 1915 bis 1918" - auch so, wie webtrees FROM ... TO anzeigt
+        Regex("^(?:von|from|vanaf|desde|de) (.+) (?:bis|to|tot|hasta|à) (.+)$").find(lower)?.let {
+            return "FROM " + simple(it.groupValues[1]) + " TO " + simple(it.groupValues[2])
+        }
+        // "1865 (geschat)", "1865 estimadas": nachgestellt wie in der niederlaendischen und spanischen Anzeige von webtrees
+        Regex("^(.+?) (?:\\(geschat\\)|estimad[ao]s?)$").find(lower)?.let { return "EST " + simple(it.groupValues[1]) }
+        Regex("^(.+?) (?:\\(berekend\\)|calculad[ao]s?)$").find(lower)?.let { return "CAL " + simple(it.groupValues[1]) }
 
         Regex("^(?:zwischen|zw\\.?|between|entre|tussen) (.+) (?:und|u\\.|and|et|en|y) (.+)$").find(lower)?.let {
             return "BET " + simple(it.groupValues[1]) + " AND " + simple(it.groupValues[2])
@@ -66,6 +79,28 @@ object GedcomDate {
 
         return simple(lower)
     }
+
+    private const val TAG_MONAT = "(?:\\d{1,2} )?(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|VEND|BRUM|FRIM|NIVO|PLUV|VENT|GERM|FLOR|PRAI|MESS|THER|FRUC|COMP|TSH|CSH|KSL|TVT|SHV|ADR|ADS|NSN|IYR|SVN|TMZ|AAV|ELL) "
+    private const val EIN_DATUM = "(?:@#D[A-Z ]+@ )?(?:$TAG_MONAT)?\\d{1,4}(?:/\\d{2})?(?: B\\.C\\.)?"
+    private val GEDCOM_FORM = Regex(
+        "^(?:@#D[A-Z ]+@ )?(?:$EIN_DATUM|(?:ABT|CAL|EST|BEF|AFT|TO) $EIN_DATUM|BET $EIN_DATUM AND $EIN_DATUM|" +
+            "FROM $EIN_DATUM(?: TO $EIN_DATUM)?|INT $EIN_DATUM \\(.*\\)|\\(.*\\))$",
+    )
+
+    /**
+     * Ist die Eingabe schon ein GEDCOM-Datum (gleich in welcher Schreibung der Schluesselwoerter), kommt sie mit
+     * grossgeschriebenen Schluesselwoertern zurueck - der Text in Klammern ("INT 1865 (Ostern)") bleibt, wie er ist.
+     */
+    fun alsGedcom(input: String): String? {
+        val t = input.trim().replace(Regex("\\s+"), " ")
+        val i = t.indexOf('(')
+        val kopf = (if (i < 0) t else t.substring(0, i)).trim().uppercase()
+        val kandidat = if (i < 0) kopf else (kopf + " " + t.substring(i)).trim()
+        return kandidat.takeIf { it.isNotEmpty() && GEDCOM_FORM.matches(it) }
+    }
+
+    /** Ob ein Text ein GEDCOM-Datum ist (fuer die Pruefung vor dem Speichern). */
+    fun istGedcom(text: String): Boolean = alsGedcom(text) == text.trim()
 
     /** A single date without qualifier. */
     private fun simple(text: String): String {

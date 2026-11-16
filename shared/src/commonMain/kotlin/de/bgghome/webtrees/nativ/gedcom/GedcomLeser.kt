@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.gedcom
 
+import de.bgghome.webtrees.nativ.api.LifespanGedcom
 import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.api.Associate
 import de.bgghome.webtrees.nativ.api.DateJson
@@ -240,7 +241,10 @@ object GedcomLeser {
             val lebensdaten = listOf(gebJahr?.toString().orEmpty(), todJahr?.toString().orEmpty()).let { (a, b) -> if (a.isEmpty() && b.isEmpty()) "" else "$a–$b" }
             val person = Person(
                 xref = s.xref, name = "$vn $fn".trim(), sortName = listOf(fn, vn).filter { it.isNotBlank() }.joinToString(", "),
-                given = vn, surname = fn, sex = sex, isDead = tot, lifespan = lebensdaten,
+                given = vn, surname = fn, sex = sex, isDead = tot, lifespanServer = lebensdaten,
+                lifespanGedcom = LifespanGedcom(
+                    birth = (if (geb?.date?.year?.takeIf { it > 0 } != null) geb else chr)?.date?.gedcom?.takeIf(String::isNotBlank),
+                    death = (if (tod?.date?.year?.takeIf { it > 0 } != null) tod else buri)?.date?.gedcom?.takeIf(String::isNotBlank)),
                 birth = geb?.let { EventJson(it.date, it.place) }, death = tod?.let { EventJson(it.date, it.place) },
                 chr = chr?.let { EventJson(it.date, it.place) }, buri = buri?.let { EventJson(it.date, it.place) },
                 occupation = mitPaten.firstOrNull { it.tag == "OCCU" }?.value?.takeIf { it.isNotBlank() },

@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.LifespanGedcom
 import de.bgghome.webtrees.nativ.api.ExportFamily
 import de.bgghome.webtrees.nativ.api.ExportIndividual
 import de.bgghome.webtrees.nativ.api.FactJson
@@ -62,7 +63,10 @@ internal class SichtFilter(private val stufe: Sichtbarkeit, private val fakten: 
         }
         // Den Namen Lebender zeigt webtrees je nach Baumeinstellung erst Mitgliedern - sonst "Privat" wie in webtrees
         val name = if (darfSehen(p.nameAccess, stufe)) neu else neu.copy(name = Texte.t(Res.string.person_private), sortName = Texte.t(Res.string.person_private), given = "", surname = "", call = "")
-        return name.copy(lifespan = lebensjahre(neu), access = "visitor", restricted = emptyList(), nameAccess = "visitor")
+        return name.copy(lifespanServer = lebensjahre(neu),
+            // Kennzeichen nur aus den Daten, die der Leser sehen darf
+            lifespanGedcom = LifespanGedcom(neu.birth?.date?.gedcom?.takeIf(String::isNotBlank), neu.death?.date?.gedcom?.takeIf(String::isNotBlank)),
+            access = "visitor", restricted = emptyList(), nameAccess = "visitor")
     }
 
     /** Die Ereignisse, die der Leser sehen duerfte, ohne Paten, die er nicht sehen duerfte. */

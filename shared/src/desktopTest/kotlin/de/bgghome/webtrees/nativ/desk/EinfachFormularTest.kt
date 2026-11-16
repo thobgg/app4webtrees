@@ -84,6 +84,18 @@ class EinfachFormularTest {
     }
 
     @Test
+    fun vorbelegungVerliertNichts() {
+        // Anzeige, die genau zurueckgerechnet wird, bleibt; sonst steht das GEDCOM-Datum im Feld
+        assertEquals("um 1850", datumVorbelegen(DateJson(text = "um 1850", gedcom = "ABT 1850")))
+        assertEquals("geschätzt 1918", datumVorbelegen(DateJson(text = "geschätzt 1918", gedcom = "EST 1918")))
+        assertEquals("von 1915 bis 1918", datumVorbelegen(DateJson(text = "von 1915 bis 1918", gedcom = "FROM 1915 TO 1918")))
+        assertEquals("INT 1865 (Ostern)", datumVorbelegen(DateJson(text = "interpretiert 1865 (Ostern)", gedcom = "INT 1865 (Ostern)")))
+        assertEquals("@#DJULIAN@ 1 JAN 1690", datumVorbelegen(DateJson(text = "1. Januar 1690", gedcom = "@#DJULIAN@ 1 JAN 1690")))
+        assertEquals("12. März 1890", datumVorbelegen(DateJson(text = "12. März 1890")))            // Server ohne gedcom
+        assertEquals("", datumVorbelegen(null))
+    }
+
+    @Test
     fun eingabenUeberlebenNeuladen() {
         val f = formular()
         f.feld("OCCU").wert = "Architekt"

@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.api.DateJson
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,7 +81,7 @@ class EinfachFeld(val key: String, val tag: String, val record: String?, val art
         val warGeaendert = geaendert
         fact = f; weitere = (anzahl - 1).coerceAtLeast(0)
         val n = GedcomName.aus(f?.value.orEmpty())
-        datumAlt = f?.date?.text.orEmpty(); ortAlt = f?.place?.name.orEmpty()
+        datumAlt = datumVorbelegen(f?.date); ortAlt = f?.place?.name.orEmpty()
         wertAlt = if (art == FeldArt.Angabe) f?.value.orEmpty() else ""
         vornamenAlt = n.vornamen; familiennameAlt = n.familienname; zusatz = n.zusatz
         if (!warGeaendert) verwerfen()
@@ -114,16 +115,25 @@ class EinfachFeld(val key: String, val tag: String, val record: String?, val art
     }
 }
 
-private val GEDCOM_DATUM = Regex("""^((ABT|BEF|AFT|FROM|TO|BET|AND|EST|CAL|INT|JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|\d{1,4})( |$))+$""")
-
 /** Eingabe als GEDCOM-Datum; was sich nicht deuten laesst, wird als Datumstext "(…)" gespeichert statt verfaelscht. */
 fun datumGedcom(eingabe: String): String {
     if (eingabe.isBlank()) return ""
     val g = GedcomDate.fromInput(eingabe)
-    return if (GEDCOM_DATUM.matches(g)) g else "(" + eingabe.trim().replace("(", "").replace(")", "") + ")"
+    return if (GedcomDate.istGedcom(g)) g else "(" + eingabe.trim().replace("(", "").replace(")", "") + ")"
 }
 
-fun datumErkannt(eingabe: String): Boolean = eingabe.isBlank() || GEDCOM_DATUM.matches(GedcomDate.fromInput(eingabe))
+fun datumErkannt(eingabe: String): Boolean = eingabe.isBlank() || GedcomDate.istGedcom(GedcomDate.fromInput(eingabe))
+
+/**
+ * Was im Datumsfeld vorbelegt wird: die Anzeige des Servers ("um 1850"), wenn sie beim Speichern wieder genau dasselbe
+ * GEDCOM-Datum ergibt; sonst das GEDCOM-Datum selbst ("INT 1865 (Ostern)", "@#DJULIAN@ 1 JAN 1690"), damit das
+ * Aendern einer Kleinigkeit nichts anderes am Datum verliert.
+ */
+fun datumVorbelegen(d: DateJson?): String {
+    val text = d?.text.orEmpty()
+    val gedcom = d?.gedcom.orEmpty().trim()
+    return if (gedcom.isNotEmpty() && datumGedcom(text) != gedcom) gedcom else text
+}
 
 /** Das Formular einer Person. */
 class EinfachFormular(val xref: String) {

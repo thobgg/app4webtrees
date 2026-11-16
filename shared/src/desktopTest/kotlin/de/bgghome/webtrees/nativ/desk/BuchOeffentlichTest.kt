@@ -18,13 +18,13 @@ class BuchOeffentlichTest {
 
     @Test
     fun eingeschraenkteEreignissePatenUndPersonen() {
-        val kind = Person("I3", name = "Lebhart Offen", birth = ev(1990), lifespan = "1990–", access = "member", nameAccess = "member")
-        val tochter = Person("I6", name = "Lina Offen", birth = ev(1995), lifespan = "1995–", access = "member", nameAccess = "visitor")
+        val kind = Person("I3", name = "Lebhart Offen", birth = ev(1990), lifespanServer = "1990–", access = "member", nameAccess = "member")
+        val tochter = Person("I6", name = "Lina Offen", birth = ev(1995), lifespanServer = "1995–", access = "member", nameAccess = "visitor")
         val ehe = FamilyJson("F1", children = listOf(kind, tochter), marriage = ev(1828), access = "manager",
             facts = listOf(FactJson("m", tag = "MARR", access = "visitor")))
         val d = IndividualDetail(
             person = Person("I1", name = "Theodor Offen", isDead = true, birth = ev(1800), death = ev(1870), occupation = "Markerberuf",
-                lifespan = "1800–1870", access = "visitor", restricted = listOf("OCCU")),
+                lifespanServer = "1800–1870", access = "visitor", restricted = listOf("OCCU")),
             facts = listOf(
                 FactJson("n", tag = "NAME", access = "visitor"),
                 FactJson("b", tag = "CHR", access = "visitor", associates = listOf(Associate("I2", access = "visitor"), Associate("I3", access = "member"))),
@@ -55,7 +55,7 @@ class BuchOeffentlichTest {
 
     @Test
     fun mitgliederSehenMehrAlsBesucher() {
-        val kind = Person("I3", name = "Lebhart Offen", birth = ev(1990), lifespan = "1990–", access = "member", nameAccess = "member")
+        val kind = Person("I3", name = "Lebhart Offen", birth = ev(1990), lifespanServer = "1990–", access = "member", nameAccess = "member")
         val geheim = Person("I4", name = "Gerda Geheim", birth = ev(1992), access = "manager", nameAccess = "manager")
         val ehe = FamilyJson("F1", children = listOf(kind, geheim), marriage = ev(1828), access = "member",
             facts = listOf(FactJson("m", tag = "MARR", access = "member")))

@@ -33,8 +33,8 @@ class ZusammenfuehrenBildErzeugen {
     fun erzeugen() {
         val ziel = System.getenv("WT_MERGEBILD")?.let(::File) ?: return
         ziel.mkdirs()
-        val p1 = Person("I52", "Johann Heinrich Falkenrath", given = "Johann Heinrich", surname = "Falkenrath", sex = "M", isDead = true, lifespan = "1801–1869")
-        val p2 = Person("I412", "Johann Heinrich Falkenrath", given = "Johann Heinrich", surname = "Falkenrath", sex = "M", isDead = true, lifespan = "1801–")
+        val p1 = Person("I52", "Johann Heinrich Falkenrath", given = "Johann Heinrich", surname = "Falkenrath", sex = "M", isDead = true, lifespanServer = "1801–1869")
+        val p2 = Person("I412", "Johann Heinrich Falkenrath", given = "Johann Heinrich", surname = "Falkenrath", sex = "M", isDead = true, lifespanServer = "1801–")
         val v = MergePreview(
             ok = true, person1 = p1, person2 = p2,
             facts1 = listOf(

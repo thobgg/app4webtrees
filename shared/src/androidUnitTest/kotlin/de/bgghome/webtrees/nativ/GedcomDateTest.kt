@@ -142,4 +142,43 @@ class GedcomDateTest {
         assertEquals("31 FEB 1890", GedcomDate.fromInput("31.2.1890"))
         assertEquals("0 MAR 1890", GedcomDate.fromInput("0.3.1890"))
     }
+
+    @Test
+    fun geschaetztBerechnetUndZeitraumWieWebtreesSieAnzeigt() {
+        // de, en, fr, nl, es - so zeigt webtrees EST, CAL und FROM ... TO an; wer es so stehen laesst, verliert nichts
+        assertEquals("EST 1850", GedcomDate.fromInput("geschätzt 1850"))
+        assertEquals("EST 12 MAR 1850", GedcomDate.fromInput("geschätzt 12. März 1850"))
+        assertEquals("CAL 1850", GedcomDate.fromInput("berechnet 1850"))
+        assertEquals("CAL 1850", GedcomDate.fromInput("errechnet 1850"))
+        assertEquals("EST 1850", GedcomDate.fromInput("estimated 1850"))
+        assertEquals("CAL 1850", GedcomDate.fromInput("calculated 1850"))
+        assertEquals("EST 1850", GedcomDate.fromInput("estimé 1850"))
+        assertEquals("CAL 1850", GedcomDate.fromInput("calculé 1850"))
+        assertEquals("EST 1850", GedcomDate.fromInput("1850 (geschat)"))
+        assertEquals("CAL 1850", GedcomDate.fromInput("1850 (berekend)"))
+        assertEquals("EST 1850", GedcomDate.fromInput("1850 estimadas"))
+        assertEquals("CAL 1850", GedcomDate.fromInput("1850 calculadas"))
+        assertEquals("ABT 1850", GedcomDate.fromInput("sobre 1850"))
+        assertEquals("FROM 1915 TO 1918", GedcomDate.fromInput("von 1915 bis 1918"))
+        assertEquals("FROM 1915 TO 1918", GedcomDate.fromInput("from 1915 to 1918"))
+        assertEquals("FROM 1915 TO 1918", GedcomDate.fromInput("de 1915 à 1918"))
+        assertEquals("FROM 1915 TO 1918", GedcomDate.fromInput("vanaf 1915 tot 1918"))
+        assertEquals("FROM 1915 TO 1918", GedcomDate.fromInput("desde 1915 hasta 1918"))
+        assertEquals("FROM 1915", GedcomDate.fromInput("von 1915"))
+        assertEquals("TO 1918", GedcomDate.fromInput("tot 1918"))
+        assertEquals("BEF 1900", GedcomDate.fromInput("vor 1900"))   // "vor" ist nicht "von"
+    }
+
+    @Test
+    fun gedcomMitFreitextBehaeltSeineSchreibung() {
+        assertEquals("INT 1865 (Ostern)", GedcomDate.fromInput("INT 1865 (Ostern)"))
+        assertEquals("INT 1865 (Ostern)", GedcomDate.fromInput("int 1865 (Ostern)"))
+        assertEquals("(um die Jahrhundertwende)", GedcomDate.fromInput("(um die Jahrhundertwende)"))
+        assertEquals("BET 1915 AND 1918", GedcomDate.fromInput("bet 1915 and 1918"))
+        assertEquals("@#DJULIAN@ 1 JAN 1690", GedcomDate.fromInput("@#DJULIAN@ 1 JAN 1690"))
+        assertEquals(true, GedcomDate.istGedcom("ABT @#DJULIAN@ 1690"))
+        assertEquals(true, GedcomDate.istGedcom("EST 1750/51"))
+        assertEquals(false, GedcomDate.istGedcom("FOOBAR 1890"))
+        assertEquals(false, GedcomDate.istGedcom("12 3 1890"))
+    }
 }
