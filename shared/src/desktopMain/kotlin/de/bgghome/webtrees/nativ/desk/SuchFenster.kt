@@ -366,13 +366,15 @@ private fun TrefferListe(treffer: List<SuchTreffer>, aktiv: String?, onKlick: (S
     LazyColumn(Modifier.fillMaxSize(), state = liste) {
         items(treffer, key = { it.person.xref }) { t ->
             val p = t.person
+            // Wie im Register "Familienname, Vornamen" - so ist die Liste auch sortiert
+            val name = registerName(p, stringResource(Res.string.person_private), stringResource(Res.string.person_no_name))
             Row(
                 Modifier.fillMaxWidth().background(if (p.xref == aktiv) farben.primary.copy(alpha = 0.12f) else farben.surface)
                     .combinedClickable(onClick = { onKlick(p.xref) }, onDoubleClick = { onDoppel(p.xref) }).padding(horizontal = 10.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Column(Modifier.width(300.dp)) {
-                    Text(p.name, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(name, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(listOf(p.xref, p.lifespan).filter(String::isNotBlank).joinToString("  ·  "), style = MaterialTheme.typography.labelMedium, color = farben.onSurfaceVariant, maxLines = 1)
                 }
                 Column(Modifier.weight(1f)) {
@@ -397,7 +399,7 @@ private fun VorschauListe(v: List<Ersetzung>, gewaehlt: Set<Int>, onWahl: (Int, 
             Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Checkbox(checked = i in gewaehlt, onCheckedChange = { onWahl(i, it) })
                 Column(Modifier.width(260.dp)) {
-                    Text(e.person.name, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(registerName(e.person, stringResource(Res.string.person_private), stringResource(Res.string.person_no_name)), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(listOf(e.fact.label.ifBlank { e.fact.tag }, stringResource(e.feld.titel)).joinToString("  ·  "), style = MaterialTheme.typography.labelMedium, color = farben.onSurfaceVariant, maxLines = 1)
                 }
                 Column(Modifier.weight(1f)) {
