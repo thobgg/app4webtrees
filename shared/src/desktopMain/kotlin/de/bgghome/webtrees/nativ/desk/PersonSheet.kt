@@ -782,6 +782,8 @@ private fun EreignisDetail(row: FactRow?, geburtJd: Int, modifier: Modifier, can
                         // Adresse (ab API-Stufe 33) und GEDCOM-L-Angaben am Ort und an der Adresse (ab Stufe 34)
                         Zeile(stringResource(Res.string.desk_detail_address), f.address.orEmpty())
                         f.extras.forEach { z -> Zeile(gedcomLLabel(z.tag), gedcomLWert(z.value, z.date)) }
+                        // Namensteile (ab API-Stufe 45): Praefix, Spitzname, Vorsatzwort, Zusatz, Rufname
+                        de.bgghome.webtrees.nativ.ui.namensteilZeilen(f).forEach { (l, w) -> Zeile(l, w) }
                         // Uebrige Angaben (ab API-Stufe 37), vom Server fertig beschriftet
                         f.details.forEach { d -> Zeile("   ".repeat(d.level) + d.label, d.value) }
                         val civil = heiratsartText(Heiratsart.Standesamtlich); val reli = heiratsartText(Heiratsart.Kirchlich)

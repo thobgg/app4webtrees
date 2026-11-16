@@ -1093,6 +1093,11 @@
     <string name="desk_partner_none">Noch keine Partnerschaft eingetragen.</string>
     <string name="field_family_name">Familienname</string>
     <string name="field_name_suffix">Namenszusatz (z. B. jun.)</string>
+    <string name="name_part_prefix">Präfix</string>
+    <string name="name_part_nickname">Spitzname</string>
+    <string name="name_part_surname_prefix">Vorsatzwort</string>
+    <string name="name_part_suffix">Namenszusatz</string>
+    <string name="name_part_call">Rufname</string>
     <string name="desk_col_age">Alter</string>
     <string name="desk_ev_name">Name</string>
     <string name="desk_ev_religion">Religion</string>

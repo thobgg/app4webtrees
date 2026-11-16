@@ -1098,6 +1098,11 @@
     <string name="desk_partner_none">No partnership recorded yet.</string>
     <string name="field_family_name">Surname</string>
     <string name="field_name_suffix">Name suffix (e.g. Jr.)</string>
+    <string name="name_part_prefix">Name prefix</string>
+    <string name="name_part_nickname">Nickname</string>
+    <string name="name_part_surname_prefix">Surname prefix</string>
+    <string name="name_part_suffix">Name suffix</string>
+    <string name="name_part_call">Call name</string>
     <string name="desk_col_age">Age</string>
     <string name="desk_ev_name">Name</string>
     <string name="desk_ev_religion">Religion</string>

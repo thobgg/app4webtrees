@@ -204,4 +204,21 @@ class GedcomLeserTest {
         assertEquals(listOf("FOO"), e.treffer.getValue("618").map { it.text.substringBefore(" ") })
         assertEquals(3, n("619"))                                 // I2 (doppelt, letzter gewinnt), I3 und I4 ohne SEX
     }
+
+    @Test
+    fun namensteile() {
+        val text = "0 HEAD\n1 CHAR UTF-8\n0 @I1@ INDI\n1 NAME Dr. Johann Hinrich /von Berg/ jun.\n2 NPFX Dr.\n2 GIVN Johann Hinrich\n" +
+            "2 NICK Hannes\n2 SPFX von\n2 SURN Berg\n2 NSFX jun.\n2 _RUFNAME Heinrich\n1 NAME Johann /Meier/\n2 TYPE married\n1 BIRT\n2 DATE 1850\n0 TRLR\n"
+        val facts = GedcomLeser.alsExport(GedcomLeser.lesen(text.toByteArray())).individuals.getValue("I1").facts
+        val namen = facts.filter { it.tag == "NAME" }
+        assertEquals(de.bgghome.webtrees.nativ.api.NameParts("Dr.", "Johann Hinrich", "Hannes", "von", "Berg", "jun.", "Heinrich"), namen[0].nameParts)
+        assertEquals(de.bgghome.webtrees.nativ.api.NameParts(), namen[1].nameParts)
+        assertNull(facts.first { it.tag == "BIRT" }.nameParts)
+        // Server-JSON ab Stufe 45; aeltere Server ohne das Feld
+        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        val f = json.decodeFromString<de.bgghome.webtrees.nativ.api.FactJson>(
+            """{"id":"x","tag":"NAME","nameParts":{"prefix":null,"given":"Anna","nickname":"Anni","surnamePrefix":null,"surname":"Roth","suffix":null,"callName":null}}""")
+        assertEquals("Anni", f.nameParts?.nickname)
+        assertNull(json.decodeFromString<de.bgghome.webtrees.nativ.api.FactJson>("""{"id":"x","tag":"NAME"}""").nameParts)
+    }
 }

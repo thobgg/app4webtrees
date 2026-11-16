@@ -229,6 +229,8 @@ private fun TimelineItem(row: TimelineRow, onEdit: (FactJson, String?) -> Unit, 
             fact.notizenOhnePaten().forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             // Paten und Trauzeugen (ab API-Stufe 19): verlinkte anklickbar, freie als Text
             PatenZeilen(fact, onPerson)
+            // Namensteile (ab API-Stufe 45): Praefix, Spitzname, Vorsatzwort, Zusatz, Rufname
+            namensteilZeilen(fact).forEach { (l, w) -> Text("$l: $w", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             // Uebrige Angaben (ab API-Stufe 37), vom Server fertig beschriftet
             fact.details.forEach { Text("   ".repeat(it.level) + it.text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             // Je Verweis eine Zeile; der Titel oeffnet die Quelle (LocalSourceOpener), eine Adresse in der Seitenangabe den

@@ -212,6 +212,20 @@ data class FactJson(
     val access: String? = null,
     /** Ab API-Stufe 37: die übrigen Angaben (Alter, Ursache, Telefon, Abstammung ...), fertig übersetzt vom Server. */
     val details: List<FactDetail> = emptyList(),
+    /** Ab API-Stufe 45, nur bei NAME: die Teile des Namens (2 NPFX, GIVN, NICK, SPFX, SURN, NSFX, _RUFNAME); sonst null. */
+    val nameParts: NameParts? = null,
+)
+
+/** Die Teile eines Namens, wie sie im GEDCOM stehen; null, wo eine Zeile fehlt. */
+@Serializable
+data class NameParts(
+    val prefix: String? = null,
+    val given: String? = null,
+    val nickname: String? = null,
+    val surnamePrefix: String? = null,
+    val surname: String? = null,
+    val suffix: String? = null,
+    val callName: String? = null,
 )
 
 /** Eine Angabe am Ereignis, wie webtrees sie zeigt; [level] 0 steht direkt am Ereignis, 1 darunter ... */

@@ -8,6 +8,7 @@ import de.bgghome.webtrees.nativ.api.EventJson
 import de.bgghome.webtrees.nativ.api.ExportFamily
 import de.bgghome.webtrees.nativ.api.ExportIndividual
 import de.bgghome.webtrees.nativ.api.FactJson
+import de.bgghome.webtrees.nativ.api.NameParts
 import de.bgghome.webtrees.nativ.api.FreeAssociate
 import de.bgghome.webtrees.nativ.api.GedcomZusatz
 import de.bgghome.webtrees.nativ.api.Person
@@ -329,6 +330,12 @@ object GedcomLeser {
                     label = label(n.tag, art),
                     value = if (n.wert == "Y") "" else if (n.tag == "_STAT") familienstand(n.wert) else n.wert,
                     type = art,
+                    nameParts = if (n.tag != "NAME") null else NameParts(
+                        prefix = n.wert("NPFX")?.trim()?.ifEmpty { null }, given = n.wert("GIVN")?.trim()?.ifEmpty { null },
+                        nickname = n.wert("NICK")?.trim()?.ifEmpty { null }, surnamePrefix = n.wert("SPFX")?.trim()?.ifEmpty { null },
+                        surname = n.wert("SURN")?.trim()?.ifEmpty { null }, suffix = n.wert("NSFX")?.trim()?.ifEmpty { null },
+                        callName = n.wert("_RUFNAME")?.trim()?.ifEmpty { null },
+                    ),
                     date = datum?.let { DateJson(text = GedcomDatum.anzeige(it), year = GedcomDatum.jahr(it), gedcom = it) },
                     place = ort?.let { o ->
                         val name = o.wert.trim(); if (name.isEmpty()) null else {
