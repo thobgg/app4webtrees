@@ -1098,6 +1098,12 @@
     <string name="name_part_surname_prefix">Vorsatzwort</string>
     <string name="name_part_suffix">Namenszusatz</string>
     <string name="name_part_call">Rufname</string>
+    <string name="name_part_given">Vornamen (GIVN)</string>
+    <string name="name_part_surname">Familienname (SURN)</string>
+    <string name="name_parts_show">Namensteile anzeigen</string>
+    <string name="name_parts_hide">Namensteile verbergen</string>
+    <string name="name_parts_hint">So speichert webtrees die Teile unter dem Namen. Vornamen, Familienname und Zusatz folgen den Feldern oben, solange sie übereinstimmen; Abweichendes bleibt, bis du es hier änderst.</string>
+    <string name="name_parts_warning">Die gespeicherten Namensteile weichen vom Anzeigenamen ab (%1$s). Dieser Server (api4webtrees vor 1.29) ersetzt sie beim Speichern durch die Felder oben.</string>
     <string name="desk_col_age">Alter</string>
     <string name="desk_ev_name">Name</string>
     <string name="desk_ev_religion">Religion</string>

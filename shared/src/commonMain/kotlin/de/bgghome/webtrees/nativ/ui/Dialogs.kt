@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.ui
 
+import de.bgghome.webtrees.nativ.data.Namensteile
 import de.bgghome.webtrees.nativ.data.notizenOhnePaten
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
@@ -94,6 +95,8 @@ fun FactDialog(
     quellen: (suspend () -> List<SourceSummary>)? = null,
     /** Speichern mit Quellenverweis: erst das Ereignis, dann der Verweis daran. */
     onSaveMitZitat: ((FactRequest, CitationRequest) -> Unit)? = null,
+    /** Server ab API-Stufe 46: Namensteile (NPFX, GIVN, NICK, SPFX, SURN, NSFX, _RUFNAME) einzeln zeigen und schreiben. */
+    namensteileSchreibbar: Boolean = false,
 ) {
     var tag by remember { mutableStateOf(tags.firstOrNull()) }
     var tagMenu by remember { mutableStateOf(false) }
@@ -108,6 +111,14 @@ fun FactDialog(
     // Name: Vornamen, Familienname und Zusatz getrennt; die Schraegstriche setzt das Programm selbst.
     val alterName = remember(fact) { de.bgghome.webtrees.nativ.data.GedcomName.aus(fact?.value.orEmpty()) }
     var name by remember(fact) { mutableStateOf(alterName) }
+    // Gespeicherte Namensteile (ab API-Stufe 45): GIVN, SURN und NSFX folgen den Feldern, solange sie dazu passen;
+    // abweichende (GIVN "Hans Peter Josef" zur Anzeige "Hans") bleiben und gehen ab Stufe 46 nicht mehr verloren.
+    var teile by remember(fact) { mutableStateOf(Namensteile.felder(fact?.nameParts)) }
+    val abweichungen = remember(fact) { Namensteile.abweichungen(alterName, fact?.nameParts) }
+    var teileOffen by remember(fact) {
+        mutableStateOf(abweichungen.isNotEmpty() || listOf(teile.prefix, teile.nickname, teile.surnamePrefix, teile.callName).any { !it.isNullOrBlank() })
+    }
+    fun nameSetzen(neu: de.bgghome.webtrees.nativ.data.GedcomName) { teile = Namensteile.folgen(teile, name, neu); name = neu }
     // Quelle gleich mit erfassen (Issue 39): aus der Liste (Kennung) oder als freier Text, dazu die Seite.
     var zitieren by remember { mutableStateOf(false) }
     var textQuelle by remember { mutableStateOf(false) }
@@ -137,9 +148,29 @@ fun FactDialog(
                 }
                 val isNote = fact?.tag == "NOTE" || (fact == null && tag?.tag == "NOTE")
                 if (fact?.tag == "NAME") {
-                    Field(name.vornamen, { name = name.copy(vornamen = it) }, Res.string.field_given)
-                    Field(name.familienname, { name = name.copy(familienname = it) }, Res.string.field_family_name)
-                    Field(name.zusatz, { name = name.copy(zusatz = it) }, Res.string.field_name_suffix)
+                    Field(name.vornamen, { nameSetzen(name.copy(vornamen = it)) }, Res.string.field_given)
+                    Field(name.familienname, { nameSetzen(name.copy(familienname = it)) }, Res.string.field_family_name)
+                    Field(name.zusatz, { nameSetzen(name.copy(zusatz = it)) }, Res.string.field_name_suffix)
+                    if (namensteileSchreibbar) {
+                        TextButton(onClick = { teileOffen = !teileOffen }) {
+                            Text(stringResource(if (teileOffen) Res.string.name_parts_hide else Res.string.name_parts_show))
+                        }
+                        if (teileOffen) {
+                            Text(stringResource(Res.string.name_parts_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Field(teile.prefix.orEmpty(), { teile = teile.copy(prefix = it) }, Res.string.name_part_prefix)
+                            Field(teile.given.orEmpty(), { teile = teile.copy(given = it) }, Res.string.name_part_given)
+                            Field(teile.nickname.orEmpty(), { teile = teile.copy(nickname = it) }, Res.string.name_part_nickname)
+                            Field(teile.surnamePrefix.orEmpty(), { teile = teile.copy(surnamePrefix = it) }, Res.string.name_part_surname_prefix)
+                            Field(teile.surname.orEmpty(), { teile = teile.copy(surname = it) }, Res.string.name_part_surname)
+                            Field(teile.suffix.orEmpty(), { teile = teile.copy(suffix = it) }, Res.string.name_part_suffix)
+                            Field(teile.callName.orEmpty(), { teile = teile.copy(callName = it) }, Res.string.name_part_call)
+                        }
+                    } else if (abweichungen.isNotEmpty()) {
+                        // Der Server liefert die Teile (Stufe 45), leitet sie beim Speichern aber noch aus dem Wert ab: warnen
+                        val labels = abweichungen.map { (t, _) -> namensteilLabel(t) }
+                        val liste = abweichungen.mapIndexed { i, (_, w) -> labels[i] + ": " + w }.joinToString("; ")
+                        Text(stringResource(Res.string.name_parts_warning, liste), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    }
                 } else {
                     Field(value, { value = it }, if (isNameOrNote) Res.string.fact_text else Res.string.fact_value_hint, minLines = if (isNote) 3 else 1)
                 }
@@ -182,6 +213,7 @@ fun FactDialog(
                             FactRequest(
                                 factId = fact.id,
                                 value = if (fact.tag == "NAME") name.takeIf { it != alterName }?.gedcom() else value.trim().takeIf { it != fact.value },
+                                nameParts = if (fact.tag == "NAME" && namensteileSchreibbar) Namensteile.zumSenden(teile, fact.nameParts, name != alterName) else null,
                                 date = if (date.changed) date.result else null,
                                 place = place.trim().takeIf { it != fact.place?.name.orEmpty() },
                                 note = note.trim().takeIf { it != originalNote },
@@ -195,6 +227,16 @@ fun FactDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
     )
 }
+
+/** Beschriftung eines Namensteils in der Warnung (Server ohne Schreiben der Teile). */
+@Composable
+private fun namensteilLabel(t: Namensteile.Teil): String = stringResource(
+    when (t) {
+        Namensteile.Teil.Vornamen -> Res.string.field_given
+        Namensteile.Teil.Familienname -> Res.string.field_family_name
+        Namensteile.Teil.Zusatz -> Res.string.name_part_suffix
+    }
+)
 
 /** Abschnitt "Quelle zitieren" im Ereignis-Dialog (Issue 39): Quelle aus der Liste (mit Suche) oder als Text, dazu die Seite. */
 @Composable

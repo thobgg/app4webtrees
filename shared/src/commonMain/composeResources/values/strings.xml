@@ -1103,6 +1103,12 @@
     <string name="name_part_surname_prefix">Surname prefix</string>
     <string name="name_part_suffix">Name suffix</string>
     <string name="name_part_call">Call name</string>
+    <string name="name_part_given">Given names (GIVN)</string>
+    <string name="name_part_surname">Surname (SURN)</string>
+    <string name="name_parts_show">Show name parts</string>
+    <string name="name_parts_hide">Hide name parts</string>
+    <string name="name_parts_hint">This is how webtrees stores the parts under the name. Given names, surname and suffix follow the fields above as long as they match; anything different stays until you change it here.</string>
+    <string name="name_parts_warning">The stored name parts differ from the displayed name (%1$s). This server (api4webtrees before 1.29) replaces them with the fields above when saving.</string>
     <string name="desk_col_age">Age</string>
     <string name="desk_ev_name">Name</string>
     <string name="desk_ev_religion">Religion</string>

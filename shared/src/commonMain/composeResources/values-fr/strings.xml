@@ -1098,6 +1098,12 @@
     <string name="name_part_surname_prefix">Particule</string>
     <string name="name_part_suffix">Suffixe du nom</string>
     <string name="name_part_call">Prénom usuel</string>
+    <string name="name_part_given">Prénoms (GIVN)</string>
+    <string name="name_part_surname">Nom de famille (SURN)</string>
+    <string name="name_parts_show">Afficher les parties du nom</string>
+    <string name="name_parts_hide">Masquer les parties du nom</string>
+    <string name="name_parts_hint">C’est ainsi que webtrees enregistre les parties sous le nom. Les prénoms, le nom de famille et le suffixe suivent les champs ci-dessus tant qu’ils concordent ; ce qui diffère reste tel quel jusqu’à ce que vous le modifiiez ici.</string>
+    <string name="name_parts_warning">Les parties du nom enregistrées diffèrent du nom affiché (%1$s). Ce serveur (api4webtrees avant 1.29) les remplace par les champs ci-dessus lors de l’enregistrement.</string>
     <string name="desk_col_age">Âge</string>
     <string name="desk_ev_name">Nom</string>
     <string name="desk_ev_religion">Religion</string>

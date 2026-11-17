@@ -58,6 +58,8 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import de.bgghome.webtrees.nativ.Sprache
 import de.bgghome.webtrees.nativ.Texte
+import de.bgghome.webtrees.nativ.api.API_NAME_PARTS_WRITE
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.TreeExport
 import de.bgghome.webtrees.nativ.pruefung.Abhakliste
@@ -377,6 +379,7 @@ fun PruefFenster(state: UiState, viewModel: AppViewModel, openSheet: (String) ->
                 FactDialog(
                     fact = bb.fakt, tags = if (bb.familie) state.familyTags else state.tags, suggestPlaces = viewModel.placeSuggestions(),
                     onDismiss = { bearbeiten = null },
+                    namensteileSchreibbar = state.info.hat(API_NAME_PARTS_WRITE),
                     onSave = { req ->
                         bearbeiten = null
                         viewModel.select(bb.person)

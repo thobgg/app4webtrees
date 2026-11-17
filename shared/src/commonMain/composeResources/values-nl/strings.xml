@@ -1087,6 +1087,12 @@
     <string name="name_part_surname_prefix">Tussenvoegsel</string>
     <string name="name_part_suffix">Naamtoevoegsel</string>
     <string name="name_part_call">Roepnaam</string>
+    <string name="name_part_given">Voornamen (GIVN)</string>
+    <string name="name_part_surname">Achternaam (SURN)</string>
+    <string name="name_parts_show">Naamdelen tonen</string>
+    <string name="name_parts_hide">Naamdelen verbergen</string>
+    <string name="name_parts_hint">Zo slaat webtrees de delen onder de naam op. Voornamen, achternaam en toevoegsel volgen de velden hierboven zolang ze overeenkomen; wat afwijkt blijft staan tot u het hier wijzigt.</string>
+    <string name="name_parts_warning">De opgeslagen naamdelen wijken af van de weergegeven naam (%1$s). Deze server (api4webtrees vóór 1.29) vervangt ze bij het opslaan door de velden hierboven.</string>
     <string name="desk_col_age">Leeftijd</string>
     <string name="desk_ev_name">Naam</string>
     <string name="desk_ev_religion">Religie</string>

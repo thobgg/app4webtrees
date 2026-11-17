@@ -228,6 +228,12 @@ data class NameParts(
     val callName: String? = null,
 )
 
+/** Ab dieser API-Stufe liefert api4webtrees die Namensteile ([FactJson.nameParts]) an jedem NAME-Fakt. */
+const val API_NAME_PARTS = 45
+
+/** Ab dieser Stufe schreibt api4webtrees die Namensteile ([FactRequest.nameParts]); darunter leitet es GIVN, SURN und NSFX aus dem Wert ab. */
+const val API_NAME_PARTS_WRITE = 46
+
 /** Eine Angabe am Ereignis, wie webtrees sie zeigt; [level] 0 steht direkt am Ereignis, 1 darunter ... */
 @Serializable
 data class FactDetail(val tag: String = "", val label: String = "", val value: String = "", val level: Int = 0) {
@@ -907,6 +913,12 @@ data class FactRequest(
     val type: String? = null,
     /** Adresse (2 ADDR), ab API-Stufe 33; "" entfernt sie, null laesst sie stehen. */
     val address: String? = null,
+    /**
+     * Namensteile (nur bei NAME, ab API-Stufe 46): ein gesendeter Teil wird gesetzt, "" entfernt seine Zeile, null (nicht
+     * gesendet) laesst sie stehen. Sobald das Feld mitgeht - auch leer -, leitet der Server nichts mehr aus [value] ab;
+     * ohne das Feld schreibt er GIVN, SURN und NSFX aus dem Wert wie bisher. Vor Stufe 46 nicht senden (wird ignoriert).
+     */
+    val nameParts: NameParts? = null,
 )
 
 /**

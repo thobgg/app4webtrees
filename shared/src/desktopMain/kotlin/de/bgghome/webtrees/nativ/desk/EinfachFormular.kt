@@ -34,7 +34,10 @@ import de.bgghome.webtrees.nativ.api.FactJson
 import de.bgghome.webtrees.nativ.api.FactRequest
 import de.bgghome.webtrees.nativ.api.IndividualDetail
 import de.bgghome.webtrees.nativ.data.GedcomDate
+import de.bgghome.webtrees.nativ.api.API_NAME_PARTS_WRITE
+import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.data.GedcomName
+import de.bgghome.webtrees.nativ.data.Namensteile
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.ui.AppViewModel
 import de.bgghome.webtrees.nativ.ui.Field
@@ -92,14 +95,24 @@ class EinfachFeld(val key: String, val tag: String, val record: String?, val art
     /** Nach erfolgreichem Speichern: das Eingetippte ist jetzt der Stand. */
     fun gespeichert() { datumAlt = datum; ortAlt = ort; wertAlt = wert; vornamenAlt = vornamen; familiennameAlt = familienname }
 
-    /** Die Anfrage an den Server - nur mit den geaenderten Teilen; null, wenn nichts zu senden ist. */
-    fun anfrage(): FactRequest? {
+    /**
+     * Die Anfrage an den Server - nur mit den geaenderten Teilen; null, wenn nichts zu senden ist. [namensteile]: der Server
+     * schreibt die Namensteile (ab Stufe 46) - dann gehen GIVN/SURN/NSFX mit, soweit sie den Feldern folgen, und
+     * abweichende gespeicherte Teile bleiben erhalten.
+     */
+    fun anfrage(namensteile: Boolean = false): FactRequest? {
         if (!geaendert) return null
         val f = fact
         return when (art) {
             FeldArt.Name -> {
-                val neu = GedcomName(vornamen, familienname, zusatz).gedcom()
-                if (f == null) FactRequest(tag = "NAME", value = neu) else FactRequest(factId = f.id, value = neu)
+                val alt = GedcomName(vornamenAlt, familiennameAlt, zusatz)
+                val neuName = GedcomName(vornamen, familienname, zusatz)
+                val neu = neuName.gedcom()
+                if (f == null) FactRequest(tag = "NAME", value = neu)
+                else FactRequest(
+                    factId = f.id, value = neu,
+                    nameParts = if (namensteile) Namensteile.zumSenden(Namensteile.folgen(Namensteile.felder(f.nameParts), alt, neuName), f.nameParts, true) else null,
+                )
             }
             FeldArt.Angabe -> if (f == null) wert.trim().takeIf { it.isNotEmpty() }?.let { FactRequest(tag = tag, value = it) }
                 else FactRequest(factId = f.id, value = wert.trim())
@@ -180,7 +193,8 @@ class EinfachFormular(val xref: String) {
 
     /** Alle geaenderten Felder mit gueltigem Datum speichern; ungueltige bleiben als Entwurf stehen. */
     fun speichern(viewModel: AppViewModel, onFertig: (fehler: Boolean) -> Unit = {}) {
-        val auftraege = felder.filter { it.datumOk }.mapNotNull { f -> f.anfrage()?.let { f to it } }
+        val namensteile = viewModel.state.value.info.hat(API_NAME_PARTS_WRITE)
+        val auftraege = felder.filter { it.datumOk }.mapNotNull { f -> f.anfrage(namensteile)?.let { f to it } }
         if (auftraege.isEmpty()) { onFertig(false); return }
         speichert = true; fehler = false
         viewModel.saveFacts(xref, auftraege.map { (f, r) -> f.record to r },
@@ -193,7 +207,7 @@ class EinfachFormular(val xref: String) {
     /** Ein Feld beim Verlassen speichern, wenn es geaendert und gueltig ist. */
     fun feldSpeichern(f: EinfachFeld, viewModel: AppViewModel) {
         if (!f.geaendert || !f.datumOk || speichert) return
-        val anfrage = f.anfrage() ?: run { f.gespeichert(); return }
+        val anfrage = f.anfrage(viewModel.state.value.info.hat(API_NAME_PARTS_WRITE)) ?: run { f.gespeichert(); return }
         speichert = true; fehler = false
         viewModel.saveFacts(xref, listOf(f.record to anfrage), onGespeichert = { f.gespeichert() }, onFertig = { e -> speichert = false; fehler = e })
     }

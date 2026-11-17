@@ -1098,6 +1098,12 @@
     <string name="name_part_surname_prefix">Partícula del apellido</string>
     <string name="name_part_suffix">Sufijo del nombre</string>
     <string name="name_part_call">Nombre usual</string>
+    <string name="name_part_given">Nombres de pila (GIVN)</string>
+    <string name="name_part_surname">Apellido (SURN)</string>
+    <string name="name_parts_show">Mostrar partes del nombre</string>
+    <string name="name_parts_hide">Ocultar partes del nombre</string>
+    <string name="name_parts_hint">Así guarda webtrees las partes bajo el nombre. Los nombres de pila, el apellido y el sufijo siguen a los campos de arriba mientras coincidan; lo que difiere se mantiene hasta que lo cambie aquí.</string>
+    <string name="name_parts_warning">Las partes del nombre guardadas difieren del nombre mostrado (%1$s). Este servidor (api4webtrees anterior a 1.29) las sustituye al guardar por los campos de arriba.</string>
     <string name="desk_col_age">Edad</string>
     <string name="desk_ev_name">Nombre</string>
     <string name="desk_ev_religion">Religión</string>

@@ -425,6 +425,7 @@ internal fun ProfileDialogs(
             fact = dialog.fact, tags = state.tags, suggestPlaces = places, onDismiss = onDismiss,
             onSave = { onDismiss(); viewModel.saveFact(it, dialog.record) },
             typErlaubt = state.info.hat(de.bgghome.webtrees.nativ.api.API_ASSOCIATES_WRITE),
+            namensteileSchreibbar = state.info.hat(de.bgghome.webtrees.nativ.api.API_NAME_PARTS_WRITE),
             quellen = quellen, onSaveMitZitat = { r, z -> onDismiss(); viewModel.saveFactMitZitat(r, dialog.record, z) },
         )
 
