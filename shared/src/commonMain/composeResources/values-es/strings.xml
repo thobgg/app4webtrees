@@ -152,6 +152,7 @@
     <string name="err_rejected">El servidor rechazó la solicitud (%1$s).</string>
     <string name="err_module_missing">El módulo «api4webtrees» no responde en esta dirección. ¿Está instalado en webtrees en modules_v4?</string>
     <string name="err_unexpected">Respuesta inesperada del servidor (HTTP %1$d). ¿Es esta la dirección de la página de inicio de webtrees?</string>
+    <string name="err_unexpected_detail">Respuesta inesperada del servidor (HTTP %1$d). El servidor indica: %2$s – Incluya este texto al informar del problema.</string>
     <string name="err_no_connection">Sin conexión: %1$s</string>
     <string name="err_local_blocked">Se interrumpió la conexión con el árbol de este PC. Causa frecuente: un programa que filtra el tráfico de red de otros programas (bloqueo de anuncios o protección web). Una excepción para wtWin en ese programa suele ayudar. Los detalles están en wtwin.log.</string>
     <string name="err_unreachable">no se puede acceder al servidor</string>
@@ -354,6 +355,7 @@
     <string name="connect_confirm_action">Conectar</string>
     <string name="err_write_interrupted">La conexión se perdió antes de que el servidor respondiera. Compruebe si el cambio llegó antes de repetirlo.</string>
     <string name="err_write_unclear">El servidor respondió con una página de error. Compruebe si el cambio se guardó antes de repetirlo.</string>
+    <string name="err_write_unclear_detail">El servidor respondió con una página de error: %1$s – Compruebe si el cambio se guardó antes de repetirlo e incluya este texto al informar del problema.</string>
     <string name="err_pair">El código de conexión ha caducado o ya se ha usado. Abra de nuevo la página «App» en webtrees y toque «Conectar ahora».</string>
     <string name="err_tree_disabled">El administrador no ha habilitado este árbol genealógico para la app.</string>
     <!-- Escritorio (wtWin/wtTux): barra de menús y línea de estado -->

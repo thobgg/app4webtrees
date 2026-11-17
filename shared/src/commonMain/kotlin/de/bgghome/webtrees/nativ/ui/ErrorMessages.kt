@@ -59,14 +59,16 @@ fun explain(e: Exception): String = when (e) {
         else -> Texte.t(Res.string.err_rejected, e.code)
     }
     // Keine JSON-Antwort: bei 404 fehlt das Modul auf dem Server, sonst hat der Webserver etwas anderes geliefert.
-    is NotJsonException -> when (e.httpStatus) {
-        404 -> Texte.t(Res.string.err_module_missing)
+    // Mit dem Kern der Fehlerseite (PHP-Fehler, Speicher- oder Laufzeitgrenze), damit der Nutzer ihn melden kann.
+    is NotJsonException -> when {
+        e.httpStatus == 404 -> Texte.t(Res.string.err_module_missing)
+        e.serverText != null -> Texte.t(Res.string.err_unexpected_detail, e.httpStatus, e.serverText)
         else -> Texte.t(Res.string.err_unexpected, e.httpStatus)
     }
     is LoginWallException -> if (e.zugangsdatenAbgelehnt) Texte.t(Res.string.err_basic_auth_rejected) else Texte.t(Res.string.err_login_wall)
     is UserMessageException -> e.message.orEmpty()
     is WriteInterruptedException -> Texte.t(Res.string.err_write_interrupted)
-    is WriteUnclearException -> Texte.t(Res.string.err_write_unclear)
+    is WriteUnclearException -> if (e.serverText != null) Texte.t(Res.string.err_write_unclear_detail, e.serverText) else Texte.t(Res.string.err_write_unclear)
     is KlartextException -> Texte.t(Res.string.err_http_only)
     is LokalVerbindungException -> Texte.t(Res.string.err_local_blocked)
     is IOException -> Texte.t(Res.string.err_no_connection, e.message ?: Texte.t(Res.string.err_unreachable))

@@ -157,6 +157,7 @@
     <string name="err_rejected">The server rejected the request (%1$s).</string>
     <string name="err_module_missing">The “api4webtrees” module does not answer at this address. Is it installed in webtrees under modules_v4?</string>
     <string name="err_unexpected">Unexpected answer from the server (HTTP %1$d). Is this the address of the webtrees home page?</string>
+    <string name="err_unexpected_detail">Unexpected answer from the server (HTTP %1$d). The server says: %2$s – Please include this text when reporting the problem.</string>
     <string name="err_no_connection">No connection: %1$s</string>
     <string name="err_local_blocked">The connection to the family tree on this PC was interrupted. A common cause is a program that filters the network traffic of other programs (ad blocking or web protection). An exception for wtWin in that program usually helps. Details are in wtwin.log.</string>
     <string name="err_unreachable">server not reachable</string>
@@ -359,6 +360,7 @@
     <string name="connect_confirm_action">Connect</string>
     <string name="err_write_interrupted">The connection was lost before the server answered. Please check whether the change arrived before you repeat it.</string>
     <string name="err_write_unclear">The server answered with an error page. Please check whether the change was saved before you repeat it.</string>
+    <string name="err_write_unclear_detail">The server answered with an error page: %1$s – Please check whether the change was saved before you repeat it, and include this text when reporting the problem.</string>
     <string name="err_pair">The connect code has expired or was already used. Open the “App” page in webtrees again and tap “Connect now”.</string>
     <string name="err_tree_disabled">The manager has not enabled this family tree for the app.</string>
     <!-- Desktop (wtWin/wtTux): Menueleiste und Statuszeile -->

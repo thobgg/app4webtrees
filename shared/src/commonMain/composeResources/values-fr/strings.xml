@@ -152,6 +152,7 @@
     <string name="err_rejected">Le serveur a refusé la requête (%1$s).</string>
     <string name="err_module_missing">Le module « api4webtrees » ne répond pas à cette adresse. Est-il installé dans webtrees sous modules_v4 ?</string>
     <string name="err_unexpected">Réponse inattendue du serveur (HTTP %1$d). Est-ce bien l’adresse de la page d’accueil de webtrees ?</string>
+    <string name="err_unexpected_detail">Réponse inattendue du serveur (HTTP %1$d). Le serveur indique : %2$s – Veuillez joindre ce texte à votre signalement.</string>
     <string name="err_no_connection">Pas de connexion : %1$s</string>
     <string name="err_local_blocked">La connexion à l’arbre sur ce PC a été interrompue. Cause fréquente : un programme qui filtre le trafic réseau des autres programmes (blocage de publicités ou protection web). Une exception pour wtWin dans ce programme aide généralement. Détails dans wtwin.log.</string>
     <string name="err_unreachable">serveur injoignable</string>
@@ -354,6 +355,7 @@
     <string name="connect_confirm_action">Connecter</string>
     <string name="err_write_interrupted">La connexion a été perdue avant la réponse du serveur. Veuillez vérifier si la modification est arrivée avant de la répéter.</string>
     <string name="err_write_unclear">Le serveur a répondu par une page d’erreur. Veuillez vérifier si la modification a été enregistrée avant de la répéter.</string>
+    <string name="err_write_unclear_detail">Le serveur a répondu par une page d’erreur : %1$s – Veuillez vérifier si la modification a été enregistrée avant de la répéter, et joindre ce texte à votre signalement.</string>
     <string name="err_pair">Le code de connexion a expiré ou a déjà été utilisé. Ouvrez de nouveau la page « App » dans webtrees et touchez « Connecter maintenant ».</string>
     <string name="err_tree_disabled">Le gestionnaire n’a pas activé cet arbre généalogique pour l’application.</string>
     <!-- Bureau (wtWin/wtTux) : barre de menus et barre d'état -->

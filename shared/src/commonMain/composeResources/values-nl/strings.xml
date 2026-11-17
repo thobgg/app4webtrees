@@ -151,6 +151,7 @@
     <string name="err_rejected">De server heeft het verzoek geweigerd (%1$s).</string>
     <string name="err_module_missing">Op dit adres antwoordt de module „api4webtrees“ niet. Is deze in webtrees onder modules_v4 geïnstalleerd?</string>
     <string name="err_unexpected">Onverwacht antwoord van de server (HTTP %1$d). Is dit het adres van de webtrees-startpagina?</string>
+    <string name="err_unexpected_detail">Onverwacht antwoord van de server (HTTP %1$d). De server meldt: %2$s – Voeg deze tekst toe als u het probleem meldt.</string>
     <string name="err_no_connection">Geen verbinding: %1$s</string>
     <string name="err_local_blocked">De verbinding met de stamboom op deze pc is onderbroken. Vaak oorzaak: een programma dat het netwerkverkeer van andere programma’s filtert (advertentie- of webbescherming). Een uitzondering voor wtWin in dat programma helpt meestal. Details staan in wtwin.log.</string>
     <string name="err_unreachable">server niet bereikbaar</string>
@@ -347,6 +348,7 @@
     <string name="connect_confirm_action">Verbinden</string>
     <string name="err_write_interrupted">De verbinding werd verbroken voordat de server antwoordde. Controleer of de wijziging is aangekomen voordat u haar herhaalt.</string>
     <string name="err_write_unclear">De server antwoordde met een foutpagina. Controleer of de wijziging is opgeslagen voordat u haar herhaalt.</string>
+    <string name="err_write_unclear_detail">De server antwoordde met een foutpagina: %1$s – Controleer of de wijziging is opgeslagen voordat u haar herhaalt, en voeg deze tekst toe als u het probleem meldt.</string>
     <string name="err_pair">De verbindingscode is verlopen of al gebruikt. Open in webtrees opnieuw de pagina „App“ en tik op „Nu verbinden“.</string>
     <string name="err_tree_disabled">De beheerder heeft deze stamboom niet voor de app vrijgegeven.</string>
     <string name="desk_menu_file">Bestand</string>

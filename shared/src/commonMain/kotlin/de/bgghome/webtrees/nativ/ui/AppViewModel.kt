@@ -91,9 +91,10 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
     // ── Fehler ───────────────────────────────────────────────────────
 
     internal fun fail(e: Exception) {
-        // Mitten in der Arbeit keine JSON-Antwort mehr: die Sitzung ist abgelaufen.
+        // Mitten in der Arbeit keine JSON-Antwort mehr: die Sitzung ist abgelaufen (Anmeldeseite, 200 oder Umleitung).
+        // Eine Fehlerseite mit 4xx/5xx ist dagegen ein Serverfehler - die Meldung soll ihn nennen, nicht abmelden.
         val state = uiState.value
-        if (e is NotJsonException && state.screen == Screen.Main && state.info?.user?.loggedIn == true) {
+        if (e is NotJsonException && e.httpStatus < 400 && state.screen == Screen.Main && state.info?.user?.loggedIn == true) {
             uiState.update { it.copy(screen = Screen.Login, error = text(Res.string.session_expired)) }
             return
         }
