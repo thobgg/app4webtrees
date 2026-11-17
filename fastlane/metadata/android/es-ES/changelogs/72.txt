@@ -1,0 +1,1 @@
+Escritura de las partes del nombre: al editar un nombre se conservan los nombres de pila, el apodo, la partícula y el nombre usual guardados, y «Mostrar partes del nombre» los edita uno a uno. Requiere api4webtrees 1.29. Un periodo en los años de vida aparece como ~1918 en vez de 1915/1918, porque la barra indica un año doble.

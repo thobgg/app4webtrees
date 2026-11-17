@@ -1,0 +1,1 @@
+Writing name parts: when editing a name, stored given names, nickname, surname prefix and call name are kept, and “Show name parts” edits them one by one. Needs api4webtrees 1.29. A range in the years of life appears as ~1918 instead of 1915/1918, because the slash means a double year.

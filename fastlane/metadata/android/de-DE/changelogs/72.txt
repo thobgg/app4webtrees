@@ -1,0 +1,1 @@
+Namensteile schreiben: Beim Bearbeiten eines Namens bleiben gespeicherte Vornamen, Spitzname, Vorsatzwort und Rufname erhalten, und „Namensteile anzeigen“ bearbeitet sie einzeln. Braucht api4webtrees 1.29. Ein Zeitraum bei den Lebensjahren erscheint als ~1918 statt 1915/1918, weil der Schrägstrich ein Doppeljahr meint.

@@ -1,0 +1,1 @@
+Écriture des parties du nom : lors de la modification d’un nom, les prénoms, le surnom, la particule et le prénom usuel enregistrés sont conservés, et « Afficher les parties du nom » les modifie une à une. Nécessite api4webtrees 1.29. Une période dans les années de vie s’affiche comme ~1918 au lieu de 1915/1918, car la barre oblique désigne une double année.

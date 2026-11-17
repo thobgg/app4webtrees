@@ -1,0 +1,1 @@
+Naamdelen schrijven: bij het bewerken van een naam blijven opgeslagen voornamen, bijnaam, tussenvoegsel en roepnaam behouden, en „Naamdelen tonen” bewerkt ze afzonderlijk. Vereist api4webtrees 1.29. Een periode in de levensjaren verschijnt als ~1918 in plaats van 1915/1918, omdat de schuine streep een dubbel jaar aanduidt.
