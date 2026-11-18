@@ -1,0 +1,1 @@
+Aussagekräftige Fehlermeldungen: Liefert der Server statt Daten eine Fehlerseite, nennt die Meldung jetzt deren Inhalt, etwa den PHP-Fehler oder eine Speicher- oder Laufzeitgrenze, mit der Bitte, ihn bei einer Fehlermeldung mitzuschicken. Eine solche Fehlerseite gilt nicht mehr als abgelaufene Sitzung.

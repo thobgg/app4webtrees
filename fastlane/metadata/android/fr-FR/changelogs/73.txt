@@ -1,0 +1,1 @@
+Messages d’erreur parlants : si le serveur renvoie une page d’erreur au lieu des données, le message en cite désormais le contenu, par exemple l’erreur PHP ou une limite de mémoire ou de temps, et vous invite à le joindre à votre signalement. Une telle page d’erreur n’est plus considérée comme une session expirée.

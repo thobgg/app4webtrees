@@ -1,0 +1,1 @@
+Duidelijke foutmeldingen: levert de server een foutpagina in plaats van gegevens, dan noemt de melding nu de inhoud ervan, zoals de PHP-fout of een geheugen- of tijdslimiet, met het verzoek die bij een melding mee te sturen. Zo’n foutpagina geldt niet meer als verlopen sessie.

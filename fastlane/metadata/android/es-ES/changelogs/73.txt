@@ -1,0 +1,1 @@
+Mensajes de error claros: si el servidor devuelve una página de error en lugar de datos, el mensaje cita ahora su contenido, como el error de PHP o un límite de memoria o de tiempo, y pide incluirlo al informar. Esa página de error ya no se trata como sesión caducada.

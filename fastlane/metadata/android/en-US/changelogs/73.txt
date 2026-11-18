@@ -1,0 +1,1 @@
+Meaningful error messages: if the server returns an error page instead of data, the message now quotes its content, such as the PHP error or a memory or time limit, and asks you to include it when reporting. Such an error page is no longer treated as an expired session.

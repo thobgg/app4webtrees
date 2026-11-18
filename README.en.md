@@ -14,9 +14,9 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), for testing"></a>
 </p>
 
-<p align="center"><b>New in 1.61: writing name parts.</b> When editing a name, stored given names, nickname, surname prefix and call name are kept; “Show name parts” edits them one by one. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.29.0">api4webtrees 1.29</a>; the tree on this PC brings it along. A range in the years of life appears as ~1918 instead of 1915/1918.</p>
+<p align="center"><b>New in 1.62: meaningful error messages.</b> If the server returns an error page instead of data, the message now quotes its content, such as the PHP error or a memory or time limit, so the cause can be reported without guesswork.</p>
 
-<p align="center"><b>New in 1.60: name parts, uncertain years, search and replace.</b> Prefix, nickname, surname prefix, suffix and call name appear under every name. Uncertain years of life are marked (~1865, &lt;1918, &gt;1918, 1915/1918). Both need <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.28.0">api4webtrees 1.28</a>; the tree on this PC brings it along. On the PC, Ctrl+F searches all fields and replaces with a preview.</p>
+<p align="center"><b>New in 1.61: writing name parts.</b> When editing a name, stored given names, nickname, surname prefix and call name are kept; “Show name parts” edits them one by one. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.29.0">api4webtrees 1.29</a>; the tree on this PC brings it along. A range in the years of life appears as ~1918 instead of 1915/1918.</p>
 
 <p align="center"><b>New in 1.58: family tree chart with spouse boxes.</b> “Show spouses” now has three levels: no, as a line in the box, or as a box of its own with photo beside the person, with a marriage line and the children below. Plus the siblings of the root person in the top row and a mark for childless marriages. In the ancestor chart, father and mother can be joined as a couple by a marriage line. Also: “Show cousins’ partners” in the tree, and the wtWin start page finds existing trees on this PC again (#31).</p>
 
