@@ -11,6 +11,36 @@ import de.bgghome.webtrees.nativ.api.WriteInterruptedException
 import de.bgghome.webtrees.nativ.api.WriteUnclearException
 import java.io.IOException
 
+/**
+ * Technische Einzelheiten zu einem Fehler fuer den Dialog "Details" und zum Kopieren in eine Fehlermeldung: Art und
+ * HTTP-Code, die aufgerufene Adresse, der Fehlercode des Moduls, die Fehlerseite des Servers im Klartext. Ohne
+ * uebersetzte Beschriftungen, damit der Text in jeder Fehlermeldung an den Entwickler gleich aussieht.
+ */
+fun details(e: Exception): String = buildString {
+    when (e) {
+        is NotJsonException -> {
+            appendLine("HTTP ${e.httpStatus}" + if (e.umgeleitet) " (redirect)" else "")
+            if (e.url.isNotEmpty()) appendLine(e.url)
+            e.serverSeite?.let { appendLine(); append(it) }
+        }
+        is WriteUnclearException -> {
+            appendLine("HTTP ${e.httpStatus} (write)")
+            if (e.url.isNotEmpty()) appendLine(e.url)
+            e.serverSeite?.let { appendLine(); append(it) }
+        }
+        is ApiException -> {
+            appendLine("api4webtrees: ${e.code}" + (e.status?.let { " (HTTP $it)" } ?: ""))
+            e.element?.let { append(it.toString()) }
+        }
+        is LoginWallException -> appendLine("HTTP ${e.httpStatus} ${e.host}".trim())
+        else -> {
+            appendLine(e.javaClass.simpleName)
+            e.message?.let { appendLine(it) }
+            e.cause?.let { appendLine("${it.javaClass.simpleName}: ${it.message.orEmpty()}") }
+        }
+    }
+}.trim()
+
 /** Ein Fehler, dessen Text schon fuer den Benutzer formuliert ist (z. B. "Bild liess sich nicht verkleinern"). */
 class UserMessageException(message: String) : Exception(message)
 

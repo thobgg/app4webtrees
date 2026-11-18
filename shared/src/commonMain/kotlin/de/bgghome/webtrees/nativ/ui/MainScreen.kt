@@ -164,12 +164,14 @@ fun AppRoot(viewModel: AppViewModel) {
 private fun WithMessages(state: UiState, viewModel: AppViewModel, content: @Composable () -> Unit) {
     val snackbar = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.message) {
-        state.message?.let {
+    // Fehler mit Einzelheiten als Dialog (MeldungDialog), alles andere kurz in der Snackbar.
+    LaunchedEffect(state.message, state.messageDetails) {
+        if (state.messageDetails == null) state.message?.let {
             snackbar.showSnackbar(it)
             viewModel.messageShown()
         }
     }
+    if (state.message != null && state.messageDetails != null) MeldungDialog(state.message, state.messageDetails, viewModel::messageShown)
 
     Box(Modifier.fillMaxSize()) {
         content()
@@ -181,12 +183,13 @@ private fun WithMessages(state: UiState, viewModel: AppViewModel, content: @Comp
 private fun MainScreen(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit) {
     val snackbar = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.message) {
-        state.message?.let {
+    LaunchedEffect(state.message, state.messageDetails) {
+        if (state.messageDetails == null) state.message?.let {
             snackbar.showSnackbar(it)
             viewModel.messageShown()
         }
     }
+    if (state.message != null && state.messageDetails != null) MeldungDialog(state.message, state.messageDetails, viewModel::messageShown)
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= WIDE_MIN_WIDTH

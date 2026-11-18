@@ -36,3 +36,18 @@ class FehlerseiteTest {
         assertTrue(k.length <= 200 && k.endsWith("…"), k)
     }
 }
+
+class FehlerDetailsTest {
+    @Test fun klartextDerGanzenSeite() {
+        val html = "<html><head><title>Fehler</title></head><body><h1>Oops</h1><p>Zeile eins</p><p>Zeile zwei</p></body></html>"
+        assertEquals("Fehler\nOops\nZeile eins\nZeile zwei", Fehlerseite.klartext(html))
+        assertNull(Fehlerseite.klartext(""))
+    }
+
+    @Test fun detailsNennenAdresseUndSeite() {
+        val e = NotJsonException(500, serverText = "Fatal error", url = "https://h/webtrees226/index.php?route=/webtrees226/module/_api4webtrees_/Places/x&list=1", serverSeite = "Fatal error: x in y on line 3")
+        val d = de.bgghome.webtrees.nativ.ui.details(e)
+        assertTrue(d.startsWith("HTTP 500\nhttps://h/webtrees226/"), d)
+        assertTrue(d.endsWith("on line 3"), d)
+    }
+}

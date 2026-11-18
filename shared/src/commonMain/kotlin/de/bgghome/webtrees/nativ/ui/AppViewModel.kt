@@ -86,7 +86,7 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
         loadMessages()
     }
 
-    fun messageShown() = uiState.update { it.copy(message = null) }
+    fun messageShown() = uiState.update { it.copy(message = null, messageDetails = null) }
 
     // ── Fehler ───────────────────────────────────────────────────────
 
@@ -99,7 +99,7 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
             return
         }
 
-        uiState.update { it.copy(message = explain(e)) }
+        uiState.update { it.copy(message = explain(e), messageDetails = details(e)) }
     }
 
     /** Text ohne Composable-Kontext (Compose-Ressourcen, fuer Android und Desktop dieselben Dateien). */

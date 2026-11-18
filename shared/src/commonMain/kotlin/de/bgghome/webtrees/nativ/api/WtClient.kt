@@ -42,6 +42,9 @@ class NotJsonException(
     val umgeleitet: Boolean = false,
     /** Was die Fehlerseite des Servers sagt ([Fehlerseite.kern]) - fuer die Meldung an den Nutzer; null ohne Text. */
     val serverText: String? = null,
+    /** Die aufgerufene Adresse und die ganze Fehlerseite als Klartext - fuer die Details der Meldung. */
+    val url: String = "",
+    val serverSeite: String? = null,
 ) : Exception("Keine JSON-Antwort (HTTP $httpStatus)")
 
 /**
@@ -74,7 +77,8 @@ class WriteInterruptedException(cause: IOException) : IOException(cause.message,
  * Speichern). Ob die Aenderung gespeichert ist, ist unbekannt - darum KEINE Wiederholung (Gutachten 27.09.2026:
  * sonst entstuende die Aenderung doppelt). Der Nutzer muss nachsehen.
  */
-class WriteUnclearException(val httpStatus: Int, val serverText: String? = null) : Exception("Schreibzugriff ohne JSON-Antwort (HTTP $httpStatus)")
+class WriteUnclearException(val httpStatus: Int, val serverText: String? = null, val url: String = "", val serverSeite: String? = null) :
+    Exception("Schreibzugriff ohne JSON-Antwort (HTTP $httpStatus)")
 
 /** http:// zu einem Server ausserhalb des Heimnetzes (auch per Weiterleitung) - abgebrochen, bevor etwas gesendet wurde. */
 class KlartextException(val host: String) : IOException("cleartext outside home network: $host")
@@ -788,12 +792,12 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         } catch (e: NotJsonException) {
             // Abgelaufenes CSRF-Token: webtrees leitet um, ohne die Aenderung auszufuehren (CheckCsrf) - Token
             // erneuern, einmal wiederholen. Ohne Umleitung lief die Anfrage dagegen bis zum Modul durch: nicht wiederholen.
-            if (!e.umgeleitet) throw WriteUnclearException(e.httpStatus, e.serverText)
+            if (!e.umgeleitet) throw WriteUnclearException(e.httpStatus, e.serverText, e.url, e.serverSeite)
             info()
             try {
                 attempt()
             } catch (e2: NotJsonException) {
-                if (e2.umgeleitet) throw e2 else throw WriteUnclearException(e2.httpStatus, e2.serverText)
+                if (e2.umgeleitet) throw e2 else throw WriteUnclearException(e2.httpStatus, e2.serverText, e2.url, e2.serverSeite)
             }
         }
     }
@@ -814,7 +818,10 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
                 // (example.org -> www.example.org mit JSON-Antwort ist dagegen in Ordnung und kommt hier nicht an.)
                 val finalHost = response.request.url.host
                 if (!finalHost.equals(request.url.host, ignoreCase = true)) throw LoginWallException(response.code, finalHost)
-                throw NotJsonException(response.code, umgeleitet = response.priorResponse != null, serverText = Fehlerseite.kern(text))
+                throw NotJsonException(
+                    response.code, umgeleitet = response.priorResponse != null, serverText = Fehlerseite.kern(text),
+                    url = request.url.toString(), serverSeite = Fehlerseite.klartext(text),
+                )
             }
 
             response.code to text

@@ -10,6 +10,11 @@
     <string name="action_delete">Supprimer</string>
     <string name="action_edit">Modifier</string>
     <string name="action_close">Fermer</string>
+    <string name="action_copy">Copier</string>
+    <string name="action_details">Détails</string>
+    <string name="action_details_hide">Masquer les détails</string>
+    <string name="msg_copied">Copié</string>
+    <string name="err_title">Erreur</string>
     <string name="action_sign_in">Se connecter</string>
     <string name="action_sign_out">Se déconnecter</string>
     <string name="setup_subtitle">Adresse de votre site webtrees. Le module « api4webtrees » doit être installé sur le serveur.</string>

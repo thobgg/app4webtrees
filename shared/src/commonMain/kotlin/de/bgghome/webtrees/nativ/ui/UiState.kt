@@ -64,6 +64,8 @@ data class UiState(
     val error: String? = null,
     /** Einmalige Meldung fuer die Snackbar; die Oberflaeche setzt sie nach dem Anzeigen zurueck. */
     val message: String? = null,
+    /** Technische Einzelheiten zu [message] (Adresse, HTTP, Fehlerseite): dann erscheint sie als Dialog mit Kopieren und Details. */
+    val messageDetails: String? = null,
     val baseUrl: String = "",
     val userName: String = "",
     /** Zugangsdaten des Verzeichnisschutzes (Vorbelegung des Adressbildschirms), siehe WtClient.basicAuth. */

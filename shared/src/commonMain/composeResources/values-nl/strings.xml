@@ -9,6 +9,11 @@
     <string name="action_delete">Verwijderen</string>
     <string name="action_edit">Bewerken</string>
     <string name="action_close">Sluiten</string>
+    <string name="action_copy">Kopiëren</string>
+    <string name="action_details">Details</string>
+    <string name="action_details_hide">Details verbergen</string>
+    <string name="msg_copied">Gekopieerd</string>
+    <string name="err_title">Fout</string>
     <string name="action_sign_in">Aanmelden</string>
     <string name="action_sign_out">Afmelden</string>
     <string name="setup_subtitle">Adres van uw webtrees-site. Op de server moet de module „api4webtrees“ geïnstalleerd zijn.</string>

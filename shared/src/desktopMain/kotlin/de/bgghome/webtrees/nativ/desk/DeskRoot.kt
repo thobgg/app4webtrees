@@ -303,9 +303,12 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         }
 
         val snackbar = remember { SnackbarHostState() }
-        LaunchedEffect(state.message) {
-            state.message?.let { snackbar.showSnackbar(it); viewModel.messageShown() }
+        // Fehler mit Einzelheiten als Dialog (MeldungDialog), alles andere kurz in der Snackbar.
+        LaunchedEffect(state.message, state.messageDetails) {
+            if (state.messageDetails == null) state.message?.let { snackbar.showSnackbar(it); viewModel.messageShown() }
         }
+        val meldung = state.message; val meldungDetails = state.messageDetails
+        if (meldung != null && meldungDetails != null) de.bgghome.webtrees.nativ.ui.MeldungDialog(meldung, meldungDetails, viewModel::messageShown)
 
         // Ortsnamen (Personentafel, Ortsfelder in den Dialogen) oeffnen die Ortsverwaltung, wenn der Server sie kennt
         val ortOeffnen: ((String) -> Unit)? = if (orteApi) ({ n: String -> orte = n }) else null
