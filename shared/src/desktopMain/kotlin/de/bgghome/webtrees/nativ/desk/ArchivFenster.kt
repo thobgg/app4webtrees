@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -195,7 +197,7 @@ fun ArchivFenster(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
                 eintraege += p.eintraege + (if (nr == 1) p.weitere else emptyList())
                 naechste = if (p.seite < p.seiten) p.seite + 1 else null
             }
-            .onFailure { fehler = it.message ?: "?" }
+            .onFailure { fehler = meldung(it) }
         laden = false
     }
     LaunchedEffect(wahl, neu) {
@@ -244,7 +246,7 @@ fun ArchivFenster(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
         val ordner = ordnerWaehlen() ?: return
         scope.launch {
             meldung = null
-            val n = runCatching { withContext(Dispatchers.IO) { kopien(client, liste, ordner) } }.getOrElse { fehler = it.message; return@launch }
+            val n = runCatching { withContext(Dispatchers.IO) { kopien(client, liste, ordner) } }.getOrElse { fehler = meldung(it); return@launch }
             meldung = de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_archive_downloaded, n, ordner.absolutePath)
         }
     }
@@ -452,7 +454,7 @@ fun ArchivFenster(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
                                 onAbgleich = { u -> scope.launch {
                                     runCatching { withContext(Dispatchers.IO) { client.writeExif(tree, einer.pfad.orEmpty(), de.bgghome.webtrees.nativ.data.ArchivAbgleich.anfrage(einer, u)) } }
                                         .onSuccess { r -> r.eintrag?.let { ersetzen(eintraege, it) }; meldung = de.bgghome.webtrees.nativ.Texte.t(Res.string.msg_exif_saved) }
-                                        .onFailure { fehler = it.message }
+                                        .onFailure { fehler = meldung(it) }
                                 } },
                                 onOeffnen = { oeffnen(einer) }, onBearbeiten = { bearbeiten = einer },
                                 onPostkarte = if (stufe6 && viewModel.canEditExif && einer.istBild && einer.pfad != null) ({ postkarteBearbeiten = einer }) else null,
@@ -479,7 +481,7 @@ fun ArchivFenster(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
                             scope.launch {
                                 runCatching { withContext(Dispatchers.IO) { client.writeExif(tree, entry.pfad.orEmpty(), req) } }
                                     .onSuccess { r -> r.eintrag?.let { n -> ersetzen(eintraege, n); betrachter = betrachter?.let { b -> b.copy(items = b.items.map { x -> if (x.entry?.pfad == n.pfad) viewerItem(n) else x }) } } }
-                                    .onFailure { fehler = it.message }
+                                    .onFailure { fehler = meldung(it) }
                             }
                         })
                 }
@@ -492,7 +494,7 @@ fun ArchivFenster(state: UiState, viewModel: AppViewModel, openWeb: (String) -> 
                     scope.launch {
                         runCatching { withContext(Dispatchers.IO) { client.writeExif(tree, entry.pfad.orEmpty(), req) } }
                             .onSuccess { r -> r.eintrag?.let { ersetzen(eintraege, it) }; meldung = de.bgghome.webtrees.nativ.Texte.t(Res.string.msg_exif_saved) }
-                            .onFailure { fehler = it.message }
+                            .onFailure { fehler = meldung(it) }
                     }
                 })
             }
@@ -825,7 +827,7 @@ private fun HochladenDialog(
                         }.onSuccess { r ->
                             abgelegt++
                             if (r.hinweis == "exif-failed") hinweise += de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_archive_upload_no_meta, d.name)
-                        }.onFailure { hinweise += d.name + ": " + (it.message ?: "?") }
+                        }.onFailure { hinweise += d.name + ": " + (meldung(it)) }
                         fertig++
                     }
                     laeuft = false; ende = true

@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -140,7 +142,7 @@ fun QuelleDialog(tree: String, alt: SourceDetail?, viewModel: AppViewModel, onDi
                         val repo = if (archiv == NEUES_ARCHIV) viewModel.client.saveRepository(tree, null, neuesArchiv.trim()).xref else archiv
                         viewModel.client.saveSource(tree, alt?.xref, anfrage(repo)).xref.ifEmpty { alt?.xref.orEmpty() }
                     }.onSuccess { onSaved(it); onDismiss() }
-                        .onFailure { fehler = it.message ?: "?"; speichert = false }
+                        .onFailure { fehler = meldung(it); speichert = false }
                 }
             }) { Text(stringResource(Res.string.action_save)) }
         },
@@ -178,7 +180,7 @@ fun UnbenutzteDialog(tree: String, quellen: List<SourceSummary>, viewModel: AppV
                 scope.launch {
                     runCatching { for (x in gewaehlt) viewModel.client.deleteRecord(tree, x) }
                         .onSuccess { onFertig(); onDismiss() }
-                        .onFailure { fehler = it.message ?: "?"; laeuft = false; onFertig() }
+                        .onFailure { fehler = meldung(it); laeuft = false; onFertig() }
                 }
             }) { Text(stringResource(Res.string.desk_sources_unused_delete, gewaehlt.size)) }
         },

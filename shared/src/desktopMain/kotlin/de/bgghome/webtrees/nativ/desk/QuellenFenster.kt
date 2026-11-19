@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -160,12 +162,12 @@ fun QuellenFenster(state: UiState, viewModel: AppViewModel, start: String?, open
                             onBearbeiten = { dialog = QuellenDialog.Bearbeiten(it) },
                             onVorhanden = { dialog = QuellenDialog.Medium(it) },
                             onMediumLoesen = { q, m ->
-                                scope.launch { runCatching { viewModel.client.saveSource(tree.orEmpty(), q.xref, de.bgghome.webtrees.nativ.api.SourceRequest(media = q.media.map { it.xref }.filter { it != m.xref }.distinct())) }.onSuccess { neuLaden() }.onFailure { fehler = it.message } }
+                                scope.launch { runCatching { viewModel.client.saveSource(tree.orEmpty(), q.xref, de.bgghome.webtrees.nativ.api.SourceRequest(media = q.media.map { it.xref }.filter { it != m.xref }.distinct())) }.onSuccess { neuLaden() }.onFailure { fehler = meldung(it) } }
                             },
                             onLoeschen = { dialog = QuellenDialog.Loeschen(it) },
                             onDatei = { q ->
                                 dateiOeffnen(scanDialogTitel())?.let { datei ->
-                                    scope.launch { runCatching { scanHochladen(viewModel.client, tree.orEmpty(), q.xref, datei) }.onSuccess { neuLaden() }.onFailure { fehler = it.message } }
+                                    scope.launch { runCatching { scanHochladen(viewModel.client, tree.orEmpty(), q.xref, datei) }.onSuccess { neuLaden() }.onFailure { fehler = meldung(it) } }
                                 }
                             })
                     }
@@ -183,12 +185,12 @@ fun QuellenFenster(state: UiState, viewModel: AppViewModel, start: String?, open
                         title = stringResource(Res.string.desk_source_delete),
                         text = if (n > 0) stringResource(Res.string.desk_source_delete_text, q.title, n) else stringResource(Res.string.desk_source_delete_unused_text, q.title),
                         confirm = stringResource(Res.string.desk_source_delete), onDismiss = { dialog = null },
-                        onConfirm = { dialog = null; scope.launch { runCatching { viewModel.client.deleteRecord(t, q.xref) }.onSuccess { gewaehlt = null; neuLaden() }.onFailure { fehler = it.message } } },
+                        onConfirm = { dialog = null; scope.launch { runCatching { viewModel.client.deleteRecord(t, q.xref) }.onSuccess { gewaehlt = null; neuLaden() }.onFailure { fehler = meldung(it) } } },
                     )
                 }
                 is QuellenDialog.Medium -> MedienWahlDialog(t, viewModel.client, dlg.quelle.media.map { it.xref }.toSet(), onDismiss = { dialog = null },
                     archive = state.archive, rechteXref = dlg.quelle.xref) { m ->
-                    scope.launch { runCatching { viewModel.client.saveSource(t, dlg.quelle.xref, de.bgghome.webtrees.nativ.api.SourceRequest(media = (dlg.quelle.media.map { it.xref } + m.xref).distinct())) }.onSuccess { neuLaden() }.onFailure { fehler = it.message } }
+                    scope.launch { runCatching { viewModel.client.saveSource(t, dlg.quelle.xref, de.bgghome.webtrees.nativ.api.SourceRequest(media = (dlg.quelle.media.map { it.xref } + m.xref).distinct())) }.onSuccess { neuLaden() }.onFailure { fehler = meldung(it) } }
                 }
                 QuellenDialog.Unbenutzte -> UnbenutzteDialog(t, liste?.getOrNull()?.sources.orEmpty(), viewModel, onDismiss = { dialog = null }, onFertig = { gewaehlt = null; neuLaden() })
             }

@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.layout.aspectRatio
 import de.bgghome.webtrees.nativ.ui.WtAlertDialog
@@ -151,13 +153,13 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                     val oben = withContext(Dispatchers.IO) { oberorte.getOrPut(v.ort) { ortsdatensatz(viewModel.client, tree.orEmpty(), v.ort) } } ?: continue
                     val ort = runCatching { withContext(Dispatchers.IO) { viewModel.client.savePlace(tree.orEmpty(), de.bgghome.webtrees.nativ.api.PlaceRequest(
                         v.name, type = typ, parentAendern = true, parent = oben, govTypeAendern = govTyp != null, govType = govTyp)) } }
-                        .onFailure { meldung = it.message ?: "?" }.getOrNull() ?: continue
+                        .onFailure { meldung = meldung(it) }.getOrNull() ?: continue
                     orte++; ausstehend = ausstehend || ort.pending
                     // Dann jedes Ereignis: Ort auf das Haus, Adresse weg - den Verweis "3 _LOC" setzt der Server (Stufe 32)
                     for (a in v.fakten) {
                         runCatching { withContext(Dispatchers.IO) { viewModel.client.saveFact(tree.orEmpty(), a.record,
                             de.bgghome.webtrees.nativ.api.FactRequest(factId = a.fact.id, tag = a.fact.tag, place = v.name, address = "")) } }
-                            .onSuccess { ereignisse++; ausstehend = ausstehend || it.pending }.onFailure { meldung = it.message ?: "?" }
+                            .onSuccess { ereignisse++; ausstehend = ausstehend || it.pending }.onFailure { meldung = meldung(it) }
                     }
                 }
                 adressFortschritt = null
@@ -173,7 +175,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
             meldung = null
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { viewModel.client.renamePlace(tree.orEmpty(), von, nach, preview = true) } }
-                    .onSuccess { umbenennen = it }.onFailure { meldung = it.message ?: "?" }
+                    .onSuccess { umbenennen = it }.onFailure { meldung = meldung(it) }
             }
         }
         val verweise = meldung
@@ -197,7 +199,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                                 verweisFortschritt = de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_places_links_running, i + 1, orte.size)
                                 runCatching { withContext(Dispatchers.IO) { viewModel.client.savePlace(tree.orEmpty(), de.bgghome.webtrees.nativ.api.PlaceRequest(o.name, linkEvents = true)) } }
                                     .onSuccess { summe += it.linked ?: 0; ausstehend = ausstehend || it.pending }
-                                    .onFailure { meldung = it.message ?: "?" }
+                                    .onFailure { meldung = meldung(it) }
                             }
                             verweisFortschritt = null
                             meldung = listOfNotNull(de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_place_linked, summe),
@@ -218,7 +220,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                                     if (r.pending) "  " + de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_place_rename_moderated) else ""
                                 gewaehlt = r.to
                                 neu++
-                            }.onFailure { meldung = it.message ?: "?" }
+                            }.onFailure { meldung = meldung(it) }
                     }
                 }
             }
@@ -939,7 +941,7 @@ private fun OrtNotizen(o: PlaceDetail, pflege: OrtPflege?) {
             speichert = true; fehler = null
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { pflege.viewModel.client.savePlace(pflege.tree, de.bgghome.webtrees.nativ.api.PlaceRequest(o.name, note = text.trim())) } }
-                    .onSuccess { pflege.onGeaendert() }.onFailure { fehler = it.message ?: "?" }
+                    .onSuccess { pflege.onGeaendert() }.onFailure { fehler = meldung(it) }
                 speichert = false
             }
         }, enabled = text.trim() != alt.trim() && !speichert, shape = MaterialTheme.shapes.small) { Text(stringResource(Res.string.action_save)) }
@@ -987,7 +989,7 @@ private fun OrtMedien(o: PlaceDetail, pflege: OrtPflege?, openWeb: (String) -> U
         if (pflege == null) return
         scope.launch {
             runCatching { withContext(Dispatchers.IO) { pflege.viewModel.client.savePlace(pflege.tree, de.bgghome.webtrees.nativ.api.PlaceRequest(o.name, media = neu.distinct())) } }
-                .onSuccess { pflege.onGeaendert() }.onFailure { fehler = it.message ?: "?" }
+                .onSuccess { pflege.onGeaendert() }.onFailure { fehler = meldung(it) }
         }
     }
     fun hochladen(dateien: List<java.io.File>) {
@@ -999,7 +1001,7 @@ private fun OrtMedien(o: PlaceDetail, pflege: OrtPflege?, openWeb: (String) -> U
                     val bytes = withContext(Dispatchers.IO) { datei.readBytes() }
                     withContext(Dispatchers.IO) { pflege.viewModel.client.uploadMedia(pflege.tree, x, bytes, datei.name, mimeVon(datei), titelAusDatei(datei)) }
                 }
-            }.onSuccess { pflege.onGeaendert() }.onFailure { fehler = it.message ?: "?" }
+            }.onSuccess { pflege.onGeaendert() }.onFailure { fehler = meldung(it) }
         }
     }
     // Dateien aus dem Dateimanager hineinziehen; waehrend des Ziehens ist der Bereich umrandet
@@ -1031,7 +1033,7 @@ private fun OrtMedien(o: PlaceDetail, pflege: OrtPflege?, openWeb: (String) -> U
                 OutlinedButton(onClick = { dateiOeffnen(scanDialogTitel())?.let { hochladen(listOf(it)) } }, shape = MaterialTheme.shapes.small) {
                     Text(stringResource(Res.string.desk_source_add_file))
                 }
-                OutlinedButton(onClick = { scope.launch { runCatching { pflege.locXref(o) }.onSuccess { waehlen = it }.onFailure { fehler = it.message } } },
+                OutlinedButton(onClick = { scope.launch { runCatching { pflege.locXref(o) }.onSuccess { waehlen = it }.onFailure { fehler = meldung(it) } } },
                     shape = MaterialTheme.shapes.small) { Text(stringResource(Res.string.desk_media_existing)) }
             }
             Text(stringResource(Res.string.desk_media_drop_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1047,7 +1049,7 @@ private fun OrtMedien(o: PlaceDetail, pflege: OrtPflege?, openWeb: (String) -> U
             bearbeiten = null
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { pflege.viewModel.client.mediaObject(pflege.tree, medium.xref, titel, art) } }
-                    .onSuccess { pflege.onGeaendert() }.onFailure { fehler = it.message ?: "?" }
+                    .onSuccess { pflege.onGeaendert() }.onFailure { fehler = meldung(it) }
             }
         }
     }

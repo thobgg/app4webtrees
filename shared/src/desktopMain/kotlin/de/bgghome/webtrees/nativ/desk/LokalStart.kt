@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -116,7 +118,7 @@ internal fun LokalAnlegenFeld(viewModel: AppViewModel, neu: Boolean = false, oef
                 // Gleich den eben angelegten Baum oeffnen, auch wenn schon andere da sind
                 viewModel.settings.tree = zugang.baum
                 viewModel.login(zugang.benutzer, zugang.passwort)
-            }.onSuccess { onFertig() }.onFailure { fehler = it.message ?: it.toString() }
+            }.onSuccess { onFertig() }.onFailure { fehler = meldung(it) }
             schritt = null
         }
     }

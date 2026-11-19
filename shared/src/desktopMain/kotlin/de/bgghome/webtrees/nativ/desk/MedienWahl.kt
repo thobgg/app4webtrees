@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -166,7 +168,7 @@ private fun ArchivWahl(tree: String, client: WtClient, archive: ArchiveOverview,
         laden = true
         var seite = 1
         while (true) {
-            val p = withContext(Dispatchers.IO) { runCatching { client.collection(tree, slug, "", seite, 200) } }.getOrElse { fehler = it.message; null } ?: break
+            val p = withContext(Dispatchers.IO) { runCatching { client.collection(tree, slug, "", seite, 200) } }.getOrElse { fehler = meldung(it); null } ?: break
             // eintraege: Bilder; weitere: Dokumente (PDF ...) - fuer Quellen sind gerade die wichtig
             eintraege += p.eintraege + p.weitere
             if (seite >= p.seiten) break
@@ -194,7 +196,7 @@ private fun ArchivWahl(tree: String, client: WtClient, archive: ArchiveOverview,
                                     val pfad = e.pfad ?: error("?")
                                     val xref = e.xref ?: client.mediaFromFile(tree, rechteXref, pfad, e.titel.ifBlank { e.datei.substringBeforeLast('.') }).media ?: error("?")
                                     MediaJson(xref = xref, title = e.titel.ifBlank { e.datei }, mime = if (e.istBild) "image/${e.format}" else "application/${e.format}", isImage = e.istBild, thumb = e.kachel)
-                                }.onSuccess(onWahl).onFailure { fehler = it.message; beschaeftigt = false }
+                                }.onSuccess(onWahl).onFailure { fehler = meldung(it); beschaeftigt = false }
                             }
                         }.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.size(44.dp).border(1.dp, MaterialTheme.colorScheme.outlineVariant), contentAlignment = Alignment.Center) {

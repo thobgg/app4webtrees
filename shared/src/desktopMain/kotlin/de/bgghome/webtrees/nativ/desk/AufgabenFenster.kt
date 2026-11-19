@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -119,7 +121,7 @@ fun AufgabenFenster(state: UiState, viewModel: AppViewModel, openSheet: (String)
                                         onErledigt = {
                                             scope.launch {
                                                 withContext(Dispatchers.IO) { runCatching { viewModel.client.deleteFact(tree, t.record, t.factId) } }
-                                                    .onSuccess { neu++ }.onFailure { meldung = it.message }
+                                                    .onSuccess { neu++ }.onFailure { meldung = meldung(it) }
                                             }
                                         })
                                     HorizontalDivider(color = farben.outlineVariant)
@@ -238,7 +240,7 @@ fun AufgabeDialog(ziel: AufgabeZiel, viewModel: AppViewModel, tree: String, onCl
                             completed = neu(erledigt, v?.completed?.gedcom?.ifBlank { null } ?: v?.completed?.text),
                             solution = neu(loesung, v?.solution), repository = neu(archiv, v?.repository?.xref))
                         runCatching { viewModel.client.saveTask(tree, ziel.xref, anfrage) }
-                    }.onSuccess { onClose(true) }.onFailure { fehler = it.message }
+                    }.onSuccess { onClose(true) }.onFailure { fehler = meldung(it) }
                     laeuft = false
                 }
             }) { Text(stringResource(Res.string.action_save)) }

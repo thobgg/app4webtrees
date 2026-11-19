@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -201,7 +203,7 @@ internal fun SuchInhalt(state: UiState, viewModel: AppViewModel, openSheet: (Str
             liste.forEachIndexed { i, e ->
                 schreibt = i + 1 to liste.size
                 runCatching { withContext(Dispatchers.IO) { viewModel.client.saveFact(tree, e.record, e.anfrage()) } }
-                    .onSuccess { ok++; ausstehend = ausstehend || it.pending }.onFailure { fehler = it.message ?: "?" }
+                    .onSuccess { ok++; ausstehend = ausstehend || it.pending }.onFailure { fehler = meldung(it) }
             }
             schreibt = null; vorschau = null; gewaehlt = emptySet()
             meldung = listOfNotNull(Texte.t(Res.string.desk_search_replace_done, ok), if (ausstehend) Texte.t(Res.string.desk_search_replace_pending) else null, fehler).joinToString("  ")
@@ -249,12 +251,12 @@ internal fun SuchInhalt(state: UiState, viewModel: AppViewModel, openSheet: (Str
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(enabled = !treffer.isNullOrEmpty(), onClick = {
                                 val d = java.awt.FileDialog(null as java.awt.Frame?, Texte.t(Res.string.desk_search_save), java.awt.FileDialog.SAVE).apply { file = "*.wtliste"; isVisible = true }
-                                d.file?.let { f -> runCatching { java.io.File(d.directory, if (f.endsWith(".wtliste", true)) f else "$f.wtliste").writeText(Suche.listeText(treffer.orEmpty())) }.onFailure { meldung = it.message } }
+                                d.file?.let { f -> runCatching { java.io.File(d.directory, if (f.endsWith(".wtliste", true)) f else "$f.wtliste").writeText(Suche.listeText(treffer.orEmpty())) }.onFailure { meldung = meldung(it) } }
                             }) { Text(stringResource(Res.string.desk_search_save)) }
                             OutlinedButton(enabled = baum?.isSuccess == true, onClick = {
                                 val b = baum?.getOrNull() ?: return@OutlinedButton
                                 val d = java.awt.FileDialog(null as java.awt.Frame?, Texte.t(Res.string.desk_search_load), java.awt.FileDialog.LOAD).apply { file = "*.wtliste"; isVisible = true }
-                                d.file?.let { f -> runCatching { java.io.File(d.directory, f).readText() }.onSuccess { treffer = Suche.listeLesen(it, b); vorschau = null; meldung = null }.onFailure { meldung = it.message } }
+                                d.file?.let { f -> runCatching { java.io.File(d.directory, f).readText() }.onSuccess { treffer = Suche.listeLesen(it, b); vorschau = null; meldung = null }.onFailure { meldung = meldung(it) } }
                             }) { Text(stringResource(Res.string.desk_search_load)) }
                         }
                     }

@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -152,7 +154,7 @@ fun ZitatDialog(ziel: ZitatZiel, tree: String, viewModel: AppViewModel, onDismis
                                         runCatching {
                                             val x = viewModel.client.saveSource(tree, null, de.bgghome.webtrees.nativ.api.SourceRequest(title = titelAusDatei(datei))).xref
                                             scanHochladen(viewModel.client, tree, x, datei); x
-                                        }.onSuccess { quelle = it; quellenNeu++ }.onFailure { fehler = it.message }
+                                        }.onSuccess { quelle = it; quellenNeu++ }.onFailure { fehler = meldung(it) }
                                     }
                                 }
                             }) { Text(stringResource(Res.string.desk_cite_from_file)) }
@@ -187,7 +189,7 @@ fun ZitatDialog(ziel: ZitatZiel, tree: String, viewModel: AppViewModel, onDismis
                                     val bytes = withContext(Dispatchers.IO) { datei.readBytes() }
                                     viewModel.client.uploadMedia(tree, ziel.record, bytes, datei.name, mimeVon(datei), datei.nameWithoutExtension, type = "document", link = false).media
                                 }.onSuccess { x -> if (x != null) medien += de.bgghome.webtrees.nativ.api.MediaJson(xref = x, title = datei.nameWithoutExtension, mime = mimeVon(datei)) }
-                                    .onFailure { medienFehler = it.message }
+                                    .onFailure { medienFehler = meldung(it) }
                             }
                         }
                     },

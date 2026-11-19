@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import de.bgghome.webtrees.nativ.api.Info
 import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
@@ -179,7 +181,7 @@ fun OrtDialog(tree: String, ort: PlaceDetail, client: WtClient, istAdmin: Boolea
         sucht = true; fehler = null
         scope.launch {
             runCatching { withContext(Dispatchers.IO) { nominatim(frage, client.userAgent) } }
-                .onSuccess { treffer = it }.onFailure { fehler = it.message ?: "?" }
+                .onSuccess { treffer = it }.onFailure { fehler = meldung(it) }
             sucht = false
         }
     }
@@ -315,7 +317,7 @@ fun OrtDialog(tree: String, ort: PlaceDetail, client: WtClient, istAdmin: Boolea
                 scope.launch {
                     runCatching { withContext(Dispatchers.IO) { client.savePlace(tree, anfrage) } }
                         .onSuccess { onSaved(it); onDismiss() }
-                        .onFailure { fehler = it.message ?: "?"; speichert = false }
+                        .onFailure { fehler = meldung(it); speichert = false }
                 }
             }) { Text(stringResource(Res.string.action_save)) }
         },

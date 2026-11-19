@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,12 +64,12 @@ fun LokaleBaeumeDialog(state: UiState, viewModel: AppViewModel, onClose: () -> U
 
     LaunchedEffect(stand) {
         withContext(Dispatchers.IO) { runCatching { LokalBetrieb.baeume() } }
-            .onSuccess { baeume = it; fehler = null }.onFailure { fehler = it.message ?: it.toString() }
+            .onSuccess { baeume = it; fehler = null }.onFailure { fehler = meldung(it) }
     }
     fun ausfuehren(aktion: () -> Unit) {
         scope.launch {
             withContext(Dispatchers.IO) { runCatching(aktion) }
-                .onFailure { fehler = it.message ?: it.toString() }
+                .onFailure { fehler = meldung(it) }
             stand++
             viewModel.reloadTrees()
         }

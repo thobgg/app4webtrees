@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -122,7 +124,7 @@ fun ZusammenfuehrenFenster(state: UiState, viewModel: AppViewModel, start: Strin
                             val r = withContext(Dispatchers.IO) { runCatching { viewModel.client.mergeUndo(tree, e.id, false) } }
                             meldung = r.fold(
                                 onSuccess = { u -> if (u.ok) Texte.t(Res.string.desk_merge_undo_done, e.removedName) else Texte.t(Res.string.desk_merge_undo_blocked, u.changed.joinToString { it.name.ifBlank { it.xref } }) },
-                                onFailure = { it.message },
+                                onFailure = { meldung(it) },
                             )
                             if (r.getOrNull()?.ok == true) { neu++; viewModel.refresh() }
                         }

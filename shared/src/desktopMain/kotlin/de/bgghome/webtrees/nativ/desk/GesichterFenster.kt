@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -327,7 +329,7 @@ fun GesichterInhalt(
                             }
                         }
                             .onSuccess { neu -> z.geaendert = false; onGespeichert(neu ?: eintrag.copy(bereiche = bereiche.toList())) }
-                            .onFailure { z.fehler = it.message ?: "?" }
+                            .onFailure { z.fehler = meldung(it) }
                         z.speichert = false
                     }
                 }) { Text(stringResource(Res.string.action_save)) }

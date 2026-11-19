@@ -1,5 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -132,7 +134,7 @@ internal fun ZusammenfuehrenDialogInhalt(start: Dublette, zugriff: Zusammenfuehr
                     laeuft = true
                     scope.launch {
                         rueckgaengig = withContext(Dispatchers.IO) { runCatching { zugriff.rueckgaengig(e.mergeId) } }
-                            .onFailure { fehler = it.message }.getOrNull()
+                            .onFailure { fehler = meldung(it) }.getOrNull()
                         laeuft = false
                     }
                 }) { Text(stringResource(Res.string.desk_merge_undo)) }
@@ -172,7 +174,7 @@ internal fun ZusammenfuehrenDialogInhalt(start: Dublette, zugriff: Zusammenfuehr
                             warteschlange = warteschlange + p.suggestions.filter { it.schluessel in weitere }.map { Dublette(it.xref1, it.xref2, "", "${it.name1} ← ${it.name2}") }
                             ergebnis = r
                         }
-                        .onFailure { fehler = it.message }
+                        .onFailure { fehler = meldung(it) }
                     laeuft = false
                 }
             }) { Text(stringResource(Res.string.desk_merge_confirm)) }
