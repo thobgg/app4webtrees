@@ -322,7 +322,7 @@ internal fun OrteInhalt(
                 }
                 gewaehlt == null -> Text(stringResource(Res.string.desk_places_choose), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 detail == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                detail.exceptionOrNull() != null -> Text(meldung(detail.exceptionOrNull()), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
+                detail.exceptionOrNull() != null -> Text(meldung(detail.exceptionOrNull()), Modifier.padding(start = 24.dp, top = 24.dp, end = 260.dp, bottom = 24.dp), color = MaterialTheme.colorScheme.error)
                 else -> OrtDetail(detail.getOrThrow(), viewModel, onWahl, openWeb, reiterStart, onBearbeiten, onUmbenennen, pflege, onBlatt, onClose)
             }
             // Schliessen oben rechts - beim Ort steht der Knopf in seiner Kopfzeile neben "In webtrees oeffnen"
