@@ -37,6 +37,23 @@ class FehlerseiteTest {
     }
 }
 
+class FehlerseiteWebtreesTest {
+    /** webtrees 2.2 (HandleExceptions): ganze Seite mit Menue, der Fehler steht als <pre class="alert alert-danger"> mit Meldung, Datei:Zeile und Stacktrace. */
+    @Test fun webtreesFehlerblockNenntDieMeldungNichtDenTrace() {
+        val html = """<html><head><title>Error – webtrees</title></head><body><nav><a>Meine Seite</a><a>Verwaltung</a></nav>
+<pre class="alert alert-danger">Failed to set memory limit to 2097152 bytes (Current memory usage is 25165824 bytes) …/modules_v4/api4webtrees/src/PlaceActions.php:99
+#0 [internal function]: Fisharebest\\Webtrees\\Http\\Middleware\\ErrorHandler-&gt;errorHandler(2, 'Failed to set m...', '/tmp/x', 99)
+#55 …/app/Http/Middleware/HandleExceptions.php(81): Psr\\Http\\Server\\RequestHandlerInterface@anonymous-&gt;handle(Object(Nyholm\\Psr7\\ServerRequest))</pre></body></html>"""
+        assertEquals("Failed to set memory limit to 2097152 bytes (Current memory usage is 25165824 bytes) …/modules_v4/api4webtrees/src/PlaceActions.php:99", Fehlerseite.kern(html))
+    }
+
+    /** Ohne Fehlerblock: Trace-Zeilen mit "Exception" im Namen sind kein Treffer. */
+    @Test fun traceZeilenZaehlenNicht() {
+        val html = "<p>#3 …/app/Http/Middleware/HandleExceptions.php(81): x</p><p>Uncaught TypeError: y in z:4</p>"
+        assertEquals("Uncaught TypeError: y in z:4", Fehlerseite.kern(html))
+    }
+}
+
 class FehlerDetailsTest {
     @Test fun klartextDerGanzenSeite() {
         val html = "<html><head><title>Fehler</title></head><body><h1>Oops</h1><p>Zeile eins</p><p>Zeile zwei</p></body></html>"
