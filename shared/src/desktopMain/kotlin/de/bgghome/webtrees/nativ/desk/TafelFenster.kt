@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -649,7 +650,7 @@ fun TafelFenster(state: UiState, viewModel: AppViewModel, start: TafelArt?, onCl
                             onAusblenden = { menue?.first?.person?.xref?.let { x -> ausgeblendet = ausgeblendet + x }; menue = null })
                     }
                     when {
-                        fehler != null -> Text(fehler.message ?: "?", color = androidx.compose.ui.graphics.Color.White)
+                        fehler != null -> Text(meldung(fehler), color = androidx.compose.ui.graphics.Color.White)
                         vorschau != null && bild == null -> Text(stringResource(Res.string.desk_chart_empty), color = androidx.compose.ui.graphics.Color.White)
                         bild == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White)

@@ -156,7 +156,7 @@ private fun Paare(baum: Result<TreeExport>?, paare: List<Dublette>?, openSheet: 
     val b = baum?.getOrNull()
     when {
         baum == null || (b != null && paare == null) -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        b == null -> Text(baum.exceptionOrNull()?.message ?: "?", color = farben.error)
+        b == null -> Text(meldung(baum.exceptionOrNull()), color = farben.error)
         else -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(Res.string.desk_merge_hint), style = MaterialTheme.typography.bodySmall, color = farben.onSurfaceVariant)
             if (paare.isNullOrEmpty()) Text(stringResource(Res.string.desk_merge_none), Modifier.padding(vertical = 20.dp), color = farben.onSurfaceVariant)
@@ -207,7 +207,7 @@ private fun Protokoll(protokoll: Result<List<MergeEntry>>?, onRueckgaengig: (Mer
     val liste = protokoll?.getOrNull()
     when {
         protokoll == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        liste == null -> Text(protokoll.exceptionOrNull()?.message ?: "?", color = farben.error)
+        liste == null -> Text(meldung(protokoll.exceptionOrNull()), color = farben.error)
         liste.isEmpty() -> Text(stringResource(Res.string.desk_merge_log_none), Modifier.padding(vertical = 20.dp), color = farben.onSurfaceVariant)
         else -> Box(Modifier.fillMaxSize().border(1.dp, farben.outlineVariant)) {
             LazyColumn {

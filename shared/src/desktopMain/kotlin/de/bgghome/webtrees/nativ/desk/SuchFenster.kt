@@ -319,7 +319,7 @@ internal fun SuchInhalt(state: UiState, viewModel: AppViewModel, openSheet: (Str
                         CircularProgressIndicator()
                         if (fortschritt.second > 0) Text("${fortschritt.first} / ${fortschritt.second}", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.labelMedium)
                     }
-                    b.isFailure -> Text(b.exceptionOrNull()?.message ?: "?", Modifier.padding(12.dp), color = farben.error)
+                    b.isFailure -> Text(meldung(b.exceptionOrNull()), Modifier.padding(12.dp), color = farben.error)
                     s != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(Res.string.desk_search_replace_progress, s.first, s.second)) }
                     v != null -> VorschauListe(v, gewaehlt, onWahl = { i, an -> gewaehlt = if (an) gewaehlt + i else gewaehlt - i })
                     t == null -> Text(stringResource(Res.string.desk_search_hint), Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium, color = farben.onSurfaceVariant)

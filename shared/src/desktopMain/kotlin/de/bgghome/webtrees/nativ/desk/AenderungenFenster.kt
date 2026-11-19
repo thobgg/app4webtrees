@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -77,7 +78,7 @@ fun AenderungenFenster(state: UiState, viewModel: AppViewModel, openSheet: (Stri
                     val l = liste
                     when {
                         l == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                        l.isFailure -> Text(l.exceptionOrNull()?.message ?: "?", Modifier.padding(12.dp), color = farben.error)
+                        l.isFailure -> Text(meldung(l.exceptionOrNull()), Modifier.padding(12.dp), color = farben.error)
                         l.getOrThrow().isEmpty() -> Text(stringResource(Res.string.desk_changes_empty), Modifier.padding(16.dp), color = farben.onSurfaceVariant)
                         else -> {
                             val ls = rememberLazyListState()

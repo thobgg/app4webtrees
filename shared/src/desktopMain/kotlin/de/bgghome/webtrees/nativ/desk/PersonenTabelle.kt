@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import de.bgghome.webtrees.nativ.data.Ortsanzeige
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
@@ -291,7 +292,7 @@ internal fun PersonenTabelleInhalt(state: UiState, viewModel: AppViewModel, open
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     val fehler = baum?.exceptionOrNull()
                     when {
-                        fehler != null -> Text(fehler.message ?: "?", Modifier.padding(16.dp), color = MaterialTheme.colorScheme.error)
+                        fehler != null -> Text(meldung(fehler), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.error)
                         baum == null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             val (x, n) = fortschritt
                             if (n > 0) LinearProgressIndicator(progress = { x.toFloat() / n }, modifier = Modifier.width(280.dp)) else CircularProgressIndicator()

@@ -141,7 +141,7 @@ fun QuellenFenster(state: UiState, viewModel: AppViewModel, start: String?, open
                     Box(Modifier.weight(1f)) {
                         val fehler = liste?.exceptionOrNull()
                         when {
-                            fehler != null -> Text(fehler.message ?: "?", Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
+                            fehler != null -> Text(meldung(fehler), Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
                             liste == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                             else -> QuellenListe(treffer, gewaehlt) { gewaehlt = it }
                         }
@@ -157,7 +157,7 @@ fun QuellenFenster(state: UiState, viewModel: AppViewModel, start: String?, open
                     when {
                         gewaehlt == null -> Text(stringResource(Res.string.desk_sources_choose), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         d == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                        d.exceptionOrNull() != null -> Text(d.exceptionOrNull()?.message ?: "?", Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
+                        d.exceptionOrNull() != null -> Text(meldung(d.exceptionOrNull()), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
                         else -> QuelleDetail(d.getOrThrow(), onPerson = viewModel::select, onMitte = viewModel::setRoot, openWeb = openWeb, canEdit = canEdit,
                             onBearbeiten = { dialog = QuellenDialog.Bearbeiten(it) },
                             onVorhanden = { dialog = QuellenDialog.Medium(it) },

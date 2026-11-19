@@ -914,7 +914,7 @@ internal fun SicherungDialog(onClose: () -> Unit) {
                         Text(stand, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     e.isSuccess -> Text(stringResource(Res.string.desk_archive_backup_done, e.getOrThrow().absolutePath))
-                    else -> Text(e.exceptionOrNull()?.message ?: "?", color = MaterialTheme.colorScheme.error)
+                    else -> Text(meldung(e.exceptionOrNull()), color = MaterialTheme.colorScheme.error)
                 }
             }
         },
@@ -959,4 +959,4 @@ internal fun GedcomSpeichernDialog(viewModel: de.bgghome.webtrees.nativ.ui.AppVi
     )
 }
 
-private fun explainOf(e: Throwable): String = (e as? Exception)?.let { de.bgghome.webtrees.nativ.ui.explain(it) } ?: (e.message ?: "?")
+private fun explainOf(e: Throwable): String = meldung(e)

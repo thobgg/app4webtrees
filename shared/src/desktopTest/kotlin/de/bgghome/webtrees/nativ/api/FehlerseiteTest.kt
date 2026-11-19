@@ -50,4 +50,14 @@ class FehlerDetailsTest {
         assertTrue(d.startsWith("HTTP 500\nhttps://h/webtrees226/"), d)
         assertTrue(d.endsWith("on line 3"), d)
     }
+
+    /** Die Fenster zeigen ueber meldung() den Servertext, nicht den rohen Ausnahmetext "Keine JSON-Antwort (HTTP 500)". */
+    @Test fun meldungNenntServertextStattAusnahmetext() {
+        val e = NotJsonException(500, serverText = "Fatal error: Allowed memory size of 134217728 bytes exhausted", url = "https://h/index.php")
+        val m = de.bgghome.webtrees.nativ.ui.meldung(e)
+        assertTrue(m.contains("Allowed memory size"), m)
+        assertTrue(m.contains("500"), m)
+        assertTrue(!m.contains("Keine JSON-Antwort"), m)
+        assertEquals("?", de.bgghome.webtrees.nativ.ui.meldung(null))
+    }
 }

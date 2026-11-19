@@ -150,7 +150,7 @@ internal fun ZusammenfuehrenDialogInhalt(start: Dublette, zugriff: Zusammenfuehr
             Column(Modifier.fillMaxWidth().heightIn(max = 620.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 when {
                     vorschau == null -> Box(Modifier.fillMaxWidth().padding(30.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                    v == null -> Text(vorschau?.exceptionOrNull()?.message ?: "?", color = farben.error)
+                    v == null -> Text(meldung(vorschau?.exceptionOrNull()), color = farben.error)
                     else -> {
                         ZusammenfuehrenVorschau(v, keep1, keep2, weitere,
                             onKeep1 = { id, an -> keep1 = if (an) keep1 + id else keep1 - id },

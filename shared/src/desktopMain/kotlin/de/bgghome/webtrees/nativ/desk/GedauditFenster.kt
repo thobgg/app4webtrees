@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -281,7 +282,7 @@ private fun GedauditFensterInhalt(fenster: FrameWindowScope?, startDatei: File?,
                 CircularProgressIndicator(); Text(stringResource(Res.string.ga_loading), Modifier.padding(top = 8.dp))
             }
             geladen?.isFailure == true -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(Res.string.ga_read_error, geladen?.exceptionOrNull()?.message ?: "?"), color = MaterialTheme.colorScheme.error)
+                Text(stringResource(Res.string.ga_read_error, meldung(geladen?.exceptionOrNull())), color = MaterialTheme.colorScheme.error)
                 Knopf(stringResource(Res.string.ga_open), true, onClick = ::waehlen)
             }
             else -> Row(Modifier.fillMaxSize()) {

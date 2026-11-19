@@ -287,7 +287,7 @@ internal fun OrteInhalt(
             Box(Modifier.weight(1f)) {
                 val fehler = liste?.exceptionOrNull()
                 when {
-                    fehler != null -> Text(fehler.message ?: "?", Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
+                    fehler != null -> Text(meldung(fehler), Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
                     liste == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                     else -> {
                         val ls = rememberLazyListState()
@@ -322,7 +322,7 @@ internal fun OrteInhalt(
                 }
                 gewaehlt == null -> Text(stringResource(Res.string.desk_places_choose), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 detail == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                detail.exceptionOrNull() != null -> Text(detail.exceptionOrNull()?.message ?: "?", Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
+                detail.exceptionOrNull() != null -> Text(meldung(detail.exceptionOrNull()), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
                 else -> OrtDetail(detail.getOrThrow(), viewModel, onWahl, openWeb, reiterStart, onBearbeiten, onUmbenennen, pflege, onBlatt, onClose)
             }
             // Schliessen oben rechts - beim Ort steht der Knopf in seiner Kopfzeile neben "In webtrees oeffnen"

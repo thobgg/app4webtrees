@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import de.bgghome.webtrees.nativ.api.hat
 import de.bgghome.webtrees.nativ.Texte
 
@@ -325,7 +326,7 @@ fun BuchFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
                     val fehler = daten?.exceptionOrNull()
                     val s = seiten
                     when {
-                        fehler != null -> Text(fehler.message ?: "?", Modifier.padding(24.dp), color = androidx.compose.ui.graphics.Color.White)
+                        fehler != null -> Text(meldung(fehler), Modifier.padding(24.dp), color = androidx.compose.ui.graphics.Color.White)
                         s == null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White)
                             Text(fortschritt.ifBlank { stringResource(Res.string.desk_book_loading) }, Modifier.padding(top = 8.dp), color = androidx.compose.ui.graphics.Color.White)

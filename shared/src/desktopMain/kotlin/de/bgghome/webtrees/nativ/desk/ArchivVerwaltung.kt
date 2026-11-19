@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +56,7 @@ import org.jetbrains.compose.resources.stringResource
  * Postkarten beschriften, Einstellungen des Moduls (Administrator). Rechte prueft das Modul; die App blendet nur aus.
  */
 
-private fun fehlerText(e: Throwable): String = (e as? Exception)?.let(::explain) ?: (e.message ?: "?")
+private fun fehlerText(e: Throwable): String = meldung(e)
 
 /** Sammlung anlegen ([alt] null) oder aendern. [onGespeichert] bekommt den Slug. */
 @Composable

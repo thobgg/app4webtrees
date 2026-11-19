@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
@@ -138,7 +139,7 @@ fun VergleichInhalt(g: GeladeneDatei, onClose: () -> Unit, vorgabeB: File? = nul
                 when {
                     dateiB == null -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { Text(stringResource(Res.string.ga_drop_hint), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     ergebnis == null -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { Column(horizontalAlignment = Alignment.CenterHorizontally) { CircularProgressIndicator(); Text(stringResource(Res.string.ga_compare_loading), Modifier.padding(top = 8.dp)) } }
-                    ergebnis?.isFailure == true -> Text(stringResource(Res.string.ga_read_error, ergebnis?.exceptionOrNull()?.message ?: "?"), Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
+                    ergebnis?.isFailure == true -> Text(stringResource(Res.string.ga_read_error, meldung(ergebnis?.exceptionOrNull())), Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
                     v != null && b != null -> {
                         val gruppen = listOf(
                             Gruppe.Geaendert to (stringResource(Res.string.ga_compare_changed) to v.geaendert.map { Eintrag(it.a, it.b, it) }),

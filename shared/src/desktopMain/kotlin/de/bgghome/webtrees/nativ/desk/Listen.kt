@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import de.bgghome.webtrees.nativ.data.Ortsanzeige
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -488,7 +489,7 @@ fun ListenFenster(start: ListenArt, state: UiState, viewModel: AppViewModel, onC
                     val fehler = zeilen?.exceptionOrNull()
                     val s = seiten
                     when {
-                        fehler != null -> Text(fehler.message ?: "?", Modifier.padding(24.dp), color = androidx.compose.ui.graphics.Color.White)
+                        fehler != null -> Text(meldung(fehler), Modifier.padding(24.dp), color = androidx.compose.ui.graphics.Color.White)
                         s == null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White)
                             Text(stringResource(Res.string.desk_chart_loading_any), Modifier.padding(top = 8.dp), color = androidx.compose.ui.graphics.Color.White)

@@ -109,7 +109,7 @@ fun AufgabenFenster(state: UiState, viewModel: AppViewModel, openSheet: (String)
                     val l = liste
                     when {
                         l == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                        l.isFailure -> Text(l.exceptionOrNull()?.message ?: "?", Modifier.padding(12.dp), color = farben.error)
+                        l.isFailure -> Text(meldung(l.exceptionOrNull()), Modifier.padding(12.dp), color = farben.error)
                         l.getOrThrow().isEmpty() -> Text(stringResource(Res.string.desk_tasks_empty), Modifier.padding(16.dp), color = farben.onSurfaceVariant)
                         else -> {
                             val ls = rememberLazyListState()

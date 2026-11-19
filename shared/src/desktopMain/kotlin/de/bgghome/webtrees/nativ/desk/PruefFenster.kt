@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -338,7 +339,7 @@ fun PruefFenster(state: UiState, viewModel: AppViewModel, openSheet: (String) ->
                     Box(Modifier.weight(1f).fillMaxWidth()) {
                         val fehlerText = baum?.exceptionOrNull()
                         when {
-                            fehlerText != null -> Text(fehlerText.message ?: "?", color = MaterialTheme.colorScheme.error)
+                            fehlerText != null -> Text(meldung(fehlerText), color = MaterialTheme.colorScheme.error)
                             e == null || b == null -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                                 val (x, n) = fortschritt
                                 if (n > 0) LinearProgressIndicator(progress = { x.toFloat() / n }, modifier = Modifier.width(280.dp)) else CircularProgressIndicator()

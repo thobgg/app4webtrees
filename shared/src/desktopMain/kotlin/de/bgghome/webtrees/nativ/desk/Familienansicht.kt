@@ -1,5 +1,6 @@
 package de.bgghome.webtrees.nativ.desk
 
+import de.bgghome.webtrees.nativ.ui.meldung
 import de.bgghome.webtrees.nativ.data.Ortsanzeige
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
@@ -181,7 +182,7 @@ fun DeskFamilie(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Un
         val fehler = proband?.exceptionOrNull()
         when {
             root == null -> {}
-            fehler != null -> Text(fehler.message ?: "?", Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
+            fehler != null -> Text(meldung(fehler), Modifier.padding(24.dp), color = MaterialTheme.colorScheme.error)
             p == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
             else -> Familie(state, viewModel, openWeb, openSheet, onSuche, PaarDaten(p, partner?.takeIf { it.person.xref == partnerXref }, ahnen, nachfahren),
                 familien, familie, reiter, onReiter = { reiter = it }, generationen = generationen,

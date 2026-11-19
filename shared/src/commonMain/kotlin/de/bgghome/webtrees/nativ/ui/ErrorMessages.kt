@@ -45,7 +45,7 @@ fun details(e: Exception): String = buildString {
  * Fuer runCatching-Stellen in den Fenstern: die uebersetzte Meldung samt Servertext statt des rohen Ausnahmetexts
  * ("Keine JSON-Antwort (HTTP 500)") - so erfaehrt der Nutzer auch dort, was der Server gemeldet hat.
  */
-fun meldung(t: Throwable): String = if (t is Exception) explain(t) else t.message ?: t.javaClass.simpleName
+fun meldung(t: Throwable?): String = when (t) { null -> "?"; is Exception -> explain(t); else -> t.message ?: t.javaClass.simpleName }
 
 /** Ein Fehler, dessen Text schon fuer den Benutzer formuliert ist (z. B. "Bild liess sich nicht verkleinern"). */
 class UserMessageException(message: String) : Exception(message)
