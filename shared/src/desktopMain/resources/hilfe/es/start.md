@@ -21,6 +21,8 @@ Requisito: webtrees 2.2 con el módulo **api4webtrees**. Quien administra el ser
 
 > **Protección de directorio:** si el navegador muestra antes de webtrees una pequeña ventana de acceso del servidor web (.htaccess), despliegue en la pantalla de dirección «¿El servidor pide usuario y contraseña antes de webtrees?» e introduzca ahí esos datos. El programa los envía con cada solicitud a este servidor; después inicia sesión como de costumbre. Si el servidor exige ese acceso, los campos se despliegan solos.
 
+> **Seguir conectado:** muchos servidores eliminan la sesión de webtrees tras una pausa de unos 24 minutos. A partir de api4webtrees 1.30, el programa recibe un token de dispositivo al iniciar sesión y lo usa para volver a conectarse sin preguntar; solo pide de nuevo la contraseña si el token lleva 90 días sin usarse, si la contraseña ha cambiado o si el dispositivo se ha desconectado. Los dispositivos conectados aparecen en webtrees en el menú **App**, donde cada uno puede desconectarse. **Cerrar sesión** también desconecta el dispositivo.
+
 Se inicia sesión con la cuenta normal de webtrees. Se aplican los mismos derechos que en el sitio web: lo que no puede ver allí, tampoco lo ve aquí; lo que puede editar allí, también puede editarlo aquí.
 
 > Las direcciones sin cifrar (`http://`) solo se aceptan en la red doméstica, p. ej. `http://192.168.178.73:8095`. Fuera de casa, el servidor necesita HTTPS.

@@ -33,6 +33,7 @@
     <string name="login_other_address">Autre adresse</string>
     <string name="login_failed">Nom d’utilisateur ou mot de passe incorrect – ou le compte n’a pas encore été approuvé.</string>
     <string name="session_expired">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="session_renewed">La session avait expiré et a été renouvelée. Veuillez réessayer.</string>
     <string name="trees_title">Choisir un arbre généalogique</string>
     <string name="trees_signed_in_as">Connecté en tant que %1$s</string>
     <string name="trees_not_signed_in">Non connecté</string>

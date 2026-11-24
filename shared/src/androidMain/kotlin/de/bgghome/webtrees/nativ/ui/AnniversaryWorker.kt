@@ -31,7 +31,8 @@ import java.util.concurrent.TimeUnit
  * kann nichts anstossen, und wer die App oeffnet, sieht Neues ohnehin an der Zahl am Reiter Start.
  * Abschaltbar; laeuft nur, wenn der Benutzer es eingeschaltet hat. Jede Meldung kommt nur einmal: gemerkt werden der Tag
  * der Jahrestage, die hoechste gemeldete Nachrichtennummer und die Zahl der gemeldeten Aenderungen.
- * Ist die webtrees-Sitzung abgelaufen, passiert einfach nichts - es wird nie ein Passwort gespeichert.
+ * Ist die webtrees-Sitzung abgelaufen, meldet das Geraete-Token still neu an (ab Stufe 47); ohne Token passiert einfach
+ * nichts - es wird nie ein Passwort gespeichert.
  */
 class AnniversaryWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -42,6 +43,7 @@ class AnniversaryWorker(context: Context, params: WorkerParameters) : CoroutineW
 
         if (!settings.reminders || tree.isEmpty() || settings.baseUrl.isEmpty()) return Result.success()
         val client = app.plattform.client
+        runCatching { client.infoMitGeraet() }
 
         // Jahrestage: einmal am Tag
         val heute = java.time.LocalDate.now().toString()

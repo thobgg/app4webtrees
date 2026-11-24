@@ -12,6 +12,7 @@ Las versiones nuevas aparecen en **github.com/thobgg/app4webtrees/releases**. El
 ## Lo que guarda el programa
 
 - Dirección del servidor, nombre de usuario y la cookie de sesión, **nunca la contraseña de webtrees**. Solo los datos de una protección de directorio (si se introducen) quedan en el PC: deben acompañar cada solicitud.
+- A partir de api4webtrees 1.30, un token de dispositivo para volver a conectarse sin preguntar. Cambia con cada uso; así un token robado deja de servir y bloquea el dispositivo en el servidor.
 - Sus ajustes (disposición, aspecto, ajustes de gráficos y listas, reglas de color, lista de marcas de la comprobación) en este PC.
 - Para el árbol genealógico en este PC: el árbol entero en la carpeta `app4webtrees`, incluido el acceso al webtrees local.
 - Sin analíticas, sin publicidad, sin cesión de datos.

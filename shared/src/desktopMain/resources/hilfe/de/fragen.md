@@ -12,6 +12,7 @@ Neue Fassungen erscheinen unter **github.com/thobgg/app4webtrees/releases**. Die
 ## Was das Programm speichert
 
 - Serveradresse, Benutzername und das Sitzungs-Cookie, **nie das webtrees-Passwort**. Nur die Zugangsdaten eines Verzeichnisschutzes (falls eingetragen) bleiben auf dem PC, sie müssen bei jeder Anfrage mit.
+- Ab api4webtrees 1.30 ein Geräte-Token für das stille Neuanmelden. Es wechselt bei jeder Benutzung; ein abgegriffenes Token wird damit wertlos und sperrt das Gerät am Server.
 - Deine Einstellungen (Aufbau, Erscheinungsbild, Tafel- und Listeneinstellungen, Farbregeln, Abhakliste der Prüfung) auf diesem PC.
 - Beim Stammbaum auf dem PC: den ganzen Stammbaum im Ordner `app4webtrees` samt Zugang zum lokalen webtrees.
 - Keine Analyse, keine Werbung, keine Weitergabe.

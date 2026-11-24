@@ -21,6 +21,8 @@ Condition : webtrees 2.2 avec le module **api4webtrees**. C'est la personne qui 
 
 > **Protection du répertoire :** si le navigateur affiche, avant webtrees, une petite fenêtre de connexion du serveur web (.htaccess), ouvrez « Le serveur demande un nom d'utilisateur et un mot de passe avant webtrees » sur l'écran d'adresse et saisissez-y ces identifiants. Le programme les envoie avec chaque requête à ce serveur ; vous vous connectez ensuite comme d'habitude. Lorsque le serveur exige une telle connexion, les champs s'ouvrent d'eux-mêmes.
 
+> **Rester connecté :** beaucoup de serveurs suppriment la session webtrees après une pause d’environ 24 minutes. À partir d’api4webtrees 1.30, le programme reçoit un jeton d’appareil à la connexion et s’en sert pour se reconnecter discrètement ; il ne redemande le mot de passe que si le jeton n’a pas servi pendant 90 jours, si le mot de passe a changé ou si l’appareil a été déconnecté. Les appareils connectés figurent dans webtrees au menu **App**, où chacun peut être déconnecté. **Se déconnecter** déconnecte aussi l’appareil.
+
 Vous vous connectez avec votre compte webtrees habituel. Les mêmes droits s'appliquent que sur le site : ce que vous ne voyez pas là-bas, vous ne le voyez pas ici ; ce que vous pouvez y modifier, vous pouvez le modifier ici.
 
 > Les adresses non chiffrées (`http://`) ne sont acceptées que sur votre réseau domestique, p. ex. `http://192.168.178.73:8095`. Hors de chez vous, le serveur doit utiliser HTTPS.

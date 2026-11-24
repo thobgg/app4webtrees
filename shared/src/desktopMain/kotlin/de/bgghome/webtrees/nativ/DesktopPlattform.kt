@@ -27,6 +27,9 @@ class DesktopPlattform : Plattform {
     override val client = WtClient(
         DesktopAblage("wtclient"), DesktopAblage("cookies"),
         userAgent = "$appName/$versionName (${System.getProperty("os.name")})",
+        // Rechnername ohne Namensaufloesung (InetAddress.getLocalHost kann beim Start Sekunden kosten)
+        geraeteName = ("$appName " + (System.getenv("COMPUTERNAME") ?: System.getenv("HOSTNAME")
+            ?: runCatching { java.io.File("/etc/hostname").readText().trim() }.getOrDefault(""))).trim(),
     ).also {
         it.baseUrl = settings.baseUrl
         it.klartextUeberall = isDebug

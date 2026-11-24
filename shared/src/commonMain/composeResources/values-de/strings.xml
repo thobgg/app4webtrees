@@ -33,6 +33,7 @@
     <string name="login_other_address">Andere Adresse</string>
     <string name="login_failed">Benutzername oder Passwort stimmt nicht – oder das Konto ist noch nicht freigeschaltet.</string>
     <string name="session_expired">Die Sitzung ist abgelaufen. Bitte neu anmelden.</string>
+    <string name="session_renewed">Die Sitzung war abgelaufen und ist erneuert. Bitte noch einmal versuchen.</string>
     <string name="trees_title">Stammbaum wählen</string>
     <string name="trees_signed_in_as">Angemeldet als %1$s</string>
     <string name="trees_not_signed_in">Nicht angemeldet</string>

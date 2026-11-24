@@ -952,10 +952,25 @@ data class DeleteFactRequest(val factId: String)
 data class UnlinkRequest(val family: String, val individual: String)
 
 @Serializable
-data class PairRequest(val code: String)
+data class PairRequest(val code: String, val deviceName: String? = null)
 
+/** Ab Stufe 47 mit [PairRequest.deviceName]: das Geraete-Token (siehe [API_DEVICE]), sonst null. */
 @Serializable
-data class PairResult(val ok: Boolean = false, val tree: String = "", val user: String = "")
+data class PairResult(val ok: Boolean = false, val tree: String = "", val user: String = "", val deviceToken: String? = null)
+
+/**
+ * Ab dieser Stufe kennt api4webtrees das Geraete-Token (Routen Device, DeviceDelete): Die App bleibt angemeldet, auch wenn
+ * der Server die webtrees-Sitzung wegraeumt (PHP session.gc_maxlifetime). Das Passwort speichert die App weiter nie.
+ */
+const val API_DEVICE = 47
+
+/** Device: [deviceName] stellt ein Token aus (angemeldet), [deviceToken] loest es ein bzw. trennt das Geraet (DeviceDelete). */
+@Serializable
+data class DeviceRequest(val deviceName: String? = null, val deviceToken: String? = null)
+
+/** [deviceToken] ist beim Einloesen das NAECHSTE Token, [csrf] gilt fuer die folgenden POSTs. */
+@Serializable
+data class DeviceResult(val ok: Boolean = false, val deviceToken: String? = null, val user: String? = null, val csrf: String? = null)
 
 @Serializable
 class EmptyRequest

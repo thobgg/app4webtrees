@@ -25,7 +25,8 @@ internal fun AppViewModel.start() {
 
     viewModelScope.launch {
         try {
-            applyInfo(client.info())
+            // Sitzung abgelaufen: still mit dem Geraete-Token neu anmelden (ab Stufe 47), sonst Anmeldeseite
+            applyInfo(client.infoMitGeraet())
         } catch (e: Exception) {
             // Server gerade nicht erreichbar o. ae.: zur Adress-Eingabe, Adresse bleibt vorbelegt.
             uiState.update { it.copy(screen = Screen.Setup, error = explain(e), loginWall = e is LoginWallException) }
@@ -50,11 +51,13 @@ fun AppViewModel.submitUrl(input: String, basicAuth: BasicAuth? = null) {
             uiState.update { it.copy(busy = false, error = text(Res.string.err_http_only)) }
             return@launch
         }
+        // Anderer Server: das Geraete-Token des bisherigen dort trennen, solange die Adresse noch stimmt
+        if (url != client.baseUrl) client.geraetTrennen()
         client.baseUrl = input
         client.basicAuth = basicAuth?.takeIf { it.user.isNotBlank() }
         uiState.update { it.copy(baseUrl = url, basicAuth = client.basicAuth) }
         try {
-            val info = client.info()
+            val info = client.infoMitGeraet()
             settings.baseUrl = url
             applyInfo(info)
         } catch (e: Exception) {
@@ -142,14 +145,17 @@ internal suspend fun AppViewModel.rejectCleartext(input: String): Boolean =
 fun AppViewModel.confirmConnect() {
     val request = uiState.value.pendingConnect ?: return
 
-    client.cookieJar.clear()
-    // Zugangsdaten des Verzeichnisschutzes gelten fuer den Server: bei einem anderen Host verfallen sie.
-    val previousHost = client.baseUrl.substringAfter("://").substringBefore("/")
-    client.baseUrl = request.url
-    if (!client.baseUrl.substringAfter("://").substringBefore("/").equals(previousHost, ignoreCase = true)) client.basicAuth = null
-    uiState.update { UiState(screen = Screen.Loading, baseUrl = client.baseUrl, basicAuth = client.basicAuth, busy = true) }
+    uiState.update { UiState(screen = Screen.Loading, baseUrl = WtClient.normalizeBaseUrl(request.url), basicAuth = client.basicAuth, busy = true) }
 
     viewModelScope.launch {
+        // Das bisherige Geraete-Token am bisherigen Server trennen (das neue Verbinden bringt ein eigenes)
+        client.geraetTrennen()
+        client.cookieJar.clear()
+        // Zugangsdaten des Verzeichnisschutzes gelten fuer den Server: bei einem anderen Host verfallen sie.
+        val previousHost = client.baseUrl.substringAfter("://").substringBefore("/")
+        client.baseUrl = request.url
+        if (!client.baseUrl.substringAfter("://").substringBefore("/").equals(previousHost, ignoreCase = true)) client.basicAuth = null
+        uiState.update { it.copy(baseUrl = client.baseUrl, basicAuth = client.basicAuth) }
         try {
             val paired = client.pair(request.code)
             settings.baseUrl = client.baseUrl

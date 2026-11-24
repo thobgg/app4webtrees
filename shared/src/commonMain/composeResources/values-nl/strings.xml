@@ -32,6 +32,7 @@
     <string name="login_other_address">Ander adres</string>
     <string name="login_failed">Gebruikersnaam of wachtwoord klopt niet – of het account is nog niet goedgekeurd.</string>
     <string name="session_expired">Uw sessie is verlopen. Meld u opnieuw aan.</string>
+    <string name="session_renewed">De sessie was verlopen en is vernieuwd. Probeer het opnieuw.</string>
     <string name="trees_title">Kies een stamboom</string>
     <string name="trees_signed_in_as">Aangemeld als %1$s</string>
     <string name="trees_not_signed_in">Niet aangemeld</string>

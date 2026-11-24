@@ -21,6 +21,8 @@ Requirement: webtrees 2.2 with the module **api4webtrees**. Whoever runs the ser
 
 > **Directory protection:** if the browser shows a small sign-in box of the web server (.htaccess) before webtrees, open “Server asks for a user name and password before webtrees” on the address screen and enter those credentials there. The program sends them with every request to this server; you then sign in as usual. When the server asks for such a sign-in, the fields open by themselves.
 
+> **Staying signed in:** many servers drop the webtrees session after a break of about 24 minutes. From api4webtrees 1.30 the program receives a device token when you sign in and uses it to sign in again quietly; it asks for the password only when the token has not been used for 90 days, the password was changed or the device was disconnected. The connected devices are listed in webtrees in the menu **App**, where each can be disconnected. **Sign out** disconnects the device as well.
+
 You sign in with your normal webtrees account. The same rights apply as on the website: what you cannot see there, you cannot see here; what you may edit there, you may edit here.
 
 > Unencrypted addresses (`http://`) are accepted only on your home network, e.g. `http://192.168.178.73:8095`. Away from home, the server needs HTTPS.

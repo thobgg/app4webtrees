@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Build
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.data.AndroidAblage
+import de.bgghome.webtrees.nativ.data.KeystoreGeheimfach
 import de.bgghome.webtrees.nativ.data.Settings
 import de.bgghome.webtrees.nativ.shared.BuildConfig
 import de.bgghome.webtrees.nativ.ui.AnniversaryWorker
@@ -17,6 +18,8 @@ class AndroidPlattform(private val app: Application) : Plattform {
     override val client = WtClient(
         AndroidAblage(app, "wtclient"), AndroidAblage(app, "cookies"),
         userAgent = "wtAnd/$versionName (Android ${Build.VERSION.RELEASE})",
+        geheimfach = KeystoreGeheimfach(),
+        geraeteName = "wtAnd ${Build.MODEL}",
     ).also { it.baseUrl = settings.baseUrl; it.klartextUeberall = isDebug }
     override val cacheOrdner: File get() = app.cacheDir
     override val kannErinnern = true

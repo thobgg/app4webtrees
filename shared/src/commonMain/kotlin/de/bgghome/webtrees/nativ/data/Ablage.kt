@@ -16,4 +16,6 @@ interface Ablage {
     /** Mehrere Texte auf einmal schreiben - auf Android ein einziger apply(). */
     fun putStrings(values: Map<String, String>) = values.forEach { (k, v) -> putString(k, v) }
     fun leeren()
+    /** Schreiben, das ein sofortiges Beenden der App uebersteht (Android: commit statt apply) - fuer das Geraete-Token. */
+    fun putStringSofort(key: String, value: String?) = putString(key, value)
 }

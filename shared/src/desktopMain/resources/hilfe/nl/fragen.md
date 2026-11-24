@@ -12,6 +12,7 @@ Nieuwe versies verschijnen op **github.com/thobgg/app4webtrees/releases**. Het W
 ## Wat het programma opslaat
 
 - Serveradres, gebruikersnaam en de sessiecookie, **nooit het webtrees-wachtwoord**. Alleen de gegevens van een mapbeveiliging (indien ingevuld) blijven op de pc, ze moeten met elk verzoek mee.
+- Vanaf api4webtrees 1.30 een apparaattoken om stil opnieuw aan te melden. Het wisselt bij elk gebruik; een buitgemaakt token wordt daardoor waardeloos en blokkeert het apparaat op de server.
 - Uw instellingen (indeling, uiterlijk, instellingen voor schema's en lijsten, kleurregels, afvinklijst van de controle) op deze pc.
 - Bij de stamboom op deze pc: de hele stamboom in de map `app4webtrees`, inclusief de toegang tot de lokale webtrees.
 - Geen tracking, geen reclame, geen doorgifte.

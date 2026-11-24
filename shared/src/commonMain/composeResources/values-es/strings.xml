@@ -33,6 +33,7 @@
     <string name="login_other_address">Otra dirección</string>
     <string name="login_failed">El nombre de usuario o la contraseña no son correctos, o la cuenta aún no ha sido aprobada.</string>
     <string name="session_expired">La sesión ha caducado. Inicie sesión de nuevo.</string>
+    <string name="session_renewed">La sesión había caducado y se ha renovado. Inténtelo de nuevo.</string>
     <string name="trees_title">Elegir un árbol genealógico</string>
     <string name="trees_signed_in_as">Sesión iniciada como %1$s</string>
     <string name="trees_not_signed_in">Sin iniciar sesión</string>

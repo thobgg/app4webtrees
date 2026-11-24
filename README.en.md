@@ -245,7 +245,7 @@ api4webtrees README.
   on the website (living individuals, restricted facts, private trees).
 - Changes go straight to webtrees: with “automatically accept changes” they are final, otherwise they wait for a
   moderator.
-- Stored on the device: server address, user name and the session cookie – **never the webtrees password**. Only the
+- Stored on the device: server address, user name, the session cookie and, from api4webtrees 1.30, a device token for signing in again quietly (encrypted in the Android Keystore) – **never the webtrees password**. Only the
   credentials of a directory protection (if entered) stay on the device, they have to go with every request. No cloud backup of
   the app data, no analytics, no ads, no Google services.
 - Permissions: internet. For the optional daily anniversary reminder: notifications (requested only when you switch it

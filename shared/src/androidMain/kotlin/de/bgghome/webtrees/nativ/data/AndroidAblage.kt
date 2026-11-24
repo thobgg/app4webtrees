@@ -18,4 +18,5 @@ class AndroidAblage(context: Context, datei: String) : Ablage {
         editor.apply()
     }
     override fun leeren() { prefs.edit().clear().apply() }
+    override fun putStringSofort(key: String, value: String?) { prefs.edit().putString(key, value).commit() }
 }

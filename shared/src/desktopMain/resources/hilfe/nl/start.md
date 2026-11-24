@@ -21,6 +21,8 @@ Voorwaarde: webtrees 2.2 met de module **api4webtrees**. Wie de server beheert, 
 
 > **Mapbeveiliging:** toont de browser vóór webtrees een klein aanmeldvenster van de webserver (.htaccess), klap dan op het adresscherm „Vraagt de server vóór webtrees om een gebruikersnaam en wachtwoord” open en vul die gegevens daar in. Het programma stuurt ze met elk verzoek naar deze server mee; daarna meldt u zich aan zoals gewoonlijk. Vraagt de server om zo'n aanmelding, dan klappen de velden vanzelf open.
 
+> **Aangemeld blijven:** veel servers ruimen de webtrees-sessie op na een pauze van ongeveer 24 minuten. Vanaf api4webtrees 1.30 krijgt het programma bij het aanmelden een apparaattoken en meldt het zich daarmee stil opnieuw aan; het vraagt pas weer om het wachtwoord als het token 90 dagen niet is gebruikt, het wachtwoord is gewijzigd of het apparaat is losgekoppeld. De gekoppelde apparaten staan in webtrees in het menu **App**, waar u elk apart kunt loskoppelen. **Afmelden** koppelt het apparaat ook los.
+
 U meldt zich aan met uw gewone webtrees-account. Dezelfde rechten gelden als op de website: wat u daar niet kunt zien, ziet u hier ook niet; wat u daar mag bewerken, mag u hier ook bewerken.
 
 > Onversleutelde adressen (`http://`) worden alleen in het thuisnetwerk geaccepteerd, bijv. `http://192.168.178.73:8095`. Buitenshuis heeft de server HTTPS nodig.

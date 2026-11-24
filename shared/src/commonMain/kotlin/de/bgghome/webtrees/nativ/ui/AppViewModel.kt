@@ -8,6 +8,7 @@ import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.api.NotJsonException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -95,7 +96,12 @@ class AppViewModel(internal val plattform: Plattform) : ViewModel() {
         // Eine Fehlerseite mit 4xx/5xx ist dagegen ein Serverfehler - die Meldung soll ihn nennen, nicht abmelden.
         val state = uiState.value
         if (e is NotJsonException && e.httpStatus < 400 && state.screen == Screen.Main && state.info?.user?.loggedIn == true) {
-            uiState.update { it.copy(screen = Screen.Login, error = text(Res.string.session_expired)) }
+            // Mit Geraete-Token (ab Stufe 47) still neu anmelden; die Aktion selbst ist nicht gelaufen und braucht einen neuen Versuch.
+            viewModelScope.launch {
+                val info = runCatching { client.infoMitGeraet() }.getOrNull()
+                if (info?.user?.loggedIn == true) uiState.update { it.copy(info = info, message = text(Res.string.session_renewed), messageDetails = null) }
+                else uiState.update { it.copy(screen = Screen.Login, error = text(Res.string.session_expired)) }
+            }
             return
         }
 

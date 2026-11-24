@@ -1,9 +1,12 @@
 package de.bgghome.webtrees.nativ.api
 
 import de.bgghome.webtrees.nativ.data.Ablage
+import de.bgghome.webtrees.nativ.data.Geheimfach
 import de.bgghome.webtrees.nativ.Texte
 import de.bgghome.webtrees.nativ.res.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
@@ -108,8 +111,14 @@ class LokalVerbindungException(cause: IOException) : IOException(cause.message, 
  * @param prefs     eigene Ablage des Clients (gewaehlter Modulname), Datei "wtclient" wie vor der Aufteilung
  * @param cookies   Ablage der Sitzungs-Cookies, Datei "cookies"
  * @param userAgent ehrliche Kennung gegenueber dem Server, z. B. "wtAnd/1.16 (Android 15)"
+ * @param geheimfach verschluesselt das Geraete-Token (Android: Keystore), siehe [Geheimfach]
+ * @param geraeteName so erscheint dieses Geraet in der Geraeteliste auf der Seite "App" (der Server kuerzt auf 32 Zeichen)
  */
-class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String) {
+class WtClient(
+    private val prefs: Ablage, cookies: Ablage, val userAgent: String,
+    private val geheimfach: Geheimfach = Geheimfach.Offen,
+    private val geraeteName: String = userAgent.substringBefore('/'),
+) {
 
     val cookieJar = PersistentCookieJar(cookies)
 
@@ -614,7 +623,7 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
             http.newCall(Request.Builder().url(url("/login", emptyMap())).post(form).build()).execute().close()
         }
 
-        return info()
+        return info().also { geraetEinrichten(it) }
     }
 
     /**
@@ -647,11 +656,15 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
      * ohne dass die App je ein Passwort gesehen hat.
      */
     suspend fun pair(code: String): PairResult {
-        info()
-        return post("Pair", null, emptyMap(), jsonBody(PairRequest.serializer(), PairRequest(code)), PairResult.serializer())
+        val name = geraeteName.takeIf { geraetMoeglich(info()) }
+        return geraetSperre.withLock {
+            post("Pair", null, emptyMap(), jsonBody(PairRequest.serializer(), PairRequest(code, name)), PairResult.serializer())
+                .also { r -> r.deviceToken?.let(::tokenSpeichern) }
+        }
     }
 
     suspend fun logout() {
+        geraetTrennen()
         withContext(Dispatchers.IO) {
             runCatching {
                 http.newCall(Request.Builder().url(url("/logout", emptyMap())).post(FormBody.Builder().build()).build())
@@ -660,6 +673,105 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         }
         cookieJar.clear()
         csrf = ""
+    }
+
+    // ── Geraete-Token (ab Stufe 47) ──────────────────────────────────
+    //
+    // webtrees haelt die Anmeldung nur, solange der Server die Sitzung aufhebt - mit PHPs Standard nach rund 24 Minuten
+    // Pause nicht mehr. Nach der Anmeldung (Passwort oder Verbinden) stellt api4webtrees deshalb ein Token fuer dieses
+    // Geraet aus; ist die Sitzung weg, meldet die App sich damit still neu an. Jedes Einloesen liefert das naechste Token,
+    // das alte gilt nur noch 2 Minuten (danach sperrt es das Geraet) - deshalb Sperre, frisch lesen, sofort speichern.
+    // Das Passwort speichert die App weiter nie. Nicht beim Stammbaum auf diesem PC, der meldet sich selbst an.
+
+    private val geraetSperre = Mutex()
+
+    /** Zeitpunkt der letzten Anfrage; nach laengerer Pause prueft [sitzungPruefen] vor der naechsten die Anmeldung. */
+    @Volatile private var letzteAnfrage = 0L
+    private val pruefungLaeuft = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /** Das Token gehoert zu genau einem Server; nach einem Wechsel gilt es nicht mehr. */
+    private fun tokenLesen(): String? {
+        if (prefs.getString(DEVICE_SERVER, null) != baseUrl) return null
+        val text = prefs.getString(DEVICE_TOKEN, null) ?: return null
+        return geheimfach.auf(text) ?: run { tokenSpeichern(null); null }
+    }
+
+    private fun tokenSpeichern(token: String?) {
+        if (token == null) {
+            listOf(DEVICE_TOKEN, DEVICE_SERVER, DEVICE_AT).forEach { prefs.putStringSofort(it, null) }
+            return
+        }
+        prefs.putStringSofort(DEVICE_TOKEN, geheimfach.zu(token))
+        prefs.putStringSofort(DEVICE_SERVER, baseUrl)
+        prefs.putStringSofort(DEVICE_AT, System.currentTimeMillis().toString())
+    }
+
+    private fun istLokal(): Boolean {
+        val u = baseUrl.toHttpUrlOrNull() ?: return false
+        return lokal?.betrifft(u.host, u.port) == true
+    }
+
+    private fun geraetMoeglich(info: Info): Boolean = info.api >= API_DEVICE && !istLokal()
+
+    /**
+     * Wie [info], meldet aber mit dem Geraete-Token still an, wenn die Sitzung weg ist. Auch bei gueltiger Sitzung wird das
+     * Token nach 7 Tagen einmal eingeloest: die 90 Tage des Servers zaehlen ab dem letzten Einloesen, und auf Servern, die
+     * Sitzungen lange halten, verfiele es sonst trotz taeglicher Benutzung.
+     */
+    suspend fun infoMitGeraet(): Info {
+        val info = info()
+        if (!geraetMoeglich(info) || tokenLesen() == null) return info
+        val zuletzt = prefs.getString(DEVICE_AT, null)?.toLongOrNull() ?: 0L
+        if (info.user.loggedIn && System.currentTimeMillis() - zuletzt < ERNEUERN_NACH) return info
+        return if (geraetEinloesen()) info() else info
+    }
+
+    /** Token einloesen; true = jetzt angemeldet. Bei device-busy und Netzfehlern bleibt das Token, sonst ist es weg. */
+    private suspend fun geraetEinloesen(): Boolean = geraetSperre.withLock {
+        val token = tokenLesen() ?: return@withLock false
+        suspend fun versuch(): DeviceResult =
+            post("Device", null, emptyMap(), jsonBody(DeviceRequest.serializer(), DeviceRequest(deviceToken = token)), DeviceResult.serializer())
+        val antwort = try {
+            // Antwort unterwegs verloren: dasselbe Token gilt noch 2 Minuten, also gleich noch einmal
+            try { versuch() } catch (e: WriteInterruptedException) { versuch() }
+        } catch (e: ApiException) {
+            if (e.code != "device-busy") tokenSpeichern(null)
+            return@withLock false
+        } catch (e: Exception) {
+            return@withLock false
+        }
+        antwort.deviceToken?.let(::tokenSpeichern)
+        antwort.csrf?.takeIf { it.isNotEmpty() }?.let { csrf = it }
+        true
+    }
+
+    /** Nach der Anmeldung mit Passwort: Token fuer dieses Geraet holen; ein altes wird vorher am Server getrennt. */
+    private suspend fun geraetEinrichten(info: Info) {
+        if (!info.user.loggedIn || !geraetMoeglich(info)) return
+        geraetTrennen()
+        geraetSperre.withLock {
+            runCatching {
+                post("Device", null, emptyMap(), jsonBody(DeviceRequest.serializer(), DeviceRequest(deviceName = geraeteName)), DeviceResult.serializer())
+            }.getOrNull()?.deviceToken?.let(::tokenSpeichern)
+        }
+    }
+
+    /** Abmelden, Serverwechsel, neu Verbinden: Token hier loeschen und am Server trennen (dort ohne Sitzung moeglich). */
+    suspend fun geraetTrennen() {
+        val token = geraetSperre.withLock { tokenLesen().also { tokenSpeichern(null) } } ?: return
+        runCatching {
+            post("DeviceDelete", null, emptyMap(), jsonBody(DeviceRequest.serializer(), DeviceRequest(deviceToken = token)), DeviceResult.serializer())
+        }
+    }
+
+    /** Vor einer Anfrage nach laengerer Pause: Anmeldung pruefen und notfalls mit dem Token erneuern (nur mit Token). */
+    private suspend fun sitzungPruefen() {
+        val jetzt = System.currentTimeMillis()
+        val pause = jetzt - letzteAnfrage
+        letzteAnfrage = jetzt
+        if (pause < PAUSE_PRUEFEN || prefs.getString(DEVICE_TOKEN, null) == null) return
+        if (!pruefungLaeuft.compareAndSet(false, true)) return
+        try { runCatching { infoMitGeraet() } } finally { pruefungLaeuft.set(false) }
     }
 
     // ── Schreiben ────────────────────────────────────────────────────
@@ -746,6 +858,7 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     private val writeHttp: OkHttpClient = http.newBuilder().retryOnConnectionFailure(false).build()
 
     private suspend fun <T> get(action: String, tree: String?, params: Map<String, String>, deserializer: DeserializationStrategy<T>): T {
+        if (action != "Info") sitzungPruefen()
         val request = Request.Builder().url(url(apiRoute(action, tree), params)).build()
 
         return decode(execute(request), deserializer)
@@ -769,6 +882,7 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
         postUrl(url(route, emptyMap()), body, deserializer)
 
     private suspend fun <T> postUrl(target: HttpUrl, body: RequestBody, deserializer: DeserializationStrategy<T>): T {
+        if (pruefungLaeuft.get().not() && geraetSperre.isLocked.not()) sitzungPruefen()
         suspend fun attempt(): T {
             val request = Request.Builder()
                 .url(target)
@@ -858,6 +972,11 @@ class WtClient(private val prefs: Ablage, cookies: Ablage, val userAgent: String
     companion object {
         /** Stammbaum auf diesem PC: setzt der Desktop beim Start (LokalBetrieb), sonst null. */
         @Volatile var lokal: LokalerDienst? = null
+        private const val DEVICE_TOKEN = "deviceToken"
+        private const val DEVICE_SERVER = "deviceServer"
+        private const val DEVICE_AT = "deviceAt"
+        private const val ERNEUERN_NACH = 7L * 24 * 60 * 60 * 1000
+        private const val PAUSE_PRUEFEN = 20L * 60 * 1000
         private val lokalSperre = java.util.concurrent.Semaphore(2, true)
 
         /** Modul ab 1.3.0 (Ordner api4webtrees) */

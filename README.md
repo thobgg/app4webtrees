@@ -244,7 +244,7 @@ README von api4webtrees.
   Datenschutzregeln wie auf der Website (lebende Personen, gesperrte Einträge, private Bäume).
 - Änderungen landen sofort in webtrees: mit „Änderungen automatisch annehmen" gelten sie gleich, sonst warten sie auf
   die Freigabe durch einen Moderator.
-- Gespeichert werden Serveradresse, Benutzername und das Sitzungs-Cookie – **nie das webtrees-Passwort**. Nur die
+- Gespeichert werden Serveradresse, Benutzername, das Sitzungs-Cookie und ab api4webtrees 1.30 ein Geräte-Token zum stillen Neuanmelden (auf Android im Keystore verschlüsselt) – **nie das webtrees-Passwort**. Nur die
   Zugangsdaten eines Verzeichnisschutzes (falls eingetragen) bleiben auf dem Gerät, sie müssen bei jeder Anfrage mit. Kein Cloud-Backup der
   App-Daten, keine Analyse, keine Werbung, keine Google-Dienste.
 - Berechtigungen: Internet. Für die abschaltbare tägliche Erinnerung an Jahrestage: Benachrichtigungen (wird erst beim

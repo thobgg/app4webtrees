@@ -38,6 +38,7 @@
     <string name="login_other_address">Other address</string>
     <string name="login_failed">Wrong username or password – or the account has not been approved yet.</string>
     <string name="session_expired">Your session has expired. Please sign in again.</string>
+    <string name="session_renewed">The session had expired and has been renewed. Please try again.</string>
     <string name="trees_title">Choose a family tree</string>
     <string name="trees_signed_in_as">Signed in as %1$s</string>
     <string name="trees_not_signed_in">Not signed in</string>
