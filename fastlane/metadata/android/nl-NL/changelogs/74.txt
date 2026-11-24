@@ -1,0 +1,1 @@
+Aangemeld blijven: verloopt de webtrees-sessie, dan meldt de app zich stil opnieuw aan met een apparaattoken in plaats van om het wachtwoord te vragen. Vereist api4webtrees 1.30; het token staat versleuteld in de Android Keystore, het wachtwoord wordt nog steeds nooit opgeslagen. Foutmeldingen verschijnen als venster met ‘Kopiëren’ en ‘Details’.

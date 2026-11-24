@@ -1,0 +1,1 @@
+Angemeldet bleiben: Läuft die webtrees-Sitzung ab, meldet sich die App mit einem Geräte-Token still neu an, statt nach dem Passwort zu fragen. Braucht api4webtrees 1.30; das Token liegt verschlüsselt im Android Keystore, das Passwort wird weiter nie gespeichert. Fehlermeldungen erscheinen als Dialog mit „Kopieren“ und „Details“.

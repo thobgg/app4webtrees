@@ -1,0 +1,1 @@
+Stay signed in: when the webtrees session ends, the app signs in again quietly with a device token instead of asking for the password. Needs api4webtrees 1.30; the token is encrypted in the Android Keystore, the password is still never stored. Error messages appear as a dialog with “Copy” and “Details”.

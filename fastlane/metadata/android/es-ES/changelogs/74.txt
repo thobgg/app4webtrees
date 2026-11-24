@@ -1,0 +1,1 @@
+Seguir conectado: cuando caduca la sesión de webtrees, la app vuelve a iniciar sesión sin preguntar con un token de dispositivo en lugar de pedir la contraseña. Requiere api4webtrees 1.30; el token se guarda cifrado en el Android Keystore y la contraseña sigue sin guardarse nunca. Los mensajes de error aparecen en un diálogo con «Copiar» y «Detalles».

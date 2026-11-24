@@ -1,0 +1,1 @@
+Rester connecté : quand la session webtrees expire, l’application se reconnecte discrètement avec un jeton d’appareil au lieu de demander le mot de passe. Nécessite api4webtrees 1.30 ; le jeton est chiffré dans l’Android Keystore, le mot de passe n’est toujours jamais enregistré. Les messages d’erreur s’affichent dans une fenêtre avec « Copier » et « Détails ».
