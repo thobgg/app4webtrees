@@ -26,6 +26,8 @@ class GeraetTokenTest {
     /** Antwort auf das naechste Einloesen statt des Normalfalls, z. B. "device-revoked". */
     private var fehler: String? = null
     private val aufrufe = mutableListOf<String>()
+    /** Ein OTP-Modul faengt das Einloesen ab (Umleitung auf seine Bestaetigungsseite). */
+    private var zweiteStufe = false
 
     init {
         server.createContext("/") { ex ->
@@ -45,12 +47,18 @@ class GeraetTokenTest {
                 "login" -> { angemeldet = true; json("{}") }
                 "logout" -> { angemeldet = false; json("{}") }
                 "Device" -> when {
+                    zweiteStufe && !rumpf.contains("deviceName") -> {
+                        // OTP-Modul: Antwort ersetzt durch eine Umleitung auf seine Bestaetigungsseite
+                        neu(); ex.responseHeaders.add("Location", "/index.php?route=/module/_otp-login_/Verify")
+                        ex.sendResponseHeaders(302, -1); ex.close()
+                    }
                     rumpf.contains("deviceName") -> json("""{"ok":true,"deviceToken":"${neu()}","user":"anna"}""")
                     fehler != null -> json("""{"ok":false,"error":"$fehler","status":403}""").also { fehler = null }
                     rumpf.contains("\"$gueltig\"") -> { angemeldet = true; json("""{"ok":true,"deviceToken":"${neu()}","user":"anna","csrf":"D"}""") }
                     else -> json("""{"ok":false,"error":"device-revoked","status":403}""")
                 }
                 "DeviceDelete" -> { gueltig = ""; json("""{"ok":true}""") }
+                "Verify" -> { val bb = "<html>Code</html>".toByteArray(); ex.responseHeaders.add("Content-Type", "text/html"); ex.sendResponseHeaders(200, bb.size.toLong()); ex.responseBody.use { it.write(bb) } }
                 else -> json("""{"ok":true}""")
             }
         }
@@ -115,6 +123,16 @@ class GeraetTokenTest {
         val anderer = WtClient(ablage, TokenAblage(), userAgent = "wtTest/1").also { it.baseUrl = "http://localhost:${server.address.port}" }
         assertFalse(anderer.infoMitGeraet().user.loggedIn)
         assertFalse("Device" in aufrufe, "an einen anderen Server geht das Token nicht")
+    }
+
+    @Test fun zweiteAnmeldestufeVerwirftDasToken() = runBlocking {
+        client().login("anna", "geheim")
+        angemeldet = false
+        zweiteStufe = true
+        assertFalse(client().infoMitGeraet().user.loggedIn)
+        aufrufe.clear()
+        client().infoMitGeraet()
+        assertFalse("Device" in aufrufe, "nach der Umleitung wird das Token nicht noch einmal eingeloest")
     }
 }
 

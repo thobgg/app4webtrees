@@ -737,6 +737,11 @@ class WtClient(
         } catch (e: ApiException) {
             if (e.code != "device-busy") tokenSpeichern(null)
             return@withLock false
+        } catch (e: NotJsonException) {
+            // Umleitung statt JSON: ein anderes Modul verlangt eine zweite Anmeldestufe (OTP, Issue 41). Das Token hat am
+            // Server schon gewechselt, das neue kommt nie an - fuer dieses Konto ist es nutzlos, also nicht wieder einloesen.
+            if (e.umgeleitet) tokenSpeichern(null)
+            return@withLock false
         } catch (e: Exception) {
             return@withLock false
         }
