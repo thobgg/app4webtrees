@@ -1,6 +1,7 @@
 package de.bgghome.webtrees.nativ.desk
 
 import de.bgghome.webtrees.nativ.ui.meldung
+import de.bgghome.webtrees.nativ.ui.details
 
 import de.bgghome.webtrees.nativ.api.hat
 import androidx.compose.foundation.layout.aspectRatio
@@ -129,6 +130,9 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
         var bereinigenOffen by remember(bereinigen) { mutableStateOf(bereinigen) }
         val scope = rememberCoroutineScope()
         var meldung by remember { mutableStateOf<String?>(null) }
+        // Fehler (Laden, Umbenennen, Verweise, Adressen) im stehenden Dialog mit Kopieren und Details - wie ueberall in der App
+        var fehlerDialog by remember { mutableStateOf<Throwable?>(null) }
+        LaunchedEffect(liste, detail) { (liste?.exceptionOrNull() ?: detail?.exceptionOrNull())?.let { fehlerDialog = it } }
         var verweisFortschritt by remember { mutableStateOf<String?>(null) }
         val darf = state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_WRITE)
         val darfUmbenennen = state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME)
@@ -153,13 +157,13 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                     val oben = withContext(Dispatchers.IO) { oberorte.getOrPut(v.ort) { ortsdatensatz(viewModel.client, tree.orEmpty(), v.ort) } } ?: continue
                     val ort = runCatching { withContext(Dispatchers.IO) { viewModel.client.savePlace(tree.orEmpty(), de.bgghome.webtrees.nativ.api.PlaceRequest(
                         v.name, type = typ, parentAendern = true, parent = oben, govTypeAendern = govTyp != null, govType = govTyp)) } }
-                        .onFailure { meldung = meldung(it) }.getOrNull() ?: continue
+                        .onFailure { fehlerDialog = it }.getOrNull() ?: continue
                     orte++; ausstehend = ausstehend || ort.pending
                     // Dann jedes Ereignis: Ort auf das Haus, Adresse weg - den Verweis "3 _LOC" setzt der Server (Stufe 32)
                     for (a in v.fakten) {
                         runCatching { withContext(Dispatchers.IO) { viewModel.client.saveFact(tree.orEmpty(), a.record,
                             de.bgghome.webtrees.nativ.api.FactRequest(factId = a.fact.id, tag = a.fact.tag, place = v.name, address = "")) } }
-                            .onSuccess { ereignisse++; ausstehend = ausstehend || it.pending }.onFailure { meldung = meldung(it) }
+                            .onSuccess { ereignisse++; ausstehend = ausstehend || it.pending }.onFailure { fehlerDialog = it }
                     }
                 }
                 adressFortschritt = null
@@ -175,13 +179,14 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
             meldung = null
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { viewModel.client.renamePlace(tree.orEmpty(), von, nach, preview = true) } }
-                    .onSuccess { umbenennen = it }.onFailure { meldung = meldung(it) }
+                    .onSuccess { umbenennen = it }.onFailure { fehlerDialog = it }
             }
         }
         val verweise = meldung
-        // Meldungen (Gespeichert, Verweise, Fehler) verschwinden nach einigen Sekunden von selbst
+        // Erfolgsmeldungen (Gespeichert, Verweise) verschwinden nach einigen Sekunden von selbst
         LaunchedEffect(meldung) { if (meldung != null) { kotlinx.coroutines.delay(8000); meldung = null } }
         DeskTheme {
+            fehlerDialog?.let { f -> de.bgghome.webtrees.nativ.ui.MeldungDialog(meldung(f), (f as? Exception)?.let(::details), onClose = { fehlerDialog = null }) }
             OrteInhalt(liste, detail, gewaehlt, { gewaehlt = it }, suche, { suche = it }, viewModel, openWeb,
                 onBearbeiten = if (darf) ({ bearbeiten = it }) else null, meldung = verweise,
                 pflege = if (darf) OrtPflege(tree.orEmpty(), viewModel, state.archive) { neu++ } else null, onClose = onClose, onBlatt = onBlatt,
@@ -199,7 +204,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                                 verweisFortschritt = de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_places_links_running, i + 1, orte.size)
                                 runCatching { withContext(Dispatchers.IO) { viewModel.client.savePlace(tree.orEmpty(), de.bgghome.webtrees.nativ.api.PlaceRequest(o.name, linkEvents = true)) } }
                                     .onSuccess { summe += it.linked ?: 0; ausstehend = ausstehend || it.pending }
-                                    .onFailure { meldung = meldung(it) }
+                                    .onFailure { fehlerDialog = it }
                             }
                             verweisFortschritt = null
                             meldung = listOfNotNull(de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_place_linked, summe),
@@ -220,7 +225,7 @@ fun OrteFenster(state: UiState, viewModel: AppViewModel, start: String?, openWeb
                                     if (r.pending) "  " + de.bgghome.webtrees.nativ.Texte.t(Res.string.desk_place_rename_moderated) else ""
                                 gewaehlt = r.to
                                 neu++
-                            }.onFailure { meldung = meldung(it) }
+                            }.onFailure { fehlerDialog = it }
                     }
                 }
             }
