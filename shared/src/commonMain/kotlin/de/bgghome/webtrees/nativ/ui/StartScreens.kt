@@ -160,14 +160,14 @@ fun SetupScreen(state: UiState, onSubmit: (String, BasicAuth?) -> Unit) {
 }
 
 @Composable
-fun LoginScreen(state: UiState, onLogin: (String, String) -> Unit, onGuest: () -> Unit, onChangeServer: () -> Unit) {
+fun LoginScreen(state: UiState, appVersion: String, onLogin: (String, String) -> Unit, onGuest: () -> Unit, onChangeServer: () -> Unit) {
     var user by rememberSaveable { mutableStateOf(state.userName) }
     var password by rememberSaveable { mutableStateOf("") }
     val info = state.info
 
     StartFrame(
         title = stringResource(Res.string.action_sign_in),
-        subtitle = state.baseUrl + (info?.let { "\n" + stringResource(Res.string.login_server_info, it.webtrees, it.module) } ?: "") +
+        subtitle = state.baseUrl + (info?.let { "\n" + stringResource(Res.string.login_server_info, it.webtrees, it.module, LocalAppName.current + " " + appVersion) } ?: "") +
             (if (WtClient.isCleartext(state.baseUrl)) "\n" + stringResource(Res.string.http_home_hint) else ""),
         error = state.error,
     ) {

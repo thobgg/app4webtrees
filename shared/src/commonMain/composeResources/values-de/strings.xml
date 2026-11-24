@@ -25,7 +25,7 @@
     <string name="setup_basic_auth_help">Nur wenn Dein Webserver die ganze Seite mit eigenem Benutzernamen und Passwort schützt (der Browser zeigt vor webtrees ein kleines Anmeldefenster, z. B. .htaccess). Diese Zugangsdaten hier eintragen; die Anmeldung bei webtrees folgt getrennt.</string>
     <string name="setup_basic_auth_user">Verzeichnisschutz: Benutzername</string>
     <string name="setup_basic_auth_password">Verzeichnisschutz: Passwort</string>
-    <string name="login_server_info">webtrees %1$s · Modul %2$s</string>
+    <string name="login_server_info">webtrees %1$s · Modul %2$s · %3$s</string>
     <string name="login_user">Benutzername oder E-Mail</string>
     <string name="login_password">Passwort</string>
     <string name="login_busy">Melde an …</string>

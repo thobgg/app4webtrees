@@ -145,7 +145,7 @@ fun AppRoot(viewModel: AppViewModel) {
     when (state.screen) {
         Screen.Loading -> LoadingScreen()
         Screen.Setup -> SetupScreen(state) { url, basicAuth -> viewModel.submitUrl(url, basicAuth) }
-        Screen.Login -> LoginScreen(state, viewModel::login, viewModel::continueAsGuest, viewModel::changeServer)
+        Screen.Login -> LoginScreen(state, viewModel.versionName, viewModel::login, viewModel::continueAsGuest, viewModel::changeServer)
         Screen.Trees -> TreesScreen(state, viewModel::chooseTree, viewModel::logout, viewModel::showLogin, onCancel = if (state.tree != null) viewModel::cancelTreePicker else null)
         Screen.Main -> {
             // Im Lebenslauf: Quellenverweise und Ortsnamen oeffnen die Nachschlage-Seiten (am Desktop eigene Fenster)

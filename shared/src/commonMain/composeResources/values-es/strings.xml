@@ -25,7 +25,7 @@
     <string name="setup_basic_auth_help">Solo si tu servidor web protege todo el sitio con su propio usuario y contraseña (el navegador muestra una pequeña ventana de acceso antes de webtrees, p. ej. .htaccess). Introdúcelos aquí; el inicio de sesión en webtrees se hace aparte.</string>
     <string name="setup_basic_auth_user">Protección de directorio: usuario</string>
     <string name="setup_basic_auth_password">Protección de directorio: contraseña</string>
-    <string name="login_server_info">webtrees %1$s · módulo %2$s</string>
+    <string name="login_server_info">webtrees %1$s · módulo %2$s · %3$s</string>
     <string name="login_user">Nombre de usuario o correo electrónico</string>
     <string name="login_password">Contraseña</string>
     <string name="login_busy">Iniciando sesión …</string>
