@@ -33,6 +33,7 @@ import de.bgghome.webtrees.nativ.api.DnaAbdeckung
 import de.bgghome.webtrees.nativ.api.DnaEintrag
 import de.bgghome.webtrees.nativ.api.DnaGestuetzt
 import de.bgghome.webtrees.nativ.api.dnaDatum
+import de.bgghome.webtrees.nativ.api.selbstGetestet
 import de.bgghome.webtrees.nativ.api.DnaLinienEintraege
 import de.bgghome.webtrees.nativ.api.DnaPerson
 import de.bgghome.webtrees.nativ.api.DnaTester
@@ -313,18 +314,28 @@ private fun AbdeckungBereich(client: WtClient, tree: String, xref: String, stand
         value = null
         value = withContext(Dispatchers.IO) { runCatching { client.dnaAbdeckung(tree, xref).let { Geladen(it, dnaPersonenLaden(client, tree, it.kennungen())) } } }
     }
+    // Selbst getestet: die Abdeckung ist dann vollstaendig, unabhaengig von den Nachkommen
+    val selbst by produceState(false, tree, xref, stand) {
+        value = withContext(Dispatchers.IO) { runCatching { client.dnaPerson(tree, xref).selbstGetestet() }.getOrDefault(false) }
+    }
     Bereichsliste(ergebnis, modifier) { g ->
         val a = g.daten
         item("wert") {
             Column(Modifier.padding(16.dp)) {
-                Text(stringResource(Res.string.dna_coverage_value, prozent(a.coverage)), style = MaterialTheme.typography.titleMedium)
-                Klein(stringResource(Res.string.dna_coverage_hint, a.descendants, a.generations))
+                if (selbst && a.coverage >= 1.0) {
+                    Text(stringResource(Res.string.dna_coverage_self), style = MaterialTheme.typography.titleMedium)
+                } else {
+                    Text(stringResource(Res.string.dna_coverage_value, prozent(a.coverage)), style = MaterialTheme.typography.titleMedium)
+                    Klein(stringResource(Res.string.dna_coverage_hint, a.descendants, a.generations))
+                }
             }
         }
         if (a.tested.isNotEmpty()) {
             item("tt") { Titel(stringResource(Res.string.dna_coverage_tested)) }
             items(a.tested, key = { "t$it" }) { x -> PersonRow(g.person(x), onClick = { onPerson(x) }) }
         }
+        // Selbst getestet: kein Test eines Nachkommen bringt noch etwas - der Abschnitt entfaellt
+        if (selbst && a.coverage >= 1.0) return@Bereichsliste
         item("tk") { Titel(stringResource(Res.string.dna_coverage_candidates)) }
         if (a.candidates.isEmpty()) item("kk") { Absatz(stringResource(Res.string.dna_coverage_no_candidates)) }
         items(a.candidates, key = { "k" + it.xref }) { k ->

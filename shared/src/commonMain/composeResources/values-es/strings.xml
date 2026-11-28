@@ -2070,4 +2070,5 @@
     <string name="dna_evidence_summary">%1$d de %2$d vínculos entre hijo y progenitor en %3$d generaciones están respaldados por coincidencias de ADN.</string>
     <string name="dna_evidence_hint">Respaldado no significa probado: el ADN encaja con el árbol y podría encajar también con otro. Regla para una sola coincidencia (WikiTree): parientes como primos terceros o más cercanos y el valor dentro del rango habitual.</string>
     <string name="dna_evidence_by">respaldado por: %1$s</string>
+    <string name="dna_coverage_self">Esta persona se ha hecho la prueba; su ADN está, por tanto, totalmente cubierto.</string>
 </resources>

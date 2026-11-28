@@ -236,3 +236,11 @@ fun dnaDatum(gedcom: String, sprache: java.util.Locale = java.util.Locale.getDef
         else -> null
     } ?: gedcom.trim()
 }
+
+/**
+ * Ist die Person selbst autosomal getestet? Dann gilt sie beim Modul als vollstaendig abgedeckt (ApiCoverage: coverage 1,
+ * keine Kandidaten) - die Antwort sagt das nicht eigens, darum leitet die App es aus den Eintraegen ab: ein autosomaler
+ * Test oder ein Treffer, wie in der Regel des Moduls (Coverage.php: "An individual who has tested is covered completely").
+ */
+fun DnaPerson.selbstGetestet(): Boolean =
+    matches.isNotEmpty() || entries.any { it.xref == xref && (it.kind == "autosomal" || (it.kind == "test" && it.value.equals("Autosomal", ignoreCase = true))) }

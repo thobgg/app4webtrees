@@ -6,6 +6,7 @@ import de.bgghome.webtrees.nativ.api.DnaLinien
 import de.bgghome.webtrees.nativ.api.DnaNachkomme
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.kennungen
+import de.bgghome.webtrees.nativ.api.selbstGetestet
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -163,6 +164,17 @@ class DnaAuswertungTest {
         // was kein einfaches Datum ist, bleibt stehen
         assertEquals("ABT 2020", de.bgghome.webtrees.nativ.api.dnaDatum("ABT 2020", java.util.Locale.GERMAN))
         assertEquals("", de.bgghome.webtrees.nativ.api.dnaDatum("", java.util.Locale.GERMAN))
+    }
+
+    @Test
+    fun selbstGetestet() {
+        fun p(eintraege: String, treffer: String = "[]") = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaPerson.serializer(),
+            """{"xref":"I21","entries":$eintraege,"lines":{},"matches":$treffer}""")
+        assertTrue(p("""[{"xref":"I21","factId":"a","kind":"test","value":"Autosomal"}]""").selbstGetestet())
+        assertTrue(p("[]", """[{"recordedAt":"I21","factId":"m","other":"I1","cm":200}]""").selbstGetestet())
+        // ein Y-DNA-Test allein deckt die autosomale DNA nicht ab
+        assertFalse(p("""[{"xref":"I21","factId":"a","kind":"test","value":"Y-DNA"},{"xref":"I21","factId":"b","kind":"y-haplogroup","value":"R-U106"}]""").selbstGetestet())
+        assertFalse(p("[]").selbstGetestet())
     }
 
     @Test

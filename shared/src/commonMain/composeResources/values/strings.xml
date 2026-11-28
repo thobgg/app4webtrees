@@ -2075,4 +2075,5 @@
     <string name="dna_evidence_summary">%1$d of %2$d links between child and parent in %3$d generations are supported by DNA matches.</string>
     <string name="dna_evidence_hint">Supported is not proven: the DNA fits the family tree and could also fit another one. Rule for a single match (WikiTree): related as third cousins or closer and the amount in the usual range.</string>
     <string name="dna_evidence_by">supported by: %1$s</string>
+    <string name="dna_coverage_self">This individual has tested themselves, so their DNA is covered completely.</string>
 </resources>
