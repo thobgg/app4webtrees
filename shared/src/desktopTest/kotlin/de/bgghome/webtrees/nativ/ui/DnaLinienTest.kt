@@ -182,6 +182,9 @@ class DnaAuswertungTest {
         val a = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaAbdeckung.serializer(),
             """{"ok":true,"level":6,"xref":"I21","generations":8,"coverage":0.4351,"descendants":13,"tested":["I1","I5"],"candidates":[{"xref":"I27","gain":0.0435}]}""")
         assertEquals(0.4351, a.coverage)
+        // aeltere Module kennen selfTested nicht
+        kotlin.test.assertNull(a.selfTested)
+        assertTrue(json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaAbdeckung.serializer(), """{"xref":"I1","selfTested":true,"coverage":1}""").selfTested == true)
         assertEquals(setOf("I1", "I5", "I27"), a.kennungen())
         val g = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaGestuetzt.serializer(), """
             {"ok":true,"level":6,"xref":"I1","generations":5,"rule":"wikitree-single-match","links":[

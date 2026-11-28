@@ -193,6 +193,8 @@ data class DnaAbdeckungKandidat(val xref: String = "", val gain: Double = 0.0)
 @Serializable
 data class DnaAbdeckung(
     val xref: String = "",
+    /** Ab JSON-Stufe 8: die Person ist selbst getestet (Test oder Treffer) - dann coverage 1 und keine Kandidaten; aeltere Module: null. */
+    val selfTested: Boolean? = null,
     val coverage: Double = 0.0,
     val descendants: Int = 0,
     val generations: Int = 0,
@@ -239,7 +241,7 @@ fun dnaDatum(gedcom: String, sprache: java.util.Locale = java.util.Locale.getDef
 
 /**
  * Ist die Person selbst autosomal getestet? Dann gilt sie beim Modul als vollstaendig abgedeckt (ApiCoverage: coverage 1,
- * keine Kandidaten) - die Antwort sagt das nicht eigens, darum leitet die App es aus den Eintraegen ab: ein autosomaler
+ * keine Kandidaten). Ab JSON-Stufe 8 sagt das Feld selfTested es; fuer aeltere Module leitet die App es ab: ein autosomaler
  * Test oder ein Treffer, wie in der Regel des Moduls (Coverage.php: "An individual who has tested is covered completely").
  */
 fun DnaPerson.selbstGetestet(): Boolean =

@@ -314,10 +314,13 @@ private fun AbdeckungBereich(client: WtClient, tree: String, xref: String, stand
         value = null
         value = withContext(Dispatchers.IO) { runCatching { client.dnaAbdeckung(tree, xref).let { Geladen(it, dnaPersonenLaden(client, tree, it.kennungen())) } } }
     }
-    // Selbst getestet: die Abdeckung ist dann vollstaendig, unabhaengig von den Nachkommen
-    val selbst by produceState(false, tree, xref, stand) {
-        value = withContext(Dispatchers.IO) { runCatching { client.dnaPerson(tree, xref).selbstGetestet() }.getOrDefault(false) }
+    // Selbst getestet: die Abdeckung ist dann vollstaendig, unabhaengig von den Nachkommen. Das Modul sagt es ab
+    // JSON-Stufe 8 (selfTested); bei aelteren Fassungen leitet die App es aus den Eintraegen der Person ab.
+    val abgeleitet by produceState<Boolean?>(null, tree, xref, stand, ergebnis) {
+        val a = ergebnis?.getOrNull()?.daten ?: return@produceState
+        value = a.selfTested ?: withContext(Dispatchers.IO) { runCatching { client.dnaPerson(tree, xref).selbstGetestet() }.getOrDefault(false) }
     }
+    val selbst = abgeleitet == true
     Bereichsliste(ergebnis, modifier) { g ->
         val a = g.daten
         item("wert") {
