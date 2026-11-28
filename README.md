@@ -214,6 +214,9 @@ api4webtrees 1.11, eintragen lassen sie sich ab 1.12; mit einem älteren Modul l
 Optional: Mit dem Modul **[Sammlungen](https://github.com/thobgg/webtrees-sammlungen)** ab Version 1.6 zeigt die App
 zusätzlich das Archiv. Fehlt es, fehlt nur der Reiter.
 
+Optional: Mit dem Modul **[dna4webtrees](https://github.com/thobgg/dna4webtrees/releases)** ab Version 0.17 zeigt die App
+(ab 1.64) DNA-Vererbungslinien, Tests, Haplogruppen und Treffer. Fehlt es, fehlt nur der Menüpunkt „DNA“.
+
 **GEDCOM 7.0:** Läuft der Server mit [webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), dem
 Versuch, webtrees GEDCOM 7.0 nativ speichern zu lassen, braucht er statt api4webtrees das Modul
 **[api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab)** (die 2.x-Linie, ab 2.0.1).

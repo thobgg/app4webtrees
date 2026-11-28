@@ -215,6 +215,9 @@ and can be entered from 1.12; with an older module everything else works as befo
 Optional: with the **[Sammlungen](https://github.com/thobgg/webtrees-sammlungen)** module, version 1.6 or newer, the
 app also shows the archive. Without it, only that tab is missing.
 
+Optional: with the **[dna4webtrees](https://github.com/thobgg/dna4webtrees/releases)** module, version 0.17 or newer,
+the app (from 1.64) shows DNA inheritance lines, tests, haplogroups and matches. Without it, only the menu item “DNA” is missing.
+
 **GEDCOM 7.0:** if the server runs [webtrees-gedcom7-lab](https://github.com/thobgg/webtrees-gedcom7-lab), the
 experiment that lets webtrees store GEDCOM 7.0 natively, it needs the module
 **[api4webtrees-gedcom7-lab](https://github.com/thobgg/api4webtrees-gedcom7-lab)** (the 2.x line, 2.0.1 or newer)
