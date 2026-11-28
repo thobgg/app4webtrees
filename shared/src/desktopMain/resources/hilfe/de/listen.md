@@ -37,3 +37,15 @@ Das Fenster **Liste erstellen** öffnest du über **Erstellen › Ahnenliste**, 
 Listen über den ganzen Stammbaum brauchen den Baum am Stück; dafür muss auf dem Server api4webtrees ab Version 1.9 laufen. Beim Stammbaum auf diesem PC ist das immer der Fall.
 
 Die Vorschau zeigt die ersten Seiten; sind es mehr, steht darunter „… und n weitere Seiten im PDF“. Jede Seite trägt unten „Erstellt mit wtWin am …“.
+
+## DNA-Vererbungslinien
+
+**Erstellen › DNA-Vererbungslinien …** zeigt für den Probanden, von welchen Vorfahren er Y-DNA, mitochondriale DNA (mtDNA) oder X-DNA haben kann und welche Nachkommen sie von ihm haben können. Oben wählst du Linie, Richtung und die Zahl der Generationen.
+
+- **Y-DNA:** vom Vater an den Sohn. Bei einer Frau steht die Linie ihres Vaters, mit dem Hinweis, dass sie selbst kein Y-Chromosom hat.
+- **mtDNA:** von der Mutter an alle Kinder; nur Töchter geben sie weiter.
+- **X-DNA:** ein Mann hat sein X von der Mutter und gibt es an die Töchter, eine Frau hat je eines von beiden Eltern und gibt X an alle Kinder. Je Generation steht, wie viele der möglichen X-Vorfahren im Stammbaum stehen.
+
+Vorfahren stehen nach Generation mit ihrer Kekulé-Nummer, Nachkommen als eingerückte Liste – das sind die Personen, die für die Linie einen Test machen könnten. Ein Klick macht die Person im Hauptfenster zum Probanden; **Von … ausgehen** berechnet die Linien für sie neu.
+
+Die Linien sind aus den eingetragenen Verwandtschaften abgeleitet und kein Testergebnis; bei X-DNA heißt „möglich“ nicht, dass tatsächlich X-DNA geteilt wird. Es zählen nur leibliche Eltern: Bei einem Adoptiv- oder Pflegekind und bei einer Person ohne eingetragenes Geschlecht endet die Linie mit einem Vermerk. Der Menüpunkt erscheint nur, wenn das Modul api4webtrees auf dem Server die Linien anbietet.

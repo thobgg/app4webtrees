@@ -37,3 +37,15 @@ Ouvrez la fenêtre **Créer une liste** par **Créer › Liste d'ascendance**, *
 Les listes sur l'ensemble de l'arbre ont besoin de l'arbre d'un seul tenant ; le serveur doit utiliser api4webtrees 1.9 ou plus récent. Avec l'arbre généalogique sur cet ordinateur, c'est toujours le cas.
 
 L'aperçu montre les premières pages ; s'il y en a davantage, « … et n pages de plus dans le PDF » apparaît en dessous. Chaque page porte en bas « Créé avec wtWin le … ».
+
+## Lignées de transmission de l'ADN
+
+**Créer › Lignées de transmission de l'ADN …** montre, pour la personne de départ, de quels ancêtres elle peut tenir l'ADN-Y, l'ADN mitochondrial (ADNmt) ou l'ADN-X, et quels descendants peuvent le tenir d'elle. En haut, choisissez la lignée, la direction et le nombre de générations.
+
+- **ADN-Y :** du père au fils. Pour une femme, la lignée de son père est affichée, avec la mention qu'elle n'a pas elle-même de chromosome Y.
+- **ADNmt :** de la mère à tous les enfants ; seules les filles le transmettent.
+- **ADN-X :** un homme tient son X de sa mère et le transmet à ses filles, une femme en tient un de chaque parent et transmet un X à tous ses enfants. Chaque génération indique combien des ancêtres X possibles figurent dans l'arbre.
+
+Les ancêtres sont classés par génération avec leur numéro d'ascendance, les descendants en liste indentée – ce sont les personnes qui pourraient faire un test pour la lignée. Un clic fait de la personne la personne de départ dans la fenêtre principale ; **Partir de …** recalcule les lignées pour elle.
+
+Les lignées sont déduites des liens de parenté enregistrés et ne sont pas un résultat de test ; pour l'ADN-X, « possible » ne signifie pas que de l'ADN-X est réellement partagé. Seuls les parents biologiques comptent : chez un enfant adopté ou placé et chez une personne sans sexe enregistré, la lignée s'arrête avec une mention. L'entrée de menu n'apparaît que si le module api4webtrees du serveur propose les lignées.

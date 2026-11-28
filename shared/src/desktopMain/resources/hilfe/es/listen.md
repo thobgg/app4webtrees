@@ -37,3 +37,15 @@ La ventana **Crear lista** se abre con **Crear › Lista de antepasados**, **Lis
 Las listas sobre todo el árbol necesitan el árbol completo; el servidor debe tener api4webtrees 1.9 o posterior. Con el árbol genealógico en este PC siempre es así.
 
 La vista previa muestra las primeras páginas; si hay más, debajo aparece «… y n páginas más en el PDF». Cada página lleva abajo «Creado con wtWin el …».
+
+## Líneas de herencia del ADN
+
+**Crear › Líneas de herencia del ADN …** muestra, para la persona de partida, de qué antepasados puede tener el ADN-Y, el ADN mitocondrial (ADNmt) o el ADN-X, y qué descendientes pueden tenerlo de ella. Arriba se eligen la línea, la dirección y el número de generaciones.
+
+- **ADN-Y:** del padre al hijo varón. En una mujer se muestra la línea de su padre, con la indicación de que ella misma no tiene cromosoma Y.
+- **ADNmt:** de la madre a todos los hijos; solo las hijas lo transmiten.
+- **ADN-X:** un hombre tiene su X de la madre y lo transmite a sus hijas, una mujer tiene uno de cada progenitor y transmite un X a todos sus hijos. En cada generación se indica cuántos de los posibles antepasados X figuran en el árbol.
+
+Los antepasados aparecen por generación con su número de ascendencia, los descendientes como lista sangrada: son las personas que podrían hacerse una prueba para la línea. Un clic convierte a la persona en persona de partida en la ventana principal; **Partir de …** vuelve a calcular las líneas para ella.
+
+Las líneas se deducen de los parentescos registrados y no son el resultado de una prueba; en el ADN-X, «posible» no significa que realmente se comparta ADN-X. Solo cuentan los padres biológicos: en un hijo adoptivo o de acogida y en una persona sin sexo registrado, la línea termina con una indicación. La entrada de menú solo aparece si el módulo api4webtrees del servidor ofrece las líneas.

@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import de.bgghome.webtrees.nativ.Sprache
+import de.bgghome.webtrees.nativ.api.DnaLinie
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.data.Ablage
 import de.bgghome.webtrees.nativ.ui.DnaLinienInhalt
@@ -20,7 +21,7 @@ import kotlin.test.Test
 /**
  * Kein Test, sondern ein Werkzeug: zeichnet die Ansicht der DNA-Vererbungslinien ohne Bildschirm (Server ab API-Stufe 48).
  *
- *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
+ *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_LINIE=y|mt|x] [WT_RICHTUNG=nachkommen] [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
  *   ./gradlew :shared:desktopTest --rerun --tests '*DnaBildErzeugen*'
  */
 class DnaBildErzeugen {
@@ -44,12 +45,14 @@ class DnaBildErzeugen {
         val client = WtClient(Speicher(), Speicher(), "wtTux/dev (DNA)").apply { baseUrl = System.getenv("WT_URL")!! }
         runBlocking { System.getenv("WT_USER")?.let { client.login(it, System.getenv("WT_PASS").orEmpty()) } ?: client.info() }
         val tree = System.getenv("WT_TREE")!!; val xref = System.getenv("WT_XREF")!!
+        val linie = DnaLinie.entries.firstOrNull { it.code == System.getenv("WT_LINIE") } ?: DnaLinie.Y
+        val nachkommen = System.getenv("WT_RICHTUNG") == "nachkommen"
         val (bw, bh, dichte) = (System.getenv("WT_BILD") ?: "640:780:1.25").split(':')
         ImageComposeScene(width = bw.toInt(), height = bh.toInt(), density = Density(dichte.toFloat())) {
-            DeskTheme { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) { DnaLinienInhalt(client, tree, xref, onPerson = {}) } }
+            DeskTheme { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) { DnaLinienInhalt(client, tree, xref, onPerson = {}, zuerst = linie, zuerstNachkommen = nachkommen) } }
         }.use { scene ->
             scene.render(); (1..60).forEach { scene.render(it * 50_000_000L); Thread.sleep(60) }
-            File(ziel, "dna.png").writeBytes(scene.render(4_000_000_000L).encodeToData(EncodedImageFormat.PNG)!!.bytes)
+            File(ziel, "dna-${linie.code}-${if (nachkommen) "nachkommen" else "vorfahren"}.png").writeBytes(scene.render(4_000_000_000L).encodeToData(EncodedImageFormat.PNG)!!.bytes)
         }
     }
 }

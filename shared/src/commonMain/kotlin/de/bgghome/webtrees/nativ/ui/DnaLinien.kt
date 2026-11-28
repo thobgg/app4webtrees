@@ -79,12 +79,15 @@ private fun stopText(stop: String?): String? = when (stop) {
 
 /**
  * Auswahl (Linie, Richtung, Generationen) und die Liste dazu. [onPerson]: Tipp bzw. Klick auf eine Person; private
- * Personen sind nicht waehlbar.
+ * Personen sind nicht waehlbar. [zuerst], [zuerstNachkommen]: womit die Ansicht aufgeht.
  */
 @Composable
-fun DnaLinienInhalt(client: WtClient, tree: String, xref: String, onPerson: (String) -> Unit, modifier: Modifier = Modifier) {
-    var linie by remember { mutableStateOf(DnaLinie.Y) }
-    var nachkommen by remember { mutableStateOf(false) }
+fun DnaLinienInhalt(
+    client: WtClient, tree: String, xref: String, onPerson: (String) -> Unit, modifier: Modifier = Modifier,
+    zuerst: DnaLinie = DnaLinie.Y, zuerstNachkommen: Boolean = false,
+) {
+    var linie by remember { mutableStateOf(zuerst) }
+    var nachkommen by remember { mutableStateOf(zuerstNachkommen) }
     var gewuenscht by remember { mutableIntStateOf(8) }
     val generationen = gewuenscht.coerceIn(1, dnaHoechstens(linie))
     val farben = MaterialTheme.colorScheme
@@ -94,7 +97,8 @@ fun DnaLinienInhalt(client: WtClient, tree: String, xref: String, onPerson: (Str
         value = withContext(Dispatchers.IO) { runCatching { client.dnaLinien(tree, xref, linie, nachkommen, generationen) } }
     }
 
-    LazyColumn(modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    // Unten Luft, damit die letzte Zeile am Handy nicht an der Navigationsleiste klebt
+    LazyColumn(modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(2.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)) {
         item("wahl") {
             Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 ChipRow(
@@ -118,8 +122,8 @@ fun DnaLinienInhalt(client: WtClient, tree: String, xref: String, onPerson: (Str
             nachkommen -> e.getOrThrow().tree?.let { wurzel ->
                 item("lage") {
                     when (dnaNachkommenLage(linie, wurzel)) {
-                        DnaNachkommenLage.KeinY -> Hinweis(stringResource(Res.string.dna_y_no_desc), Modifier.padding(horizontal = 12.dp))
-                        DnaNachkommenLage.MannMt -> Hinweis(stringResource(Res.string.dna_mt_man), Modifier.padding(horizontal = 12.dp))
+                        DnaNachkommenLage.KeinY -> Hinweis(stringResource(Res.string.dna_y_no_desc), Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp))
+                        DnaNachkommenLage.MannMt -> Hinweis(stringResource(Res.string.dna_mt_man), Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp))
                         DnaNachkommenLage.Keine -> Zwischenzeile(stringResource(Res.string.dna_no_descendants))
                         DnaNachkommenLage.Liste -> Zwischenzeile(stringResource(Res.string.dna_desc_count, e.getOrThrow().count))
                     }

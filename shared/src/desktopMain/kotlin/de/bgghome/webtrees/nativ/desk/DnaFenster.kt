@@ -46,7 +46,7 @@ fun DnaFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
         onPreviewKeyEvent = { e ->
             when {
                 e.type == KeyEventType.KeyDown && e.key == Key.Escape -> { onClose(); true }
-                e.type == KeyEventType.KeyDown && e.key == Key.F1 -> { Hilfe.oeffnen("hauptfenster"); true }
+                e.type == KeyEventType.KeyDown && e.key == Key.F1 -> { Hilfe.oeffnen("listen"); true }
                 else -> false
             }
         },
