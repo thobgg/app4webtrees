@@ -65,6 +65,8 @@ object DnaWarnung {
     const val MEHRFACH = "multiple-relationships"
     const val ZWEITE = "distant-second-relationship"
     const val X_OHNE_VORFAHR = "x-segment-without-common-x-ancestor"
+    /** Ab JSON-Stufe 7: Menge und Segmentzahl passen nach dem Modell des Moduls kaum zur Verwandtschaft im Baum. */
+    const val UNWAHRSCHEINLICH = "unlikely-for-relationship"
 }
 
 /**

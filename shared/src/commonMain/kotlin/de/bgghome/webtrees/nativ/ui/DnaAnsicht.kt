@@ -256,7 +256,9 @@ private fun warnText(code: String): String? = when (code) {
     DnaWarnung.MEHRFACH -> stringResource(Res.string.dna_warn_multiple)
     DnaWarnung.ZWEITE -> stringResource(Res.string.dna_warn_distant)
     DnaWarnung.X_OHNE_VORFAHR -> stringResource(Res.string.dna_warn_x)
-    else -> null
+    DnaWarnung.UNWAHRSCHEINLICH -> stringResource(Res.string.dna_warn_unlikely)
+    // Codes neuerer Modulfassungen, die die App noch nicht kennt, erscheinen wenigstens als Code statt gar nicht
+    else -> code
 }
 
 @Composable

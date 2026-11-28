@@ -2071,4 +2071,5 @@
     <string name="dna_evidence_hint">Étayé ne veut pas dire prouvé : l’ADN concorde avec l’arbre et pourrait aussi concorder avec un autre. Règle pour une correspondance unique (WikiTree) : apparentés comme cousins au 3e degré ou plus proches et valeur dans la plage habituelle.</string>
     <string name="dna_evidence_by">étayé par : %1$s</string>
     <string name="dna_coverage_self">Cette personne a fait elle-même un test ; son ADN est donc entièrement couvert.</string>
+    <string name="dna_warn_unlikely">La quantité et le nombre de segments sont peu probables pour cette parenté dans l’arbre.</string>
 </resources>

@@ -2052,4 +2052,5 @@
     <string name="dna_evidence_hint">Ondersteund betekent niet bewezen: het DNA past bij de stamboom en zou ook bij een andere kunnen passen. Regel voor één match (WikiTree): verwant als achterachterneven of nauwer en de hoeveelheid binnen het gebruikelijke bereik.</string>
     <string name="dna_evidence_by">ondersteund door: %1$s</string>
     <string name="dna_coverage_self">Deze persoon heeft zelf een test gedaan; het DNA is daarmee volledig gedekt.</string>
+    <string name="dna_warn_unlikely">Hoeveelheid en aantal segmenten zijn onwaarschijnlijk voor deze verwantschap in de stamboom.</string>
 </resources>

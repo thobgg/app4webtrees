@@ -2076,4 +2076,5 @@
     <string name="dna_evidence_hint">Supported is not proven: the DNA fits the family tree and could also fit another one. Rule for a single match (WikiTree): related as third cousins or closer and the amount in the usual range.</string>
     <string name="dna_evidence_by">supported by: %1$s</string>
     <string name="dna_coverage_self">This individual has tested themselves, so their DNA is covered completely.</string>
+    <string name="dna_warn_unlikely">Amount and number of segments are unlikely for this relationship in the family tree.</string>
 </resources>

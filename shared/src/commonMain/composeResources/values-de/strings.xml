@@ -2071,4 +2071,5 @@
     <string name="dna_evidence_hint">Gestützt heißt nicht bewiesen: Die DNA passt zum Stammbaum und könnte auch zu einem anderen passen. Regel für einen einzelnen Treffer (WikiTree): verwandt als Cousins 3. Grades oder näher und die Menge im üblichen Bereich.</string>
     <string name="dna_evidence_by">gestützt durch: %1$s</string>
     <string name="dna_coverage_self">Diese Person ist selbst getestet; ihre DNA ist damit vollständig abgedeckt.</string>
+    <string name="dna_warn_unlikely">Menge und Segmentzahl sind für diese Verwandtschaft im Stammbaum unwahrscheinlich.</string>
 </resources>
