@@ -171,6 +171,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
     val stufe30 = viewModel.tasksSupported
     var aufgaben by remember { mutableStateOf(false) }
     var aenderungen by remember { mutableStateOf(false) }
+    var dna by remember { mutableStateOf(false) }
     var aufgabeNeu by remember { mutableStateOf<AufgabeZiel?>(null) }
     // Archiv des Moduls Sammlungen als eigenes Fenster (nur wenn das Modul laeuft und der Nutzer es sehen darf)
     var archiv by remember { mutableStateOf(false) }
@@ -243,6 +244,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
         onOrteBereinigen = if (orteApi && state.tree?.canEdit == true && state.info.hat(de.bgghome.webtrees.nativ.api.API_PLACE_RENAME)) ({ orteBereinigen = true; orte = "" }) else null,
         onAufgaben = if (stufe30) ({ aufgaben = true }) else null,
         onAenderungen = if (stufe30) ({ aenderungen = true }) else null,
+        onDna = if (viewModel.dnaSupported) ({ dna = true }) else null,
         onAufgabeNeu = if (stufe30 && state.tree?.canEdit == true) ({ aufgabeNeu = it }) else null,
         onLokaleBaeume = if (LokalBetrieb.istLokal(state.baseUrl) && LokalBetrieb.verfuegbar) ({ lokaleBaeume = true }) else null,
         onArchiv = if (archivDa) ({ archiv = true }) else null,
@@ -435,6 +437,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
             onAufgabe = if (stufe30 && state.tree?.canEdit == true) ({ aufgabeNeu = it }) else null)
         if (aufgaben && state.tree != null) AufgabenFenster(state, viewModel, openSheet, onClose = { aufgaben = false })
         if (aenderungen && state.tree != null) AenderungenFenster(state, viewModel, openSheet, onClose = { aenderungen = false })
+        if (dna && state.tree != null && state.root != null) DnaFenster(state, viewModel, onClose = { dna = false })
         if (archiv && archivDa) ArchivFenster(state, viewModel, openWeb, onClose = { archiv = false })
         if (sicherung) SicherungDialog(onClose = { sicherung = false })
         if (gedcomSpeichern) state.tree?.name?.let { GedcomSpeichernDialog(viewModel, it, onClose = { gedcomSpeichern = false }) }
@@ -472,6 +475,7 @@ private fun FrameWindowScope.DeskMenuBar(
     onOrteBereinigen: (() -> Unit)? = null,
     onAufgaben: (() -> Unit)? = null,
     onAenderungen: (() -> Unit)? = null,
+    onDna: (() -> Unit)? = null,
     onAufgabeNeu: ((AufgabeZiel) -> Unit)? = null,
     onStartperson: (() -> Unit)? = null,
     onOrtsanzeige: () -> Unit = {},
@@ -559,6 +563,11 @@ private fun FrameWindowScope.DeskMenuBar(
                 Item(stringResource(Res.string.desk_chart_open), enabled = state.root != null, shortcut = KeyShortcut(Key.T, ctrl = true), onClick = { onTafel(TafelArt.Stamm) })
                 Separator()
                 Item(stringResource(Res.string.desk_book_window) + " …", enabled = state.root != null, onClick = onBuch)
+                // Fuer wenige Nutzer: nur diese eine Zeile, kein Knopf in der Leiste, kein Rechtsklick
+                if (onDna != null) {
+                    Separator()
+                    Item(stringResource(Res.string.dna_menu), enabled = state.root != null, onClick = onDna)
+                }
             }
             Menu(stringResource(Res.string.desk_menu_webtrees), enabled = main && state.tree != null) {
                 val t = state.tree?.name.orEmpty()

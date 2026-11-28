@@ -1973,4 +1973,29 @@
         <item quantity="one">%1$d Generation</item>
         <item quantity="other">%1$d Generationen</item>
     </plurals>
+    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <string name="dna_title">DNA-Vererbungslinien</string>
+    <string name="dna_title_of">DNA-Vererbungslinien von %1$s</string>
+    <string name="dna_menu">DNA-Vererbungslinien …</string>
+    <string name="dna_line_y">Y-DNA (väterliche Linie)</string>
+    <string name="dna_line_mt">mtDNA (mütterliche Linie)</string>
+    <string name="dna_line_x">X-DNA</string>
+    <string name="dna_ancestors">Vorfahren</string>
+    <string name="dna_descendants">Nachkommen</string>
+    <string name="dna_start">Ausgangsperson</string>
+    <string name="dna_generation">Generation %1$d</string>
+    <string name="dna_number">Nr. %1$s</string>
+    <string name="dna_x_count">%1$d von %2$d möglichen X-Vorfahren stehen im Baum</string>
+    <string name="dna_desc_count">Nachkommen auf dieser Linie: %1$d</string>
+    <string name="dna_no_ancestors">Der Baum enthält auf dieser Linie keine Vorfahren.</string>
+    <string name="dna_no_descendants">Der Baum enthält auf dieser Linie keine Nachkommen.</string>
+    <string name="dna_stop_nonbio">Die Linie endet hier: Die Eltern sind nicht als leibliche Eltern eingetragen.</string>
+    <string name="dna_stop_sex">Die Linie endet hier: Das Geschlecht ist nicht eingetragen.</string>
+    <string name="dna_mt_no_pass">Hat diese mitochondriale DNA, gibt sie aber nicht weiter.</string>
+    <string name="dna_hint">Diese Linien sind aus den im Stammbaum eingetragenen Verwandtschaften abgeleitet. Sie sind kein Testergebnis. Eine falsch eingetragene Verwandtschaft führt zu einer falschen Linie.</string>
+    <string name="dna_hint_x">Bei X-DNA zeigt die Liste, wer sie weitergegeben oder erhalten haben kann. Weil das X-Chromosom rekombiniert wird, teilen einige dieser Personen tatsächlich keine X-DNA.</string>
+    <string name="dna_y_woman">Eine Frau hat kein Y-Chromosom. Die Liste zeigt die väterliche Linie ihres Vaters. Ein Bruder, ihr Vater oder ein Onkel väterlicherseits kann für diese Linie einen Y-DNA-Test machen.</string>
+    <string name="dna_y_no_desc">Nur Männer haben ein Y-Chromosom, daher hat diese Person keine Nachkommen auf der Y-Linie.</string>
+    <string name="dna_mt_man">Ein Mann hat die mitochondriale DNA seiner Mutter, gibt sie aber nicht weiter. Daher hat er auf dieser Linie keine Nachkommen.</string>
+    <string name="dna_from_selected">Von %1$s ausgehen</string>
 </resources>

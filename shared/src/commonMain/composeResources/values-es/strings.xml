@@ -1973,4 +1973,29 @@
         <item quantity="one">%1$d generación</item>
         <item quantity="other">%1$d generaciones</item>
     </plurals>
+    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <string name="dna_title">Líneas de herencia del ADN</string>
+    <string name="dna_title_of">Líneas de herencia del ADN de %1$s</string>
+    <string name="dna_menu">Líneas de herencia del ADN …</string>
+    <string name="dna_line_y">ADN-Y (línea paterna)</string>
+    <string name="dna_line_mt">ADNmt (línea materna)</string>
+    <string name="dna_line_x">ADN-X</string>
+    <string name="dna_ancestors">Antepasados</string>
+    <string name="dna_descendants">Descendientes</string>
+    <string name="dna_start">Persona de partida</string>
+    <string name="dna_generation">Generación %1$d</string>
+    <string name="dna_number">N.º %1$s</string>
+    <string name="dna_x_count">%1$d de %2$d posibles antepasados X figuran en el árbol</string>
+    <string name="dna_desc_count">Descendientes en esta línea: %1$d</string>
+    <string name="dna_no_ancestors">El árbol no contiene antepasados en esta línea.</string>
+    <string name="dna_no_descendants">El árbol no contiene descendientes en esta línea.</string>
+    <string name="dna_stop_nonbio">La línea termina aquí: los padres no constan como padres biológicos.</string>
+    <string name="dna_stop_sex">La línea termina aquí: el sexo no consta.</string>
+    <string name="dna_mt_no_pass">Tiene este ADN mitocondrial, pero no lo transmite.</string>
+    <string name="dna_hint">Estas líneas se deducen de los parentescos registrados en el árbol. No son el resultado de una prueba. Un parentesco mal registrado conduce a una línea errónea.</string>
+    <string name="dna_hint_x">Para el ADN-X, la lista muestra quién puede haberlo transmitido o recibido. Como el cromosoma X se recombina, algunas de estas personas en realidad no comparten ADN-X.</string>
+    <string name="dna_y_woman">Una mujer no tiene cromosoma Y. La lista muestra la línea paterna de su padre. Un hermano, su padre o un tío paterno puede hacerse una prueba de ADN-Y para esta línea.</string>
+    <string name="dna_y_no_desc">Solo los hombres tienen cromosoma Y, por lo que esta persona no tiene descendientes en la línea Y.</string>
+    <string name="dna_mt_man">Un hombre tiene el ADN mitocondrial de su madre, pero no lo transmite; por eso no tiene descendientes en esta línea.</string>
+    <string name="dna_from_selected">Partir de %1$s</string>
 </resources>

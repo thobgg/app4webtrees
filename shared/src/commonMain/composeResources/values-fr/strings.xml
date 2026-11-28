@@ -1973,4 +1973,29 @@
         <item quantity="one">%1$d génération</item>
         <item quantity="other">%1$d générations</item>
     </plurals>
+    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <string name="dna_title">Lignées de transmission de l’ADN</string>
+    <string name="dna_title_of">Lignées de transmission de l’ADN de %1$s</string>
+    <string name="dna_menu">Lignées de transmission de l’ADN …</string>
+    <string name="dna_line_y">ADN-Y (lignée paternelle)</string>
+    <string name="dna_line_mt">ADNmt (lignée maternelle)</string>
+    <string name="dna_line_x">ADN-X</string>
+    <string name="dna_ancestors">Ancêtres</string>
+    <string name="dna_descendants">Descendants</string>
+    <string name="dna_start">Personne de départ</string>
+    <string name="dna_generation">Génération %1$d</string>
+    <string name="dna_number">N° %1$s</string>
+    <string name="dna_x_count">%1$d des %2$d ancêtres X possibles figurent dans l’arbre</string>
+    <string name="dna_desc_count">Descendants sur cette lignée : %1$d</string>
+    <string name="dna_no_ancestors">L’arbre ne contient aucun ancêtre sur cette lignée.</string>
+    <string name="dna_no_descendants">L’arbre ne contient aucun descendant sur cette lignée.</string>
+    <string name="dna_stop_nonbio">La lignée s’arrête ici : les parents ne sont pas enregistrés comme parents biologiques.</string>
+    <string name="dna_stop_sex">La lignée s’arrête ici : le sexe n’est pas enregistré.</string>
+    <string name="dna_mt_no_pass">Porte cet ADN mitochondrial, mais ne le transmet pas.</string>
+    <string name="dna_hint">Ces lignées sont déduites des liens de parenté enregistrés dans l’arbre. Ce n’est pas un résultat de test. Un lien de parenté mal enregistré conduit à une lignée erronée.</string>
+    <string name="dna_hint_x">Pour l’ADN-X, la liste montre qui a pu le transmettre ou le recevoir. Comme le chromosome X est recombiné, certaines de ces personnes ne partagent en réalité aucun ADN-X.</string>
+    <string name="dna_y_woman">Une femme n’a pas de chromosome Y. La liste montre la lignée paternelle de son père. Un frère, son père ou un oncle paternel peut faire un test ADN-Y pour cette lignée.</string>
+    <string name="dna_y_no_desc">Seuls les hommes ont un chromosome Y ; cette personne n’a donc aucun descendant sur la lignée Y.</string>
+    <string name="dna_mt_man">Un homme porte l’ADN mitochondrial de sa mère, mais ne le transmet pas ; il n’a donc aucun descendant sur cette lignée.</string>
+    <string name="dna_from_selected">Partir de %1$s</string>
 </resources>

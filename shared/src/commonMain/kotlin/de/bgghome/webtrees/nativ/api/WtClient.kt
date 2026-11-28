@@ -422,6 +422,11 @@ class WtClient(
     suspend fun descendants(tree: String, xref: String, generations: Int): Descendants =
         get("Descendants", tree, mapOf("xref" to xref, "generations" to generations.toString()), Descendants.serializer())
 
+    /** Vererbungslinie einer Person (ab API-Stufe 48); [nachkommen]: wer sie von ihr haben kann, sonst von wem sie sie hat. */
+    suspend fun dnaLinien(tree: String, xref: String, linie: DnaLinie, nachkommen: Boolean, generationen: Int): DnaLinien =
+        get("DnaLines", tree, mapOf("xref" to xref, "line" to linie.code, "direction" to if (nachkommen) "descendants" else "ancestors",
+            "generations" to generationen.toString()), DnaLinien.serializer())
+
     suspend fun pending(tree: String): PendingList = get("Pending", tree, emptyMap(), PendingList.serializer())
 
     suspend fun bookmarks(tree: String): BookmarkList = get("Bookmarks", tree, emptyMap(), BookmarkList.serializer())

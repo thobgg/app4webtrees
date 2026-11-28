@@ -38,6 +38,10 @@ fun AppViewModel.toggleBookmark(xref: String) {
 val AppViewModel.tasksSupported: Boolean
     get() = uiState.value.info.hat(de.bgghome.webtrees.nativ.api.API_TASKS) && uiState.value.info?.user?.loggedIn == true
 
+/** Ab API-Stufe 48: DNA-Vererbungslinien (der Server rechnet, auch fuer Besucher). */
+val AppViewModel.dnaSupported: Boolean
+    get() = uiState.value.info.hat(de.bgghome.webtrees.nativ.api.API_DNA_LINES)
+
 fun AppViewModel.isTreeBookmarked(xref: String): Boolean = uiState.value.treeBookmarks.any { it.xref == xref }
 
 /** Favoriten des Stammbaums setzen oder entfernen (nur Verwalter, ab Stufe 30). */

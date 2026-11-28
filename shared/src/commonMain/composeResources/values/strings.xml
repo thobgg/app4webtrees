@@ -1978,4 +1978,29 @@
         <item quantity="one">%1$d generation</item>
         <item quantity="other">%1$d generations</item>
     </plurals>
+    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <string name="dna_title">DNA inheritance lines</string>
+    <string name="dna_title_of">DNA inheritance lines of %1$s</string>
+    <string name="dna_menu">DNA inheritance lines …</string>
+    <string name="dna_line_y">Y-DNA (paternal line)</string>
+    <string name="dna_line_mt">mtDNA (maternal line)</string>
+    <string name="dna_line_x">X-DNA</string>
+    <string name="dna_ancestors">Ancestors</string>
+    <string name="dna_descendants">Descendants</string>
+    <string name="dna_start">Start individual</string>
+    <string name="dna_generation">Generation %1$d</string>
+    <string name="dna_number">No. %1$s</string>
+    <string name="dna_x_count">%1$d of %2$d possible X ancestors are in the tree</string>
+    <string name="dna_desc_count">Descendants on this line: %1$d</string>
+    <string name="dna_no_ancestors">The tree has no ancestors on this line.</string>
+    <string name="dna_no_descendants">The tree has no descendants on this line.</string>
+    <string name="dna_stop_nonbio">The line ends here: the parents are not recorded as biological parents.</string>
+    <string name="dna_stop_sex">The line ends here: the sex is not recorded.</string>
+    <string name="dna_mt_no_pass">Has this mitochondrial DNA but does not pass it on.</string>
+    <string name="dna_hint">These lines are derived from the relationships recorded in the family tree. They are not a test result. A relationship that is recorded wrongly leads to a wrong line.</string>
+    <string name="dna_hint_x">For X-DNA the list shows who can have passed it on or received it. Because the X chromosome is recombined, some of these individuals will in fact share no X-DNA.</string>
+    <string name="dna_y_woman">A woman has no Y chromosome. The list shows the paternal line of her father. A brother, her father or a paternal uncle can take a Y-DNA test for this line.</string>
+    <string name="dna_y_no_desc">Only men have a Y chromosome, so this individual has no descendants on the Y line.</string>
+    <string name="dna_mt_man">A man has the mitochondrial DNA of his mother but does not pass it on, so he has no descendants on this line.</string>
+    <string name="dna_from_selected">Start from %1$s</string>
 </resources>

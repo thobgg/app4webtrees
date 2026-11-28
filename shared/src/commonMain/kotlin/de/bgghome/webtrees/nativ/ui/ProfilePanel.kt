@@ -57,6 +57,8 @@ internal sealed interface ProfileDialog {
     data object DeletePerson : ProfileDialog
     /** Person an Mitforscher schicken (webtrees-Nachricht) oder ueber das Teilen-Menue weitergeben (Nachrichten.kt) */
     data object Share : ProfileDialog
+    /** DNA-Vererbungslinien dieser Person (DnaLinien.kt, ab API-Stufe 48) */
+    data object Dna : ProfileDialog
     /** Geschlecht aendern - Stift an der Zeile Geschlecht in der Zeitleiste, Auswahl statt Textfeld */
     data object Sex : ProfileDialog
     /** Forschungsaufgabe fuer diese Person anlegen (Aufgaben.kt) */
@@ -156,14 +158,20 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
                     }
                     // Teilen als eigenes Symbol (Alltag); Seltenes und Endgueltiges steckt im Drei-Punkte-Menue, Loeschen dort rot
                     val teilbar = !person.isPrivate && person.url.isNotBlank() && (viewModel.messagesSupported || rememberTeilen() != null)
-                    if (canEdit || teilbar) {
+                    // Selten gebraucht, darum im Menue statt als Reiter
+                    val dna = viewModel.dnaSupported && !person.isPrivate
+                    if (canEdit || teilbar || dna) {
                         Row(Modifier.align(Alignment.TopStart)) {
-                            if (canEdit) Box {
+                            if (canEdit || dna) Box {
                                 IconButton(onClick = { moreMenu = true }) {
                                     Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.action_menu))
                                 }
                                 DropdownMenu(expanded = moreMenu, onDismissRequest = { moreMenu = false }) {
-                                    DropdownMenuItem(
+                                    if (dna) DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.dna_title)) },
+                                        onClick = { moreMenu = false; dialog = ProfileDialog.Dna },
+                                    )
+                                    if (canEdit) DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.action_delete_person), color = MaterialTheme.colorScheme.error) },
                                         onClick = { moreMenu = false; dialog = ProfileDialog.DeletePerson },
                                     )
@@ -373,6 +381,7 @@ internal fun ProfileDialogs(
     when (dialog) {
         null -> Unit
 
+        ProfileDialog.Dna -> state.tree?.let { t -> DnaLinienDialog(viewModel.client, t.name, person.xref, person.name, onPerson = viewModel::select, onDismiss = onDismiss) }
         ProfileDialog.Share -> NachrichtDialog(state, viewModel, teilenEntwurf(person), onDismiss = onDismiss)
         ProfileDialog.NewTask -> state.tree?.let { t -> AufgabeDialogHandy(AufgabeFuer(person.xref, person.name), viewModel, t.name, onClose = { onDismiss() }) }
                 ProfileDialog.Sex -> ChoiceDialog(

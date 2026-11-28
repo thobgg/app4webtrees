@@ -707,6 +707,53 @@ data class DescendantNode(
 data class Descendants(val root: String = "", val generations: Int = 0, val tree: DescendantNode)
 
 /** Merkliste (ab API-Stufe 11): die gemerkten Personen des Benutzers in diesem Baum. */
+/** Ab dieser API-Stufe kennt das Modul die Route DnaLines. */
+const val API_DNA_LINES = 48
+
+/** Welche Vererbungslinie: Y-Chromosom (Vater an Sohn), mitochondriale DNA (Mutter an alle Kinder) oder X-Chromosom. */
+enum class DnaLinie(val code: String) { Y("y"), Mt("mt"), X("x") }
+
+/** Die Linie endet an dieser Person: die Eltern sind nicht als leibliche eingetragen bzw. das Geschlecht fehlt. */
+const val DNA_STOP_NICHT_LEIBLICH = "non-biological"
+const val DNA_STOP_GESCHLECHT = "unknown-sex"
+
+/**
+ * Ein Vorfahr auf der Linie. [sosa]: alle Kekule-Nummern, unter denen er in dieser Generation steht (mehrere bei
+ * Ahnenschwund). [carrier] ist nur bei einer Ausgangsperson falsch, die die Linie nicht traegt (Y-Linie einer Frau).
+ */
+@Serializable
+data class DnaVorfahr(val person: Person, val sosa: List<Long> = emptyList(), val carrier: Boolean = true, val stop: String? = null)
+
+/** Eine Generation der Linie; 0 ist die Ausgangsperson. [possible]: so viele Vorfahren haette ein lueckenloser Baum hier. */
+@Serializable
+data class DnaGeneration(val generation: Int = 0, val possible: Int = 1, val people: List<DnaVorfahr> = emptyList())
+
+/** Ein Nachkomme auf der Linie mit denen seiner Kinder, die sie von ihm haben koennen. */
+@Serializable
+data class DnaNachkomme(
+    val person: Person,
+    val carrier: Boolean = true,
+    /** Kann die Linie an Kinder weitergeben (ein Mann gibt mitochondriale DNA nicht weiter). */
+    val passesOn: Boolean = true,
+    val stop: String? = null,
+    val children: List<DnaNachkomme> = emptyList(),
+)
+
+/**
+ * Antwort der Route DnaLines: fuer Vorfahren [generationsList], fuer Nachkommen [tree] und [count]. Der Server leitet
+ * die Linie aus den eingetragenen Verwandtschaften ab - es ist kein Testergebnis.
+ */
+@Serializable
+data class DnaLinien(
+    val root: String = "",
+    val line: String = "",
+    val direction: String = "",
+    val generations: Int = 0,
+    val generationsList: List<DnaGeneration> = emptyList(),
+    val count: Int = 0,
+    val tree: DnaNachkomme? = null,
+)
+
 @Serializable
 data class BookmarkList(val data: List<Person> = emptyList(), /** Ab Stufe 30: die Favoriten des Stammbaums (Verwalter setzen sie). */ val treeFavorites: List<Person> = emptyList())
 

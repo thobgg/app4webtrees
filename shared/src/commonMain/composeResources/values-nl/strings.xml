@@ -1954,4 +1954,29 @@
         <item quantity="one">%1$d generatie</item>
         <item quantity="other">%1$d generaties</item>
     </plurals>
+    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <string name="dna_title">DNA-overervingslijnen</string>
+    <string name="dna_title_of">DNA-overervingslijnen van %1$s</string>
+    <string name="dna_menu">DNA-overervingslijnen …</string>
+    <string name="dna_line_y">Y-DNA (vaderlijke lijn)</string>
+    <string name="dna_line_mt">mtDNA (moederlijke lijn)</string>
+    <string name="dna_line_x">X-DNA</string>
+    <string name="dna_ancestors">Voorouders</string>
+    <string name="dna_descendants">Nakomelingen</string>
+    <string name="dna_start">Uitgangspersoon</string>
+    <string name="dna_generation">Generatie %1$d</string>
+    <string name="dna_number">Nr. %1$s</string>
+    <string name="dna_x_count">%1$d van de %2$d mogelijke X-voorouders staan in de stamboom</string>
+    <string name="dna_desc_count">Nakomelingen op deze lijn: %1$d</string>
+    <string name="dna_no_ancestors">De stamboom bevat op deze lijn geen voorouders.</string>
+    <string name="dna_no_descendants">De stamboom bevat op deze lijn geen nakomelingen.</string>
+    <string name="dna_stop_nonbio">De lijn eindigt hier: de ouders zijn niet als biologische ouders vastgelegd.</string>
+    <string name="dna_stop_sex">De lijn eindigt hier: het geslacht is niet vastgelegd.</string>
+    <string name="dna_mt_no_pass">Heeft dit mitochondriale DNA, maar geeft het niet door.</string>
+    <string name="dna_hint">Deze lijnen zijn afgeleid van de verwantschappen die in de stamboom zijn vastgelegd. Ze zijn geen testresultaat. Een onjuist vastgelegde verwantschap leidt tot een onjuiste lijn.</string>
+    <string name="dna_hint_x">Bij X-DNA toont de lijst wie het kan hebben doorgegeven of ontvangen. Omdat het X-chromosoom wordt gerecombineerd, delen sommige van deze personen in werkelijkheid geen X-DNA.</string>
+    <string name="dna_y_woman">Een vrouw heeft geen Y-chromosoom. De lijst toont de vaderlijke lijn van haar vader. Een broer, haar vader of een oom van vaderskant kan voor deze lijn een Y-DNA-test doen.</string>
+    <string name="dna_y_no_desc">Alleen mannen hebben een Y-chromosoom; deze persoon heeft daarom geen nakomelingen op de Y-lijn.</string>
+    <string name="dna_mt_man">Een man heeft het mitochondriale DNA van zijn moeder, maar geeft het niet door. Daarom heeft hij op deze lijn geen nakomelingen.</string>
+    <string name="dna_from_selected">Uitgaan van %1$s</string>
 </resources>
