@@ -38,9 +38,9 @@ Lists across the whole tree need the tree in one piece; the server must run api4
 
 The preview shows the first pages; if there are more, "… and n more pages in the PDF" appears below. Each page carries "Created with wtWin on …" at the bottom.
 
-## DNA inheritance lines
+## DNA
 
-**Create › DNA inheritance lines …** shows for the starting person from which ancestors they can have Y-DNA, mitochondrial DNA (mtDNA) or X-DNA, and which descendants can have it from them. Choose the line, the direction and the number of generations at the top.
+**Create › DNA …** opens the DNA view of the starting person with four areas. **Lines** shows from which ancestors they can have Y-DNA, mitochondrial DNA (mtDNA) or X-DNA, and which descendants can have it from them. Choose the line, the direction and the number of generations at the top.
 
 - **Y-DNA:** from father to son. For a woman the line of her father is shown, with a note that she has no Y chromosome herself.
 - **mtDNA:** from the mother to all children; only daughters pass it on.
@@ -49,3 +49,5 @@ The preview shows the first pages; if there are more, "… and n more pages in t
 Ancestors are listed by generation with their ancestor number, descendants as an indented list – these are the people who could take a test for the line. A click makes the person the starting person in the main window; **Start from …** recalculates the lines for them.
 
 The lines are derived from the recorded relationships and are not a test result; for X-DNA "possible" does not mean that X-DNA is actually shared. Only biological parents count: at an adopted or foster child and at a person without a recorded sex the line ends with a note. The menu item only appears if the webtrees module dna4webtrees is installed on the server; it calculates the lines.
+
+**Tests** shows the recorded DNA tests and haplogroups of the person and of the other people on the same line, with a note if haplogroups of a line contradict each other. **Matches** shows the recorded DNA matches: the shared DNA in centimorgans, the relationship in the tree with the common ancestors, the amount usual for it and notes, for example if the amount is outside the usual range. **Who could test?** lists the living people on the Y line and the maternal line. Tests and matches are entered in the browser, on the **DNA** tab of the person.

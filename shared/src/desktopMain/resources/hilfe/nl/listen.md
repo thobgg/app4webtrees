@@ -38,9 +38,9 @@ Lijsten over de hele stamboom hebben de stamboom in één geheel nodig; op de se
 
 De voorbeeldweergave toont de eerste pagina's; zijn er meer, dan staat eronder „… en nog n pagina's in de PDF“. Elke pagina draagt onderaan „Gemaakt met wtWin op …“.
 
-## DNA-overervingslijnen
+## DNA
 
-**Maken › DNA-overervingslijnen …** toont voor de uitgangspersoon van welke voorouders deze Y-DNA, mitochondriaal DNA (mtDNA) of X-DNA kan hebben en welke nakomelingen het van deze persoon kunnen hebben. Bovenaan kiest u de lijn, de richting en het aantal generaties.
+**Maken › DNA …** opent de DNA-weergave van de uitgangspersoon met vier onderdelen. **Lijnen** toont van welke voorouders deze Y-DNA, mitochondriaal DNA (mtDNA) of X-DNA kan hebben en welke nakomelingen het van deze persoon kunnen hebben. Bovenaan kiest u de lijn, de richting en het aantal generaties.
 
 - **Y-DNA:** van vader op zoon. Bij een vrouw staat de lijn van haar vader, met de opmerking dat zij zelf geen Y-chromosoom heeft.
 - **mtDNA:** van de moeder op alle kinderen; alleen dochters geven het door.
@@ -49,3 +49,5 @@ De voorbeeldweergave toont de eerste pagina's; zijn er meer, dan staat eronder �
 Voorouders staan per generatie met hun kwartierstaatnummer, nakomelingen als ingesprongen lijst – dat zijn de personen die voor de lijn een test zouden kunnen doen. Een klik maakt de persoon in het hoofdvenster tot uitgangspersoon; **Uitgaan van …** berekent de lijnen opnieuw voor die persoon.
 
 De lijnen zijn afgeleid van de vastgelegde verwantschappen en zijn geen testresultaat; bij X-DNA betekent „mogelijk“ niet dat er werkelijk X-DNA wordt gedeeld. Alleen biologische ouders tellen: bij een adoptie- of pleegkind en bij een persoon zonder vastgelegd geslacht eindigt de lijn met een opmerking. Het menu-item verschijnt alleen als op de server de webtrees-module dna4webtrees is geïnstalleerd; die berekent de lijnen.
+
+**Tests** toont de vastgelegde DNA-tests en haplogroepen van de persoon en van de andere personen op dezelfde lijn, met een opmerking als haplogroepen van een lijn elkaar tegenspreken. **Matches** toont de vastgelegde DNA-matches: het gedeelde DNA in centimorgan, de verwantschap in de stamboom met de gemeenschappelijke voorouders, de daarvoor gebruikelijke hoeveelheid en opmerkingen, bijvoorbeeld als de waarde buiten het gebruikelijke bereik ligt. **Wie zou kunnen testen?** noemt de levende personen op de Y-lijn en de moederlijke lijn. Tests en matches voert u in de browser in, op het tabblad **DNA** van de persoon.

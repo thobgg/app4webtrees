@@ -238,7 +238,7 @@ fun DnaLinienDialog(client: WtClient, tree: String, xref: String, name: String, 
                     }
                     Text(stringResource(Res.string.dna_title_of, name), style = MaterialTheme.typography.titleMedium, maxLines = 2)
                 }
-                DnaLinienInhalt(client, tree, xref, onPerson = { onDismiss(); onPerson(it) }, Modifier.weight(1f))
+                DnaAnsicht(client, tree, xref, onPerson = { onDismiss(); onPerson(it) }, Modifier.weight(1f))
             }
         }
     }

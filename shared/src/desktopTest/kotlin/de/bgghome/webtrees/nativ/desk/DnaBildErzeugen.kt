@@ -12,6 +12,8 @@ import de.bgghome.webtrees.nativ.Sprache
 import de.bgghome.webtrees.nativ.api.DnaLinie
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.data.Ablage
+import de.bgghome.webtrees.nativ.ui.DnaAnsicht
+import de.bgghome.webtrees.nativ.ui.DnaBereich
 import de.bgghome.webtrees.nativ.ui.DnaLinienInhalt
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.EncodedImageFormat
@@ -21,7 +23,7 @@ import kotlin.test.Test
 /**
  * Kein Test, sondern ein Werkzeug: zeichnet die Ansicht der DNA-Vererbungslinien ohne Bildschirm (Server mit dem Modul dna4webtrees ab 0.11.0).
  *
- *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_LINIE=y|mt|x] [WT_RICHTUNG=nachkommen] [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
+ *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_LINIE=y|mt|x] [WT_RICHTUNG=nachkommen] [WT_BEREICH=eintraege|treffer|tester] [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
  *   ./gradlew :shared:desktopTest --rerun --tests '*DnaBildErzeugen*'
  */
 class DnaBildErzeugen {
@@ -47,12 +49,13 @@ class DnaBildErzeugen {
         val tree = System.getenv("WT_TREE")!!; val xref = System.getenv("WT_XREF")!!
         val linie = DnaLinie.entries.firstOrNull { it.code == System.getenv("WT_LINIE") } ?: DnaLinie.Y
         val nachkommen = System.getenv("WT_RICHTUNG") == "nachkommen"
+        val bereich = System.getenv("WT_BEREICH")?.let { b -> DnaBereich.entries.firstOrNull { it.name.equals(b, ignoreCase = true) } }
         val (bw, bh, dichte) = (System.getenv("WT_BILD") ?: "640:780:1.25").split(':')
         ImageComposeScene(width = bw.toInt(), height = bh.toInt(), density = Density(dichte.toFloat())) {
-            DeskTheme { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) { DnaLinienInhalt(client, tree, xref, onPerson = {}, zuerst = linie, zuerstNachkommen = nachkommen) } }
+            DeskTheme { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) { bereich?.let { DnaAnsicht(client, tree, xref, onPerson = {}, zuerst = it) } ?: DnaLinienInhalt(client, tree, xref, onPerson = {}, zuerst = linie, zuerstNachkommen = nachkommen) } }
         }.use { scene ->
             scene.render(); (1..60).forEach { scene.render(it * 50_000_000L); Thread.sleep(60) }
-            File(ziel, "dna-${linie.code}-${if (nachkommen) "nachkommen" else "vorfahren"}.png").writeBytes(scene.render(4_000_000_000L).encodeToData(EncodedImageFormat.PNG)!!.bytes)
+            File(ziel, bereich?.let { "dna-${it.name.lowercase()}.png" } ?: "dna-${linie.code}-${if (nachkommen) "nachkommen" else "vorfahren"}.png").writeBytes(scene.render(4_000_000_000L).encodeToData(EncodedImageFormat.PNG)!!.bytes)
         }
     }
 }

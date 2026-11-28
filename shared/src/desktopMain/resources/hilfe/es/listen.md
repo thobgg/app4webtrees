@@ -38,9 +38,9 @@ Las listas sobre todo el árbol necesitan el árbol completo; el servidor debe t
 
 La vista previa muestra las primeras páginas; si hay más, debajo aparece «… y n páginas más en el PDF». Cada página lleva abajo «Creado con wtWin el …».
 
-## Líneas de herencia del ADN
+## ADN
 
-**Crear › Líneas de herencia del ADN …** muestra, para la persona de partida, de qué antepasados puede tener el ADN-Y, el ADN mitocondrial (ADNmt) o el ADN-X, y qué descendientes pueden tenerlo de ella. Arriba se eligen la línea, la dirección y el número de generaciones.
+**Crear › ADN …** abre la vista de ADN de la persona de partida, con cuatro apartados. **Líneas** muestra de qué antepasados puede tener el ADN-Y, el ADN mitocondrial (ADNmt) o el ADN-X, y qué descendientes pueden tenerlo de ella. Arriba se eligen la línea, la dirección y el número de generaciones.
 
 - **ADN-Y:** del padre al hijo varón. En una mujer se muestra la línea de su padre, con la indicación de que ella misma no tiene cromosoma Y.
 - **ADNmt:** de la madre a todos los hijos; solo las hijas lo transmiten.
@@ -49,3 +49,5 @@ La vista previa muestra las primeras páginas; si hay más, debajo aparece «…
 Los antepasados aparecen por generación con su número de ascendencia, los descendientes como lista sangrada: son las personas que podrían hacerse una prueba para la línea. Un clic convierte a la persona en persona de partida en la ventana principal; **Partir de …** vuelve a calcular las líneas para ella.
 
 Las líneas se deducen de los parentescos registrados y no son el resultado de una prueba; en el ADN-X, «posible» no significa que realmente se comparta ADN-X. Solo cuentan los padres biológicos: en un hijo adoptivo o de acogida y en una persona sin sexo registrado, la línea termina con una indicación. La entrada de menú solo aparece si en el servidor está instalado el módulo de webtrees dna4webtrees; él calcula las líneas.
+
+**Pruebas** muestra las pruebas de ADN y los haplogrupos registrados de la persona y de las demás personas de la misma línea, con una indicación si los haplogrupos de una línea se contradicen. **Coincidencias** muestra las coincidencias de ADN registradas: el ADN compartido en centimorgans, el parentesco en el árbol con los antepasados comunes, la cantidad habitual para ese parentesco e indicaciones, por ejemplo si el valor está fuera del rango habitual. **¿Quién podría hacerse la prueba?** indica las personas vivas de la línea Y y de la línea materna. Las pruebas y las coincidencias se introducen en el navegador, en la pestaña **ADN** de la persona.

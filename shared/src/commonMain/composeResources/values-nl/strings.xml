@@ -1955,9 +1955,9 @@
         <item quantity="other">%1$d generaties</item>
     </plurals>
     <!-- DNA-Vererbungslinien (Modul dna4webtrees) -->
-    <string name="dna_title">DNA-overervingslijnen</string>
-    <string name="dna_title_of">DNA-overervingslijnen van %1$s</string>
-    <string name="dna_menu">DNA-overervingslijnen …</string>
+    <string name="dna_title">DNA</string>
+    <string name="dna_title_of">DNA – %1$s</string>
+    <string name="dna_menu">DNA …</string>
     <string name="dna_line_y">Y-DNA (vaderlijke lijn)</string>
     <string name="dna_line_mt">mtDNA (moederlijke lijn)</string>
     <string name="dna_line_x">X-DNA</string>
@@ -1979,4 +1979,37 @@
     <string name="dna_y_no_desc">Alleen mannen hebben een Y-chromosoom; deze persoon heeft daarom geen nakomelingen op de Y-lijn.</string>
     <string name="dna_mt_man">Een man heeft het mitochondriale DNA van zijn moeder, maar geeft het niet door. Daarom heeft hij op deze lijn geen nakomelingen.</string>
     <string name="dna_from_selected">Uitgaan van %1$s</string>
+    <string name="dna_area_lines">Lijnen</string>
+    <string name="dna_area_entries">Tests</string>
+    <string name="dna_area_matches">Matches</string>
+    <string name="dna_area_testers">Wie zou kunnen testen?</string>
+    <string name="dna_entries_none">Voor deze persoon is geen DNA-test vastgelegd.</string>
+    <string name="dna_same_line_y">Dezelfde Y-lijn</string>
+    <string name="dna_same_line_mt">Dezelfde moederlijke lijn</string>
+    <string name="dna_calculated">Berekend: %1$s (%2$s)</string>
+    <string name="dna_contradiction">De haplogroepen op deze lijn spreken elkaar tegen: %1$s</string>
+    <string name="dna_restriction_confidential">Beperking: alleen beheerders</string>
+    <string name="dna_restriction_privacy">Beperking: leden</string>
+    <string name="dna_restriction_none">Geen beperking</string>
+    <string name="dna_matches_none">Voor deze persoon is geen DNA-match vastgelegd.</string>
+    <string name="dna_match_not_in_tree">niet in de stamboom</string>
+    <string name="dna_match_cm">%1$s cM</string>
+    <string name="dna_match_segments">%1$d segmenten</string>
+    <string name="dna_match_longest">langste %1$s cM</string>
+    <string name="dna_match_common">gemeenschappelijke voorouders: %1$s</string>
+    <string name="dna_match_no_relationship">In de stamboom niet verwant.</string>
+    <string name="dna_match_usual">Gebruikelijk voor deze verwantschap: %1$s cM (%2$s tot %3$s)</string>
+    <string name="dna_match_candidates">Voor deze waarde gemeld: %1$s</string>
+    <string name="dna_match_x_via">X-DNA mogelijk, dichtstbijzijnde gemeenschappelijke X-voorouder: %1$s</string>
+    <string name="dna_match_x_possible">X-DNA volgens de stamboom mogelijk</string>
+    <string name="dna_usual_source">Gebruikelijke waarden: Shared cM Project 4.0 van Blaine T. Bettinger, CC BY 4.0. Gemeld door geteste personen; een aanwijzing, geen bewijs.</string>
+    <string name="dna_warn_unrestricted">Dit item heeft geen beperking.</string>
+    <string name="dna_warn_outside">De waarde ligt buiten het gebruikelijke bereik.</string>
+    <string name="dna_warn_multiple">De twee zijn langs meerdere wegen ongeveer even nauw verwant; een gebruikelijk bereik is niet te geven.</string>
+    <string name="dna_warn_distant">Er is een tweede, verdere verwantschap.</string>
+    <string name="dna_warn_x">Er is een segment op het X-chromosoom vastgelegd, maar de stamboom toont geen gemeenschappelijke X-voorouder.</string>
+    <string name="dna_testers_hint">Levende personen op de lijn die een test zouden kunnen doen, voor zover u ze mag zien.</string>
+    <string name="dna_testers_earliest">Vroegst bekende voorouder: %1$s · %2$d personen op de lijn</string>
+    <string name="dna_testers_none">Geen levende personen zichtbaar op deze lijn.</string>
+    <string name="dna_has_entry">heeft een item</string>
 </resources>

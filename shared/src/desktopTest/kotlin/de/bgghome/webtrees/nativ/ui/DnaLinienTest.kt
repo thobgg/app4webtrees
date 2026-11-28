@@ -5,6 +5,7 @@ import de.bgghome.webtrees.nativ.api.DnaLinie
 import de.bgghome.webtrees.nativ.api.DnaLinien
 import de.bgghome.webtrees.nativ.api.DnaNachkomme
 import de.bgghome.webtrees.nativ.api.Person
+import de.bgghome.webtrees.nativ.api.kennungen
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -85,5 +86,66 @@ class DnaLinienTest {
         assertEquals(30, dnaHoechstens(DnaLinie.Y))
         assertEquals(30, dnaHoechstens(DnaLinie.Mt))
         assertEquals(12, dnaHoechstens(DnaLinie.X))
+    }
+}
+
+/** Tests, Treffer und Testkandidaten: die Antworten von ApiPerson und ApiTesters des Moduls dna4webtrees lesen. */
+class DnaModulTest {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    private val person = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaPerson.serializer(), """
+        {"ok":true,"level":3,"xref":"I1","canEdit":true,"unprotected":8,
+         "entries":[{"xref":"I1","factId":"a","kind":"y-other","value":"M269+, U106+","type":"Y-DNA","provider":"","date":"",
+                     "calculated":{"clade":"R-U106","lineage":["R","R-U106"],"tree":"YFull 14.06.0","tie":false,"unknown":[]},"restriction":"",
+                     "links":[{"site":"YFull","url":"https://www.yfull.com/tree/R-U106/"}]}],
+         "lines":{"y":{"entries":[{"xref":"I27","factId":"b","kind":"y-haplogroup","value":"I-DF29","type":"Y-DNA Haplogroup","provider":"FamilyTreeDNA","date":"SEP 2023","calculated":null}],
+                       "contradiction":{"by":"tree","names":["R-U106","I-DF29"]}},
+                  "mt":{"entries":[],"contradiction":null}},
+         "matches":[
+           {"recordedAt":"I1","factId":"m1","other":"I88","private":false,"name":null,"cm":900,"segments":27,"longest":51.5,"segmentsOnX":1,"hasSegmentTable":true,
+            "provider":"","date":"","relationship":{"code":"1C","text":"Cousin","half":false,"multiple":false,"distant":false},"commonAncestors":["I19","I20"],
+            "usual":{"average":866,"minimum":396,"maximum":1397},"outsideRange":false,"candidates":[],"x":{"possible":true,"nearestCommonAncestor":"I19"},
+            "warnings":["unrestricted"],"restriction":"","sharedCmUrl":"https://dnapainter.com/tools/sharedcmv4/900"},
+           {"recordedAt":"I1","factId":"m2","other":null,"private":false,"name":"J. S.","cm":62,"segments":3,"longest":28.4,"segmentsOnX":null,"hasSegmentTable":false,
+            "provider":"FamilyTreeDNA","date":"2023","relationship":null,"commonAncestors":[],"usual":null,"outsideRange":null,
+            "candidates":[{"code":"2C1R","text":"Cousin 2. Grades, um 1 Generation versetzt"}],"x":null,"warnings":[]}]}
+    """.trimIndent())
+
+    @Test
+    fun trefferLesen() {
+        val im = person.matches[0]
+        assertEquals("1C", im.relationship?.code)
+        assertEquals(866.0, im.usual?.average)
+        assertEquals("I19", im.x?.nearestCommonAncestor)
+        assertEquals(listOf(de.bgghome.webtrees.nativ.api.DnaWarnung.OHNE_SCHUTZ), im.warnings)
+        val ausserhalb = person.matches[1]
+        assertNull(ausserhalb.other)
+        assertEquals("J. S.", ausserhalb.name)
+        assertNull(ausserhalb.segmentsOnX)
+        assertEquals("2C1R", ausserhalb.candidates.single().code)
+    }
+
+    @Test
+    fun eintraegeUndWiderspruch() {
+        assertEquals("R-U106", person.entries.single().calculated?.clade)
+        assertEquals("tree", person.lines.getValue("y").contradiction?.by)
+        assertNull(person.lines.getValue("mt").contradiction)
+    }
+
+    @Test
+    fun kennungenFuerDieNamen() {
+        // die Person selbst und Treffer ausserhalb des Baums brauchen keinen Abruf
+        assertEquals(setOf("I27", "I88", "I19", "I20"), person.kennungen())
+        val t = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaTester.serializer(),
+            """{"ok":true,"level":3,"xref":"I21","lines":{"y":{"earliestAncestor":"I54","onLine":23,"living":[{"xref":"I27","hasEntry":true},{"xref":"I3","hasEntry":false}]},"mt":{"earliestAncestor":null,"onLine":1,"living":[]}}}""")
+        assertEquals(setOf("I54", "I27", "I3"), t.kennungen())
+        assertTrue(t.lines.getValue("y").living[0].hasEntry)
+    }
+
+    @Test
+    fun centimorganInDerSchreibweiseDerSprache() {
+        assertEquals("900", cmText(900.0, java.util.Locale.GERMAN))
+        assertEquals("849,9", cmText(849.9, java.util.Locale.GERMAN))
+        assertEquals("849.9", cmText(849.9, java.util.Locale.ENGLISH))
     }
 }

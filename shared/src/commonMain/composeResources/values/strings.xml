@@ -1979,9 +1979,9 @@
         <item quantity="other">%1$d generations</item>
     </plurals>
     <!-- DNA-Vererbungslinien (Modul dna4webtrees) -->
-    <string name="dna_title">DNA inheritance lines</string>
-    <string name="dna_title_of">DNA inheritance lines of %1$s</string>
-    <string name="dna_menu">DNA inheritance lines …</string>
+    <string name="dna_title">DNA</string>
+    <string name="dna_title_of">DNA – %1$s</string>
+    <string name="dna_menu">DNA …</string>
     <string name="dna_line_y">Y-DNA (paternal line)</string>
     <string name="dna_line_mt">mtDNA (maternal line)</string>
     <string name="dna_line_x">X-DNA</string>
@@ -2003,4 +2003,37 @@
     <string name="dna_y_no_desc">Only men have a Y chromosome, so this individual has no descendants on the Y line.</string>
     <string name="dna_mt_man">A man has the mitochondrial DNA of his mother but does not pass it on, so he has no descendants on this line.</string>
     <string name="dna_from_selected">Start from %1$s</string>
+    <string name="dna_area_lines">Lines</string>
+    <string name="dna_area_entries">Tests</string>
+    <string name="dna_area_matches">Matches</string>
+    <string name="dna_area_testers">Who could test?</string>
+    <string name="dna_entries_none">No DNA test is recorded for this individual.</string>
+    <string name="dna_same_line_y">Same Y line</string>
+    <string name="dna_same_line_mt">Same maternal line</string>
+    <string name="dna_calculated">Calculated: %1$s (%2$s)</string>
+    <string name="dna_contradiction">The haplogroups on this line contradict each other: %1$s</string>
+    <string name="dna_restriction_confidential">Restriction: managers only</string>
+    <string name="dna_restriction_privacy">Restriction: members</string>
+    <string name="dna_restriction_none">No restriction</string>
+    <string name="dna_matches_none">No DNA match is recorded for this individual.</string>
+    <string name="dna_match_not_in_tree">not in the family tree</string>
+    <string name="dna_match_cm">%1$s cM</string>
+    <string name="dna_match_segments">%1$d segments</string>
+    <string name="dna_match_longest">longest %1$s cM</string>
+    <string name="dna_match_common">common ancestors: %1$s</string>
+    <string name="dna_match_no_relationship">Not related in the family tree.</string>
+    <string name="dna_match_usual">Usual for this relationship: %1$s cM (%2$s to %3$s)</string>
+    <string name="dna_match_candidates">Reported for this amount: %1$s</string>
+    <string name="dna_match_x_via">X-DNA possible, nearest common X ancestor: %1$s</string>
+    <string name="dna_match_x_possible">X-DNA possible according to the family tree</string>
+    <string name="dna_usual_source">Usual amounts: Shared cM Project 4.0 by Blaine T. Bettinger, CC BY 4.0. Reported by people who were tested; a hint, not proof.</string>
+    <string name="dna_warn_unrestricted">This entry has no restriction.</string>
+    <string name="dna_warn_outside">The amount is outside the usual range.</string>
+    <string name="dna_warn_multiple">The two are related in several ways of similar closeness; no usual range can be given.</string>
+    <string name="dna_warn_distant">There is a second, more distant relationship.</string>
+    <string name="dna_warn_x">A segment on the X chromosome is recorded, but the family tree shows no common X ancestor.</string>
+    <string name="dna_testers_hint">Living individuals on the line who could take a test, as far as you may see them.</string>
+    <string name="dna_testers_earliest">Earliest known ancestor: %1$s · %2$d individuals on the line</string>
+    <string name="dna_testers_none">No living individuals visible on this line.</string>
+    <string name="dna_has_entry">has an entry</string>
 </resources>

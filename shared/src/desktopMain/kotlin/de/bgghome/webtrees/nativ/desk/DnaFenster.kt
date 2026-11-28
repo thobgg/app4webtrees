@@ -24,7 +24,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import de.bgghome.webtrees.nativ.res.*
 import de.bgghome.webtrees.nativ.ui.AppViewModel
-import de.bgghome.webtrees.nativ.ui.DnaLinienInhalt
+import de.bgghome.webtrees.nativ.ui.DnaAnsicht
 import de.bgghome.webtrees.nativ.ui.UiState
 import de.bgghome.webtrees.nativ.ui.setRoot
 import org.jetbrains.compose.resources.stringResource
@@ -54,7 +54,7 @@ fun DnaFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
         Surface(Modifier.fillMaxSize(), color = farben.surface) {
             Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(Modifier.weight(1f).fillMaxWidth().border(1.dp, farben.outlineVariant)) {
-                    DnaLinienInhalt(viewModel.client, tree, start, onPerson = { viewModel.setRoot(it) })
+                    DnaAnsicht(viewModel.client, tree, start, onPerson = { viewModel.setRoot(it) })
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (proband != start) {

@@ -57,7 +57,7 @@ class UserMessageException(message: String) : Exception(message)
 fun explain(e: Exception): String = when (e) {
     is ApiException -> when (e.code) {
         "private" -> Texte.t(Res.string.err_private)
-        "not-found" -> Texte.t(Res.string.err_not_found)
+        "not-found", "individual-not-found" -> Texte.t(Res.string.err_not_found)
         "not-editable", "not-editor" -> Texte.t(Res.string.err_not_editable)
         "fact-locked", "family-locked" -> Texte.t(Res.string.err_locked)
         "invalid-date" -> Texte.t(Res.string.err_invalid_date)

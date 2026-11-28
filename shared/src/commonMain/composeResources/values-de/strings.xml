@@ -1974,9 +1974,9 @@
         <item quantity="other">%1$d Generationen</item>
     </plurals>
     <!-- DNA-Vererbungslinien (Modul dna4webtrees) -->
-    <string name="dna_title">DNA-Vererbungslinien</string>
-    <string name="dna_title_of">DNA-Vererbungslinien von %1$s</string>
-    <string name="dna_menu">DNA-Vererbungslinien …</string>
+    <string name="dna_title">DNA</string>
+    <string name="dna_title_of">DNA – %1$s</string>
+    <string name="dna_menu">DNA …</string>
     <string name="dna_line_y">Y-DNA (väterliche Linie)</string>
     <string name="dna_line_mt">mtDNA (mütterliche Linie)</string>
     <string name="dna_line_x">X-DNA</string>
@@ -1998,4 +1998,37 @@
     <string name="dna_y_no_desc">Nur Männer haben ein Y-Chromosom, daher hat diese Person keine Nachkommen auf der Y-Linie.</string>
     <string name="dna_mt_man">Ein Mann hat die mitochondriale DNA seiner Mutter, gibt sie aber nicht weiter. Daher hat er auf dieser Linie keine Nachkommen.</string>
     <string name="dna_from_selected">Von %1$s ausgehen</string>
+    <string name="dna_area_lines">Linien</string>
+    <string name="dna_area_entries">Tests</string>
+    <string name="dna_area_matches">Treffer</string>
+    <string name="dna_area_testers">Wer könnte testen?</string>
+    <string name="dna_entries_none">Für diese Person ist kein DNA-Test eingetragen.</string>
+    <string name="dna_same_line_y">Dieselbe Y-Linie</string>
+    <string name="dna_same_line_mt">Dieselbe mütterliche Linie</string>
+    <string name="dna_calculated">Berechnet: %1$s (%2$s)</string>
+    <string name="dna_contradiction">Die Haplogruppen auf dieser Linie widersprechen sich: %1$s</string>
+    <string name="dna_restriction_confidential">Schutz: nur Verwalter</string>
+    <string name="dna_restriction_privacy">Schutz: Mitglieder</string>
+    <string name="dna_restriction_none">Kein Schutz</string>
+    <string name="dna_matches_none">Für diese Person ist kein DNA-Treffer eingetragen.</string>
+    <string name="dna_match_not_in_tree">nicht im Stammbaum</string>
+    <string name="dna_match_cm">%1$s cM</string>
+    <string name="dna_match_segments">%1$d Segmente</string>
+    <string name="dna_match_longest">längstes %1$s cM</string>
+    <string name="dna_match_common">gemeinsame Vorfahren: %1$s</string>
+    <string name="dna_match_no_relationship">Im Stammbaum nicht verwandt.</string>
+    <string name="dna_match_usual">Üblich für diese Verwandtschaft: %1$s cM (%2$s bis %3$s)</string>
+    <string name="dna_match_candidates">Für diesen Wert gemeldet: %1$s</string>
+    <string name="dna_match_x_via">X-DNA möglich, nächster gemeinsamer X-Vorfahr: %1$s</string>
+    <string name="dna_match_x_possible">X-DNA nach dem Stammbaum möglich</string>
+    <string name="dna_usual_source">Übliche Werte: Shared cM Project 4.0 von Blaine T. Bettinger, CC BY 4.0. Von Getesteten gemeldet; ein Hinweis, kein Beweis.</string>
+    <string name="dna_warn_unrestricted">Dieser Eintrag hat keinen Schutzvermerk.</string>
+    <string name="dna_warn_outside">Der Wert liegt außerhalb des üblichen Bereichs.</string>
+    <string name="dna_warn_multiple">Die beiden sind auf mehreren Wegen ähnlich nah verwandt; ein üblicher Bereich lässt sich nicht nennen.</string>
+    <string name="dna_warn_distant">Es gibt eine zweite, entferntere Verwandtschaft.</string>
+    <string name="dna_warn_x">Ein Segment auf dem X-Chromosom ist eingetragen, der Stammbaum zeigt aber keinen gemeinsamen X-Vorfahren.</string>
+    <string name="dna_testers_hint">Lebende Personen auf der Linie, die einen Test machen könnten, soweit Sie sie sehen dürfen.</string>
+    <string name="dna_testers_earliest">Frühester bekannter Vorfahr: %1$s · %2$d Personen auf der Linie</string>
+    <string name="dna_testers_none">Keine lebenden Personen auf dieser Linie sichtbar.</string>
+    <string name="dna_has_entry">hat Eintrag</string>
 </resources>

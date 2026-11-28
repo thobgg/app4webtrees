@@ -38,9 +38,9 @@ Listen über den ganzen Stammbaum brauchen den Baum am Stück; dafür muss auf d
 
 Die Vorschau zeigt die ersten Seiten; sind es mehr, steht darunter „… und n weitere Seiten im PDF“. Jede Seite trägt unten „Erstellt mit wtWin am …“.
 
-## DNA-Vererbungslinien
+## DNA
 
-**Erstellen › DNA-Vererbungslinien …** zeigt für den Probanden, von welchen Vorfahren er Y-DNA, mitochondriale DNA (mtDNA) oder X-DNA haben kann und welche Nachkommen sie von ihm haben können. Oben wählst du Linie, Richtung und die Zahl der Generationen.
+**Erstellen › DNA …** öffnet die DNA-Ansicht des Probanden mit vier Bereichen. **Linien** zeigt, von welchen Vorfahren er Y-DNA, mitochondriale DNA (mtDNA) oder X-DNA haben kann und welche Nachkommen sie von ihm haben können. Oben wählst du Linie, Richtung und die Zahl der Generationen.
 
 - **Y-DNA:** vom Vater an den Sohn. Bei einer Frau steht die Linie ihres Vaters, mit dem Hinweis, dass sie selbst kein Y-Chromosom hat.
 - **mtDNA:** von der Mutter an alle Kinder; nur Töchter geben sie weiter.
@@ -49,3 +49,5 @@ Die Vorschau zeigt die ersten Seiten; sind es mehr, steht darunter „… und n 
 Vorfahren stehen nach Generation mit ihrer Kekulé-Nummer, Nachkommen als eingerückte Liste – das sind die Personen, die für die Linie einen Test machen könnten. Ein Klick macht die Person im Hauptfenster zum Probanden; **Von … ausgehen** berechnet die Linien für sie neu.
 
 Die Linien sind aus den eingetragenen Verwandtschaften abgeleitet und kein Testergebnis; bei X-DNA heißt „möglich“ nicht, dass tatsächlich X-DNA geteilt wird. Es zählen nur leibliche Eltern: Bei einem Adoptiv- oder Pflegekind und bei einer Person ohne eingetragenes Geschlecht endet die Linie mit einem Vermerk. Der Menüpunkt erscheint nur, wenn auf dem Server das webtrees-Modul dna4webtrees installiert ist; es berechnet die Linien.
+
+**Tests** zeigt die eingetragenen DNA-Tests und Haplogruppen der Person und der anderen Personen auf derselben Linie, mit einem Hinweis, wenn sich Haplogruppen einer Linie widersprechen. **Treffer** zeigt die eingetragenen DNA-Treffer: die gemeinsame DNA in Centimorgan, die Verwandtschaft im Stammbaum mit den gemeinsamen Vorfahren, die dafür übliche Menge und Hinweise, etwa wenn der Wert außerhalb des üblichen Bereichs liegt. **Wer könnte testen?** nennt die lebenden Personen auf der Y- und der mütterlichen Linie. Eingetragen werden Tests und Treffer im Browser, im Reiter **DNA** der Person.

@@ -1974,9 +1974,9 @@
         <item quantity="other">%1$d générations</item>
     </plurals>
     <!-- DNA-Vererbungslinien (Modul dna4webtrees) -->
-    <string name="dna_title">Lignées de transmission de l’ADN</string>
-    <string name="dna_title_of">Lignées de transmission de l’ADN de %1$s</string>
-    <string name="dna_menu">Lignées de transmission de l’ADN …</string>
+    <string name="dna_title">ADN</string>
+    <string name="dna_title_of">ADN – %1$s</string>
+    <string name="dna_menu">ADN …</string>
     <string name="dna_line_y">ADN-Y (lignée paternelle)</string>
     <string name="dna_line_mt">ADNmt (lignée maternelle)</string>
     <string name="dna_line_x">ADN-X</string>
@@ -1998,4 +1998,37 @@
     <string name="dna_y_no_desc">Seuls les hommes ont un chromosome Y ; cette personne n’a donc aucun descendant sur la lignée Y.</string>
     <string name="dna_mt_man">Un homme porte l’ADN mitochondrial de sa mère, mais ne le transmet pas ; il n’a donc aucun descendant sur cette lignée.</string>
     <string name="dna_from_selected">Partir de %1$s</string>
+    <string name="dna_area_lines">Lignées</string>
+    <string name="dna_area_entries">Tests</string>
+    <string name="dna_area_matches">Correspondances</string>
+    <string name="dna_area_testers">Qui pourrait tester ?</string>
+    <string name="dna_entries_none">Aucun test ADN n’est enregistré pour cette personne.</string>
+    <string name="dna_same_line_y">Même lignée Y</string>
+    <string name="dna_same_line_mt">Même lignée maternelle</string>
+    <string name="dna_calculated">Calculé : %1$s (%2$s)</string>
+    <string name="dna_contradiction">Les haplogroupes de cette lignée se contredisent : %1$s</string>
+    <string name="dna_restriction_confidential">Restriction : gestionnaires seulement</string>
+    <string name="dna_restriction_privacy">Restriction : membres</string>
+    <string name="dna_restriction_none">Aucune restriction</string>
+    <string name="dna_matches_none">Aucune correspondance ADN n’est enregistrée pour cette personne.</string>
+    <string name="dna_match_not_in_tree">absent de l’arbre</string>
+    <string name="dna_match_cm">%1$s cM</string>
+    <string name="dna_match_segments">%1$d segments</string>
+    <string name="dna_match_longest">le plus long %1$s cM</string>
+    <string name="dna_match_common">ancêtres communs : %1$s</string>
+    <string name="dna_match_no_relationship">Sans parenté dans l’arbre.</string>
+    <string name="dna_match_usual">Habituel pour cette parenté : %1$s cM (%2$s à %3$s)</string>
+    <string name="dna_match_candidates">Signalé pour cette valeur : %1$s</string>
+    <string name="dna_match_x_via">ADN-X possible, ancêtre X commun le plus proche : %1$s</string>
+    <string name="dna_match_x_possible">ADN-X possible d’après l’arbre</string>
+    <string name="dna_usual_source">Valeurs habituelles : Shared cM Project 4.0 de Blaine T. Bettinger, CC BY 4.0. Signalées par des personnes testées ; un indice, pas une preuve.</string>
+    <string name="dna_warn_unrestricted">Cette entrée n’a pas de restriction.</string>
+    <string name="dna_warn_outside">La valeur est en dehors de la plage habituelle.</string>
+    <string name="dna_warn_multiple">Les deux sont apparentés par plusieurs voies de proximité comparable ; aucune plage habituelle ne peut être donnée.</string>
+    <string name="dna_warn_distant">Il existe une seconde parenté, plus éloignée.</string>
+    <string name="dna_warn_x">Un segment sur le chromosome X est enregistré, mais l’arbre ne montre aucun ancêtre X commun.</string>
+    <string name="dna_testers_hint">Personnes vivantes de la lignée qui pourraient faire un test, dans la mesure où vous pouvez les voir.</string>
+    <string name="dna_testers_earliest">Plus ancien ancêtre connu : %1$s · %2$d personnes dans la lignée</string>
+    <string name="dna_testers_none">Aucune personne vivante visible dans cette lignée.</string>
+    <string name="dna_has_entry">a une entrée</string>
 </resources>

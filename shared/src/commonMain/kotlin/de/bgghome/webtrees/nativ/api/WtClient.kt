@@ -430,6 +430,14 @@ class WtClient(
         getRoute("/module/$DNA_MODUL/ApiLines/$tree", mapOf("xref" to xref, "line" to linie.code,
             "direction" to if (nachkommen) "descendants" else "ancestors", "generations" to generationen.toString()), DnaLinien.serializer())
 
+    /** Was der Reiter "DNA" des Moduls dna4webtrees fuer eine Person zeigt: Eintraege, dieselbe Linie, Treffer. */
+    suspend fun dnaPerson(tree: String, xref: String): DnaPerson =
+        getRoute("/module/$DNA_MODUL/ApiPerson/$tree", mapOf("xref" to xref), DnaPerson.serializer())
+
+    /** Wer auf der Y- und der mt-Linie einer Person lebt und einen Test machen koennte. */
+    suspend fun dnaTester(tree: String, xref: String): DnaTester =
+        getRoute("/module/$DNA_MODUL/ApiTesters/$tree", mapOf("xref" to xref), DnaTester.serializer())
+
     suspend fun pending(tree: String): PendingList = get("Pending", tree, emptyMap(), PendingList.serializer())
 
     suspend fun bookmarks(tree: String): BookmarkList = get("Bookmarks", tree, emptyMap(), BookmarkList.serializer())
