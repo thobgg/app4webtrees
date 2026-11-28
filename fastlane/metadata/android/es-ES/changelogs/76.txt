@@ -1,0 +1,1 @@
+Árbol: el padre y la madre aparecen ahora siempre juntos como pareja, con línea de matrimonio y anillos, también más arriba. Los antepasados del padre crecen hacia la izquierda y los de la madre hacia la derecha: los padres ya no se separan mucho cuando hay muchas generaciones, hermanos o primos por encima.
