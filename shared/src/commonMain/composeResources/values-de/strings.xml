@@ -2031,4 +2031,26 @@
     <string name="dna_testers_earliest">Frühester bekannter Vorfahr: %1$s · %2$d Personen auf der Linie</string>
     <string name="dna_testers_none">Keine lebenden Personen auf dieser Linie sichtbar.</string>
     <string name="dna_has_entry">hat Eintrag</string>
+    <string name="dna_area_tree">Ganzer Baum</string>
+    <string name="dna_add_test">DNA-Test eintragen …</string>
+    <string name="dna_add_match">DNA-Treffer eintragen …</string>
+    <string name="dna_form_test_title">DNA-Test für %1$s</string>
+    <string name="dna_form_match_title">DNA-Treffer für %1$s</string>
+    <string name="dna_form_type">Testart</string>
+    <string name="dna_form_provider">Anbieter</string>
+    <string name="dna_form_date">Datum (z. B. 2024 oder MAR 2024)</string>
+    <string name="dna_form_haplogroup">Haplogruppe (z. B. R-U106)</string>
+    <string name="dna_form_note">Notiz</string>
+    <string name="dna_form_restriction">Schutz</string>
+    <string name="dna_form_restriction_auto">nach Regel des Moduls</string>
+    <string name="dna_form_other">Andere Person im Stammbaum (Namen tippen)</string>
+    <string name="dna_form_name">oder Name, wenn nicht im Stammbaum</string>
+    <string name="dna_form_living_hint">Bei einer lebenden Person außerhalb des Stammbaums bitte nicht den vollen Namen eintragen.</string>
+    <string name="dna_form_cm">Gemeinsame DNA in cM</string>
+    <string name="dna_form_segments">Segmente</string>
+    <string name="dna_form_longest">Längstes Segment in cM</string>
+    <string name="dna_form_table">Segmenttabelle (Zeilen aus der Datei des Anbieters)</string>
+    <string name="dna_overview_matches">Treffer im Stammbaum</string>
+    <string name="dna_overview_entries">Tests und Haplogruppen</string>
+    <string name="dna_overview_none">Im Stammbaum sind keine DNA-Einträge sichtbar.</string>
 </resources>

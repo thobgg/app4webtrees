@@ -438,6 +438,25 @@ class WtClient(
     suspend fun dnaTester(tree: String, xref: String): DnaTester =
         getRoute("/module/$DNA_MODUL/ApiTesters/$tree", mapOf("xref" to xref), DnaTester.serializer())
 
+    /** Fassung und Auswahllisten des Moduls dna4webtrees. */
+    suspend fun dnaModul(): DnaModulInfo = getRoute("/module/$DNA_MODUL/ApiInfo", emptyMap(), DnaModulInfo.serializer())
+
+    /** Alle DNA-Eintraege eines Baums, die der Benutzer sehen darf. */
+    suspend fun dnaUebersicht(tree: String): DnaUebersicht = getRoute("/module/$DNA_MODUL/ApiOverview/$tree", emptyMap(), DnaUebersicht.serializer())
+
+    /**
+     * DNA-Test bzw. DNA-Treffer an einer Person anlegen. Das Modul schreibt den Eintrag und setzt den Schutzvermerk (RESN)
+     * nach seinen Regeln - darum laeuft das Anlegen ueber das Modul und nicht ueber die allgemeine Schreib-Route.
+     */
+    suspend fun dnaTestAnlegen(tree: String, xref: String, eingabe: DnaTestEingabe): DnaGeschrieben = dnaSchreiben("ApiAddTest", tree, xref, eingabe.felder())
+
+    suspend fun dnaTrefferAnlegen(tree: String, xref: String, eingabe: DnaTrefferEingabe): DnaGeschrieben = dnaSchreiben("ApiAddMatch", tree, xref, eingabe.felder())
+
+    private suspend fun dnaSchreiben(aktion: String, tree: String, xref: String, felder: Map<String, String>): DnaGeschrieben {
+        val form = FormBody.Builder().apply { felder.forEach { (k, v) -> add(k, v) } }.build()
+        return postUrl(url("/module/$DNA_MODUL/$aktion/$tree", mapOf("xref" to xref)), form, DnaGeschrieben.serializer())
+    }
+
     suspend fun pending(tree: String): PendingList = get("Pending", tree, emptyMap(), PendingList.serializer())
 
     suspend fun bookmarks(tree: String): BookmarkList = get("Bookmarks", tree, emptyMap(), BookmarkList.serializer())

@@ -2031,4 +2031,26 @@
     <string name="dna_testers_earliest">Antepasado más antiguo conocido: %1$s · %2$d personas en la línea</string>
     <string name="dna_testers_none">No hay personas vivas visibles en esta línea.</string>
     <string name="dna_has_entry">tiene entrada</string>
+    <string name="dna_area_tree">Árbol completo</string>
+    <string name="dna_add_test">Añadir prueba de ADN …</string>
+    <string name="dna_add_match">Añadir coincidencia de ADN …</string>
+    <string name="dna_form_test_title">Prueba de ADN de %1$s</string>
+    <string name="dna_form_match_title">Coincidencia de ADN de %1$s</string>
+    <string name="dna_form_type">Tipo de prueba</string>
+    <string name="dna_form_provider">Proveedor</string>
+    <string name="dna_form_date">Fecha (p. ej. 2024 o MAR 2024)</string>
+    <string name="dna_form_haplogroup">Haplogrupo (p. ej. R-U106)</string>
+    <string name="dna_form_note">Nota</string>
+    <string name="dna_form_restriction">Restricción</string>
+    <string name="dna_form_restriction_auto">según la regla del módulo</string>
+    <string name="dna_form_other">Otra persona del árbol (escriba un nombre)</string>
+    <string name="dna_form_name">o nombre, si no está en el árbol</string>
+    <string name="dna_form_living_hint">Para una persona viva que no está en el árbol, no introduzca el nombre completo.</string>
+    <string name="dna_form_cm">ADN compartido en cM</string>
+    <string name="dna_form_segments">Segmentos</string>
+    <string name="dna_form_longest">Segmento más largo en cM</string>
+    <string name="dna_form_table">Tabla de segmentos (líneas del archivo del proveedor)</string>
+    <string name="dna_overview_matches">Coincidencias en el árbol</string>
+    <string name="dna_overview_entries">Pruebas y haplogrupos</string>
+    <string name="dna_overview_none">No hay entradas de ADN visibles en el árbol.</string>
 </resources>

@@ -2012,4 +2012,26 @@
     <string name="dna_testers_earliest">Vroegst bekende voorouder: %1$s · %2$d personen op de lijn</string>
     <string name="dna_testers_none">Geen levende personen zichtbaar op deze lijn.</string>
     <string name="dna_has_entry">heeft een item</string>
+    <string name="dna_area_tree">Hele stamboom</string>
+    <string name="dna_add_test">DNA-test invoeren …</string>
+    <string name="dna_add_match">DNA-match invoeren …</string>
+    <string name="dna_form_test_title">DNA-test voor %1$s</string>
+    <string name="dna_form_match_title">DNA-match voor %1$s</string>
+    <string name="dna_form_type">Soort test</string>
+    <string name="dna_form_provider">Aanbieder</string>
+    <string name="dna_form_date">Datum (bijv. 2024 of MAR 2024)</string>
+    <string name="dna_form_haplogroup">Haplogroep (bijv. R-U106)</string>
+    <string name="dna_form_note">Notitie</string>
+    <string name="dna_form_restriction">Beperking</string>
+    <string name="dna_form_restriction_auto">volgens de regel van de module</string>
+    <string name="dna_form_other">Andere persoon in de stamboom (typ een naam)</string>
+    <string name="dna_form_name">of naam, indien niet in de stamboom</string>
+    <string name="dna_form_living_hint">Voer bij een levende persoon buiten de stamboom niet de volledige naam in.</string>
+    <string name="dna_form_cm">Gedeeld DNA in cM</string>
+    <string name="dna_form_segments">Segmenten</string>
+    <string name="dna_form_longest">Langste segment in cM</string>
+    <string name="dna_form_table">Segmententabel (regels uit het bestand van de aanbieder)</string>
+    <string name="dna_overview_matches">Matches in de stamboom</string>
+    <string name="dna_overview_entries">Tests en haplogroepen</string>
+    <string name="dna_overview_none">In de stamboom zijn geen DNA-items zichtbaar.</string>
 </resources>

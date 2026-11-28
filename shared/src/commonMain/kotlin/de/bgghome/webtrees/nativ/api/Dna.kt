@@ -126,3 +126,58 @@ fun DnaPerson.kennungen(): Set<String> =
 
 fun DnaTester.kennungen(): Set<String> =
     lines.values.flatMap { l -> listOfNotNull(l.earliestAncestor) + l.living.map { it.xref } }.filter { it.isNotEmpty() }.toSet()
+
+/** Antwort von ApiInfo: Fassung des Moduls, Stufe seiner JSON-Routen und die Auswahllisten seiner Formulare. */
+@Serializable
+data class DnaModulInfo(
+    val version: String = "",
+    val level: Int = 0,
+    val providers: List<String> = emptyList(),
+    val testTypes: List<String> = emptyList(),
+    val restrictions: List<String> = emptyList(),
+)
+
+/** Eine Y- bzw. mt-Linie des Baums, auf der jemand einen Eintrag hat. */
+@Serializable
+data class DnaUebersichtLinie(val earliestAncestor: String? = null, val entries: List<DnaEintrag> = emptyList(), val contradiction: DnaWiderspruch? = null)
+
+/** Antwort von ApiOverview: alles zu DNA, was der Benutzer in einem Baum sehen darf. [lines]: "y" und "mt". */
+@Serializable
+data class DnaUebersicht(
+    val lines: Map<String, List<DnaUebersichtLinie>> = emptyMap(),
+    val matches: List<DnaTreffer> = emptyList(),
+    val entries: List<DnaEintrag> = emptyList(),
+)
+
+/** Antwort der Schreib-Routen; Fehler kommen als ok:false und werden vorher zur Ausnahme. */
+@Serializable
+data class DnaGeschrieben(val ok: Boolean = false)
+
+/** Was das Formular "DNA-Test eintragen" an ApiAddTest schickt; leere Felder bleiben weg, der Schutz folgt dann der Regel des Moduls. */
+data class DnaTestEingabe(val art: String, val anbieter: String = "", val datum: String = "", val haplogruppe: String = "", val notiz: String = "", val schutz: String = "") {
+    fun felder(): Map<String, String> = mapOf("test_type" to art, "provider" to anbieter, "date" to datum, "haplogroup" to haplogruppe, "note" to notiz, "restriction" to schutz)
+        .mapValues { it.value.trim() }.filterValues { it.isNotEmpty() }
+}
+
+/** Was das Formular "DNA-Treffer eintragen" an ApiAddMatch schickt: [andere] (Kennung im Baum) oder [name]. */
+data class DnaTrefferEingabe(
+    val andere: String = "", val name: String = "", val cm: String = "", val segmente: String = "", val laengstes: String = "",
+    val anbieter: String = "", val datum: String = "", val notiz: String = "", val tabelle: String = "", val schutz: String = "",
+) {
+    /** Mindestens: wer (Person oder Name) und wie viel - oder eine Segmenttabelle, aus der das Modul die Menge liest. */
+    val vollstaendig get() = (andere.isNotBlank() || name.isNotBlank()) && (zahl(cm) != null || tabelle.isNotBlank())
+
+    fun felder(): Map<String, String> = mapOf(
+        "other" to andere, "name" to if (andere.isBlank()) name else "", "cm" to zahl(cm).orEmpty(), "segments" to segmente.filter(Char::isDigit),
+        "longest" to zahl(laengstes).orEmpty(), "provider" to anbieter, "date" to datum, "note" to notiz, "table" to tabelle, "restriction" to schutz,
+    ).mapValues { it.value.trim() }.filterValues { it.isNotEmpty() }
+
+    private companion object {
+        /** Zahl mit Punkt, wie der Server sie liest; ein Komma aus der Eingabe wird zum Punkt ("849,9"). */
+        fun zahl(text: String): String? = text.trim().replace(',', '.').takeIf { it.toDoubleOrNull() != null }
+    }
+}
+
+fun DnaUebersicht.kennungen(): Set<String> =
+    (entries.map { it.xref } + lines.values.flatten().flatMap { l -> listOfNotNull(l.earliestAncestor) + l.entries.map { it.xref } } +
+        matches.flatMap { m -> listOfNotNull(m.recordedAt, m.other, m.x?.nearestCommonAncestor) + m.commonAncestors }).filter { it.isNotEmpty() }.toSet()

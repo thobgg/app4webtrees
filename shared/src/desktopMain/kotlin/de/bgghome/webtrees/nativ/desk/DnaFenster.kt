@@ -32,13 +32,18 @@ import org.jetbrains.compose.resources.stringResource
 /*
  * DNA-Vererbungslinien (Erstellen > DNA-Vererbungslinien, nur mit dem Modul dna4webtrees auf dem Server): die Linien der Person, die beim Oeffnen
  * Proband war. Ein Klick auf eine Person der Liste macht sie im Hauptfenster zum Probanden; die Liste bleibt stehen,
- * bis man unten ausdruecklich von der neuen Person ausgeht - sonst waere sie nach jedem Klick weg.
+ * bis man unten ausdruecklich von der neuen Person ausgeht - sonst waere sie nach jedem Klick weg. Wer bearbeiten darf,
+ * traegt hier auch einen DNA-Test oder -Treffer fuer diese Person ein (DnaEintragen.kt).
  */
 @Composable
 fun DnaFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
     val tree = state.tree?.name ?: return
     val proband = state.root ?: return
     var start by remember { mutableStateOf(proband) }
+    // Eintragen: nur wer im Baum bearbeiten darf; das Modul prueft das Recht an der Person noch einmal
+    var formular by remember { mutableStateOf<DnaFormular?>(null) }
+    var stand by remember { mutableStateOf(0) }
+    fun name(x: String) = state.detail?.takeIf { it.person.xref == x }?.person?.name ?: state.people.firstOrNull { it.xref == x }?.name ?: x
     val farben = MaterialTheme.colorScheme
     androidx.compose.ui.window.Window(
         onCloseRequest = onClose, title = stringResource(Res.string.dna_title) + " – " + state.tree?.title.orEmpty(),
@@ -51,15 +56,17 @@ fun DnaFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
             }
         },
     ) {
+        formular?.let { f -> DnaEintragenDialog(f, viewModel.client, tree, start, name(start), onClose = { gespeichert -> formular = null; if (gespeichert) stand++ }) }
         Surface(Modifier.fillMaxSize(), color = farben.surface) {
             Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(Modifier.weight(1f).fillMaxWidth().border(1.dp, farben.outlineVariant)) {
-                    DnaAnsicht(viewModel.client, tree, start, onPerson = { viewModel.setRoot(it) })
+                    DnaAnsicht(viewModel.client, tree, start, onPerson = { viewModel.setRoot(it) }, mitBaum = true, stand = stand)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (proband != start) {
-                        val name = state.detail?.takeIf { it.person.xref == proband }?.person?.name ?: state.people.firstOrNull { it.xref == proband }?.name ?: proband
-                        Knopf(stringResource(Res.string.dna_from_selected, name), true) { start = proband }
+                    if (proband != start) Knopf(stringResource(Res.string.dna_from_selected, name(proband)), true) { start = proband }
+                    if (state.tree?.canEdit == true) {
+                        Knopf(stringResource(Res.string.dna_add_test), true) { formular = DnaFormular.Test }
+                        Knopf(stringResource(Res.string.dna_add_match), true) { formular = DnaFormular.Treffer }
                     }
                     Spacer(Modifier.weight(1f))
                     Knopf(stringResource(Res.string.action_close), true, onClose)

@@ -2036,4 +2036,26 @@
     <string name="dna_testers_earliest">Earliest known ancestor: %1$s · %2$d individuals on the line</string>
     <string name="dna_testers_none">No living individuals visible on this line.</string>
     <string name="dna_has_entry">has an entry</string>
+    <string name="dna_area_tree">Whole tree</string>
+    <string name="dna_add_test">Add DNA test …</string>
+    <string name="dna_add_match">Add DNA match …</string>
+    <string name="dna_form_test_title">DNA test for %1$s</string>
+    <string name="dna_form_match_title">DNA match for %1$s</string>
+    <string name="dna_form_type">Test type</string>
+    <string name="dna_form_provider">Provider</string>
+    <string name="dna_form_date">Date (e.g. 2024 or MAR 2024)</string>
+    <string name="dna_form_haplogroup">Haplogroup (e.g. R-U106)</string>
+    <string name="dna_form_note">Note</string>
+    <string name="dna_form_restriction">Restriction</string>
+    <string name="dna_form_restriction_auto">by the rule of the module</string>
+    <string name="dna_form_other">Other individual in the family tree (type a name)</string>
+    <string name="dna_form_name">or name, if not in the family tree</string>
+    <string name="dna_form_living_hint">For a living person outside the family tree please do not enter the full name.</string>
+    <string name="dna_form_cm">Shared DNA in cM</string>
+    <string name="dna_form_segments">Segments</string>
+    <string name="dna_form_longest">Longest segment in cM</string>
+    <string name="dna_form_table">Segment table (lines from the file of the provider)</string>
+    <string name="dna_overview_matches">Matches in the family tree</string>
+    <string name="dna_overview_entries">Tests and haplogroups</string>
+    <string name="dna_overview_none">No DNA entries are visible in the family tree.</string>
 </resources>

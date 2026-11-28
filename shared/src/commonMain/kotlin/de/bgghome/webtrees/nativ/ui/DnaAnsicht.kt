@@ -34,6 +34,7 @@ import de.bgghome.webtrees.nativ.api.DnaPerson
 import de.bgghome.webtrees.nativ.api.DnaTester
 import de.bgghome.webtrees.nativ.api.DnaTesterLinie
 import de.bgghome.webtrees.nativ.api.DnaTreffer
+import de.bgghome.webtrees.nativ.api.DnaUebersicht
 import de.bgghome.webtrees.nativ.api.DnaWarnung
 import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.WtClient
@@ -53,8 +54,8 @@ import java.util.Locale
  * dna4webtrees; hier wird nur gezeigt. Eintragen geht am PC (eigene Formulare) und im Browser.
  */
 
-/** Die vier Bereiche der Ansicht. */
-enum class DnaBereich { Linien, Eintraege, Treffer, Tester }
+/** Die Bereiche der Ansicht; [Baum] (alle DNA-Eintraege des Stammbaums) nur am PC. */
+enum class DnaBereich { Linien, Eintraege, Treffer, Tester, Baum }
 
 /** Centimorgan zur Anzeige: ganze Werte ohne Komma, sonst eine Stelle in der Schreibweise der Sprache ("849,9"). */
 fun cmText(wert: Double, sprache: Locale = Locale.getDefault()): String =
@@ -77,9 +78,14 @@ private class Geladen<T>(val daten: T, val personen: Map<String, Person>) {
 
 /**
  * Bereichswahl und der gewaehlte Bereich. [onPerson]: Tipp bzw. Klick auf eine Person. [zuerst]: womit die Ansicht aufgeht.
+ * [mitBaum]: auch die Uebersicht ueber den ganzen Stammbaum anbieten. [stand]: hochzaehlen, wenn etwas eingetragen wurde -
+ * dann laden Tests, Treffer und Uebersicht neu.
  */
 @Composable
-fun DnaAnsicht(client: WtClient, tree: String, xref: String, onPerson: (String) -> Unit, modifier: Modifier = Modifier, zuerst: DnaBereich = DnaBereich.Linien) {
+fun DnaAnsicht(
+    client: WtClient, tree: String, xref: String, onPerson: (String) -> Unit, modifier: Modifier = Modifier,
+    zuerst: DnaBereich = DnaBereich.Linien, mitBaum: Boolean = false, stand: Int = 0,
+) {
     var bereich by remember { mutableStateOf(zuerst) }
     Column(modifier.fillMaxSize()) {
         // Eine Zeile zum Wischen: vier Knoepfe brechen am Handy sonst in zwei Zeilen um
@@ -87,15 +93,16 @@ fun DnaAnsicht(client: WtClient, tree: String, xref: String, onPerson: (String) 
             listOf(
                 DnaBereich.Linien to Res.string.dna_area_lines, DnaBereich.Eintraege to Res.string.dna_area_entries,
                 DnaBereich.Treffer to Res.string.dna_area_matches, DnaBereich.Tester to Res.string.dna_area_testers,
-            ).forEach { (b, text) ->
+            ).plus(if (mitBaum) listOf(DnaBereich.Baum to Res.string.dna_area_tree) else emptyList()).forEach { (b, text) ->
                 FilterChip(selected = bereich == b, onClick = { bereich = b }, label = { Text(stringResource(text), maxLines = 1, softWrap = false) })
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         when (bereich) {
             DnaBereich.Linien -> DnaLinienInhalt(client, tree, xref, onPerson, Modifier.weight(1f))
-            DnaBereich.Tester -> TesterBereich(client, tree, xref, onPerson, Modifier.weight(1f))
-            else -> PersonBereich(client, tree, xref, bereich, onPerson, Modifier.weight(1f))
+            DnaBereich.Tester -> TesterBereich(client, tree, xref, stand, onPerson, Modifier.weight(1f))
+            DnaBereich.Baum -> BaumBereich(client, tree, stand, onPerson, Modifier.weight(1f))
+            else -> PersonBereich(client, tree, xref, bereich, stand, onPerson, Modifier.weight(1f))
         }
     }
 }
@@ -113,13 +120,13 @@ private fun <T> Bereichsliste(ergebnis: Result<Geladen<T>>?, modifier: Modifier,
 }
 
 @Composable
-private fun PersonBereich(client: WtClient, tree: String, xref: String, bereich: DnaBereich, onPerson: (String) -> Unit, modifier: Modifier) {
-    val ergebnis by produceState<Result<Geladen<DnaPerson>>?>(null, tree, xref) {
+private fun PersonBereich(client: WtClient, tree: String, xref: String, bereich: DnaBereich, stand: Int, onPerson: (String) -> Unit, modifier: Modifier) {
+    val ergebnis by produceState<Result<Geladen<DnaPerson>>?>(null, tree, xref, stand) {
         value = null
         value = withContext(Dispatchers.IO) { runCatching { client.dnaPerson(tree, xref).let { Geladen(it, dnaPersonenLaden(client, tree, it.kennungen())) } } }
     }
     Bereichsliste(ergebnis, modifier) { g ->
-        if (bereich == DnaBereich.Eintraege) eintraege(g, onPerson) else treffer(g, onPerson)
+        if (bereich == DnaBereich.Eintraege) eintraege(g, onPerson) else treffer(g.daten.matches, g, onPerson, mitErfasser = false)
     }
 }
 
@@ -160,19 +167,20 @@ private fun schutzText(schutz: String?): String? = when (schutz) {
     else -> null
 }
 
-private fun LazyListScope.treffer(g: Geladen<DnaPerson>, onPerson: (String) -> Unit) {
-    val d = g.daten
-    if (d.matches.isEmpty()) item("keine") { Absatz(stringResource(Res.string.dna_matches_none)) }
-    items(d.matches, key = { "m" + it.factId }) { m ->
+/** [mitErfasser]: in der Uebersicht des Baums steht ueber jedem Treffer, bei wem er eingetragen ist. */
+private fun LazyListScope.treffer(liste: List<DnaTreffer>, g: Geladen<*>, onPerson: (String) -> Unit, mitErfasser: Boolean) {
+    if (liste.isEmpty() && !mitErfasser) item("keine") { Absatz(stringResource(Res.string.dna_matches_none)) }
+    items(liste, key = { "m" + it.recordedAt + it.factId }) { m ->
+        if (mitErfasser) Klein(g.name(m.recordedAt) + "  ↔", Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp))
         TrefferZeile(m, g, onPerson)
         HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
     }
     // Die ueblichen Werte stehen unter CC BY - die Quelle gehoert dazu, sobald einer gezeigt wird
-    if (d.matches.any { it.usual != null || it.candidates.isNotEmpty() }) item("quelle") { Klein(stringResource(Res.string.dna_usual_source), Modifier.padding(16.dp)) }
+    if (liste.any { it.usual != null || it.candidates.isNotEmpty() }) item("quelle") { Klein(stringResource(Res.string.dna_usual_source), Modifier.padding(16.dp)) }
 }
 
 @Composable
-private fun TrefferZeile(m: DnaTreffer, g: Geladen<DnaPerson>, onPerson: (String) -> Unit) {
+private fun TrefferZeile(m: DnaTreffer, g: Geladen<*>, onPerson: (String) -> Unit) {
     Column(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
         val andere = m.other
         when {
@@ -217,8 +225,8 @@ private fun warnText(code: String): String? = when (code) {
 }
 
 @Composable
-private fun TesterBereich(client: WtClient, tree: String, xref: String, onPerson: (String) -> Unit, modifier: Modifier) {
-    val ergebnis by produceState<Result<Geladen<DnaTester>>?>(null, tree, xref) {
+private fun TesterBereich(client: WtClient, tree: String, xref: String, stand: Int, onPerson: (String) -> Unit, modifier: Modifier) {
+    val ergebnis by produceState<Result<Geladen<DnaTester>>?>(null, tree, xref, stand) {
         value = null
         value = withContext(Dispatchers.IO) { runCatching { client.dnaTester(tree, xref).let { Geladen(it, dnaPersonenLaden(client, tree, it.kennungen())) } } }
     }
@@ -234,6 +242,31 @@ private fun TesterBereich(client: WtClient, tree: String, xref: String, onPerson
             items(l.living, key = { "p$linie" + it.xref }) { k ->
                 PersonRow(g.person(k.xref), onClick = { onPerson(k.xref) },
                     trailing = if (k.hasEntry) ({ Text(stringResource(Res.string.dna_has_entry), style = MaterialTheme.typography.labelMedium) }) else null)
+            }
+        }
+    }
+}
+
+/** Alles zu DNA im Stammbaum: erst die Treffer mit ihrer Einordnung, dann Tests und Haplogruppen je Person. */
+@Composable
+private fun BaumBereich(client: WtClient, tree: String, stand: Int, onPerson: (String) -> Unit, modifier: Modifier) {
+    val ergebnis by produceState<Result<Geladen<DnaUebersicht>>?>(null, tree, stand) {
+        value = null
+        value = withContext(Dispatchers.IO) { runCatching { client.dnaUebersicht(tree).let { Geladen(it, dnaPersonenLaden(client, tree, it.kennungen())) } } }
+    }
+    Bereichsliste(ergebnis, modifier) { g ->
+        val d = g.daten
+        if (d.matches.isEmpty() && d.entries.isEmpty()) item("leer") { Absatz(stringResource(Res.string.dna_overview_none)) }
+        if (d.matches.isNotEmpty()) {
+            item("tm") { Titel(stringResource(Res.string.dna_overview_matches)) }
+            treffer(d.matches, g, onPerson, mitErfasser = true)
+        }
+        if (d.entries.isNotEmpty()) {
+            item("te") { Titel(stringResource(Res.string.dna_overview_entries)) }
+            // je Person einmal der Name, darunter ihre Eintraege
+            d.entries.groupBy { it.xref }.forEach { (x, liste) ->
+                item("p$x") { PersonRow(g.person(x), onClick = { onPerson(x) }) }
+                items(liste, key = { "o$x" + it.factId }) { EintragZeile(it, eingerueckt = true) }
             }
         }
     }

@@ -2031,4 +2031,26 @@
     <string name="dna_testers_earliest">Plus ancien ancêtre connu : %1$s · %2$d personnes dans la lignée</string>
     <string name="dna_testers_none">Aucune personne vivante visible dans cette lignée.</string>
     <string name="dna_has_entry">a une entrée</string>
+    <string name="dna_area_tree">Arbre entier</string>
+    <string name="dna_add_test">Saisir un test ADN …</string>
+    <string name="dna_add_match">Saisir une correspondance ADN …</string>
+    <string name="dna_form_test_title">Test ADN pour %1$s</string>
+    <string name="dna_form_match_title">Correspondance ADN pour %1$s</string>
+    <string name="dna_form_type">Type de test</string>
+    <string name="dna_form_provider">Fournisseur</string>
+    <string name="dna_form_date">Date (p. ex. 2024 ou MAR 2024)</string>
+    <string name="dna_form_haplogroup">Haplogroupe (p. ex. R-U106)</string>
+    <string name="dna_form_note">Note</string>
+    <string name="dna_form_restriction">Restriction</string>
+    <string name="dna_form_restriction_auto">selon la règle du module</string>
+    <string name="dna_form_other">Autre personne de l’arbre (saisir un nom)</string>
+    <string name="dna_form_name">ou nom, si absent de l’arbre</string>
+    <string name="dna_form_living_hint">Pour une personne vivante absente de l’arbre, merci de ne pas saisir le nom complet.</string>
+    <string name="dna_form_cm">ADN partagé en cM</string>
+    <string name="dna_form_segments">Segments</string>
+    <string name="dna_form_longest">Segment le plus long en cM</string>
+    <string name="dna_form_table">Tableau des segments (lignes du fichier du fournisseur)</string>
+    <string name="dna_overview_matches">Correspondances dans l’arbre</string>
+    <string name="dna_overview_entries">Tests et haplogroupes</string>
+    <string name="dna_overview_none">Aucune entrée ADN n’est visible dans l’arbre.</string>
 </resources>

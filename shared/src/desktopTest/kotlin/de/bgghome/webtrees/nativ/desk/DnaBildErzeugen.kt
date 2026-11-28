@@ -23,7 +23,7 @@ import kotlin.test.Test
 /**
  * Kein Test, sondern ein Werkzeug: zeichnet die Ansicht der DNA-Vererbungslinien ohne Bildschirm (Server mit dem Modul dna4webtrees ab 0.11.0).
  *
- *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_LINIE=y|mt|x] [WT_RICHTUNG=nachkommen] [WT_BEREICH=eintraege|treffer|tester] [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
+ *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_LINIE=y|mt|x] [WT_RICHTUNG=nachkommen] [WT_BEREICH=eintraege|treffer|tester|baum] [WT_REGION=DE] [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
  *   ./gradlew :shared:desktopTest --rerun --tests '*DnaBildErzeugen*'
  */
 class DnaBildErzeugen {
@@ -44,6 +44,8 @@ class DnaBildErzeugen {
         ziel.mkdirs()
         System.setProperty("java.util.prefs.userRoot", File(ziel, "prefs").absolutePath)
         System.getenv("WT_SPRACHE")?.let { java.util.Locale.setDefault(java.util.Locale.forLanguageTag(it)); Sprache.setzen(it) }
+        // Wie ein echtes Geraet: Sprache mit Region ("de-DE") geht an den Server, wenn WT_REGION gesetzt ist
+        System.getenv("WT_REGION")?.let { java.util.Locale.setDefault(java.util.Locale(java.util.Locale.getDefault().language, it)) }
         val client = WtClient(Speicher(), Speicher(), "wtTux/dev (DNA)").apply { baseUrl = System.getenv("WT_URL")!! }
         runBlocking { System.getenv("WT_USER")?.let { client.login(it, System.getenv("WT_PASS").orEmpty()) } ?: client.info() }
         val tree = System.getenv("WT_TREE")!!; val xref = System.getenv("WT_XREF")!!
@@ -52,7 +54,7 @@ class DnaBildErzeugen {
         val bereich = System.getenv("WT_BEREICH")?.let { b -> DnaBereich.entries.firstOrNull { it.name.equals(b, ignoreCase = true) } }
         val (bw, bh, dichte) = (System.getenv("WT_BILD") ?: "640:780:1.25").split(':')
         ImageComposeScene(width = bw.toInt(), height = bh.toInt(), density = Density(dichte.toFloat())) {
-            DeskTheme { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) { bereich?.let { DnaAnsicht(client, tree, xref, onPerson = {}, zuerst = it) } ?: DnaLinienInhalt(client, tree, xref, onPerson = {}, zuerst = linie, zuerstNachkommen = nachkommen) } }
+            DeskTheme { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) { bereich?.let { DnaAnsicht(client, tree, xref, onPerson = {}, zuerst = it, mitBaum = true) } ?: DnaLinienInhalt(client, tree, xref, onPerson = {}, zuerst = linie, zuerstNachkommen = nachkommen) } }
         }.use { scene ->
             scene.render(); (1..60).forEach { scene.render(it * 50_000_000L); Thread.sleep(60) }
             File(ziel, bereich?.let { "dna-${it.name.lowercase()}.png" } ?: "dna-${linie.code}-${if (nachkommen) "nachkommen" else "vorfahren"}.png").writeBytes(scene.render(4_000_000_000L).encodeToData(EncodedImageFormat.PNG)!!.bytes)
