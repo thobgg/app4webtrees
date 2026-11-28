@@ -14,6 +14,8 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), zum Testen"></a>
 </p>
 
+<p align="center"><b>Neu in 1.64: DNA.</b> Für eine Person die Vererbungslinien von Y-DNA, mtDNA und X-DNA, die eingetragenen Tests und Haplogruppen, Treffer mit der Verwandtschaft im Stammbaum und dem dafür üblichen Bereich und wer auf einer Linie noch testen könnte. Am PC zusätzlich: Tests und Treffer eintragen, Abdeckung durch getestete Nachkommen, durch DNA gestützte Vorfahren und alle DNA-Einträge des Stammbaums. Braucht das webtrees-Modul <a href="https://github.com/thobgg/dna4webtrees/releases">dna4webtrees</a> auf dem Server; die Linien sind aus den eingetragenen Verwandtschaften abgeleitet, kein Testergebnis.</p>
+
 <p align="center"><b>Neu in 1.63: angemeldet bleiben.</b> Läuft die webtrees-Sitzung ab (bei vielen Servern nach etwa 24 Minuten Pause), meldet sich die App mit einem Geräte-Token still neu an, statt nach dem Passwort zu fragen. Braucht <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.30.0">api4webtrees 1.30</a>; die verbundenen Geräte lassen sich in webtrees unter „App“ trennen. Fehlermeldungen erscheinen als Dialog mit „Kopieren“ und „Details“.</p>
 
 <p align="center"><b>Neu in 1.62: aussagekräftige Fehlermeldungen.</b> Liefert der Server statt Daten eine Fehlerseite, nennt die Meldung jetzt deren Inhalt, etwa den PHP-Fehler oder eine Speicher- oder Laufzeitgrenze, damit sich die Ursache ohne Rätselraten melden lässt.</p>

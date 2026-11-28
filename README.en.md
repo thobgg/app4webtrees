@@ -14,6 +14,8 @@
   <a href="https://github.com/thobgg/app4webtrees/releases/latest"><img src="https://img.shields.io/badge/macOS-wtMac%20.dmg%20(Test)-A2AAAD?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: wtMac (.dmg), for testing"></a>
 </p>
 
+<p align="center"><b>New in 1.64: DNA.</b> For an individual the inheritance lines of Y-DNA, mtDNA and X-DNA, the recorded tests and haplogroups, matches with the relationship in the family tree and the range usual for it, and who on a line could still test. On the PC also: add tests and matches, coverage by tested descendants, ancestors supported by DNA and all DNA entries of the tree. Needs the webtrees module <a href="https://github.com/thobgg/dna4webtrees/releases">dna4webtrees</a> on the server; the lines are derived from the recorded relationships, not a test result.</p>
+
 <p align="center"><b>New in 1.63: stay signed in.</b> When the webtrees session ends (on many servers after a break of about 24 minutes), the app signs in again quietly with a device token instead of asking for the password. Needs <a href="https://github.com/thobgg/api4webtrees/releases/tag/v1.30.0">api4webtrees 1.30</a>; the connected devices can be disconnected in webtrees under “App”. Error messages appear as a dialog with “Copy” and “Details”.</p>
 
 <p align="center"><b>New in 1.62: meaningful error messages.</b> If the server returns an error page instead of data, the message now quotes its content, such as the PHP error or a memory or time limit, so the cause can be reported without guesswork.</p>

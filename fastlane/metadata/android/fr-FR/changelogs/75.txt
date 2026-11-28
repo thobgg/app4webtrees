@@ -1,0 +1,1 @@
+ADN : lignées de transmission (ADN-Y, ADNmt, ADN-X), tests et haplogroupes enregistrés, correspondances avec la parenté dans l’arbre, la plage habituelle et des avertissements, et « Qui pourrait tester ? ». Dans le profil via ⋮ → ADN. Nécessite le module webtrees dna4webtrees sur le serveur.

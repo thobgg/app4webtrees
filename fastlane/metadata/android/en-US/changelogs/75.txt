@@ -1,0 +1,1 @@
+DNA: inheritance lines (Y-DNA, mtDNA, X-DNA), recorded tests and haplogroups, matches with the relationship in the family tree, the usual range and warnings, and “Who could test?”. In the profile via ⋮ → DNA. Needs the webtrees module dna4webtrees on the server.

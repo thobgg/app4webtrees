@@ -1,0 +1,1 @@
+ADN: líneas de herencia (ADN-Y, ADNmt, ADN-X), pruebas y haplogrupos registrados, coincidencias con el parentesco en el árbol, el rango habitual y avisos, y «¿Quién podría hacerse la prueba?». En el perfil con ⋮ → ADN. Requiere el módulo de webtrees dna4webtrees en el servidor.

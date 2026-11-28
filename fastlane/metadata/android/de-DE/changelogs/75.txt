@@ -1,0 +1,1 @@
+DNA: Vererbungslinien (Y-DNA, mtDNA, X-DNA), eingetragene Tests und Haplogruppen, Treffer mit Verwandtschaft im Stammbaum, üblichem Bereich und Warnungen sowie „Wer könnte testen?“. Im Profil über ⋮ → DNA. Braucht das webtrees-Modul dna4webtrees auf dem Server.
