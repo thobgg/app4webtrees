@@ -248,51 +248,72 @@ class TreeLayout private constructor(
 
         private fun hasCousins(n: Int): Boolean = siblingsOf(n).any { cousinsOf(n, it).isNotEmpty() }
 
-        /**
-         * Wo die Eltern von Platz n stehen, relativ zur Mitte des Kindes: beide Eltern symmetrisch, so weit auseinander,
-         * wie ihre Teilbaeume brauchen. Bei der Mittelperson (n = 1) ausserdem so weit, dass die Cousins unter den
-         * Eltern-Geschwistern nicht mit ihren eigenen Geschwistern (links) und Partnern (rechts) zusammenstossen -
-         * die stehen in derselben Reihe.
+        /*
+         * Anordnung der Ahnen als Faecher: Vater und Mutter stehen immer direkt nebeneinander ueber dem Kind, wie ein Paar.
+         * Was ueber dem Vater steht (seine Ahnen samt deren Geschwistern), bleibt links von seiner Karte, was ueber der Mutter
+         * steht, rechts von ihrer. Die Breite, die viele Generationen brauchen, entsteht so oben im Baum und nicht zwischen den
+         * Eltern. Gerechnet wird mit der Ausdehnung je Reihe (links, rechts) statt mit der breitesten Stelle eines Teilbaums.
          */
-        private fun parentOffsets(n: Int): List<Float> {
-            val parents = parentsOf(n)
 
-            // Reihe der Mittelperson: was links und rechts ihrer Kartenmitte schon steht (Geschwister | Partner, "+")
-            val rowLeft = BOX_W / 2 + groupWidth(1).let { if (it == 0f) 0f else it + SIBLING_GAP }
-            val rowRight = boxes.filter { it.y == 0f }.maxOf { it.right } - focusBox.centerX
-            // So weit muss ein Elternteil mindestens von der Mitte weg, damit seine Gruppe (Rand bei BOX_W/2 + SIBLING_GAP
-            // von seiner Mitte) neben dieser Reihe bleibt
-            val fatherMin = if (n == 1 && hasCousins(2)) rowLeft + H_GAP - BOX_W / 2 - SIBLING_GAP else 0f
-            val motherMin = if (n == 1 && hasCousins(3)) rowRight + H_GAP - BOX_W / 2 - SIBLING_GAP else 0f
+        /** Halber Mittenabstand zweier Partnerkarten. */
+        private val paar = (BOX_W + SPOUSE_GAP) / 2
 
-            return when (parents.size) {
-                2 -> {
-                    val half = maxOf((extents(parents[0]).second + H_GAP + extents(parents[1]).first) / 2, fatherMin, motherMin)
-                    listOf(-half, half)
-                }
-                1 -> listOf(if (parents[0] % 2 == 0) -fatherMin else motherMin)
-                else -> emptyList()
+        /** Wie weit Ahnen ueber einer Karte hoechstens zur Partnerseite hin ueberstehen duerfen - so bleiben zwischen den
+         *  Ahnen von Vater und Mutter SIBLING_GAP Luft, und fremde Karten stehen nie so eng wie ein Paar. */
+        private val rand = (SIBLING_GAP - SPOUSE_GAP) / 2
+
+        /**
+         * Abstand der Geschwistergruppe von der Karte. Bei den Eltern der Mittelperson mit Cousins so gross, dass die Cousins
+         * (in der Reihe der Mittelperson) neben deren Geschwistern links und Partnern rechts bleiben - die Eltern selbst
+         * bleiben dabei nebeneinander, nur ihre Geschwistergruppen ruecken nach aussen.
+         */
+        private fun siblingGap(n: Int): Float {
+            if ((n != 2 && n != 3) || !hasCousins(n)) return SIBLING_GAP
+            val elternMitte = if (parentsOf(1).size == 2) (if (n == 2) -paar else paar) else 0f
+            return if (n == 2) {
+                val rowLeft = BOX_W / 2 + groupWidth(1).let { if (it == 0f) 0f else it + SIBLING_GAP }
+                maxOf(SIBLING_GAP, elternMitte - BOX_W / 2 + rowLeft + H_GAP)
+            } else {
+                val rowRight = boxes.filter { it.y == 0f }.maxOf { it.right } - focusBox.centerX
+                maxOf(SIBLING_GAP, rowRight + H_GAP - elternMitte - BOX_W / 2)
             }
         }
 
-        private val extentCache = HashMap<Int, Pair<Float, Float>>()
+        private val rowCache = HashMap<Int, Map<Int, Pair<Float, Float>>>()
+
+        /** Ausdehnung des Blocks an Platz n (Karte, Geschwistergruppe, alle Ahnen darueber) je Generation, relativ zu seiner Kartenmitte. */
+        private fun rows(n: Int): Map<Int, Pair<Float, Float>> = rowCache.getOrPut(n) {
+            val result = HashMap<Int, Pair<Float, Float>>()
+            fun add(g: Int, links: Float, rechts: Float) {
+                val alt = result[g]
+                result[g] = if (alt == null) links to rechts else minOf(alt.first, links) to maxOf(alt.second, rechts)
+            }
+            val seite = groupWidth(n).let { if (it == 0f) 0f else it + siblingGap(n) }
+            add(generationOf(n), -BOX_W / 2 - if (siblingsOnLeft(n)) seite else 0f, BOX_W / 2 + if (siblingsOnLeft(n)) 0f else seite)
+            parentsOf(n).zip(parentOffsets(n)).forEach { (parent, offset) ->
+                rows(parent).forEach { (g, lr) -> add(g, lr.first + offset, lr.second + offset) }
+            }
+            result
+        }
 
         /**
-         * Wie weit der Teilbaum an Platz n nach links und rechts ueber die Mitte seiner Karte hinausragt.
-         * Die Geschwistergruppe macht ihn einseitig - deshalb zwei Werte statt einer Breite.
+         * Wo die Eltern von Platz n stehen, relativ zu seiner Kartenmitte: als Paar nebeneinander (ein Elternteil allein direkt
+         * darueber). Ueber der Mittelperson mittig; ueber einem Vater so weit nach links, dass nichts ueber seine Karte nach rechts
+         * zur Mutter hin hinausragt, ueber einer Mutter entsprechend nach rechts.
          */
-        private fun extents(n: Int): Pair<Float, Float> = extentCache.getOrPut(n) {
-            val side = groupWidth(n).let { if (it == 0f) 0f else it + SIBLING_GAP }
-            var left = BOX_W / 2 + if (siblingsOnLeft(n)) side else 0f
-            var right = BOX_W / 2 + if (siblingsOnLeft(n)) 0f else side
+        private fun parentOffsets(n: Int): List<Float> {
+            val parents = parentsOf(n)
+            if (parents.isEmpty()) return emptyList()
+            val lokal = if (parents.size == 2) listOf(-paar, paar) else listOf(0f)
+            if (n == 1) return lokal
 
-            parentsOf(n).zip(parentOffsets(n)).forEach { (parent, offset) ->
-                val (parentLeft, parentRight) = extents(parent)
-                left = maxOf(left, parentLeft - offset)
-                right = maxOf(right, parentRight + offset)
+            var links = Float.MAX_VALUE
+            var rechts = -Float.MAX_VALUE
+            parents.zip(lokal).forEach { (parent, offset) ->
+                rows(parent).values.forEach { (l, r) -> links = minOf(links, l + offset); rechts = maxOf(rechts, r + offset) }
             }
-
-            left to right
+            val mitte = if (n % 2 == 0) minOf(0f, BOX_W / 2 - rand - rechts) else maxOf(0f, -BOX_W / 2 + rand - links)
+            return lokal.map { it + mitte }
         }
 
         /** Legt Platz n (Kartenmitte bei centerX) und alles darueber an. Platz 1 selbst zeichnet placeDescendants. */
@@ -316,8 +337,7 @@ class TreeLayout private constructor(
             if (parentCenters.isNotEmpty()) {
                 parentCenters.forEach { connectors += Connector(listOf(centerX to y, centerX to railY, it to railY, it to y - V_GAP)) }
             }
-            // Vater und Mutter als Paar: Ehelinie zwischen den Karten wie bei Partnern der Mittelperson. Stehen sie weit
-            // auseinander (ihre eigenen Ahnen brauchen Platz), sah man sonst nur die Linie zum Kind und kein Paar.
+            // Vater und Mutter als Paar: Ehelinie mit Ringen zwischen den Karten wie bei Partnern der Mittelperson
             if (parentCenters.size == 2) {
                 val parentY = y - (BOX_H + V_GAP) + BOX_H / 2
                 connectors += Connector(listOf(parentCenters[0] + BOX_W / 2 to parentY, parentCenters[1] - BOX_W / 2 to parentY), spouse = true)
@@ -334,7 +354,7 @@ class TreeLayout private constructor(
             val group = siblingsOf(n)
             if (group.isEmpty()) return
 
-            var unitLeft = if (siblingsOnLeft(n)) centerX - BOX_W / 2 - SIBLING_GAP - groupWidth(n) else centerX + BOX_W / 2 + SIBLING_GAP
+            var unitLeft = if (siblingsOnLeft(n)) centerX - BOX_W / 2 - siblingGap(n) - groupWidth(n) else centerX + BOX_W / 2 + siblingGap(n)
 
             group.forEach { sibling ->
                 val unit = unitWidth(n, sibling)

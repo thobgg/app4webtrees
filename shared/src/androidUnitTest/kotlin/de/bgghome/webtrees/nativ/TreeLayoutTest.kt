@@ -232,8 +232,10 @@ class TreeLayoutTest {
         assertTrue(box.getValue("I4").canExpand)
         assertTrue(box.getValue("I4").y < box.getValue("I2").y && box.getValue("I2").y < box.getValue("I1").y)
         assertEquals(box.getValue("I4").y, box.getValue("I5").y, 0.01f)
-        // Die Eltern stehen mittig ueber I2
-        assertEquals(box.getValue("I2").centerX, (box.getValue("I4").centerX + box.getValue("I5").centerX) / 2, 0.01f)
+        // Die Eltern von I2 stehen als Paar nebeneinander; da I2 ein Vater ist, ragen sie nicht ueber seine Karte nach
+        // rechts zur Mutter hin hinaus (die Ahnen der Mutter haben dort ihren Platz)
+        assertEquals(TreeLayout.BOX_W + TreeLayout.SPOUSE_GAP, box.getValue("I5").x - box.getValue("I4").x, 0.01f)
+        assertTrue(box.getValue("I5").right <= box.getValue("I2").right)
     }
 
     @Test
