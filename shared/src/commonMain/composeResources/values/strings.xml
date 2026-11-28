@@ -2058,4 +2058,21 @@
     <string name="dna_overview_matches">Matches in the family tree</string>
     <string name="dna_overview_entries">Tests and haplogroups</string>
     <string name="dna_overview_none">No DNA entries are visible in the family tree.</string>
+    <string name="dna_area_coverage">Coverage</string>
+    <string name="dna_area_evidence">Supported ancestors</string>
+    <string name="dna_kind_test">DNA test</string>
+    <string name="dna_kind_y_haplogroup">Y-DNA haplogroup</string>
+    <string name="dna_kind_mt_haplogroup">mtDNA haplogroup</string>
+    <string name="dna_kind_y">Y-DNA</string>
+    <string name="dna_kind_mt">mtDNA</string>
+    <string name="dna_kind_autosomal">autosomal DNA</string>
+    <string name="dna_link_shared_cm">Shared cM tool</string>
+    <string name="dna_coverage_value">About %1$s of the DNA of this individual is represented by tested descendants.</string>
+    <string name="dna_coverage_hint">Estimate from average values over %1$d descendants in %2$d generations; the real share varies.</string>
+    <string name="dna_coverage_tested">Tested descendants</string>
+    <string name="dna_coverage_candidates">Whose test would add most</string>
+    <string name="dna_coverage_no_candidates">No living descendant who could add to it is visible.</string>
+    <string name="dna_evidence_summary">%1$d of %2$d links between child and parent in %3$d generations are supported by DNA matches.</string>
+    <string name="dna_evidence_hint">Supported is not proven: the DNA fits the family tree and could also fit another one. Rule for a single match (WikiTree): related as third cousins or closer and the amount in the usual range.</string>
+    <string name="dna_evidence_by">supported by: %1$s</string>
 </resources>

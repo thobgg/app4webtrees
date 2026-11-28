@@ -228,7 +228,7 @@ private fun Vermerk(text: String) {
 
 /** Handy: die Linien bildschirmfuellend ueber dem Profil; ein Tipp auf eine Person schliesst und oeffnet ihr Profil. */
 @Composable
-fun DnaLinienDialog(client: WtClient, tree: String, xref: String, name: String, onPerson: (String) -> Unit, onDismiss: () -> Unit) {
+fun DnaLinienDialog(client: WtClient, tree: String, xref: String, name: String, onPerson: (String) -> Unit, onDismiss: () -> Unit, onLink: (String) -> Unit = {}) {
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
         androidx.compose.material3.Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             Column(Modifier.fillMaxSize()) {
@@ -238,7 +238,7 @@ fun DnaLinienDialog(client: WtClient, tree: String, xref: String, name: String, 
                     }
                     Text(stringResource(Res.string.dna_title_of, name), style = MaterialTheme.typography.titleMedium, maxLines = 2)
                 }
-                DnaAnsicht(client, tree, xref, onPerson = { onDismiss(); onPerson(it) }, Modifier.weight(1f))
+                DnaAnsicht(client, tree, xref, onPerson = { onDismiss(); onPerson(it) }, Modifier.weight(1f), onLink = onLink)
             }
         }
     }

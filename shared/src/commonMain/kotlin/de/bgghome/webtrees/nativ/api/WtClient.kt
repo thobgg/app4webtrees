@@ -441,6 +441,14 @@ class WtClient(
     /** Fassung und Auswahllisten des Moduls dna4webtrees. */
     suspend fun dnaModul(): DnaModulInfo = getRoute("/module/$DNA_MODUL/ApiInfo", emptyMap(), DnaModulInfo.serializer())
 
+    /** Wie viel der DNA einer Person durch getestete Nachkommen vertreten ist (Modul ab JSON-Stufe 4). */
+    suspend fun dnaAbdeckung(tree: String, xref: String): DnaAbdeckung =
+        getRoute("/module/$DNA_MODUL/ApiCoverage/$tree", mapOf("xref" to xref), DnaAbdeckung.serializer())
+
+    /** Welche Verbindungen Kind - Elternteil unter den Vorfahren durch Treffer gestuetzt sind (Modul ab JSON-Stufe 5). */
+    suspend fun dnaGestuetzt(tree: String, xref: String): DnaGestuetzt =
+        getRoute("/module/$DNA_MODUL/ApiEvidence/$tree", mapOf("xref" to xref), DnaGestuetzt.serializer())
+
     /** Alle DNA-Eintraege eines Baums, die der Benutzer sehen darf. */
     suspend fun dnaUebersicht(tree: String): DnaUebersicht = getRoute("/module/$DNA_MODUL/ApiOverview/$tree", emptyMap(), DnaUebersicht.serializer())
 

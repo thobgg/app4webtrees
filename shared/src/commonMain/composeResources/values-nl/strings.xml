@@ -2034,4 +2034,21 @@
     <string name="dna_overview_matches">Matches in de stamboom</string>
     <string name="dna_overview_entries">Tests en haplogroepen</string>
     <string name="dna_overview_none">In de stamboom zijn geen DNA-items zichtbaar.</string>
+    <string name="dna_area_coverage">Dekking</string>
+    <string name="dna_area_evidence">Ondersteunde voorouders</string>
+    <string name="dna_kind_test">DNA-test</string>
+    <string name="dna_kind_y_haplogroup">Y-DNA-haplogroep</string>
+    <string name="dna_kind_mt_haplogroup">mtDNA-haplogroep</string>
+    <string name="dna_kind_y">Y-DNA</string>
+    <string name="dna_kind_mt">mtDNA</string>
+    <string name="dna_kind_autosomal">autosomaal DNA</string>
+    <string name="dna_link_shared_cm">Shared cM-hulpmiddel</string>
+    <string name="dna_coverage_value">Ongeveer %1$s van het DNA van deze persoon is vertegenwoordigd door geteste nakomelingen.</string>
+    <string name="dna_coverage_hint">Schatting uit gemiddelde waarden over %1$d nakomelingen in %2$d generaties; het werkelijke aandeel varieert.</string>
+    <string name="dna_coverage_tested">Geteste nakomelingen</string>
+    <string name="dna_coverage_candidates">Wiens test het meest zou opleveren</string>
+    <string name="dna_coverage_no_candidates">Geen levende nakomeling zichtbaar die er nog iets aan kan bijdragen.</string>
+    <string name="dna_evidence_summary">%1$d van de %2$d verbindingen tussen kind en ouder in %3$d generaties worden door DNA-matches ondersteund.</string>
+    <string name="dna_evidence_hint">Ondersteund betekent niet bewezen: het DNA past bij de stamboom en zou ook bij een andere kunnen passen. Regel voor één match (WikiTree): verwant als achterachterneven of nauwer en de hoeveelheid binnen het gebruikelijke bereik.</string>
+    <string name="dna_evidence_by">ondersteund door: %1$s</string>
 </resources>

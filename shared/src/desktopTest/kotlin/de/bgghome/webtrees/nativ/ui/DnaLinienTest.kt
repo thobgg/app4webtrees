@@ -149,3 +149,34 @@ class DnaModulTest {
         assertEquals("849.9", cmText(849.9, java.util.Locale.ENGLISH))
     }
 }
+
+/** Abdeckung, gestuetzte Vorfahren und das Datum der DNA-Eintraege. */
+class DnaAuswertungTest {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    @Test
+    fun datumInDerSpracheDerApp() {
+        assertEquals("März 2022", de.bgghome.webtrees.nativ.api.dnaDatum("MAR 2022", java.util.Locale.GERMAN))
+        assertEquals("February 2024", de.bgghome.webtrees.nativ.api.dnaDatum("FEB 2024", java.util.Locale.ENGLISH))
+        assertEquals("2022", de.bgghome.webtrees.nativ.api.dnaDatum("2022", java.util.Locale.GERMAN))
+        assertTrue(de.bgghome.webtrees.nativ.api.dnaDatum("12 MAR 2022", java.util.Locale.GERMAN).contains("März"))
+        // was kein einfaches Datum ist, bleibt stehen
+        assertEquals("ABT 2020", de.bgghome.webtrees.nativ.api.dnaDatum("ABT 2020", java.util.Locale.GERMAN))
+        assertEquals("", de.bgghome.webtrees.nativ.api.dnaDatum("", java.util.Locale.GERMAN))
+    }
+
+    @Test
+    fun abdeckungUndGestuetztLesen() {
+        val a = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaAbdeckung.serializer(),
+            """{"ok":true,"level":6,"xref":"I21","generations":8,"coverage":0.4351,"descendants":13,"tested":["I1","I5"],"candidates":[{"xref":"I27","gain":0.0435}]}""")
+        assertEquals(0.4351, a.coverage)
+        assertEquals(setOf("I1", "I5", "I27"), a.kennungen())
+        val g = json.decodeFromString(de.bgghome.webtrees.nativ.api.DnaGestuetzt.serializer(), """
+            {"ok":true,"level":6,"xref":"I1","generations":5,"rule":"wikitree-single-match","links":[
+             {"generation":1,"child":"I1","parent":"I8","supported":true,"matches":[{"recordedAt":"I1","factId":"a","other":"I12","cm":849.9,"relationship":"1C"}]},
+             {"generation":1,"child":"I1","parent":"I9","supported":false,"matches":[]}]}
+        """.trimIndent())
+        assertEquals(1, g.links.count { it.supported })
+        assertEquals(setOf("I1", "I8", "I9", "I12"), g.kennungen())
+    }
+}

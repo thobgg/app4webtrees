@@ -2053,4 +2053,21 @@
     <string name="dna_overview_matches">Correspondances dans l’arbre</string>
     <string name="dna_overview_entries">Tests et haplogroupes</string>
     <string name="dna_overview_none">Aucune entrée ADN n’est visible dans l’arbre.</string>
+    <string name="dna_area_coverage">Couverture</string>
+    <string name="dna_area_evidence">Ancêtres étayés</string>
+    <string name="dna_kind_test">Test ADN</string>
+    <string name="dna_kind_y_haplogroup">Haplogroupe ADN-Y</string>
+    <string name="dna_kind_mt_haplogroup">Haplogroupe ADNmt</string>
+    <string name="dna_kind_y">ADN-Y</string>
+    <string name="dna_kind_mt">ADNmt</string>
+    <string name="dna_kind_autosomal">ADN autosomique</string>
+    <string name="dna_link_shared_cm">Outil Shared cM</string>
+    <string name="dna_coverage_value">Environ %1$s de l’ADN de cette personne est représenté par des descendants testés.</string>
+    <string name="dna_coverage_hint">Estimation à partir de valeurs moyennes sur %1$d descendants en %2$d générations ; la part réelle varie.</string>
+    <string name="dna_coverage_tested">Descendants testés</string>
+    <string name="dna_coverage_candidates">Le test qui apporterait le plus</string>
+    <string name="dna_coverage_no_candidates">Aucun descendant vivant visible ne pourrait encore y contribuer.</string>
+    <string name="dna_evidence_summary">%1$d des %2$d liens entre enfant et parent sur %3$d générations sont étayés par des correspondances ADN.</string>
+    <string name="dna_evidence_hint">Étayé ne veut pas dire prouvé : l’ADN concorde avec l’arbre et pourrait aussi concorder avec un autre. Règle pour une correspondance unique (WikiTree) : apparentés comme cousins au 3e degré ou plus proches et valeur dans la plage habituelle.</string>
+    <string name="dna_evidence_by">étayé par : %1$s</string>
 </resources>

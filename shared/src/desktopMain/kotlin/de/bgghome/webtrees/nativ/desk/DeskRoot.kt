@@ -437,7 +437,7 @@ fun FrameWindowScope.DeskRoot(viewModel: AppViewModel, onQuit: () -> Unit) {
             onAufgabe = if (stufe30 && state.tree?.canEdit == true) ({ aufgabeNeu = it }) else null)
         if (aufgaben && state.tree != null) AufgabenFenster(state, viewModel, openSheet, onClose = { aufgaben = false })
         if (aenderungen && state.tree != null) AenderungenFenster(state, viewModel, openSheet, onClose = { aenderungen = false })
-        if (dna && state.tree != null && state.root != null) DnaFenster(state, viewModel, onClose = { dna = false })
+        if (dna && state.tree != null && state.root != null) DnaFenster(state, viewModel, openWeb, onClose = { dna = false })
         if (archiv && archivDa) ArchivFenster(state, viewModel, openWeb, onClose = { archiv = false })
         if (sicherung) SicherungDialog(onClose = { sicherung = false })
         if (gedcomSpeichern) state.tree?.name?.let { GedcomSpeichernDialog(viewModel, it, onClose = { gedcomSpeichern = false }) }

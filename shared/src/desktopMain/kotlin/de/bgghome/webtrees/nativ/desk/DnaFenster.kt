@@ -36,7 +36,7 @@ import org.jetbrains.compose.resources.stringResource
  * traegt hier auch einen DNA-Test oder -Treffer fuer diese Person ein (DnaEintragen.kt).
  */
 @Composable
-fun DnaFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
+fun DnaFenster(state: UiState, viewModel: AppViewModel, openWeb: (String) -> Unit, onClose: () -> Unit) {
     val tree = state.tree?.name ?: return
     val proband = state.root ?: return
     var start by remember { mutableStateOf(proband) }
@@ -60,7 +60,7 @@ fun DnaFenster(state: UiState, viewModel: AppViewModel, onClose: () -> Unit) {
         Surface(Modifier.fillMaxSize(), color = farben.surface) {
             Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(Modifier.weight(1f).fillMaxWidth().border(1.dp, farben.outlineVariant)) {
-                    DnaAnsicht(viewModel.client, tree, start, onPerson = { viewModel.setRoot(it) }, mitBaum = true, stand = stand)
+                    DnaAnsicht(viewModel.client, tree, start, onPerson = { viewModel.setRoot(it) }, mitBaum = true, stand = stand, onLink = openWeb)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (proband != start) Knopf(stringResource(Res.string.dna_from_selected, name(proband)), true) { start = proband }

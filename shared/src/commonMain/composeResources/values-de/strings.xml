@@ -2053,4 +2053,21 @@
     <string name="dna_overview_matches">Treffer im Stammbaum</string>
     <string name="dna_overview_entries">Tests und Haplogruppen</string>
     <string name="dna_overview_none">Im Stammbaum sind keine DNA-Einträge sichtbar.</string>
+    <string name="dna_area_coverage">Abdeckung</string>
+    <string name="dna_area_evidence">Gestützte Vorfahren</string>
+    <string name="dna_kind_test">DNA-Test</string>
+    <string name="dna_kind_y_haplogroup">Y-DNA-Haplogruppe</string>
+    <string name="dna_kind_mt_haplogroup">mtDNA-Haplogruppe</string>
+    <string name="dna_kind_y">Y-DNA</string>
+    <string name="dna_kind_mt">mtDNA</string>
+    <string name="dna_kind_autosomal">autosomale DNA</string>
+    <string name="dna_link_shared_cm">Shared-cM-Werkzeug</string>
+    <string name="dna_coverage_value">Etwa %1$s der DNA dieser Person sind durch getestete Nachkommen vertreten.</string>
+    <string name="dna_coverage_hint">Schätzung aus Durchschnittswerten über %1$d Nachkommen in %2$d Generationen; der tatsächliche Anteil schwankt.</string>
+    <string name="dna_coverage_tested">Getestete Nachkommen</string>
+    <string name="dna_coverage_candidates">Wessen Test am meisten brächte</string>
+    <string name="dna_coverage_no_candidates">Kein lebender Nachkomme sichtbar, der noch etwas beitragen könnte.</string>
+    <string name="dna_evidence_summary">%1$d von %2$d Verbindungen zwischen Kind und Elternteil in %3$d Generationen sind durch DNA-Treffer gestützt.</string>
+    <string name="dna_evidence_hint">Gestützt heißt nicht bewiesen: Die DNA passt zum Stammbaum und könnte auch zu einem anderen passen. Regel für einen einzelnen Treffer (WikiTree): verwandt als Cousins 3. Grades oder näher und die Menge im üblichen Bereich.</string>
+    <string name="dna_evidence_by">gestützt durch: %1$s</string>
 </resources>

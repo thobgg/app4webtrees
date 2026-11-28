@@ -2053,4 +2053,21 @@
     <string name="dna_overview_matches">Coincidencias en el árbol</string>
     <string name="dna_overview_entries">Pruebas y haplogrupos</string>
     <string name="dna_overview_none">No hay entradas de ADN visibles en el árbol.</string>
+    <string name="dna_area_coverage">Cobertura</string>
+    <string name="dna_area_evidence">Antepasados respaldados</string>
+    <string name="dna_kind_test">Prueba de ADN</string>
+    <string name="dna_kind_y_haplogroup">Haplogrupo ADN-Y</string>
+    <string name="dna_kind_mt_haplogroup">Haplogrupo ADNmt</string>
+    <string name="dna_kind_y">ADN-Y</string>
+    <string name="dna_kind_mt">ADNmt</string>
+    <string name="dna_kind_autosomal">ADN autosómico</string>
+    <string name="dna_link_shared_cm">Herramienta Shared cM</string>
+    <string name="dna_coverage_value">Aproximadamente el %1$s del ADN de esta persona está representado por descendientes que se hicieron la prueba.</string>
+    <string name="dna_coverage_hint">Estimación a partir de valores medios sobre %1$d descendientes en %2$d generaciones; la proporción real varía.</string>
+    <string name="dna_coverage_tested">Descendientes con prueba</string>
+    <string name="dna_coverage_candidates">Qué prueba aportaría más</string>
+    <string name="dna_coverage_no_candidates">No hay ningún descendiente vivo visible que pueda aportar algo más.</string>
+    <string name="dna_evidence_summary">%1$d de %2$d vínculos entre hijo y progenitor en %3$d generaciones están respaldados por coincidencias de ADN.</string>
+    <string name="dna_evidence_hint">Respaldado no significa probado: el ADN encaja con el árbol y podría encajar también con otro. Regla para una sola coincidencia (WikiTree): parientes como primos terceros o más cercanos y el valor dentro del rango habitual.</string>
+    <string name="dna_evidence_by">respaldado por: %1$s</string>
 </resources>

@@ -249,7 +249,7 @@ fun ProfilePanel(state: UiState, detail: IndividualDetail, viewModel: AppViewMod
         }
     }
 
-    ProfileDialogs(dialog, state, detail, viewModel, onDismiss = { dialog = null }, onPickFamily = { dialog = ProfileDialog.NewFamilyFact(it) })
+    ProfileDialogs(dialog, state, detail, viewModel, onDismiss = { dialog = null }, onPickFamily = { dialog = ProfileDialog.NewFamilyFact(it) }, openWeb = openWeb)
 }
 
 /** Kopf des Profils: Portraet (Tipp fuegt ein Foto hinzu), Name, "Verwandtschaft | Jahre", zwei Knoepfe. */
@@ -370,6 +370,7 @@ internal fun ProfileDialogs(
     viewModel: AppViewModel,
     onDismiss: () -> Unit,
     onPickFamily: (String) -> Unit,
+    openWeb: (String) -> Unit = {},
 ) {
     val person = detail.person
     val places = viewModel.placeSuggestions()
@@ -381,7 +382,7 @@ internal fun ProfileDialogs(
     when (dialog) {
         null -> Unit
 
-        ProfileDialog.Dna -> state.tree?.let { t -> DnaLinienDialog(viewModel.client, t.name, person.xref, person.name, onPerson = viewModel::select, onDismiss = onDismiss) }
+        ProfileDialog.Dna -> state.tree?.let { t -> DnaLinienDialog(viewModel.client, t.name, person.xref, person.name, onPerson = viewModel::select, onDismiss = onDismiss, onLink = openWeb) }
         ProfileDialog.Share -> NachrichtDialog(state, viewModel, teilenEntwurf(person), onDismiss = onDismiss)
         ProfileDialog.NewTask -> state.tree?.let { t -> AufgabeDialogHandy(AufgabeFuer(person.xref, person.name), viewModel, t.name, onClose = { onDismiss() }) }
                 ProfileDialog.Sex -> ChoiceDialog(
