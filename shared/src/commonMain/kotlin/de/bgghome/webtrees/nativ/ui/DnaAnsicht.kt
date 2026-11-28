@@ -1,9 +1,12 @@
 package de.bgghome.webtrees.nativ.ui
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -78,14 +82,14 @@ private class Geladen<T>(val daten: T, val personen: Map<String, Person>) {
 fun DnaAnsicht(client: WtClient, tree: String, xref: String, onPerson: (String) -> Unit, modifier: Modifier = Modifier, zuerst: DnaBereich = DnaBereich.Linien) {
     var bereich by remember { mutableStateOf(zuerst) }
     Column(modifier.fillMaxSize()) {
-        Box(Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp)) {
-            ChipRow(
-                listOf(
-                    DnaBereich.Linien.name to stringResource(Res.string.dna_area_lines), DnaBereich.Eintraege.name to stringResource(Res.string.dna_area_entries),
-                    DnaBereich.Treffer.name to stringResource(Res.string.dna_area_matches), DnaBereich.Tester.name to stringResource(Res.string.dna_area_testers),
-                ),
-                bereich.name,
-            ) { bereich = DnaBereich.valueOf(it) }
+        // Eine Zeile zum Wischen: vier Knoepfe brechen am Handy sonst in zwei Zeilen um
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(start = 12.dp, end = 12.dp, top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(
+                DnaBereich.Linien to Res.string.dna_area_lines, DnaBereich.Eintraege to Res.string.dna_area_entries,
+                DnaBereich.Treffer to Res.string.dna_area_matches, DnaBereich.Tester to Res.string.dna_area_testers,
+            ).forEach { (b, text) ->
+                FilterChip(selected = bereich == b, onClick = { bereich = b }, label = { Text(stringResource(text), maxLines = 1, softWrap = false) })
+            }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         when (bereich) {
