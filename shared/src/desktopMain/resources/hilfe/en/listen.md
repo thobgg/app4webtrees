@@ -48,4 +48,4 @@ The preview shows the first pages; if there are more, "… and n more pages in t
 
 Ancestors are listed by generation with their ancestor number, descendants as an indented list – these are the people who could take a test for the line. A click makes the person the starting person in the main window; **Start from …** recalculates the lines for them.
 
-The lines are derived from the recorded relationships and are not a test result; for X-DNA "possible" does not mean that X-DNA is actually shared. Only biological parents count: at an adopted or foster child and at a person without a recorded sex the line ends with a note. The menu item only appears if the api4webtrees module on the server offers the lines.
+The lines are derived from the recorded relationships and are not a test result; for X-DNA "possible" does not mean that X-DNA is actually shared. Only biological parents count: at an adopted or foster child and at a person without a recorded sex the line ends with a note. The menu item only appears if the webtrees module dna4webtrees is installed on the server; it calculates the lines.

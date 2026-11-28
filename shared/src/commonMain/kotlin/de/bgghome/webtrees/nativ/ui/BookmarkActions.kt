@@ -38,9 +38,9 @@ fun AppViewModel.toggleBookmark(xref: String) {
 val AppViewModel.tasksSupported: Boolean
     get() = uiState.value.info.hat(de.bgghome.webtrees.nativ.api.API_TASKS) && uiState.value.info?.user?.loggedIn == true
 
-/** Ab API-Stufe 48: DNA-Vererbungslinien (der Server rechnet, auch fuer Besucher). */
+/** DNA-Ansicht: nur wenn das Modul dna4webtrees fuer diesen Baum und Benutzer da ist - es rechnet, die App zeigt. */
 val AppViewModel.dnaSupported: Boolean
-    get() = uiState.value.info.hat(de.bgghome.webtrees.nativ.api.API_DNA_LINES)
+    get() = uiState.value.tree?.availableModules?.contains(de.bgghome.webtrees.nativ.api.DNA_MODUL) == true
 
 fun AppViewModel.isTreeBookmarked(xref: String): Boolean = uiState.value.treeBookmarks.any { it.xref == xref }
 

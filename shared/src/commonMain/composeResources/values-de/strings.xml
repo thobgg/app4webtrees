@@ -1973,7 +1973,7 @@
         <item quantity="one">%1$d Generation</item>
         <item quantity="other">%1$d Generationen</item>
     </plurals>
-    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <!-- DNA-Vererbungslinien (Modul dna4webtrees) -->
     <string name="dna_title">DNA-Vererbungslinien</string>
     <string name="dna_title_of">DNA-Vererbungslinien von %1$s</string>
     <string name="dna_menu">DNA-Vererbungslinien …</string>

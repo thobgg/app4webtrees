@@ -91,6 +91,8 @@ data class TreeInfo(
     val startXref: String = "",
     /** Standardperson des Stammbaums (Verwaltung, ab API-Stufe 24). */
     val treeDefaultXref: String = "",
+    /** Module, die dieser Benutzer in diesem Baum nutzen darf (z. B. "_dna4webtrees_"); leer bei aelteren Servern. */
+    val availableModules: List<String> = emptyList(),
 )
 
 @Serializable
@@ -707,8 +709,8 @@ data class DescendantNode(
 data class Descendants(val root: String = "", val generations: Int = 0, val tree: DescendantNode)
 
 /** Merkliste (ab API-Stufe 11): die gemerkten Personen des Benutzers in diesem Baum. */
-/** Ab dieser API-Stufe kennt das Modul die Route DnaLines. */
-const val API_DNA_LINES = 48
+/** Das webtrees-Modul dna4webtrees: alles zu DNA kommt von dort (JSON-Routen ab 0.9.0, die Linien ab 0.11.0), nicht aus api4webtrees. */
+const val DNA_MODUL = "_dna4webtrees_"
 
 /** Welche Vererbungslinie: Y-Chromosom (Vater an Sohn), mitochondriale DNA (Mutter an alle Kinder) oder X-Chromosom. */
 enum class DnaLinie(val code: String) { Y("y"), Mt("mt"), X("x") }
@@ -718,11 +720,16 @@ const val DNA_STOP_NICHT_LEIBLICH = "non-biological"
 const val DNA_STOP_GESCHLECHT = "unknown-sex"
 
 /**
- * Ein Vorfahr auf der Linie. [sosa]: alle Kekule-Nummern, unter denen er in dieser Generation steht (mehrere bei
- * Ahnenschwund). [carrier] ist nur bei einer Ausgangsperson falsch, die die Linie nicht traegt (Y-Linie einer Frau).
+ * Ein Vorfahr auf der Linie - nur die Kennung; Name und Bild holt die App ueber api4webtrees. [sex] ("M", "F", "U") steht
+ * auch bei Personen, die der Benutzer nicht sehen darf ([private]). [sosa]: alle Kekule-Nummern, unter denen er in dieser
+ * Generation steht (mehrere bei Ahnenschwund). [carrier] ist nur bei einer Ausgangsperson falsch, die die Linie nicht
+ * traegt (Y-Linie einer Frau).
  */
 @Serializable
-data class DnaVorfahr(val person: Person, val sosa: List<Long> = emptyList(), val carrier: Boolean = true, val stop: String? = null)
+data class DnaVorfahr(
+    val xref: String, val private: Boolean = false, val sex: String = "U",
+    val sosa: List<Long> = emptyList(), val carrier: Boolean = true, val stop: String? = null,
+)
 
 /** Eine Generation der Linie; 0 ist die Ausgangsperson. [possible]: so viele Vorfahren haette ein lueckenloser Baum hier. */
 @Serializable
@@ -731,7 +738,9 @@ data class DnaGeneration(val generation: Int = 0, val possible: Int = 1, val peo
 /** Ein Nachkomme auf der Linie mit denen seiner Kinder, die sie von ihm haben koennen. */
 @Serializable
 data class DnaNachkomme(
-    val person: Person,
+    val xref: String,
+    val private: Boolean = false,
+    val sex: String = "U",
     val carrier: Boolean = true,
     /** Kann die Linie an Kinder weitergeben (ein Mann gibt mitochondriale DNA nicht weiter). */
     val passesOn: Boolean = true,
@@ -740,7 +749,7 @@ data class DnaNachkomme(
 )
 
 /**
- * Antwort der Route DnaLines: fuer Vorfahren [generationsList], fuer Nachkommen [tree] und [count]. Der Server leitet
+ * Antwort der Route ApiLines von dna4webtrees: fuer Vorfahren [generationsList], fuer Nachkommen [tree] und [count]. Der Server leitet
  * die Linie aus den eingetragenen Verwandtschaften ab - es ist kein Testergebnis.
  */
 @Serializable

@@ -19,7 +19,7 @@ import java.io.File
 import kotlin.test.Test
 
 /**
- * Kein Test, sondern ein Werkzeug: zeichnet die Ansicht der DNA-Vererbungslinien ohne Bildschirm (Server ab API-Stufe 48).
+ * Kein Test, sondern ein Werkzeug: zeichnet die Ansicht der DNA-Vererbungslinien ohne Bildschirm (Server mit dem Modul dna4webtrees ab 0.11.0).
  *
  *   WT_DNABILD=/pfad WT_URL=http://... WT_TREE=tree1 WT_XREF=I21 [WT_LINIE=y|mt|x] [WT_RICHTUNG=nachkommen] [WT_USER=.. WT_PASS=..] [WT_SPRACHE=en] [WT_BILD=640:780:1.25]
  *   ./gradlew :shared:desktopTest --rerun --tests '*DnaBildErzeugen*'

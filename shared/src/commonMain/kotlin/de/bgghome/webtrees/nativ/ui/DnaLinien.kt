@@ -34,16 +34,21 @@ import de.bgghome.webtrees.nativ.api.DnaGeneration
 import de.bgghome.webtrees.nativ.api.DnaLinie
 import de.bgghome.webtrees.nativ.api.DnaLinien
 import de.bgghome.webtrees.nativ.api.DnaNachkomme
+import de.bgghome.webtrees.nativ.api.DescendantNode
+import de.bgghome.webtrees.nativ.api.Person
 import de.bgghome.webtrees.nativ.api.WtClient
 import de.bgghome.webtrees.nativ.res.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 
 /*
  * DNA-Vererbungslinien einer Person: von welchen Vorfahren sie Y-DNA, mitochondriale DNA oder X-DNA haben kann und
- * welche Nachkommen sie von ihr haben koennen. Der Server rechnet (api4webtrees ab Stufe 48), hier wird nur gezeigt -
- * dieselbe Ansicht fuer Handy und PC. Die Linien sind aus den eingetragenen Verwandtschaften abgeleitet, kein
+ * welche Nachkommen sie von ihr haben koennen. Das Modul dna4webtrees rechnet, hier wird nur gezeigt - dieselbe Ansicht
+ * fuer Handy und PC. Das Modul nennt Personen nur als Kennung; Namen und Bilder kommen wie ueberall aus api4webtrees. Die Linien sind aus den eingetragenen Verwandtschaften abgeleitet, kein
  * Testergebnis; das sagt der Hinweis ueber der Liste.
  */
 
@@ -61,7 +66,7 @@ enum class DnaNachkommenLage { KeinY, MannMt, Keine, Liste }
 
 fun dnaNachkommenLage(linie: DnaLinie, wurzel: DnaNachkomme): DnaNachkommenLage = when {
     !wurzel.carrier -> DnaNachkommenLage.KeinY
-    linie == DnaLinie.Mt && wurzel.person.sex == "M" -> DnaNachkommenLage.MannMt
+    linie == DnaLinie.Mt && wurzel.sex == "M" -> DnaNachkommenLage.MannMt
     wurzel.stop == null && wurzel.children.isEmpty() -> DnaNachkommenLage.Keine
     else -> DnaNachkommenLage.Liste
 }
@@ -69,6 +74,36 @@ fun dnaNachkommenLage(linie: DnaLinie, wurzel: DnaNachkomme): DnaNachkommenLage 
 /** Nur die Ausgangsperson und kein Vermerk, warum es nicht weitergeht: der Baum kennt auf der Linie keine Vorfahren. */
 fun dnaOhneVorfahren(generationen: List<DnaGeneration>): Boolean =
     generationen.size == 1 && generationen[0].people.firstOrNull()?.stop == null
+
+/** Die Linien samt den Personen dazu. */
+class DnaLinienErgebnis(val linien: DnaLinien, private val personen: Map<String, Person>) {
+    /** Die Person zur Kennung; war sie nicht zu laden, steht ihre Kennung als Name, vertrauliche bleiben "Privat". */
+    fun person(xref: String, sex: String, privat: Boolean): Person =
+        personen[xref] ?: Person(xref, name = if (privat) "" else xref, sex = sex, isPrivate = privat)
+}
+
+/**
+ * Linien vom Modul holen und die Personen dazu ueber api4webtrees. Fuer die verzweigte X-Linie und fuer Nachkommen
+ * liefert ein Abruf (Ahnentafel bzw. Nachkommenbaum der Ausgangsperson) fast alle; der Rest kommt einzeln.
+ */
+suspend fun dnaLinienLaden(client: WtClient, tree: String, xref: String, linie: DnaLinie, nachkommen: Boolean, generationen: Int): DnaLinienErgebnis = coroutineScope {
+    val l = client.dnaLinien(tree, xref, linie, nachkommen, generationen)
+    val gesucht = (l.generationsList.flatMap { g -> g.people.filter { !it.private }.map { it.xref } } +
+        l.tree?.zeilen().orEmpty().filter { !it.knoten.private }.map { it.knoten.xref }).toSet()
+    val personen = HashMap<String, Person>()
+    runCatching {
+        if (nachkommen) {
+            fun sammeln(n: DescendantNode) { personen[n.person.xref] = n.person; n.families.forEach { f -> f.children.forEach(::sammeln) } }
+            sammeln(client.descendants(tree, xref, minOf(10, generationen + 1)).tree)
+        } else if (linie == DnaLinie.X) {
+            client.pedigree(tree, xref, minOf(12, generationen + 1)).ancestors.forEach { personen[it.person.xref] = it.person }
+        }
+    }
+    (gesucht - personen.keys).chunked(8).forEach { gruppe ->
+        gruppe.map { x -> async { runCatching { client.individual(tree, x).person }.getOrNull() } }.awaitAll().filterNotNull().forEach { personen[it.xref] = it }
+    }
+    DnaLinienErgebnis(l, personen)
+}
 
 @Composable
 private fun stopText(stop: String?): String? = when (stop) {
@@ -92,9 +127,9 @@ fun DnaLinienInhalt(
     val generationen = gewuenscht.coerceIn(1, dnaHoechstens(linie))
     val farben = MaterialTheme.colorScheme
 
-    val ergebnis by produceState<Result<DnaLinien>?>(null, tree, xref, linie, nachkommen, generationen) {
+    val ergebnis by produceState<Result<DnaLinienErgebnis>?>(null, tree, xref, linie, nachkommen, generationen) {
         value = null
-        value = withContext(Dispatchers.IO) { runCatching { client.dnaLinien(tree, xref, linie, nachkommen, generationen) } }
+        value = withContext(Dispatchers.IO) { runCatching { dnaLinienLaden(client, tree, xref, linie, nachkommen, generationen) } }
     }
 
     // Unten Luft, damit die letzte Zeile am Handy nicht an der Navigationsleiste klebt
@@ -119,28 +154,28 @@ fun DnaLinienInhalt(
         when {
             e == null -> item("laden") { Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
             e.isFailure -> item("fehler") { Text(meldung(e.exceptionOrNull()), Modifier.padding(16.dp), color = farben.error) }
-            nachkommen -> e.getOrThrow().tree?.let { wurzel ->
+            nachkommen -> e.getOrThrow().linien.tree?.let { wurzel ->
                 item("lage") {
                     when (dnaNachkommenLage(linie, wurzel)) {
                         DnaNachkommenLage.KeinY -> Hinweis(stringResource(Res.string.dna_y_no_desc), Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp))
                         DnaNachkommenLage.MannMt -> Hinweis(stringResource(Res.string.dna_mt_man), Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp))
                         DnaNachkommenLage.Keine -> Zwischenzeile(stringResource(Res.string.dna_no_descendants))
-                        DnaNachkommenLage.Liste -> Zwischenzeile(stringResource(Res.string.dna_desc_count, e.getOrThrow().count))
+                        DnaNachkommenLage.Liste -> Zwischenzeile(stringResource(Res.string.dna_desc_count, e.getOrThrow().linien.count))
                     }
                 }
                 items(wurzel.zeilen()) { z ->
                     val k = z.knoten
                     val vermerk = stopText(k.stop) ?: if (k.carrier && !k.passesOn && linie == DnaLinie.Mt && z.tiefe > 0) stringResource(Res.string.dna_mt_no_pass) else null
                     Column(Modifier.padding(start = (z.tiefe * 20).dp)) {
-                        PersonRow(k.person, selected = z.tiefe == 0, onClick = { onPerson(k.person.xref) })
+                        PersonRow(e.getOrThrow().person(k.xref, k.sex, k.private), selected = z.tiefe == 0, onClick = { onPerson(k.xref) })
                         vermerk?.let { Vermerk(it) }
                     }
                 }
             }
             else -> {
-                val liste = e.getOrThrow().generationsList
+                val liste = e.getOrThrow().linien.generationsList
                 val start = liste.firstOrNull()?.people?.firstOrNull()
-                if (linie == DnaLinie.Y && start?.person?.sex == "F") item("frau") { Hinweis(stringResource(Res.string.dna_y_woman), Modifier.padding(horizontal = 12.dp)) }
+                if (linie == DnaLinie.Y && start?.sex == "F") item("frau") { Hinweis(stringResource(Res.string.dna_y_woman), Modifier.padding(horizontal = 12.dp)) }
                 liste.forEach { g ->
                     item("g${g.generation}") {
                         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp)) {
@@ -153,10 +188,10 @@ fun DnaLinienInhalt(
                             }
                         }
                     }
-                    items(g.people, key = { "g${g.generation}-${it.person.xref}-${it.sosa.firstOrNull()}" }) { v ->
+                    items(g.people, key = { "g${g.generation}-${it.xref}-${it.sosa.firstOrNull()}" }) { v ->
                         Column {
                             PersonRow(
-                                v.person, selected = g.generation == 0, onClick = { onPerson(v.person.xref) },
+                                e.getOrThrow().person(v.xref, v.sex, v.private), selected = g.generation == 0, onClick = { onPerson(v.xref) },
                                 trailing = if (g.generation > 0) ({ Text(stringResource(Res.string.dna_number, v.sosa.joinToString(", ")), style = MaterialTheme.typography.labelMedium) }) else null,
                             )
                             stopText(v.stop)?.let { Vermerk(it) }

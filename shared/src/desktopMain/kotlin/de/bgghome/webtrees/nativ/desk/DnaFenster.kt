@@ -30,7 +30,7 @@ import de.bgghome.webtrees.nativ.ui.setRoot
 import org.jetbrains.compose.resources.stringResource
 
 /*
- * DNA-Vererbungslinien (Erstellen > DNA-Vererbungslinien, ab API-Stufe 48): die Linien der Person, die beim Oeffnen
+ * DNA-Vererbungslinien (Erstellen > DNA-Vererbungslinien, nur mit dem Modul dna4webtrees auf dem Server): die Linien der Person, die beim Oeffnen
  * Proband war. Ein Klick auf eine Person der Liste macht sie im Hauptfenster zum Probanden; die Liste bleibt stehen,
  * bis man unten ausdruecklich von der neuen Person ausgeht - sonst waere sie nach jedem Klick weg.
  */

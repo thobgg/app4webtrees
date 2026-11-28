@@ -422,10 +422,13 @@ class WtClient(
     suspend fun descendants(tree: String, xref: String, generations: Int): Descendants =
         get("Descendants", tree, mapOf("xref" to xref, "generations" to generations.toString()), Descendants.serializer())
 
-    /** Vererbungslinie einer Person (ab API-Stufe 48); [nachkommen]: wer sie von ihr haben kann, sonst von wem sie sie hat. */
+    /**
+     * Vererbungslinie einer Person aus dem Modul dna4webtrees (Route ApiLines, ab 0.11.0); [nachkommen]: wer sie von ihr
+     * haben kann, sonst von wem sie sie hat. Die Antwort nennt Personen nur als Kennung.
+     */
     suspend fun dnaLinien(tree: String, xref: String, linie: DnaLinie, nachkommen: Boolean, generationen: Int): DnaLinien =
-        get("DnaLines", tree, mapOf("xref" to xref, "line" to linie.code, "direction" to if (nachkommen) "descendants" else "ancestors",
-            "generations" to generationen.toString()), DnaLinien.serializer())
+        getRoute("/module/$DNA_MODUL/ApiLines/$tree", mapOf("xref" to xref, "line" to linie.code,
+            "direction" to if (nachkommen) "descendants" else "ancestors", "generations" to generationen.toString()), DnaLinien.serializer())
 
     suspend fun pending(tree: String): PendingList = get("Pending", tree, emptyMap(), PendingList.serializer())
 

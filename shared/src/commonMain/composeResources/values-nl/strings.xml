@@ -1954,7 +1954,7 @@
         <item quantity="one">%1$d generatie</item>
         <item quantity="other">%1$d generaties</item>
     </plurals>
-    <!-- DNA-Vererbungslinien (ab API-Stufe 48) -->
+    <!-- DNA-Vererbungslinien (Modul dna4webtrees) -->
     <string name="dna_title">DNA-overervingslijnen</string>
     <string name="dna_title_of">DNA-overervingslijnen van %1$s</string>
     <string name="dna_menu">DNA-overervingslijnen …</string>
