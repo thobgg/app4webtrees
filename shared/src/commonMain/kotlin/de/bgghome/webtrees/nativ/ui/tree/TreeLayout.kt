@@ -316,6 +316,12 @@ class TreeLayout private constructor(
             if (parentCenters.isNotEmpty()) {
                 parentCenters.forEach { connectors += Connector(listOf(centerX to y, centerX to railY, it to railY, it to y - V_GAP)) }
             }
+            // Vater und Mutter als Paar: Ehelinie zwischen den Karten wie bei Partnern der Mittelperson. Stehen sie weit
+            // auseinander (ihre eigenen Ahnen brauchen Platz), sah man sonst nur die Linie zum Kind und kein Paar.
+            if (parentCenters.size == 2) {
+                val parentY = y - (BOX_H + V_GAP) + BOX_H / 2
+                connectors += Connector(listOf(parentCenters[0] + BOX_W / 2 to parentY, parentCenters[1] - BOX_W / 2 to parentY), spouse = true)
+            }
 
             placeSiblings(n, centerX, y, if (parentCenters.isEmpty()) null else railY)
         }
